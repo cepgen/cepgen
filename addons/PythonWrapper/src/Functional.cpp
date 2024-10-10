@@ -25,7 +25,8 @@
 using namespace std::string_literals;
 
 namespace cepgen::python {
-  Functional::Functional(const ParametersList& params) : utils::Functional(params) {
+  Functional::Functional(const ParametersList& params)
+      : utils::Functional(params), environment_(new Environment(steer<ParametersList>("environment"))) {
     const auto cmd = "from math import *\n"s + "def " + steer<std::string>("functionName") + "("s +
                      utils::merge(vars_, ",") + ") -> float:\n" + "\treturn " +
                      utils::replaceAll(expression_, {{"^", "**"}}) + "\n";
@@ -41,20 +42,39 @@ namespace cepgen::python {
     }
   }
 
-  Functional::Functional(const ObjectPtr& obj)
-      : utils::Functional(ParametersList()), func_(ObjectPtr::wrap(obj.get())) {}
+  Functional::Functional(const ObjectPtr& obj) : utils::Functional(ParametersList()), func_(obj.get()) {
+    // Python environment is not needed, as it is already assumed to be present (if a Python object is given as an argument...)
+    CG_DEBUG("python:Functional") << "Functional '" << obj.attribute("__name__").value<std::string>()
+                                  << "' parsed from object.";
+    if (const auto code = ObjectPtr::wrap(PyFunction_GetCode(func_.get())); code) {
+      CG_DEBUG("python:Functional") << "Functional has an associated code.";
+      if (const auto arg_count = code.attribute("co_argcount"); arg_count && arg_count.is<int>()) {
+        CG_DEBUG("python:Functional") << "Retrieved " << utils::s("argument", arg_count.value<int>(), true) << ".";
+        for (int i = 0; i < arg_count.value<int>(); ++i) {
+          vars_.emplace_back(utils::format("var_%d", i));
+          values_.emplace_back(0.);
+        }
+      }
+    } else
+      CG_WARNING("python:Functional")
+          << "Python code object was not retrieved from function object. Cannot count the arguments.";
+  }
 
   double Functional::eval() const {
-    auto args = ObjectPtr::tupleFromVector(values_);
-    try {
-      if (auto value = func_.call(args); value)
+    if (values_.size() == 1)
+      if (const auto value = func_.call(values_.at(0)); value)
         return value.value<double>();
-      throw PY_ERROR;
-    } catch (const Error& err) {
-      throw CG_ERROR("python:Functional:eval")
-          << "Failed to call the function with arguments=" << args.vector<double>() << ".\n"
-          << err.message();
-    }
+    if (const auto func_arguments = ObjectPtr::tupleFromVector(values_); func_arguments)
+      try {
+        if (const auto value = func_.call(func_arguments); value)
+          return value.value<double>();
+        throw PY_ERROR;
+      } catch (const Error& err) {
+        throw CG_ERROR("python:Functional:eval")
+            << "Failed to call the function with arguments=" << func_arguments.vector<double>() << ".\n"
+            << err.message();
+      }
+    throw CG_ERROR("python:Functional:eval") << "Failed to build a tuple for the arguments.";
   }
 
   ParametersDescription Functional::description() {

@@ -36,9 +36,10 @@ namespace cepgen::utils {
   }
 
   double Functional::operator()(double x) const {
-    if (vars_orig_.size() != 1)
+    if (vars_.size() != 1)
       throw CG_FATAL("Functional") << "This function only works with single-dimensional functions!";
-    return operator()(std::vector<double>{x});
+    values_[0] = x;
+    return eval();
   }
 
   double Functional::operator()(const std::vector<double>& x) const {

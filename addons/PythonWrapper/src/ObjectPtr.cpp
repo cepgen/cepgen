@@ -414,7 +414,9 @@ namespace cepgen::python {
   ObjectPtr ObjectPtr::tupleFromVector(const std::vector<T>& vec) {
     ObjectPtr tuple(PyTuple_New(vec.size()));
     for (size_t i = 0; i < vec.size(); ++i)
-      PyTuple_SetItem(tuple.get(), i, make<T>(vec.at(i)).release());
+      if (const auto ret = PyTuple_SetItem(tuple.get(), i, make<T>(vec.at(i)).release()); ret != 0)
+        throw CG_ERROR("Python:tupleFromVector")
+            << "Failed to insert element '" << vec.at(i) << "' into tuple. Return value: " << ret << ".";
     return tuple;
   }
 
@@ -422,7 +424,9 @@ namespace cepgen::python {
   ObjectPtr ObjectPtr::tupleFromVector(const std::vector<PyObject*>& vec) {
     ObjectPtr tuple(PyTuple_New(vec.size()));
     for (size_t i = 0; i < vec.size(); ++i)
-      PyTuple_SetItem(tuple.get(), i, vec.at(i));
+      if (const auto ret = PyTuple_SetItem(tuple.get(), i, vec.at(i)); ret != 0)
+        throw CG_ERROR("Python:tupleFromVector")
+            << "Failed to insert element '" << ObjectPtr(vec.at(i)) << "' into tuple. Return value: " << ret << ".";
     return tuple;
   }
 
@@ -434,13 +438,20 @@ namespace cepgen::python {
 
   std::ostream& operator<<(std::ostream& os, const ObjectPtr& ptr) {
     os << "PyObject{";
-    if (auto repr = ObjectPtr(PyObject_Str(ptr.get())); repr)  // new
+    if (const auto repr = ObjectPtr(PyObject_Str(ptr.get())); repr)  // new
       os << repr.value<std::string>();
     return os << "}";
   }
 
-  ObjectPtr ObjectPtr::call(const ObjectPtr& args) const {
-    return ObjectPtr(PyObject_CallObject(get(), args.get()) /* new */);
+  template <typename T>
+  ObjectPtr ObjectPtr::call(const T& arg) const {
+    return ObjectPtr(PyObject_CallOneArg(get(), make<T>(arg).release()));
+  }
+
+  template ObjectPtr ObjectPtr::call<double>(const double&) const;
+
+  ObjectPtr ObjectPtr::call(const ObjectPtr& tuple_arguments) const {
+    return ObjectPtr(PyObject_CallObject(get(), tuple_arguments.get()) /* new */);
   }
 
   ObjectPtr ObjectPtr::attribute(const std::string& attr) const {
