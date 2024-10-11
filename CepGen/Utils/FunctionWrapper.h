@@ -46,7 +46,11 @@ namespace cepgen::utils {
     /// Call the function with a templated object as parameters
     template <typename T>
     inline double operator()(double x, const T& obj) const {
-      return func_obj_(x, (void*)&obj);
+      if (func_obj_)
+        return func_obj_(x, (void*)&obj);
+      if (func_params_)
+        return func_params_(x, ParametersList().set("parameter", obj));
+      return func_(x);
     }
 
     inline operator const std::function<double(double)>&() { return func_; }

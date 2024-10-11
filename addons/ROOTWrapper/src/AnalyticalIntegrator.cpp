@@ -50,14 +50,14 @@ namespace cepgen::root {
       return desc;
     }
 
-    double integrate(const utils::FunctionWrapper& func, void* params, const Limits& lim) const override {
+  private:
+    double run(const utils::FunctionWrapper& func, void* params, const Limits& lim) const override {
       const auto func_local = utils::FunctionWrapper([&func, &params](double x) { return func(x, params); });
       const double xmin = lim.hasMin() ? lim.min() : range_.min();
       const double xmax = lim.hasMax() ? lim.max() : range_.max();
       return integr_.Integral(func_local, xmin, xmax);
     }
 
-  private:
     mutable ROOT::Math::IntegratorOneDim integr_;
   };
 }  // namespace cepgen::root

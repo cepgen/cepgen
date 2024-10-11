@@ -35,7 +35,8 @@ namespace cepgen {
       return desc;
     }
 
-    double integrate(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
+  private:
+    double run(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
       return boost::math::quadrature::gauss<double, N>::integrate(
           func, lim.hasMin() ? lim.min() : range_.min(), lim.hasMax() ? lim.max() : range_.max());
     }

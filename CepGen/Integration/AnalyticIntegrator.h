@@ -46,17 +46,16 @@ namespace cepgen {
     /// \param[in] range (optional) integration range
     template <typename T>
     inline double integrate(const utils::FunctionWrapper& func, const T& obj, const Limits& range = {}) const {
-      return integrate(func, (void*)&obj, range);
+      return run(func, (void*)&obj, range);
     }
+
+  protected:
     /// Evaluate the integral of a function at a given value
     /// \param[in] func function to integrate
     /// \param[in] obj (optional) parameters object
     /// \param[in] range (optional) integration range
-    virtual double integrate(const utils::FunctionWrapper& func,
-                             void* obj = nullptr,
-                             const Limits& range = {}) const = 0;
+    virtual double run(const utils::FunctionWrapper& func, void* obj = nullptr, const Limits& range = {}) const = 0;
 
-  protected:
     const Limits range_;
     const ParametersList func_params_;
     const int verbosity_;  ///< Integrator verbosity

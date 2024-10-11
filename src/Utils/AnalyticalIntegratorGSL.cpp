@@ -57,13 +57,13 @@ namespace cepgen::utils {
       return desc;
     }
 
-    double integrate(const FunctionWrapper& func, void* obj = nullptr, const Limits& lim = {}) const override {
+  private:
+    double run(const FunctionWrapper& func, void* obj = nullptr, const Limits& lim = {}) const override {
       if (obj)
         return eval(GSLFunctionWrapper::build(func, obj).get(), lim);
       return eval(GSLFunctionWrapper::build(func, func_params_).get(), lim);
     }
 
-  private:
     enum struct Mode { Fixed = 0, QNG = 1, QAG = 2, QAGS = 3, QAWC = 4 };
     enum struct FixedType {
       Legendre = 0,

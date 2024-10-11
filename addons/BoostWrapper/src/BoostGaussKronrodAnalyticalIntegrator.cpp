@@ -40,7 +40,8 @@ namespace cepgen {
       return desc;
     }
 
-    double integrate(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
+  private:
+    double run(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
       return boost::math::quadrature::gauss_kronrod<double, N>::integrate(func,
                                                                           lim.hasMin() ? lim.min() : range_.min(),
                                                                           lim.hasMax() ? lim.max() : range_.max(),
@@ -48,7 +49,6 @@ namespace cepgen {
                                                                           max_refinements_);
     }
 
-  private:
     const size_t max_refinements_;
     const double tol_;
   };
