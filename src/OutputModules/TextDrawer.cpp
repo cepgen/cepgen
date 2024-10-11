@@ -28,6 +28,8 @@
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::utils {
   class TextDrawer : public Drawer {
   public:
@@ -197,7 +199,7 @@ namespace cepgen::utils {
       std::istringstream ss(plt);
       std::ostringstream out;
       for (std::string line; std::getline(ss, line);) {
-        std::string base(line.size(), ' ');
+        auto base = line.empty() ? ""s : std::string(line.size(), ' ');
         if (!buf.str().empty() && !std::getline(buf, base)) {
           CG_WARNING("TextDrawer:draw") << "Invalid plot to be produced... Aborting the multiplot.";
           return;
@@ -264,7 +266,10 @@ namespace cepgen::utils {
     const double max_val_log = std::log(std::min(max_val, 1.e+10));
     if (!dr.yAxis().label().empty()) {
       const auto y_label = delatexify(dr.yAxis().label());
-      os << sep << std::string(std::max(0., 2. + width_ - y_label.size()), ' ') << y_label << "\n";
+      os << sep;
+      if (const auto length = 2. + width_ - y_label.size(); length > 0)
+        os << std::string(length, ' ');
+      os << y_label << "\n";
     }
     os << sep << utils::format("%-5.2f ", (mode & Mode::logy) ? std::exp(min_val_log) : min_val)
        << std::setw(width_ - 11) << std::left << ((mode & Mode::logy) ? "logarithmic scale" : "linear scale")
@@ -276,10 +281,12 @@ namespace cepgen::utils {
           coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label;
       if (min_val == max_val) {
         os << "\n" << left_label << ":";
-        if (idx == axis.size() / 2)
-          os << std::string((width_ - kEmptyLabel.size()) / 2, ' ') << kEmptyLabel
-             << std::string((width_ - kEmptyLabel.size()) / 2, ' ');
-        else
+        if (idx == axis.size() / 2) {
+          std::string padding;
+          if (const auto padding_length = (width_ - kEmptyLabel.size()) / 2; padding_length > 0)
+            padding = std::string(padding_length, ' ');
+          os << padding << kEmptyLabel << padding;
+        } else
           os << std::string(width_, ' ');
         os << ":";
       } else {
@@ -304,10 +311,12 @@ namespace cepgen::utils {
         os << "\n"
            << left_label << ":" << (i_value > i_uncertainty ? std::string(i_value - i_uncertainty, ' ') : "")
            << (i_uncertainty > 0 ? std::string(i_uncertainty, ERR_CHAR) : "")
-           << (effects ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR))
-           << (i_uncertainty > 0 ? std::string(std::min(width_ - i_value - 1, i_uncertainty), ERR_CHAR) : "")
-           << (i_value + i_uncertainty < width_ + 1 ? std::string(width_ - i_value - i_uncertainty - 1, ' ') : "")
-           << ": " << utils::format("%6.2e +/- %6.2e", val, val.uncertainty());
+           << (effects ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR));
+        if (const auto padding = width_ - i_value - 1; i_uncertainty > 0 && padding > 0)
+          os << std::string(std::min(padding, i_uncertainty), ERR_CHAR);
+        if (const auto padding = width_ - i_value - i_uncertainty - 1; padding > 0)
+          os << std::string(padding, ' ');
+        os << ": " << utils::format("%6.2e +/- %6.2e", val, val.uncertainty());
       }
       ++idx;
     }
@@ -321,7 +330,10 @@ namespace cepgen::utils {
     const std::string sep(17, ' ');
     if (!dr.yAxis().label().empty()) {
       const auto y_label = delatexify(dr.yAxis().label());
-      os << sep << std::string(std::max(0., 2. + width_ - y_label.size()), ' ') << y_label << "\n";
+      os << sep;
+      if (const auto length = 2. + width_ - y_label.size(); length > 0)
+        os << std::string(length, ' ');
+      os << y_label << "\n";
     }
     // find the maximum element of the graph
     double min_val = -Limits::INVALID, max_val = Limits::INVALID;
@@ -339,8 +351,10 @@ namespace cepgen::utils {
             min_log_value = std::min(min_log_value, std::log(y_value.second / max_val));
     }
     const auto& y_axis = axes.begin()->second;
-    os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
-       << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
+    os << sep << utils::format("%-5.2f", y_axis.begin()->first.value);
+    if (axes.size() > 11)
+      os << std::string(axes.size() - 11, ' ');
+    os << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
        << utils::format("%17s", delatexify(dr.xAxis().label()).c_str())
        << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
     size_t idx = 0;
@@ -348,10 +362,12 @@ namespace cepgen::utils {
       os << "\n"
          << (x_value.first.label.empty() ? utils::format("%16g ", x_value.first.value) : x_value.first.label) << ":";
       if (min_val == max_val) {
-        if (idx == axes.size() / 2)
-          os << std::string((width_ - kEmptyLabel.size()) / 2, ' ') << kEmptyLabel
-             << std::string((width_ - kEmptyLabel.size()) / 2, ' ');
-        else
+        if (idx == axes.size() / 2) {
+          std::string padding;
+          if (const auto padding_length = (width_ - kEmptyLabel.size()) / 2; padding_length > 0)
+            padding = std::string(padding_length, ' ');
+          os << padding << kEmptyLabel << padding;
+        } else
           os << std::string(width_, ' ');
       } else {
         for (const auto& y_value : x_value.second) {
@@ -396,8 +412,10 @@ namespace cepgen::utils {
         os << (lab.size() > i ? lab.at(i) : ' ');
       os << ":";
     }
-    os << "\n"
-       << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
+    os << "\n" << sep << ":";
+    if (!y_axis.empty())
+      os << std::string(y_axis.size(), '.');
+    os << ": "  // 2nd abscissa axis
        << delatexify(dr.yAxis().label()) << "\n\t"
        << "(scale: \"" << VALUES_CHAR << "\", ";
     for (size_t i = 0; i < kColours.size(); ++i)
