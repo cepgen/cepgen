@@ -410,7 +410,7 @@ namespace cepgen {
           if (moth != part.id())
             ptot -= operator()(moth).momentum();
       }
-      const double mass_diff = (ptot - part.momentum()).mass();
+      const double mass_diff = Momentum(ptot - part.momentum()).mass();
       if (fabs(mass_diff) > MIN_PRECISION) {
         dump();
         throw CG_FATAL("Event") << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff

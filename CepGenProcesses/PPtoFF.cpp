@@ -167,7 +167,7 @@ double PPtoFF::offShellME() const {
   const auto compute_mat_element =
       [this](double zp, double zm, double q2, const Momentum& vec_pho, const Momentum& vec_qt) -> double {
     const auto vec_kt = Momentum(zm * pc(0) - zp * pc(1)).transverse();
-    const auto phi_p = vec_kt + zp * vec_qt, phi_m = vec_kt - zm * vec_qt;
+    const Momentum phi_p = vec_kt + zp * vec_qt, phi_m = vec_kt - zm * vec_qt;
     const auto zpm = zp * zm, eps2 = mf2_ + zpm * q2;
 
     const auto kp = 1. / (phi_p.pt2() + eps2), km = 1. / (phi_m.pt2() + eps2);

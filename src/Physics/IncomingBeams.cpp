@@ -194,7 +194,7 @@ namespace cepgen {
   }
 
   double IncomingBeams::s() const {
-    const auto sval = (pos_beam_.momentum() + neg_beam_.momentum()).mass2();
+    const auto sval = Momentum(pos_beam_.momentum() + neg_beam_.momentum()).mass2();
     CG_DEBUG("IncomingBeams:s") << "Beams momenta:\n"
                                 << "\t" << pos_beam_.momentum() << "\n"
                                 << "\t" << neg_beam_.momentum() << "\n"
