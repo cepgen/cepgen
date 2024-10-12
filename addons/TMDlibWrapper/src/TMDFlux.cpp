@@ -45,7 +45,7 @@ public:
     return desc;
   }
 
-  bool fragmenting() const override final { return true; }
+  bool fragmenting() const final { return true; }
   double mass2() const override { return mp2_; }
   pdgid_t partonPdgId() const override { return parton_pdgid_; }
 
@@ -68,7 +68,7 @@ public:
     return vals_map.at(parton_pdgid_);
   }
 
-protected:
+private:
   mutable TMDlib::TMD tmd_;
   const int parton_pdgid_;
 };
