@@ -21,6 +21,7 @@ add_subdirectory(Pythia8Wrapper)
 add_subdirectory(REvolverWrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(ROOTWrapper)
+add_subdirectory(TMDlibWrapper)
 add_subdirectory(TopdrawerWrapper)
 
 add_subdirectory(Functionals)
