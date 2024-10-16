@@ -22,6 +22,8 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/StreamCollector.h"
 
 using namespace cepgen;
 
@@ -50,18 +52,24 @@ public:
   pdgid_t partonPdgId() const override { return parton_pdgid_; }
 
   double fluxQ2(double x, double kt2, double q2) const override {
+    if (!utils::positive(x))
+      return 0.;
     std::unordered_map<int, double> vals_map;
-    tmd_.TMDpdf(x,
-                0.,  // xbar
-                std::sqrt(kt2),
-                std::sqrt(q2),  // evolution scale mu
-                vals_map[PDG::up],
-                vals_map[PDG::down],
-                vals_map[4],  // sea
-                vals_map[3],  // charm
-                vals_map[5],  // bottom
-                vals_map[PDG::gluon],
-                vals_map[PDG::photon]);
+    {
+      std::string buf;
+      auto sc = utils::StreamCollector(buf);
+      tmd_.TMDpdf(x,
+                  0.,  // xbar
+                  std::sqrt(kt2),
+                  std::sqrt(q2),  // evolution scale mu
+                  vals_map[PDG::up],
+                  vals_map[PDG::down],
+                  vals_map[4],  // sea
+                  vals_map[3],  // charm
+                  vals_map[5],  // bottom
+                  vals_map[PDG::gluon],
+                  vals_map[PDG::photon]);
+    }
     if (vals_map.count(parton_pdgid_) == 0)
       throw CG_ERROR("TMDFlux:fluxQ2") << "Parton id=" << static_cast<PDG::Id>(parton_pdgid_)
                                        << " is not handled by this TMD evaluator.";
