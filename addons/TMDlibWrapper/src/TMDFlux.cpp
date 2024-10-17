@@ -31,17 +31,20 @@ class TMDFlux : public cepgen::KTFlux {
 public:
   explicit TMDFlux(const ParametersList& params) : KTFlux(params), parton_pdgid_(steer<int>("partonPdgId")) {
     tmd_.setVerbosity(steer<int>("verbosity"));
-    if (const auto replica = steer<int>("replica"); replica >= 0)
-      tmd_.TMDinit(steer<std::string>("name"), replica);
+    if (const auto set = steer<std::string>("set"); !set.empty())
+      if (const auto replica = steer<int>("replica"); replica >= 0)
+        tmd_.TMDinit(set, replica);
+      else
+        tmd_.TMDinit(set);
     else
-      tmd_.TMDinit(steer<std::string>("name"));
+      throw CG_ERROR("TMDFlux") << "Failed to retrieve a set name.";
   }
 
   static ParametersDescription description() {
     auto desc = cepgen::KTFlux::description();
     desc.setDescription("TMDlib kt-dependent flux");
     desc.add<int>("verbosity", 99).setDescription("TMDlib evaluator verbosity");
-    desc.add<std::string>("name", "PB-NLO+QED-HERAI+II-set2").setDescription("dataset name");
+    desc.add<std::string>("set", "PB-NLO+QED-HERAI+II-set2").setDescription("dataset name");
     desc.add<int>("replica", -1).setDescription("dataset replica");
     desc.addAs<int, pdgid_t>("partonPdgId", PDG::photon);
     return desc;
