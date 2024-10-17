@@ -545,7 +545,7 @@ namespace cepgen {
         return;
       if (ratio_)
         TCanvas::cd(1);
-      leg_.reset(new TLegend);
+      leg_.reset(new TLegend(leg_x1_, leg_y1_, leg_x1_ + leg_width_, leg_y1_ + leg_height_));
       leg_->SetLineColor(kWhite);
       leg_->SetLineWidth(0);
       leg_->SetFillStyle(0);
@@ -559,7 +559,7 @@ namespace cepgen {
 
     const bool ratio_{false};
     std::string leg_mode_{"rt"};
-    double leg_x1_{0.5}, leg_y1_{0.75};
+    double leg_x1_{0.15}, leg_y1_{0.75};
     double leg_width_{0.45}, leg_height_{0.15};
     std::unique_ptr<TLegend> leg_{nullptr};
     std::unique_ptr<ROOTPaveText> top_label_{nullptr};
