@@ -29,7 +29,7 @@ namespace cepgen {
 
   Exception::~Exception() noexcept {
     if (type_ >= Type::error)
-      dump();
+      Exception::dump();
     if (type_ == Type::fatal && raise(SIGINT) != 0)  // we stop execution on fatal exception
       std::exit(EXIT_FAILURE);
   }
