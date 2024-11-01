@@ -1,5 +1,6 @@
 add_subdirectory(APFELWrapper)
 add_subdirectory(APFELppWrapper)
+add_subdirectory(asciichartWrapper)
 add_subdirectory(BasesWrapper)
 add_subdirectory(BoostWrapper)
 add_subdirectory(CLHEPWrapper)
