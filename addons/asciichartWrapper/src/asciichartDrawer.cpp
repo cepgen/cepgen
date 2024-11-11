@@ -80,8 +80,8 @@ namespace cepgen::utils {
     }
 
     const asciichartDrawer& draw(const DrawableColl& coll,
-                                 const std::string& name,
-                                 const std::string& title,
+                                 const std::string&,
+                                 const std::string&,
                                  const Mode&) const override {
       std::unordered_map<std::string, std::vector<double> > series;
       for (const auto& obj : coll) {

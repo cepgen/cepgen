@@ -461,6 +461,7 @@ namespace cepgen::python {
   }
 
   ObjectPtr ObjectPtr::importModule(const std::string& mod_name) {
+    CG_DEBUG("Python:importModule") << "Importing a module '" << mod_name << "' into the Python environment.";
     return ObjectPtr(PyImport_Import(ObjectPtr::make<std::string>(mod_name).get()));  // new
   }
 
