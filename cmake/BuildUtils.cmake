@@ -138,13 +138,21 @@ macro(cepgen_build mod_name)
     if(NOT TARGET CepGen::${ARG_COMPONENT})
         find_library(${mod_name}_LIBRARY
             NAMES ${mod_name}
-            PATHS \$\{PC_CepGen_LIBRARY_DIRS\} \$\{CEPGEN_PATHS\}
+            HINTS \$\{PC_CepGen_LIBRARY_DIRS\} \$\{CEPGEN_PATHS\}
             PATH_SUFFIXES lib64 lib build)
         if(${mod_name}_LIBRARY)
             add_library(CepGen::${ARG_COMPONENT} UNKNOWN IMPORTED)
-            set_target_properties(CepGen::${ARG_COMPONENT} PROPERTIES
-                IMPORTED_LOCATION \$\{${mod_name}_LIBRARY\}
-                INTERFACE_INCLUDE_DIRECTORIES \"\$\{CepGen_INCLUDE_DIR\}/${mod_name}\")
+            set_target_properties(CepGen::${ARG_COMPONENT} PROPERTIES IMPORTED_LOCATION \$\{${mod_name}_LIBRARY\})
+            file(GLOB ${mod_name}_INCLUDE_FILES \"\$\{CepGen_INCLUDE_DIR\}/${mod_name}/*.h\")
+            if(${mod_name}_INCLUDE_FILES)
+                find_path(${mod_name}_INCLUDE_DIR
+                    NAMES \$\{${mod_name}_INCLUDE_FILES\}
+                    HINTS \$\{PC_CepGen_INCLUDE_DIRS\} \$\{CEPGEN_PATHS\} \$\{CEPGEN_PATHS\}/addons/ROOTWrapper
+                    PATH_SUFFIXES include addons/*Wrapper/)
+                if(${mod_name}_INCLUDE_DIR)
+                    set_target_properties(CepGen::${ARG_COMPONENT} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES \"\$\{${mod_name}_INCLUDE_DIR\}\")
+                endif()
+            endif()
         endif()
     endif()" PARENT_SCOPE)
         endif()
