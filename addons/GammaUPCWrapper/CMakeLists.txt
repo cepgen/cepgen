@@ -9,10 +9,11 @@ file(GLOB gammaUPC_SOURCES ${gammaUPC}/*.f90)
 message(STATUS "gammaUPC ${gammaUPC} sources: ${gammaUPC_SOURCES}")
 
 #----- build the objects
-cepgen_build(CepGenGammaUPC SOURCES src/*.cpp ${gammaUPC_SOURCES}
-        EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}
+cepgen_build(CepGenGammaUPC
+        SOURCES src/*.cpp ${gammaUPC_SOURCES}
         OPTIONS "-Wa,-Wno-tabs -Wno-unused-variable -Wno-unused-function -Wno-maybe-uninitialized"
-        INSTALL_COMPONENT gammaUPC)
+        INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}
+        COMPONENT gammaUPC)
 cpack_add_component(gammaUPC
         DISPLAY_NAME " CepGen gammaUPC wrappers library"
         DESCRIPTION "Collection of CepGen wrappers to the gammaUPC library"
