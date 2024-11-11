@@ -80,7 +80,12 @@ namespace gammaUPC {
       // register the incoming partons' virtuality
       const auto lim_q2_1 = process().kinematics().cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
                  lim_q2_2 = process().kinematics().cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
-      if (log_parton_virtuality_)
+      const auto lim_log_xi = Limits{1.e-10, 1.}.compute(std::log);
+      process().defineVariable(
+          process().x1(), proc::Process::Mapping::exponential, lim_log_xi, "Positive-z parton momentum fraction");
+      process().defineVariable(
+          process().x2(), proc::Process::Mapping::exponential, lim_log_xi, "Negative-z parton momentum fraction");
+      /*if (log_parton_virtuality_)
         process()
             .defineVariable(
                 m_t1_, proc::Process::Mapping::exponential, lim_q2_1.compute(std::log), "Positive-z parton virtuality")
@@ -89,7 +94,7 @@ namespace gammaUPC {
       else
         process()
             .defineVariable(m_t1_, proc::Process::Mapping::linear, lim_q2_1, "Positive-z parton virtuality")
-            .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2_2, "Negative-z parton virtuality");
+            .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2_2, "Negative-z parton virtuality");*/
       const auto hi_a = HeavyIon::isHI(process().kinematics().incomingBeams().positive().integerPdgId()),
                  hi_b = HeavyIon::isHI(process().kinematics().incomingBeams().negative().integerPdgId());
       mass_number_prod_ = 1;
@@ -110,8 +115,13 @@ namespace gammaUPC {
       static Limits x_limits{0., 1.};
       if (!x_limits.contains(process().x1(), false) || !x_limits.contains(process().x2(), false))
         return false;
-      process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
-      process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
+      /*process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
+      process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));*/
+      const auto mom4_q1 = process().x1() * process().pA(), mom4_q2 = process().x2() * process().pB();
+      CG_LOG << mom4_q1 << ":" << mom4_q2 << ":" << (mom4_q1 + mom4_q2);
+      process().q1() = Momentum::fromPxPyPzM(0., 0., mom4_q1.pz(), mom4_q1.energy());
+      process().q2() = Momentum::fromPxPyPzM(0., 0., mom4_q2.pz(), mom4_q2.energy());
+      //CG_LOG << process().x1() << ":" << process().x2() << ":" << process().q1() << ":" << process().q2();
       return true;
     }
     double fluxes() const override {
