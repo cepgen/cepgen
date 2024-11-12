@@ -66,7 +66,7 @@ namespace cepgen::python {
       Py_Finalize();
   }
 
-  bool Environment::initialised() { return Py_IsInitialized(); }
+  bool Environment::initialised() const { return Py_IsInitialized(); }
 
   void Environment::setProgramName(const std::string& filename) {
     const size_t fn_len = filename.length() + 1;
