@@ -35,6 +35,7 @@ namespace cepgen::python {
 
   private:
     const std::unique_ptr<Environment> environment_;
+    const std::string name_;
     ObjectPtr mod_{nullptr};
     ObjectPtr func_{nullptr};
   };

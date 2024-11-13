@@ -26,7 +26,9 @@ using namespace std::string_literals;
 
 namespace cepgen::python {
   Functional::Functional(const ParametersList& params)
-      : utils::Functional(params), environment_(new Environment(steer<ParametersList>("environment"))) {
+      : utils::Functional(params),
+        environment_(new Environment(steer<ParametersList>("environment"))),
+        name_(steerName()) {
     const auto cmd = "from math import *\n"s + "def " + steer<std::string>("functionName") + "("s +
                      utils::merge(vars_, ",") + ") -> float:\n" + "\treturn " +
                      utils::replaceAll(expression_, {{"^", "**"}}) + "\n";
@@ -42,10 +44,10 @@ namespace cepgen::python {
     }
   }
 
-  Functional::Functional(const ObjectPtr& obj) : utils::Functional(ParametersList()), func_(obj.get()) {
+  Functional::Functional(const ObjectPtr& obj)
+      : utils::Functional(ParametersList()), name_(obj.attribute("__name__").value<std::string>()), func_(obj.get()) {
     // Python environment is not needed, as it is already assumed to be present (if a Python object is given as an argument...)
-    CG_DEBUG("python:Functional") << "Functional '" << obj.attribute("__name__").value<std::string>()
-                                  << "' parsed from object.";
+    CG_DEBUG("python:Functional") << "Functional '" << name_ << "' parsed from object.";
     if (const auto code = ObjectPtr::wrap(PyFunction_GetCode(func_.get())); code) {
       CG_DEBUG("python:Functional") << "Functional has an associated code.";
       if (const auto arg_count = code.attribute("co_argcount"); arg_count && arg_count.is<int>()) {
@@ -56,24 +58,24 @@ namespace cepgen::python {
         }
       }
     } else
-      CG_WARNING("python:Functional")
-          << "Python code object was not retrieved from function object. Cannot count the arguments.";
+      CG_WARNING("python:Functional") << "Python code object was not retrieved from function '" << name_
+                                      << "' object. Cannot count the arguments.";
   }
 
   double Functional::eval() const {
-    const auto get_value = [](const ObjectPtr& return_value) -> double {
+    const auto get_value = [this](const ObjectPtr& return_value) -> double {
       if (return_value.is<double>())
         return return_value.value<double>();
       if (return_value.isVector<double>()) {
         if (const auto vec = return_value.vector<double>(); !vec.empty()) {
           if (vec.size() > 1)
-            CG_WARNING("python:Functional")
-                << "Invalid size for return vector: " << vec.size() << ". Values: " << vec << ".";
+            CG_WARNING("python:Functional") << "Invalid size for return vector of function '" << name_
+                                            << "': " << vec.size() << ". Values: " << vec << ".";
           return vec.at(0);
         } else
-          throw PY_ERROR << "Empty result vector returned.";
+          throw PY_ERROR << "Empty result vector returned from function '" << name_ << "'.";
       }
-      throw PY_ERROR << "Invalid return type for function call: " << return_value << ".";
+      throw PY_ERROR << "Invalid return type for function '" << name_ << "' call: " << return_value << ".";
     };
     try {
       if (values_.size() == 1) {  // single-argument function is a bit simpler to handle
@@ -85,8 +87,9 @@ namespace cepgen::python {
       } else
         throw PY_ERROR << "Invalid functions argument building: " << values_ << ".";
     } catch (const Error& err) {
-      throw CG_ERROR("python:Functional:eval") << "Failed to call the function with arguments=" << values_ << ".\n"
-                                               << err.message();
+      throw CG_ERROR("python:Functional:eval")
+          << "Failed to call the function '" << name_ << "' with arguments=" << values_ << ".\n"
+          << err.message();
     }
     throw CG_ERROR("python:Functional:eval") << "Failed to build a tuple for the arguments.";
   }
