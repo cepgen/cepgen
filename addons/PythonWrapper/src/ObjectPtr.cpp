@@ -371,7 +371,10 @@ namespace cepgen::python {
 
   template <typename T>
   bool ObjectPtr::isVector() const {
-    CG_ASSERT(get());
+    if (!get()) {
+      CG_WARNING("python:ObjectPtr:vector") << "Object '0x" << get() << "' is not properly defined.";
+      return false;
+    }
     const bool tuple = PyTuple_Check(get()), list = PyList_Check(get());
     if (!tuple && !list)  // only accept 'tuples' and 'lists'
       return false;
@@ -393,6 +396,8 @@ namespace cepgen::python {
 
   template <typename T>
   std::vector<T> ObjectPtr::vector() const {
+    if (!get())
+      throw CG_ERROR("python::ObjectPtr:vector") << "Object is not defined.";
     if (!isVector<T>())
       throw CG_ERROR("python::ObjectPtr:vector")
           << "Object has invalid type: list/tuple != \"" << get()->ob_type->tp_name << "\".";

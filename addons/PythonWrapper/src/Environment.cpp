@@ -59,11 +59,11 @@ namespace cepgen::python {
   }
 
   Environment::~Environment() {
-    if (!initialised())
+    if (initialised())
+      Py_Finalize();
+    else
       CG_WARNING("Python:Environment")
           << "Python environment is set to be finalised while it was not initialised in the first place.";
-    else
-      Py_Finalize();
   }
 
   bool Environment::initialised() const { return Py_IsInitialized(); }

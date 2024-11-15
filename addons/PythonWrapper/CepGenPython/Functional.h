@@ -30,12 +30,14 @@ namespace cepgen::python {
     explicit Functional(const ObjectPtr&);
 
     double eval() const override;
+    const std::vector<std::string>& arguments() const;
 
     static ParametersDescription description();
 
   private:
     const std::unique_ptr<Environment> environment_;
     const std::string name_;
+    std::vector<std::string> arguments_;
     ObjectPtr mod_{nullptr};
     ObjectPtr func_{nullptr};
   };

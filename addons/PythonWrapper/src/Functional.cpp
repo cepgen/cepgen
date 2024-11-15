@@ -33,10 +33,23 @@ namespace cepgen::python {
                      utils::merge(vars_, ",") + ") -> float:\n" + "\treturn " +
                      utils::replaceAll(expression_, {{"^", "**"}}) + "\n";
     CG_DEBUG("python:Functional") << "Will compile Python expression:\n" << cmd;
-    mod_ = ObjectPtr::defineModule("functional", cmd);
+    if (mod_ = ObjectPtr::defineModule("functional", cmd); !mod_)
+      throw CG_ERROR("python:Functional") << "Failed to initialise the functional parser module.";
     try {
-      if (func_ = mod_.attribute(steer<std::string>("functionName")); !func_ || !PyCallable_Check(func_.get()))
+      func_ = mod_.attribute(steer<std::string>("functionName"));
+      if (!func_ || !PyCallable_Check(func_.get()))
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
+      if (const auto function_code = func_.attribute("__code__"); function_code) {
+        if (const auto argument_names_attribute = function_code.attribute("co_varnames");
+            argument_names_attribute && argument_names_attribute.isVector<std::string>()) {
+          for (const auto& argument_name : argument_names_attribute.vector<std::string>())
+            arguments_.emplace_back(argument_name);
+          CG_DEBUG("python:Functional") << "List of arguments unpacked for function '" << name_ << "': " << arguments_
+                                        << ".";
+        } else
+          CG_WARNING("python:Functional") << "Failed to retrieve argument names for function '" << name_ << "'.";
+      } else
+        CG_WARNING("python:Functional") << "Failed to retrieve code for function '" << name_ << "'.";
     } catch (const Error& err) {
       throw CG_ERROR("python:Functional")
           << "Failed to initialise the Python functional with \"" << expression_ << "\".\n"
@@ -64,6 +77,8 @@ namespace cepgen::python {
 
   double Functional::eval() const {
     const auto get_value = [this](const ObjectPtr& return_value) -> double {
+      if (!return_value)
+        throw PY_ERROR << "Invalid return type for function '" << name_ << "' call: " << return_value.get() << ".";
       if (return_value.is<double>())
         return return_value.value<double>();
       if (return_value.isVector<double>()) {
