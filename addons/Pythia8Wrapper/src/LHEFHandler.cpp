@@ -26,7 +26,7 @@
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Value.h"
-#include "CepGenPythia8/PythiaEventInterface.h"
+#include "CepGenPythia8/EventInterface.h"
 
 namespace cepgen::pythia8 {
   /// Pythia8 handler for the LHE file output
@@ -37,7 +37,7 @@ namespace cepgen::pythia8 {
     explicit LHEFHandler(const ParametersList& params)
         : EventExporter(params),
           pythia_(new Pythia8::Pythia),
-          lhaevt_(new Pythia8::CepGenEvent),
+          lhaevt_(new pythia8::EventInterface),
           compress_event_(steer<bool>("compress")),
           filename_(steer<std::string>("filename")) {
       if (utils::fileExtension(filename_) == ".gz") {
@@ -80,6 +80,7 @@ namespace cepgen::pythia8 {
       oss_init << std::endl;  // LHEF is usually not as beautifully parsed as a standard XML...
                               // we're physicists, what do you expect?
       lhaevt_->addComments(oss_init.str());
+      lhaevt_->storeRemnants(true);
       lhaevt_->initialise(runParameters());
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(lhaevt_.get());
@@ -96,18 +97,16 @@ namespace cepgen::pythia8 {
     }
 
     inline bool operator<<(const Event& ev) override {
-      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
+      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress());
       pythia_->next();
       lhaevt_->eventLHEF();
       return true;
     }
-    inline void setCrossSection(const Value& cross_section) override {
-      lhaevt_->setCrossSection(0, cross_section, cross_section.uncertainty());
-    }
+    inline void setCrossSection(const Value& cross_section) override { lhaevt_->setCrossSection(0, cross_section); }
 
   private:
     const std::unique_ptr<Pythia8::Pythia> pythia_;
-    const std::shared_ptr<Pythia8::CepGenEvent> lhaevt_;
+    const std::shared_ptr<pythia8::EventInterface> lhaevt_;
     const bool compress_event_;
     std::string filename_;
     bool gzip_{false};

@@ -14,6 +14,8 @@ if(GZIP_BIN)
   list(APPEND PYTHIA_DEFS "-DGZIP_BIN=\"${GZIP_BIN}\"")
 endif()
 
+enable_testing()
+
 #----- build the object
 cepgen_build(CepGenPythia8
     SOURCES src/*.cpp
@@ -27,6 +29,4 @@ cpack_add_component(pythia8
     DISPLAY_NAME "CepGen Pythia 8 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to Pythia 8"
     DEPENDS lib)
-install(DIRECTORY CepGenPythia8
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    COMPONENT pythia8)
+add_test(NAME pythia8_kt_hadr COMMAND ${CMAKE_BINARY_DIR}/test/generator/ktfactor_proc_hadronisation -H pythia8)
