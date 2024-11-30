@@ -63,8 +63,7 @@ namespace cepgen::pythia6 {
       const double px = std::sqrt(px2);
 
       //--- build 4-vectors and boost decay particles
-      auto pdq = Momentum::fromPThetaPhiE(px, theta, phi, std::hypot(px, mdq));
-      auto pq = -pdq;
+      cepgen::Momentum pdq = cepgen::Momentum::fromPThetaPhiE(px, theta, phi, std::hypot(px, mdq)), pq = -pdq;
       pq.setEnergy(std::hypot(px, mq));
 
       const auto part_id = part.id();

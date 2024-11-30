@@ -110,11 +110,11 @@ namespace cepgen {
     }
 
     double that() const override {
-      return 0.5 * ((proc_->q1() - proc_->pc(0)).mass2() + (proc_->q2() - proc_->pc(1)).mass2());
+      return 0.5 * (Momentum(proc_->q1() - proc_->pc(0)).mass2() + Momentum(proc_->q2() - proc_->pc(1)).mass2());
     }
 
     double uhat() const override {
-      return 0.5 * ((proc_->q1() - proc_->pc(1)).mass2() + (proc_->q2() - proc_->pc(0)).mass2());
+      return 0.5 * (Momentum(proc_->q1() - proc_->pc(1)).mass2() + Momentum(proc_->q2() - proc_->pc(0)).mass2());
     }
 
   private:
@@ -125,7 +125,7 @@ namespace cepgen {
           return 0.;
         const auto qt_sum = (proc_->q1() + proc_->q2()).transverse();  // two-parton system
         const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
-        const auto pt_c1 = 0.5 * (qt_sum + pt_diff), pt_c2 = 0.5 * (qt_sum - pt_diff);
+        const Momentum pt_c1 = 0.5 * (qt_sum + pt_diff), pt_c2 = 0.5 * (qt_sum - pt_diff);
         const auto p1t = pt_c1.pt(), p2t = pt_c2.pt();
         // apply user cuts on central system
         if (!kin.cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))

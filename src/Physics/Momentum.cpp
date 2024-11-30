@@ -42,27 +42,18 @@ namespace cepgen {
 
   static double normaliseSqrt(double x2) { return std::sqrt(x2 < 0. ? -x2 : x2); }
 
-  Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {
-    computeP();
-  }
+  const Matrix metricMatrix{
+      {-1., 0., 0., 0.},  // x
+      {0., -1., 0., 0.},  // y
+      {0., 0., -1., 0.},  // z
+      {0., 0., 0., 1.}    // t
+  };
 
-  Momentum::Momentum(double* p) {
-    std::copy_n(p, 4, begin());
-    computeP();
-  }
+  Momentum::Momentum(double x, double y, double z, double t) : Vector{x, y, z, t == -1. ? 0. : t} { computeP(); }
 
-  Momentum::Momentum(const Vector& vec) {
-    if (vec.size() < 3)
-      throw CG_FATAL("Momentum") << "Failed to initialise a momentum from a vector with coordinates " << vec
-                                 << ". Should have at least 3 coordinates.";
-    setPx(vec(0)).setPy(vec(1)).setPz(vec(2));
-    if (vec.size() > 3)
-      setEnergy(vec(3));
-  }
+  Momentum::Momentum(double* p) : Vector{p[0], p[1], p[2], p[3]} { computeP(); }
 
-  bool Momentum::operator==(const Momentum& oth) const {
-    return px() == oth.px() && py() == oth.py() && pz() == oth.pz() && energy() == oth.energy();
-  }
+  Momentum::Momentum(const Matrix& mat) : Vector(mat.column(0)) { computeP(); }
 
   //--- static constructors
 
@@ -101,44 +92,6 @@ namespace cepgen {
 
   //--- arithmetic operators
 
-  Momentum Momentum::operator+(const Momentum& mom) const {
-    return Momentum(px() + mom.px(), py() + mom.py(), pz() + mom.pz(), energy() + mom.energy());
-  }
-
-  Momentum& Momentum::operator+=(const Momentum& mom) {
-    *this = *this + mom;
-    return computeP();
-  }
-
-  Momentum Momentum::operator-() const { return Momentum(-px(), -py(), -pz(), energy()); }
-
-  Momentum Momentum::operator-(const Momentum& mom) const {
-    return Momentum(px() - mom.px(), py() - mom.py(), pz() - mom.pz(), energy() - mom.energy());
-  }
-
-  Momentum& Momentum::operator-=(const Momentum& mom) {
-    *this = *this - mom;
-    return computeP();
-  }
-
-  double Momentum::operator*(const Momentum& mom) const { return threeProduct(mom); }
-
-  Momentum Momentum::operator%(const Momentum& mom) const {
-    return Momentum(
-        py() * mom.pz() - pz() * mom.py(), pz() * mom.px() - px() * mom.pz(), px() * mom.py() - py() * mom.px());
-  }
-
-  Momentum Momentum::operator*(double c) const { return Momentum(c * px(), c * py(), c * pz(), c * energy()); }
-
-  Momentum& Momentum::operator*=(double c) {
-    *this = *this * c;
-    return computeP();
-  }
-
-  Momentum operator*(double c, const Momentum& mom) {
-    return Momentum(c * mom.px(), c * mom.py(), c * mom.pz(), c * mom.energy());
-  }
-
   double Momentum::threeProduct(const Momentum& mom) const {
     CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t"
                               << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ")\n\t"
@@ -146,35 +99,29 @@ namespace cepgen {
     return px() * mom.px() + py() * mom.py() + pz() * mom.pz();
   }
 
-  double Momentum::fourProduct(const Momentum& mom) const {
-    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t"
-                              << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy()
-                              << ")\n\t"
-                              << "= " << energy() * mom.energy() - threeProduct(mom);
-    return energy() * mom.energy() - threeProduct(mom);
-  }
+  double Momentum::fourProduct(const Momentum& mom) const { return (transposed() * metricMatrix * mom)(0); }
 
   double Momentum::crossProduct(const Momentum& mom) const { return px() * mom.py() - py() * mom.px(); }
 
   //--- various setters
 
   Momentum& Momentum::setPx(double px) {
-    (*this)[X] = px;
+    (*this)(X) = px;
     return computeP();
   }
 
   Momentum& Momentum::setPy(double py) {
-    (*this)[Y] = py;
+    (*this)(Y) = py;
     return computeP();
   }
 
   Momentum& Momentum::setPz(double pz) {
-    (*this)[Z] = pz;
+    (*this)(Z) = pz;
     return computeP();
   }
 
   Momentum& Momentum::setEnergy(double e) {
-    (*this)[E] = e;
+    (*this)(E) = e;
     return *this;
   }
 
@@ -200,20 +147,13 @@ namespace cepgen {
   }
 
   Momentum& Momentum::truncate(double tolerance) {
-    std::replace_if(begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
+    Vector::truncate(tolerance);
     return computeP();
   }
 
   //--- various getters
 
-  std::array<double, 5> Momentum::pVector() const {
-    std::array<double, 5> out;
-    std::copy(begin(), end(), out.begin());
-    out[4] = mass();
-    return out;
-  }
-
-  Momentum::operator Vector() const { return Vector{px(), py(), pz(), energy()}; }
+  std::array<double, 5> Momentum::pVector() const { return std::array<double, 5>{px(), py(), pz(), energy(), mass()}; }
 
   double Momentum::energyT2() const {
     const auto square_pt_value = pt2();
@@ -311,7 +251,7 @@ namespace cepgen {
     const auto mass = mom.mass();
     if (mass == 0.)
       return *this;
-    const auto pf4 = (threeProduct(mom) + energy() * mom.energy()) / mass;
+    const double pf4 = dot(mom) / mass;
     const auto fn = (pf4 + energy()) / (mass + mom.energy());
     (*this) += fn * mom;
     return setEnergy(pf4);
@@ -327,29 +267,28 @@ namespace cepgen {
 
   Momentum& Momentum::rotatePhi(double phi, double sign) {
     const auto sin_phi = std::sin(phi), cos_phi = std::cos(phi);
-    const auto pxp = px() * cos_phi + sign * py() * sin_phi, pyp = -px() * sin_phi + sign * py() * cos_phi;
-    return setPx(pxp).setPy(pyp);
+    const Matrix rot{
+        {+cos_phi, sign * sin_phi, 0., 0.},  // px
+        {-sin_phi, sign * cos_phi, 0., 0.},  // py
+        {0., 0., 1., 0.},                    // pz
+        {0., 0., 0., 1.}                     // e
+    };
+    *this = rot * (*this);
+    return *this;
   }
 
   Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
     const double cos_theta = std::cos(theta), sin_theta = std::sin(theta);
     const double cos_phi = std::cos(phi), sin_phi = std::sin(phi);
-    double rotation_matrix[3][3];  //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
-    std::vector<double> mom(3, 0.);
-    rotation_matrix[X][X] = -sin_phi;
-    rotation_matrix[X][Y] = -cos_theta * cos_phi;
-    rotation_matrix[X][Z] = sin_theta * cos_phi;
-    rotation_matrix[Y][X] = cos_phi;
-    rotation_matrix[Y][Y] = -cos_theta * sin_phi;
-    rotation_matrix[Y][Z] = sin_theta * sin_phi;
-    rotation_matrix[Z][X] = 0.;
-    rotation_matrix[Z][Y] = sin_theta;
-    rotation_matrix[Z][Z] = cos_theta;
-
-    for (size_t i = X; i <= Z; ++i)
-      for (size_t j = X; j <= Z; ++j)
-        mom[i] += rotation_matrix[i][j] * (*this)[j];
-    return setP(mom.at(X), mom.at(Y), mom.at(Z));
+    const Matrix rot{
+        {-sin_phi, -cos_theta * cos_phi, sin_theta * cos_phi, 0.},  // px
+        {+cos_phi, -cos_theta * sin_phi, sin_theta * sin_phi, 0.},  // py
+        {0., sin_theta, cos_theta, 0.},                             // pz
+        {0., 0., 0., 1.}                                            // e
+    };
+    //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
+    *this = rot * (*this);
+    return *this;
   }
 
   //--- printout
