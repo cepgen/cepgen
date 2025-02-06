@@ -36,7 +36,7 @@ jobs:
 
     - name: 'CMake configuration'
       run: |
-        source source-lxplus.sh
+        source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-opt/setup.sh
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
               -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
