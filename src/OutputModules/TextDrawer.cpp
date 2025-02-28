@@ -40,7 +40,7 @@ namespace cepgen::utils {
           NEG_CHAR('-'),
           MARKERS_CHAR("o.#@"),
           VALUES_CHAR(" .:oO0@%#"),
-          width_(steerAs<int, size_t>("width")),
+          width_(std::max(5lu, steerAs<int, size_t>("width"))),
           colourise_(steer<bool>("colourise")) {}
 
     static ParametersDescription description() {
