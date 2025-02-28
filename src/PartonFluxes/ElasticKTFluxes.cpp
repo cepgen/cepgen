@@ -84,12 +84,12 @@ namespace cepgen {
   class BudnevElasticLeptonKTFlux final : public BudnevElasticNucleonKTFlux {
   public:
     explicit BudnevElasticLeptonKTFlux(const ParametersList& params)
-        : BudnevElasticNucleonKTFlux(params), ml2_(std::pow(PDG::get().mass(steer<pdgid_t>("pdgId")), 2)) {}
+        : BudnevElasticNucleonKTFlux(params), ml2_(std::pow(steer<ParticleProperties>("pdgId").mass, 2)) {}
     static ParametersDescription description() {
       auto desc = BudnevElasticNucleonKTFlux::description();
       desc.setDescription("Lepton el. photon emission (Budnev flux)");
       desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
-      desc.add<pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
+      desc.addAs<int, pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
       return desc;
     }
     double mass2() const override { return ml2_; }
