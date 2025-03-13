@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,43 +28,42 @@ namespace {
   }
 }  // namespace
 
-namespace cepgen {
-  class AlphaSPEGASUS : public Coupling {
-  public:
-    explicit AlphaSPEGASUS(const ParametersList& params)
-        : Coupling(params),
-          iord_(steer<int>("iord")),
-          fr2_(steer<double>("fr2")),
-          mur_(steer<double>("mur")),
-          asmur_(steer<double>("asmur")) {
-      double mc = PDG::get().mass(4), mb = PDG::get().mass(5), mt = PDG::get().mass(6);
+using namespace cepgen;
 
-      initalphas_(iord_, fr2_, mur_, asmur_, mc, mb, mt);
-      CG_INFO("AlphaSPEGASUS:init") << "PEGASUS alpha(S) evolution algorithm initialised with parameters:\n\t"
-                                    << "order: " << iord_ << ", fr2: " << fr2_ << ", "
-                                    << "mur: " << mur_ << ", asmur: " << asmur_ << "\n\t"
-                                    << "quark masses (GeV): charm: " << mc << ", bottom: " << mb << ", top: " << mt
-                                    << ".";
-    }
+class AlphaSPEGASUS final : public Coupling {
+public:
+  explicit AlphaSPEGASUS(const ParametersList& params)
+      : Coupling(params),
+        order_(steer<int>("iord")),
+        fr2_(steer<double>("fr2")),
+        mu_(steer<double>("mur")),
+        alphas_mu_(steer<double>("asmur")) {
+    double mc = PDG::get().mass(4), mb = PDG::get().mass(5), mt = PDG::get().mass(6);
 
-    static ParametersDescription description() {
-      auto desc = Coupling::description();
-      desc.setDescription("PEGASUS alpha(S) evolution algorithm");
-      desc.add<int>("iord", 2).setDescription("Evolution order");
-      desc.add<double>("fr2", 1.);
-      desc.add<double>("mur", 1.);
-      desc.add<double>("asmur", 0.49128);
-      return desc;
-    }
+    initalphas_(order_, fr2_, mu_, alphas_mu_, mc, mb, mt);
+    CG_INFO("AlphaSPEGASUS:init") << "PEGASUS alpha(S) evolution algorithm initialised with parameters:\n\t"
+                                  << "order: " << order_ << ", fr2: " << fr2_ << ", "
+                                  << "mur: " << mu_ << ", asmur: " << alphas_mu_ << "\n\t"
+                                  << "quark masses (GeV): charm: " << mc << ", bottom: " << mb << ", top: " << mt
+                                  << ".";
+  }
 
-    double operator()(double q) const override { return alphas_(q); }
+  static ParametersDescription description() {
+    auto desc = Coupling::description();
+    desc.setDescription("PEGASUS alpha(S) evolution algorithm");
+    desc.add<int>("iord", 2).setDescription("Evolution order");
+    desc.add<double>("fr2", 1.);
+    desc.add<double>("mur", 1.);
+    desc.add<double>("asmur", 0.49128);
+    return desc;
+  }
 
-  private:
-    int iord_;
-    double fr2_;
-    double mur_;
-    double asmur_;
-  };
-}  // namespace cepgen
+  double operator()(double q) const override { return alphas_(q); }
 
+private:
+  int order_;
+  double fr2_;
+  double mu_;
+  double alphas_mu_;
+};
 REGISTER_ALPHAS_MODULE("pegasus", AlphaSPEGASUS);

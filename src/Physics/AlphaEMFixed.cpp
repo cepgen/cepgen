@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,23 +20,22 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 
-namespace cepgen {
-  class AlphaEMFixed final : public Coupling {
-  public:
-    explicit AlphaEMFixed(const ParametersList& params) : Coupling(params), value_(steer<double>("value")) {}
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = Coupling::description();
-      desc.setDescription("Constant alpha(EM)");
-      desc.add<double>("value", constants::ALPHA_EM).setDescription("Constant value for alpha(EM)");
-      return desc;
-    }
+class AlphaEMFixed final : public Coupling {
+public:
+  explicit AlphaEMFixed(const ParametersList& params) : Coupling(params), value_(steer<double>("value")) {}
 
-    double operator()(double /* q */) const override { return value_; }
+  static ParametersDescription description() {
+    auto desc = Coupling::description();
+    desc.setDescription("Constant alpha(EM)");
+    desc.add<double>("value", constants::ALPHA_EM).setDescription("Constant value for alpha(EM)");
+    return desc;
+  }
 
-  private:
-    double value_;
-  };
-}  // namespace cepgen
+  double operator()(double /* q */) const override { return value_; }
 
+private:
+  double value_;
+};
 REGISTER_ALPHAEM_MODULE("fixed", AlphaEMFixed);

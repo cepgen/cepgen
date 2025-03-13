@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
-  class PolarisationState : public SteeredObject<PolarisationState> {
+  class PolarisationState final : public SteeredObject<PolarisationState> {
   public:
     explicit PolarisationState(const ParametersList&);
 

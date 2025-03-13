@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 namespace cepgen {
   /// Incoming beams characteristics
-  class Beam : public SteeredObject<Beam> {
+  class Beam final : public SteeredObject<Beam> {
   public:
     explicit Beam(const ParametersList&);  ///< Default constructor
 

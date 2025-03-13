@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *

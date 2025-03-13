@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,21 +21,23 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 
+using namespace cepgen;
+
+Beam::Beam(const ParametersList& params)
+    : SteeredObject(params),
+      pdg_id_(steerAs<int, pdgid_t>("pdgId")),
+      momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))) {
+  (*this).add("formFactors", form_factors_).add("partonFlux", flux_info_).add("elastic", elastic_);
+}
+
+ParametersDescription Beam::description() {
+  auto desc = ParametersDescription();
+  desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
+  desc.add<double>("pz", 0.);
+  return desc;
+}
+
 namespace cepgen {
-  Beam::Beam(const ParametersList& params)
-      : SteeredObject(params),
-        pdg_id_(steerAs<int, pdgid_t>("pdgId")),
-        momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))) {
-    (*this).add("formFactors", form_factors_).add("partonFlux", flux_info_).add("elastic", elastic_);
-  }
-
-  ParametersDescription Beam::description() {
-    auto desc = ParametersDescription();
-    desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
-    desc.add<double>("pz", 0.);
-    return desc;
-  }
-
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
     os << static_cast<PDG::Id>(beam.pdg_id_) << " (" << beam.momentum_.pz() << " GeV/c) "
        << (beam.elastic_ ? "elastic" : "inelastic");

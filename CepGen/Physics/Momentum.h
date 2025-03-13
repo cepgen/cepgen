@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2015-2024  Laurent Forthomme
+ *  Copyright (C) 2015-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace cepgen {
   /// Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
   /// \date Dec 2015
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-  class Momentum : private std::array<double, 4> {
+  class Momentum : std::array<double, 4> {
   public:
     explicit Momentum(double x = 0.,
                       double y = 0.,

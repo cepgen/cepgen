@@ -23,150 +23,149 @@
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
-namespace cepgen::cuts {
-  Central::Central() : SteeredObject(ParametersList{}) {}
+using namespace cepgen;
+using namespace cepgen::cuts;
 
-  Central::Central(const ParametersList& params) : SteeredObject(params) {
-    (*this)
-        .add("pt", pt_single)
-        .add("eta", eta_single)
-        .add("phi", phi_single)
-        .add("rapidity", rapidity_single)
-        .add("energy", energy_single)
-        .add("mass", mass_single)
-        .add("ptsum", pt_sum)
-        .add("etasum", eta_sum)
-        .add("energysum", energy_sum)
-        .add("invmass", mass_sum)
-        .add("ptdiff", pt_diff)
-        .add("dphi", phi_diff)
-        .add("rapiditydiff", rapidity_diff);
-    if (params.has<Limits>("phiptdiff")) {
-      CG_WARNING("Central") << "\"phiptdiff\" parameter is deprecated! "
-                            << "Please use \"phidiff\" instead.";
-      params.fill("phiptdiff", phi_diff);  // legacy
-    }
+Central::Central() : SteeredObject(ParametersList{}) {}
+
+Central::Central(const ParametersList& params) : SteeredObject(params) {
+  (*this)
+      .add("pt", pt_single)
+      .add("eta", eta_single)
+      .add("phi", phi_single)
+      .add("rapidity", rapidity_single)
+      .add("energy", energy_single)
+      .add("mass", mass_single)
+      .add("ptsum", pt_sum)
+      .add("etasum", eta_sum)
+      .add("energysum", energy_sum)
+      .add("invmass", mass_sum)
+      .add("ptdiff", pt_diff)
+      .add("dphi", phi_diff)
+      .add("rapiditydiff", rapidity_diff);
+  if (params.has<Limits>("phiptdiff")) {
+    CG_WARNING("Central") << "\"phiptdiff\" parameter is deprecated! "
+                          << "Please use \"phidiff\" instead.";
+    params.fill("phiptdiff", phi_diff);  // legacy
   }
+}
 
-  bool Central::contain(const Particles& parts, const Event*) const {
-    Momentum mom_sum;
-    for (const auto& part : parts) {
-      const auto& mom = part.momentum();
-      if (!pt_single.contains(mom.pt()) || !eta_single.contains(mom.eta()) ||
-          !rapidity_single.contains(mom.rapidity()) || !energy_single.contains(mom.energy()) ||
-          !mass_single.contains(mom.mass()))
-        return false;
-      mom_sum += mom;
-    }
-    if (!pt_sum.contains(mom_sum.pt()) || !eta_sum.contains(mom_sum.eta()) || !energy_sum.contains(mom_sum.energy()) ||
-        !mass_sum.contains(mom_sum.mass()))
+bool Central::contain(const Particles& parts, const Event*) const {
+  Momentum mom_sum;
+  for (const auto& part : parts) {
+    const auto& mom = part.momentum();
+    if (!pt_single.contains(mom.pt()) || !eta_single.contains(mom.eta()) || !rapidity_single.contains(mom.rapidity()) ||
+        !energy_single.contains(mom.energy()) || !mass_single.contains(mom.mass()))
       return false;
-    if (parts.size() > 1) {  // look at correlations
-      const auto &mom1 = parts.at(0).momentum(), &mom2 = parts.at(1).momentum();
-      if (!pt_diff.contains(fabs(mom1.pt() - mom2.pt())) || !phi_diff.contains(mom1.deltaPhi(mom2)) ||
-          !rapidity_diff.contains(fabs(mom1.rapidity() - mom2.rapidity())))
-        return false;
+    mom_sum += mom;
+  }
+  if (!pt_sum.contains(mom_sum.pt()) || !eta_sum.contains(mom_sum.eta()) || !energy_sum.contains(mom_sum.energy()) ||
+      !mass_sum.contains(mom_sum.mass()))
+    return false;
+  if (parts.size() > 1) {  // look at correlations
+    const auto &mom1 = parts.at(0).momentum(), &mom2 = parts.at(1).momentum();
+    if (!pt_diff.contains(fabs(mom1.pt() - mom2.pt())) || !phi_diff.contains(mom1.deltaPhi(mom2)) ||
+        !rapidity_diff.contains(fabs(mom1.rapidity() - mom2.rapidity())))
+      return false;
+  }
+  return true;
+}
+
+ParametersDescription Central::description() {
+  auto desc = ParametersDescription();
+  desc.add<Limits>("pt", Limits{0.}).setDescription("Single particle pt (GeV/c)");
+  desc.add<Limits>("eta", Limits{}).setDescription("Single particle eta");
+  desc.add<Limits>("phi", Limits{0., 2. * M_PI}).setDescription("Single particle azimuthal angle");
+  desc.add<Limits>("rapidity", Limits{}).setDescription("Single particle rapidity");
+  desc.add<Limits>("energy", Limits{}).setDescription("Single particle energy (GeV)");
+  desc.add<Limits>("mass", Limits{}).setDescription("Single particle mass (GeV/c^2)");
+  desc.add<Limits>("ptsum", Limits{}).setDescription("System pt (GeV/c)");
+  desc.add<Limits>("etasum", Limits{}).setDescription("System eta");
+  desc.add<Limits>("energysum", Limits{}).setDescription("System energy (GeV)");
+  desc.add<Limits>("invmass", Limits{}).setDescription("System mass (GeV/c^2)");
+  desc.add<Limits>("ptdiff", Limits{}).setDescription("System D(pt) (GeV/c)");
+  desc.add<Limits>("dphi", Limits{}).setDescription("System D(phi) (rad)");
+  desc.add<Limits>("rapiditydiff", Limits{}).setDescription("System D(Y)");
+  return desc;
+}
+
+//------------------------------------------------------------------
+
+Initial::Initial(const ParametersList& params) : SteeredObject(params) {
+  (*this).add("q2", q2).add("qt", qt).add("phi", phi);
+}
+
+void Initial::setParameters(const ParametersList& params) {
+  if (params.empty())
+    return;
+  SteeredObject::setParameters(params);
+  if (const auto q2lim = params.get<Limits>("q2"); q2lim.valid())  // symmetric Q^2 cut specified
+    q2 = {q2lim, q2lim};
+  for (auto& q2lim : q2)
+    if (q2lim.max() <= 0.) {
+      CG_WARNING("Initial:setParameters") << "Maximum parton virtuality (" << q2lim << ") is invalid. "
+                                          << "It is now set to " << 1.e4 << " GeV^2.";
+      q2lim.max() = 1.e4;
     }
-    return true;
+}
+
+bool Initial::contain(const Particles& parts, const Event*) const {
+  for (const auto& part : parts) {
+    const auto& mom = part.momentum();
+    if (!qt.contains(mom.pt()))
+      return false;
   }
-
-  ParametersDescription Central::description() {
-    auto desc = ParametersDescription();
-    desc.add<Limits>("pt", Limits{0.}).setDescription("Single particle pt (GeV/c)");
-    desc.add<Limits>("eta", Limits{}).setDescription("Single particle eta");
-    desc.add<Limits>("phi", Limits{0., 2. * M_PI}).setDescription("Single particle azimuthal angle");
-    desc.add<Limits>("rapidity", Limits{}).setDescription("Single particle rapidity");
-    desc.add<Limits>("energy", Limits{}).setDescription("Single particle energy (GeV)");
-    desc.add<Limits>("mass", Limits{}).setDescription("Single particle mass (GeV/c^2)");
-    desc.add<Limits>("ptsum", Limits{}).setDescription("System pt (GeV/c)");
-    desc.add<Limits>("etasum", Limits{}).setDescription("System eta");
-    desc.add<Limits>("energysum", Limits{}).setDescription("System energy (GeV)");
-    desc.add<Limits>("invmass", Limits{}).setDescription("System mass (GeV/c^2)");
-    desc.add<Limits>("ptdiff", Limits{}).setDescription("System D(pt) (GeV/c)");
-    desc.add<Limits>("dphi", Limits{}).setDescription("System D(phi) (rad)");
-    desc.add<Limits>("rapiditydiff", Limits{}).setDescription("System D(Y)");
-    return desc;
-  }
-
-  //------------------------------------------------------------------
-
-  Initial::Initial(const ParametersList& params) : SteeredObject(params) {
-    (*this).add("q2", q2).add("qt", qt).add("phi", phi);
-  }
-
-  void Initial::setParameters(const ParametersList& params) {
-    if (params.empty())
-      return;
-    SteeredObject::setParameters(params);
-    if (const auto q2lim = params.get<Limits>("q2"); q2lim.valid())  // symmetric Q^2 cut specified
-      q2 = {q2lim, q2lim};
-    for (auto& q2lim : q2)
-      if (q2lim.max() <= 0.) {
-        CG_WARNING("Initial:setParameters") << "Maximum parton virtuality (" << q2lim << ") is invalid. "
-                                            << "It is now set to " << 1.e4 << " GeV^2.";
-        q2lim.max() = 1.e4;
-      }
-  }
-
-  bool Initial::contain(const Particles& parts, const Event*) const {
-    for (const auto& part : parts) {
-      const auto& mom = part.momentum();
-      if (!qt.contains(mom.pt()))
+  if (parts.size() == 2) {
+    for (size_t i = 0; i < 2; ++i)
+      if (!q2.at(i).contains(parts.at(i).momentum().mass2()))
         return false;
-    }
-    if (parts.size() == 2) {
-      for (size_t i = 0; i < 2; ++i)
-        if (!q2.at(i).contains(parts.at(i).momentum().mass2()))
-          return false;
-      if (phi.valid() && !phi.contains(parts.at(0).momentum().deltaPhi(parts.at(1).momentum())))
-        return false;
-    }
-    return true;
+    if (phi.valid() && !phi.contains(parts.at(0).momentum().deltaPhi(parts.at(1).momentum())))
+      return false;
   }
+  return true;
+}
 
-  ParametersDescription Initial::description() {
-    auto desc = ParametersDescription();
-    desc.add("q2", std::vector<Limits>(2, {0., 1.e5})).setDescription("Parton virtuality(ies) (GeV^2)");
-    desc.add("qt", Limits{}).setDescription("Transverse virtuality (GeV)");
-    desc.add("phi", Limits{}).setDescription("Partons D(phi) (rad)");
-    return desc;
+ParametersDescription Initial::description() {
+  auto desc = ParametersDescription();
+  desc.add("q2", std::vector<Limits>(2, {0., 1.e5})).setDescription("Parton virtuality(ies) (GeV^2)");
+  desc.add("qt", Limits{}).setDescription("Transverse virtuality (GeV)");
+  desc.add("phi", Limits{}).setDescription("Partons D(phi) (rad)");
+  return desc;
+}
+
+//------------------------------------------------------------------
+
+Remnants::Remnants(const ParametersList& params) : SteeredObject(params) {
+  (*this).add("mx", mx).add("yj", yj).add("xi", xi);
+}
+
+void Remnants::setParameters(const ParametersList& params) {
+  if (params.empty())
+    return;
+  SteeredObject::setParameters(params);
+  if (mx.min() < MX_MIN) {
+    CG_WARNING("CutsList:setParameters") << "Minimum diffractive mass range (" << mx << ") is invalid. "
+                                         << "It is now set to " << MX_MIN << " GeV/c^2.";
+    mx.min() = MX_MIN;
   }
+}
 
-  //------------------------------------------------------------------
-
-  Remnants::Remnants(const ParametersList& params) : SteeredObject(params) {
-    (*this).add("mx", mx).add("yj", yj).add("xi", xi);
+bool Remnants::contain(const Particles& parts, const Event* evt) const {
+  for (const auto& part : parts) {
+    if (part.status() != Particle::Status::FinalState)
+      continue;
+    if (evt && xi.valid() && !xi.contains(1. - part.momentum().pz() / (*evt)(*part.mothers().begin()).momentum().pz()))
+      return false;
+    if (!yj.contains(fabs(part.momentum().rapidity())))
+      return false;
   }
+  return true;
+}
 
-  void Remnants::setParameters(const ParametersList& params) {
-    if (params.empty())
-      return;
-    SteeredObject::setParameters(params);
-    if (mx.min() < MX_MIN) {
-      CG_WARNING("CutsList:setParameters") << "Minimum diffractive mass range (" << mx << ") is invalid. "
-                                           << "It is now set to " << MX_MIN << " GeV/c^2.";
-      mx.min() = MX_MIN;
-    }
-  }
-
-  bool Remnants::contain(const Particles& parts, const Event* evt) const {
-    for (const auto& part : parts) {
-      if (part.status() != Particle::Status::FinalState)
-        continue;
-      if (evt && xi.valid() &&
-          !xi.contains(1. - part.momentum().pz() / (*evt)(*part.mothers().begin()).momentum().pz()))
-        return false;
-      if (!yj.contains(fabs(part.momentum().rapidity())))
-        return false;
-    }
-    return true;
-  }
-
-  ParametersDescription Remnants::description() {
-    auto desc = ParametersDescription();
-    desc.add<Limits>("mx", Limits{Remnants::MX_MIN, 1.e3}).setDescription("Diffractive mass (GeV/c^2)");
-    desc.add<Limits>("yj", Limits{}).setDescription("Diffractive jet rapidity");
-    desc.add<Limits>("xi", Limits{}).setDescription("Longit.fract.mom. loss (\"xi\")");
-    return desc;
-  }
-}  // namespace cepgen::cuts
+ParametersDescription Remnants::description() {
+  auto desc = ParametersDescription();
+  desc.add<Limits>("mx", Limits{Remnants::MX_MIN, 1.e3}).setDescription("Diffractive mass (GeV/c^2)");
+  desc.add<Limits>("yj", Limits{}).setDescription("Diffractive jet rapidity");
+  desc.add<Limits>("xi", Limits{}).setDescription("Longit.fract.mom. loss (\"xi\")");
+  return desc;
+}

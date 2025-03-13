@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 /// Kimber-Martin-Ryskin un-integrated gluon densities
 namespace kmr {
   /// A KMR un-integrated gluon densities grid interpolator
-  class GluonGrid : private cepgen::GridHandler<3, 1>, public cepgen::SteeredObject<GluonGrid> {
+  class GluonGrid : cepgen::GridHandler<3, 1>, public cepgen::SteeredObject<GluonGrid> {
   public:
     /// Retrieve the grid interpolator (singleton)
     static GluonGrid& get(const cepgen::ParametersList& params = {});

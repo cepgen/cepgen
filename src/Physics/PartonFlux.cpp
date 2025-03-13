@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,16 +20,16 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
-namespace cepgen {
-  PartonFlux::PartonFlux(const ParametersList& params)
-      : NamedModule(params),
-        prefactor_(constants::ALPHA_EM * M_1_PI),
-        mp_(PDG::get().mass(PDG::proton)),
-        mp2_(mp_ * mp_) {}
+using namespace cepgen;
 
-  ParametersDescription PartonFlux::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed parton flux evaluator");
-    return desc;
-  }
-}  // namespace cepgen
+PartonFlux::PartonFlux(const ParametersList& params)
+    : NamedModule(params),
+      prefactor_(constants::ALPHA_EM * M_1_PI),
+      mp_(PDG::get().mass(PDG::proton)),
+      mp2_(mp_ * mp_) {}
+
+ParametersDescription PartonFlux::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("Unnamed parton flux evaluator");
+  return desc;
+}

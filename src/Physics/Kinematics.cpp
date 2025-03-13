@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2014-2024  Laurent Forthomme
+ *  Copyright (C) 2014-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,39 +20,39 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen {
-  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
+using namespace cepgen;
 
-  void Kinematics::setParameters(const ParametersList& params) {
-    SteeredObject::setParameters(params);
-    CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
-                           << "with the following parameters:\n\t" << params_ << ".";
+Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
-    incoming_beams_.setParameters(params_);
-    cuts_.setParameters(params_);
-    if (params_.has<std::vector<int> >("minFinalState"))  // outgoing particles definition
-      for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
-        minimum_final_state_.emplace_back(static_cast<pdgid_t>(pdg));
+void Kinematics::setParameters(const ParametersList& params) {
+  SteeredObject::setParameters(params);
+  CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
+                         << "with the following parameters:\n\t" << params_ << ".";
 
-    if (const auto kmr_grid_path = steerPath("kmrGridPath"); !kmr_grid_path.empty())  // grid path for gluon emission
-      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
-  }
+  incoming_beams_.setParameters(params_);
+  cuts_.setParameters(params_);
+  if (params_.has<std::vector<int> >("minFinalState"))  // outgoing particles definition
+    for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
+      minimum_final_state_.emplace_back(static_cast<pdgid_t>(pdg));
 
-  const ParametersList& Kinematics::parameters() const {
-    params_ += incoming_beams_.parameters() + cuts_.parameters();
-    // minimum final state content
-    std::transform(minimum_final_state_.begin(),
-                   minimum_final_state_.end(),
-                   std::back_inserter(params_.operator[]<std::vector<int> >("minFinalState")),
-                   [](const auto& pdg) { return static_cast<int>(pdg); });
-    return SteeredObject::parameters();
-  }
+  if (const auto kmr_grid_path = steerPath("kmrGridPath"); !kmr_grid_path.empty())  // grid path for gluon emission
+    kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
+}
 
-  ParametersDescription Kinematics::description() {
-    auto desc = ParametersDescription();
-    desc += IncomingBeams::description();
-    desc += CutsList::description();
-    desc.add<std::string>("kmrGridPath", "").setDescription("path to the KMR interpolation grid");
-    return desc;
-  }
-}  // namespace cepgen
+const ParametersList& Kinematics::parameters() const {
+  params_ += incoming_beams_.parameters() + cuts_.parameters();
+  // minimum final state content
+  std::transform(minimum_final_state_.begin(),
+                 minimum_final_state_.end(),
+                 std::back_inserter(params_.operator[]<std::vector<int> >("minFinalState")),
+                 [](const auto& pdg) { return static_cast<int>(pdg); });
+  return SteeredObject::parameters();
+}
+
+ParametersDescription Kinematics::description() {
+  auto desc = ParametersDescription();
+  desc += IncomingBeams::description();
+  desc += CutsList::description();
+  desc.add<std::string>("kmrGridPath", "").setDescription("path to the KMR interpolation grid");
+  return desc;
+}
