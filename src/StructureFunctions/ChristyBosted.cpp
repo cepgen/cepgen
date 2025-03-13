@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,18 +32,61 @@ namespace cepgen::strfun {
   /// \f$F_{2,L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
   class ChristyBosted final : public Parameterisation {
   public:
-    explicit ChristyBosted(const ParametersList&);
+    explicit ChristyBosted(const ParametersList& params)
+        : Parameterisation(params),
+          m0_(steer<double>("m0")),
+          q20_(steer<double>("q20")),
+          q21_(steer<double>("q21")),
+          mpi_(PDG::get().mass(PDG::piZero)),
+          mpi2_(mpi_ * mpi_),
+          meta_(PDG::get().mass(PDG::eta)),
+          meta2_(meta_ * meta_) {
+      for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
+        resonances_.emplace_back(res);
+      const auto& cont = steer<std::vector<ParametersList> >("continuum");
+      if (cont.size() != 3)
+        throw CG_FATAL("ChristyBosted") << "Continuum should have its three directions parameterisation defined! Found "
+                                        << cont.size() << ".";
+      for (const auto& cnt : cont)
+        continuum_.emplace_back(cnt);
+    }
 
     static ParametersDescription description();
 
-    void eval() override;
+    void eval() override {
+      const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_);
+      if (sqrt(w2) < mx_min_)
+        return;
 
+      //-----------------------------
+      // modification of Christy-Bosted at large q2 as described in the LUXqed paper
+      //-----------------------------
+      const double delq2 = args_.q2 - q20_;
+      //------------------------------
+
+      double q2_eff = args_.q2, w2_eff = w2;
+      if (args_.q2 > q20_) {
+        q2_eff = q20_ + delq2 / (1. + delq2 / (q21_ - q20_));
+        w2_eff = utils::mX2(args_.xbj, q2_eff, mp2_);
+      }
+      const double sigT = resmod507(Polarisation::transverse, w2_eff, q2_eff);
+      const double sigL = resmod507(Polarisation::longitudinal, w2_eff, q2_eff);
+
+      double f2 = prefactor_ * (1. - args_.xbj) * q2_eff / gamma2(args_.xbj, q2_eff) * (sigT + sigL) /
+                  constants::GEVM2_TO_PB * 1.e6;
+      if (args_.q2 > q20_)
+        f2 *= q21_ / (q21_ + delq2);
+      setF2(f2);
+
+      if (sigT != 0.)
+        Parameterisation::computeFL(args_.xbj, q2_eff, sigL / sigT);
+    }
     //--- already computed internally during F2 computation
     ChristyBosted& computeFL(double, double) override { return *this; }
     ChristyBosted& computeFL(double, double, double) override { return *this; }
 
   private:
-    enum Polarisation { L, T };
+    enum Polarisation { longitudinal, transverse };
     static constexpr double prefactor_ = 0.25 * M_1_PI * M_1_PI / constants::ALPHA_EM;
 
     double resmod507(const Polarisation& pol, double w2, double q2) const;
@@ -80,11 +123,11 @@ namespace cepgen::strfun {
       /// resonance Q^2 dependence
       double height(const Polarisation& pol, double q2) const {
         switch (pol) {
-          case Polarisation::T:
+          case transverse:
             return std::pow(a0t_ * (1. + fit_pars_.at(0) * q2 / (1. + fit_pars_.at(1) * q2)) /
                                 std::pow(1. + q2 / 0.91, fit_pars_.at(2)),
                             2);
-          case Polarisation::L:
+          case longitudinal:
             return std::pow(a0l_ / (1. + fit_pars_.at(3) * q2) * q2 * exp(-q2 * fit_pars_.at(4)), 2);
           default:
             throw CG_FATAL("ChristyBosted:Resonance") << "Invalid polarisation state: " << static_cast<int>(pol) << "!";
@@ -126,28 +169,9 @@ namespace cepgen::strfun {
     const double meta_, meta2_;
   };
 
-  ChristyBosted::ChristyBosted(const ParametersList& params)
-      : Parameterisation(params),
-        m0_(steer<double>("m0")),
-        q20_(steer<double>("q20")),
-        q21_(steer<double>("q21")),
-        mpi_(PDG::get().mass(PDG::piZero)),
-        mpi2_(mpi_ * mpi_),
-        meta_(PDG::get().mass(PDG::eta)),
-        meta2_(meta_ * meta_) {
-    for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
-      resonances_.emplace_back(res);
-    const auto& cont = steer<std::vector<ParametersList> >("continuum");
-    if (cont.size() != 3)
-      throw CG_FATAL("ChristyBosted") << "Continuum should have its three directions parameterisation defined! Found "
-                                      << cont.size() << ".";
-    for (const auto& cnt : cont)
-      continuum_.emplace_back(cnt);
-  }
-
   double ChristyBosted::resmod507(const Polarisation& pol, double w2, double q2) const {
     const double w = sqrt(w2);
-    const double q20 = pol == Polarisation::T ? 0.05 : 0.125;
+    const double q20 = pol == Polarisation::transverse ? 0.05 : 0.125;
 
     //--- kinematics needed for threshold relativistic B-W
     const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
@@ -165,7 +189,7 @@ namespace cepgen::strfun {
 
     double sig_nr = 0.;
     switch (pol) {
-      case Polarisation::T: {  // transverse
+      case Polarisation::transverse: {  // transverse
         const double wdif = w - mx_min_;
         if (wdif >= 0.) {
           for (unsigned short i = 0; i < 2; ++i) {
@@ -177,7 +201,7 @@ namespace cepgen::strfun {
 
         sig_nr *= xpr;
       } break;
-      case Polarisation::L: {  // longitudinal
+      case Polarisation::longitudinal: {  // longitudinal
         const auto& dir = continuum_.at(2);
         const double expo = dir.fit_pars.at(0);
         const double xb = utils::xBj(q2, mp2_, w2);
@@ -188,35 +212,6 @@ namespace cepgen::strfun {
       }
     }
     return sig_res + sig_nr;
-  }
-
-  void ChristyBosted::eval() {
-    const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_);
-    if (sqrt(w2) < mx_min_)
-      return;
-
-    //-----------------------------
-    // modification of Christy-Bosted at large q2 as described in the LUXqed paper
-    //-----------------------------
-    const double delq2 = args_.q2 - q20_;
-    //------------------------------
-
-    double q2_eff = args_.q2, w2_eff = w2;
-    if (args_.q2 > q20_) {
-      q2_eff = q20_ + delq2 / (1. + delq2 / (q21_ - q20_));
-      w2_eff = utils::mX2(args_.xbj, q2_eff, mp2_);
-    }
-    const double sigT = resmod507(Polarisation::T, w2_eff, q2_eff);
-    const double sigL = resmod507(Polarisation::L, w2_eff, q2_eff);
-
-    double f2 = prefactor_ * (1. - args_.xbj) * q2_eff / gamma2(args_.xbj, q2_eff) * (sigT + sigL) /
-                constants::GEVM2_TO_PB * 1.e6;
-    if (args_.q2 > q20_)
-      f2 *= q21_ / (q21_ + delq2);
-    setF2(f2);
-
-    if (sigT != 0.)
-      Parameterisation::computeFL(args_.xbj, q2_eff, sigL / sigT);
   }
 
   ParametersDescription ChristyBosted::description() {

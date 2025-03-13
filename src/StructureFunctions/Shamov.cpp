@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -148,17 +148,17 @@ namespace cepgen::strfun {
 
     const enum class Mode {
       SuriYennie = 0,  ///< Suri & Yennie
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence as for Delta(1232)
       RealRes = 1,
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence: resonant contribution as for Delta(1232),
       /// non-resonant contribution according to S&Y
       RealResAndNonRes = 2,
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence according to S&Y
       RealAndSuriYennieNonRes = 3,
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence: resonant contribution as for Delta(1232),
       /// some fit for non-resonant contribution
       RealAndFitNonRes = 4

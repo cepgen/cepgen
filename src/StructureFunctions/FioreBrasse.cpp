@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -129,9 +129,9 @@ namespace cepgen::strfun {
         alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - std::sqrt(s0_ - s)), 0.);
 
       double formfactor = std::pow(1. + args_.q2 / res.q02, -2);
-      double denom = std::pow(res.spinTimesTwo * 0.5 - std::real(alpha), 2) + std::pow(std::imag(alpha), 2);
-      double ampli_imag = res.a * formfactor * formfactor * std::imag(alpha) / denom;
-      amplitude_res += ampli_imag;
+      double denominator = std::pow(res.spinTimesTwo * 0.5 - std::real(alpha), 2) + std::pow(std::imag(alpha), 2);
+      double imaginary_amplitude = res.a * formfactor * formfactor * std::imag(alpha) / denominator;
+      amplitude_res += imaginary_amplitude;
     }
     double amplitude_bg = 0.;
     {
@@ -142,9 +142,9 @@ namespace cepgen::strfun {
         alpha = std::complex<double>(res.alpha0 + res.alpha1 * sqrtsE, res.alpha1 * std::sqrt(s - sE));
       else
         alpha = std::complex<double>(res.alpha0 + res.alpha1 * (sqrtsE - std::sqrt(sE - s)), 0.);
-      double formfactor = std::pow(1. + args_.q2 / res.q02, -2);
-      double denom = std::pow(res.spinTimesTwo * 0.75 - std::real(alpha), 2) + std::pow(std::imag(alpha), 2);
-      amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
+      double form_factor = std::pow(1. + args_.q2 / res.q02, -2);
+      double denominator = std::pow(res.spinTimesTwo * 0.75 - std::real(alpha), 2) + std::pow(std::imag(alpha), 2);
+      amplitude_bg = res.a * form_factor * form_factor * std::imag(alpha) / denominator;
     }
     const double amplitude_tot = norm_ * (amplitude_res + amplitude_bg);
 

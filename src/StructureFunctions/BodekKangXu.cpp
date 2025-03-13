@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ namespace cepgen::strfun {
 
       const auto BBKG = b1 + b2, BRES = constants_.at(1) + b2;
 
-      auto ressum = 0.;
+      auto resonances_sum = 0.;
       for (size_t i = 0; i < NRES; ++i) {
         const size_t index = i * 3 + 1 + NBKG;
         auto ram = constants_.at(index), rma = constants_.at(index + 1), rwd = constants_.at(index + 2);
@@ -116,13 +116,13 @@ namespace cepgen::strfun {
 
         const auto term = prefactor_ * qstarn, term0 = prefactor_ * qstar0;
         const size_t j = 2 * spins_.at(i);
-        const auto gamres =
+        const auto gamma_resonance =
             0.5 * (rwd * std::pow(term / term0, j + 1) * (1. + std::pow(term0, j)) / (1. + std::pow(term, j)));
-        const auto brwig = M_1_PI * gamres / (std::pow(w - rma, 2.) + std::pow(gamres, 2.));
-        ressum += 0.5 * ram * brwig * inv_mp_;
+        const auto breit_wigner = M_1_PI * gamma_resonance / (std::pow(w - rma, 2.) + std::pow(gamma_resonance, 2.));
+        resonances_sum += 0.5 * ram * breit_wigner * inv_mp_;
       }
 
-      return BBKG * (1. + (1. - BBKG) * xpx) + ressum * (1. - BRES);
+      return BBKG * (1. + (1. - BBKG) * xpx) + resonances_sum * (1. - BRES);
     }
     static constexpr double prefactor_ = 6.08974;
     const std::vector<double> constants_;

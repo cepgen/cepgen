@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *                2021       Sergey Kulagin
  *                           Vladislav Barinov
  *
@@ -39,7 +39,59 @@ namespace cepgen::strfun {
   /// \cite Kulagin:2021mee
   class KulaginBarinov : public Parameterisation {
   public:
-    explicit KulaginBarinov(const ParametersList&);
+    explicit KulaginBarinov(const ParametersList& params)
+        : Parameterisation(params),
+          t0_(steer<double>("t0")),
+          q2_range_(steer<Limits>("Q2range")),
+          q2_grid_range_(steer<Limits>("Q2gridRange")),
+          sfs_grid_file_(steerPath("gridFile")),
+          dis_params_(steer<ParametersList>("disParameters")),
+          derivator_(DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
+          mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),
+          meta2_(std::pow(PDG::get().mass(PDG::eta), 2)) {
+      for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
+        resonances_.emplace_back(res);
+      {  // build the FT and F2 grid
+        if (!utils::fileExists(sfs_grid_file_))
+          throw CG_FATAL("KulaginBarinov")
+              << "Failed to load the DIS structure functions interpolation grid from '" << sfs_grid_file_ << "'!";
+        CG_INFO("KulaginBarinov") << "Loading A08 structure function values from '" << sfs_grid_file_ << "' file.";
+        std::ifstream grid_file(sfs_grid_file_);
+        static constexpr size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
+        static constexpr double min_xbj = 1.01e-5;
+        //--- xbj & Q2 binning
+        constexpr size_t nxbb = num_xbj / 2;
+        const double x1 = 0.3, xlog1 = log(x1), delta_x = (xlog1 - log(min_xbj)) / (nxbb - 1),
+                     delta_x1 = std::pow(1. - x1, 2) / (nxbb + 1);
+        const double deltas =
+            (log(log(q2_grid_range_.max() / 0.04)) - log(log(q2_grid_range_.min() / 0.04))) / (num_q2 - 1);
+        // parameterisation of Twist-4 correction from A08 analysis arXiv:0710.0124 [hep-ph] (assuming F2ht=FTht)
+        auto sfnht = [](double xbj, double q2) -> double {
+          return (std::pow(xbj, 0.9) * std::pow(1. - xbj, 3.63) * (xbj - 0.356) *
+                  (1.0974 + 47.7352 * std::pow(xbj, 4))) /
+                 q2;
+        };
+
+        for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
+          const double xbj = idx_xbj < nxbb
+                                 ? exp(log(min_xbj) + delta_x * idx_xbj)
+                                 : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delta_x1 * (idx_xbj - nxbb + 1)));
+          for (size_t idx_q2 = 0; idx_q2 < num_q2; ++idx_q2) {  // Q^2 grid
+            const double q2 = 0.04 * exp(exp(log(log(q2_grid_range_.min() / 0.04)) + deltas * idx_q2));
+            std::array<double, num_sf> sfs{};
+            for (size_t idx_sf = 0; idx_sf < num_sf; ++idx_sf) {
+              grid_file >> sfs[idx_sf];  // FT, F2
+              sfs[idx_sf] += sfnht(xbj, q2);
+            }
+            CG_DEBUG("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector<double>{xbj, q2} << "("
+                                            << std::vector<size_t>{idx_xbj, idx_q2} << "): " << sfs;
+            sfs_grid_.insert({xbj, q2}, sfs);
+          }
+        }
+        sfs_grid_.initialise();
+        CG_DEBUG("KulaginBarinov:grid") << "Grid boundaries: " << sfs_grid_.boundaries();
+      }
+    }
 
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
@@ -140,7 +192,7 @@ namespace cepgen::strfun {
         return desc;
       }
 
-      bool computeStrFuns(const KinematicsBlock& kin, double& fl, double& ft) const {
+      bool computeStructureFunctions(const KinematicsBlock& kin, double& fl, double& ft) const {
         // compute contributions to the total resonance width
         const double width_t = partialWidth(kin);
         if (width_t <= 0.)
@@ -177,61 +229,9 @@ namespace cepgen::strfun {
       double bg1t, bg2t, pmt;
     } dis_params_;
     GridHandler<2, 2> sfs_grid_{GridType::linear};
-    std::unique_ptr<utils::Derivator> deriv_;
+    std::unique_ptr<utils::Derivator> derivator_;
     const double mpi2_, meta2_;
   };
-
-  KulaginBarinov::KulaginBarinov(const ParametersList& params)
-      : Parameterisation(params),
-        t0_(steer<double>("t0")),
-        q2_range_(steer<Limits>("Q2range")),
-        q2_grid_range_(steer<Limits>("Q2gridRange")),
-        sfs_grid_file_(steerPath("gridFile")),
-        dis_params_(steer<ParametersList>("disParameters")),
-        deriv_(DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
-        mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),
-        meta2_(std::pow(PDG::get().mass(PDG::eta), 2)) {
-    for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
-      resonances_.emplace_back(res);
-    {  // build the FT and F2 grid
-      if (!utils::fileExists(sfs_grid_file_))
-        throw CG_FATAL("KulaginBarinov") << "Failed to load the DIS structure functions interpolation grid from '"
-                                         << sfs_grid_file_ << "'!";
-      CG_INFO("KulaginBarinov") << "Loading A08 structure function values from '" << sfs_grid_file_ << "' file.";
-      std::ifstream grid_file(sfs_grid_file_);
-      static constexpr size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
-      static constexpr double min_xbj = 1.01e-5;
-      //--- xbj & Q2 binning
-      constexpr size_t nxbb = num_xbj / 2;
-      const double x1 = 0.3, xlog1 = log(x1), delx = (xlog1 - log(min_xbj)) / (nxbb - 1),
-                   delx1 = std::pow(1. - x1, 2) / (nxbb + 1);
-      const double dels =
-          (log(log(q2_grid_range_.max() / 0.04)) - log(log(q2_grid_range_.min() / 0.04))) / (num_q2 - 1);
-      // parameterisation of Twist-4 correction from A08 analysis arXiv:0710.0124 [hep-ph] (assuming F2ht=FTht)
-      auto sfnht = [](double xbj, double q2) -> double {
-        return (std::pow(xbj, 0.9) * std::pow(1. - xbj, 3.63) * (xbj - 0.356) * (1.0974 + 47.7352 * std::pow(xbj, 4))) /
-               q2;
-      };
-
-      for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
-        const double xbj = idx_xbj < nxbb ? exp(log(min_xbj) + delx * idx_xbj)
-                                          : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delx1 * (idx_xbj - nxbb + 1)));
-        for (size_t idx_q2 = 0; idx_q2 < num_q2; ++idx_q2) {  // Q^2 grid
-          const double q2 = 0.04 * exp(exp(log(log(q2_grid_range_.min() / 0.04)) + dels * idx_q2));
-          std::array<double, num_sf> sfs{};
-          for (size_t idx_sf = 0; idx_sf < num_sf; ++idx_sf) {
-            grid_file >> sfs[idx_sf];  // FT, F2
-            sfs[idx_sf] += sfnht(xbj, q2);
-          }
-          CG_DEBUG("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector<double>{xbj, q2} << "("
-                                          << std::vector<size_t>{idx_xbj, idx_q2} << "): " << sfs;
-          sfs_grid_.insert({xbj, q2}, sfs);
-        }
-      }
-      sfs_grid_.initialise();
-      CG_DEBUG("KulaginBarinov:grid") << "Grid boundaries: " << sfs_grid_.boundaries();
-    }
-  }
 
   void KulaginBarinov::eval() {
     const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_), w = std::sqrt(w2);
@@ -243,7 +243,7 @@ namespace cepgen::strfun {
       double fl_res{0.}, ft_res{0.};
       for (const auto& res : resonances_) {  // sum over the resonant contributions
         double fl_sng_res, ft_sng_res;
-        if (!res.computeStrFuns(kin, fl_sng_res, ft_sng_res)) {
+        if (!res.computeStructureFunctions(kin, fl_sng_res, ft_sng_res)) {
           setFL(0.);
           setF2(0.);
           return;
@@ -277,13 +277,13 @@ namespace cepgen::strfun {
           double ddt{0.}, ddl{0.};
           if (xbj_t >= 1.e-6) {  // check the range of validity
             // DIS structure function model using the results of A08 analysis arXiv:0710.0124 [hep-ph]
-            ddt = deriv_->derivate(
+            ddt = derivator_->derivate(
                 [this, &xbj_t](double qsq) -> double {
                   return sfs_grid_.eval({xbj_t, qsq}).at(0);
                 },  // TM-corrected FT with twist-4 correction
                 t,
                 t * 1.e-2);
-            ddl = deriv_->derivate(
+            ddl = derivator_->derivate(
                 [this, &xbj_t](double qsq) -> double {
                   const auto vals = sfs_grid_.eval({xbj_t, qsq});  // FT, F2
                   const auto &ft_l = vals.at(0), &f2_l = vals.at(1);

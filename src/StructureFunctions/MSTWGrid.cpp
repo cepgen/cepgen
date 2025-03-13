@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace mstw {
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid final : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
+  class Grid final : public cepgen::strfun::Parameterisation, cepgen::GridHandler<2, 2> {
   public:
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList& params)
-        : cepgen::strfun::Parameterisation(params), cepgen::GridHandler<2, 2>(cepgen::GridType::logarithmic) {
+        : Parameterisation(params), GridHandler(cepgen::GridType::logarithmic) {
       {  // file readout part
         const auto& grid_path = steerPath("gridPath");
         std::ifstream file(grid_path, std::ios::binary | std::ios::in);
@@ -145,8 +145,8 @@ namespace mstw {
   }
 
   /// Human-readable description of a nucleon type
-  std::ostream& operator<<(std::ostream& os, const Grid::header_t::nucleon_t& nucl) {
-    switch (nucl) {
+  std::ostream& operator<<(std::ostream& os, const Grid::header_t::nucleon_t& nucleon) {
+    switch (nucleon) {
       case Grid::header_t::proton:
         return os << "proton";
       case Grid::header_t::neutron:

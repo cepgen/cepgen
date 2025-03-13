@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace cepgen::strfun {
     friend std::ostream& operator<<(std::ostream&, const Mode& mode);
 
     static ParametersDescription description();
-    void eval() override final;
+    void eval() final;
 
   protected:
     virtual double evalxQ2(int flavour, double xbj, double q2) = 0;

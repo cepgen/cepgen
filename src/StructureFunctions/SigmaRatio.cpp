@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,22 +25,25 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Utils/Math.h"
 
+using namespace cepgen;
+using namespace cepgen::sigrat;
+
+Parameterisation::Parameterisation(const ParametersList& params)
+    : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
+
+double Parameterisation::theta(double xbj, double q2) {
+  return 1. + 12. * (q2 / (q2 + 1.)) * (0.125 * 0.125 / (0.125 * 0.125 + xbj * xbj));
+}
+
+ParametersDescription Parameterisation::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("Unnamed sigma ratio parameterisation");
+  return desc;
+}
+
+//---------------------------------------------------------------------------------------------
+
 namespace cepgen::sigrat {
-  Parameterisation::Parameterisation(const ParametersList& params)
-      : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
-
-  double Parameterisation::theta(double xbj, double q2) {
-    return 1. + 12. * (q2 / (q2 + 1.)) * (0.125 * 0.125 / (0.125 * 0.125 + xbj * xbj));
-  }
-
-  ParametersDescription Parameterisation::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed sigma ratio parameterisation");
-    return desc;
-  }
-
-  //---------------------------------------------------------------------------------------------
-
   /// E143 experimental R measurement \cite Abe:1998ym
   class E143 final : public Parameterisation {
   public:
@@ -198,10 +201,10 @@ namespace cepgen::sigrat {
     double a_, b1_, b2_, c_;
   };
 }  // namespace cepgen::sigrat
-using cepgen::sigrat::CLAS;
-using cepgen::sigrat::E143;
-using cepgen::sigrat::R1990;
-using cepgen::sigrat::SibirtsevBlunden;
+using sigrat::CLAS;
+using sigrat::E143;
+using sigrat::R1990;
+using sigrat::SibirtsevBlunden;
 REGISTER_SIGRAT("E143", 1, E143);
 REGISTER_SIGRAT("R1990", 2, R1990);
 REGISTER_SIGRAT("CLAS", 3, CLAS);
