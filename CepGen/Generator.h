@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ namespace cepgen {
   void initialise(bool safe_mode = false);
   void printHeader();  ///< Dump this program's header into the standard output stream
 
-  /// Core generator object allowing for process definition, cross section computation, and event generation
+  /// Core generator object allowing for process definition, cross-section computation, and event generation
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Feb 2013
   class Generator {
@@ -63,15 +63,15 @@ namespace cepgen {
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
     void integrate();                                 ///< Integrate the functional over the phase space of interest
 
-    Value computeXsection();  ///< Compute the cross section and uncertainty, in pb, for the run parameters
-    /// Compute the cross section for the run parameters
+    Value computeXsection();  ///< Compute the cross-section and uncertainty, in pb, for the run parameters
+    /// Compute the cross-section for the run parameters
     /// \param[out] cross_section The computed cross-section, in pb
     /// \param[out] err The absolute integration error on the computed cross-section, in pb
     [[deprecated("Please use the parameters-less version")]] void computeXsection(double& cross_section, double& err);
-    double crossSection() const { return cross_section_; }  ///< Last cross section computed by the generator
+    double crossSection() const { return cross_section_; }  ///< Last cross-section computed by the generator
     double crossSectionError() const {
       return cross_section_.uncertainty();
-    }  ///< Last error on the cross section computed
+    }  ///< Last error on the cross-section computed
 
     void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);            ///< Generate events
     void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);  ///< Generate events

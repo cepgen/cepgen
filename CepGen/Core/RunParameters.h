@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ namespace cepgen {
 
     //----- event modification (e.g. hadronisation, decay) algorithm
 
-    EventModifier& eventModifier(size_t);  ///< Event modification algorithm
+    EventModifier& eventModifier(size_t) const;  ///< Event modification algorithm
     /// List of event modification algos
     inline EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
     /// List of event modification algos
@@ -126,7 +126,7 @@ namespace cepgen {
 
     //----- event output algorithms
 
-    EventExporter& eventExporter(size_t);  ///< Output module
+    EventExporter& eventExporter(size_t) const;  ///< Output module
     /// List of event output modules
     inline EventExportersSequence& eventExportersSequence() { return evt_exporters_; }
     /// List of event output modules

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,56 +27,56 @@
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
-namespace cepgen {
-  GeneratorWorker::GeneratorWorker(const ParametersList& params) : SteeredObject(params) {}
+using namespace cepgen;
 
-  void GeneratorWorker::setRunParameters(const RunParameters* params) {
-    run_params_ = params;
-    integrand_ = std::make_unique<ProcessIntegrand>(params);
-    CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
-                                << "Run parameters at " << (void*)run_params_ << ".";
-  }
+GeneratorWorker::GeneratorWorker(const ParametersList& params) : SteeredObject(params) {}
 
-  GeneratorWorker::~GeneratorWorker() {
-    CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at " << (void*)run_params_
-                                << ".";
-  }
+void GeneratorWorker::setRunParameters(const RunParameters* params) {
+  run_params_ = params;
+  integrand_ = std::make_unique<ProcessIntegrand>(params);
+  CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
+                              << "Run parameters at " << dynamic_cast<const void*>(run_params_) << ".";
+}
 
-  void GeneratorWorker::setIntegrator(const Integrator* integrator) {
-    integrator_ = integrator;
-    CG_DEBUG("GeneratorWorker:integrator")
-        << "Dim-" << integrand_->size() << " " << integrator_->name() << " integrator set.";
-  }
+GeneratorWorker::~GeneratorWorker() {
+  CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at "
+                              << dynamic_cast<const void*>(run_params_) << ".";
+}
 
-  void GeneratorWorker::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
-    if (!run_params_)
-      throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
-    callback_proc_ = callback;
-    while (run_params_->numGeneratedEvents() < num_events)
-      next();
-  }
+void GeneratorWorker::setIntegrator(const Integrator* integrator) {
+  integrator_ = integrator;
+  CG_DEBUG("GeneratorWorker:integrator") << "Dim-" << integrand_->size() << " " << integrator_->name()
+                                         << " integrator set.";
+}
 
-  bool GeneratorWorker::storeEvent() const {
-    CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
+void GeneratorWorker::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
+  if (!run_params_)
+    throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
+  callback_proc_ = callback;
+  while (run_params_->numGeneratedEvents() < num_events)
+    next();
+}
 
-    if (!integrand_->process().hasEvent())
-      return true;
+bool GeneratorWorker::storeEvent() const {
+  CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
-    const auto& event = integrand_->process().event();
-    const auto ngen = run_params_->numGeneratedEvents();
-    if ((ngen + 1) % run_params_->generation().printEvery() == 0)
-      CG_DEBUG("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
-    if (callback_proc_)
-      callback_proc_(integrand_->process());
-    for (const auto& mod : run_params_->eventExportersSequence())
-      *mod << event;
-    const_cast<RunParameters*>(run_params_)->addGenerationTime(event.metadata("time:total"));
+  if (!integrand_->process().hasEvent())
     return true;
-  }
 
-  ParametersDescription GeneratorWorker::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed generator worker");
-    return desc;
-  }
-}  // namespace cepgen
+  const auto& event = integrand_->process().event();
+  const auto ngen = run_params_->numGeneratedEvents();
+  if ((ngen + 1) % run_params_->generation().printEvery() == 0)
+    CG_DEBUG("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
+  if (callback_proc_)
+    callback_proc_(integrand_->process());
+  for (const auto& mod : run_params_->eventExportersSequence())
+    *mod << event;
+  const_cast<RunParameters*>(run_params_)->addGenerationTime(event.metadata("time:total"));
+  return true;
+}
+
+ParametersDescription GeneratorWorker::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("Unnamed generator worker");
+  return desc;
+}

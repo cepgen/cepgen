@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,26 +21,26 @@
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen {
-  Steerable::Steerable(const ParametersList& params) { setParameters(params); }
+using namespace cepgen;
 
-  void Steerable::setParameters(const ParametersList& params) { params_ += params; }
+Steerable::Steerable(const ParametersList& params) { setParameters(params); }
 
-  std::string Steerable::steerPath(const std::string& key) const {
-    const auto fn = steer<std::string>(key);
-    if (fn.empty())
-      return fn;
-    for (const auto& path : utils::env::searchPaths())
-      if (const auto abs_path = fs::path(path) / fn; utils::fileExists(abs_path)) {
-        CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << abs_path << "'.";
-        return abs_path;
-      }
+void Steerable::setParameters(const ParametersList& params) { params_ += params; }
+
+std::string Steerable::steerPath(const std::string& key) const {
+  const auto fn = steer<std::string>(key);
+  if (fn.empty())
     return fn;
-  }
+  for (const auto& path : utils::env::searchPaths())
+    if (const auto abs_path = fs::path(path) / fn; utils::fileExists(abs_path)) {
+      CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << abs_path << "'.";
+      return abs_path;
+    }
+  return fn;
+}
 
-  ParametersDescription Steerable::description() {
-    auto desc = ParametersDescription("Steerable");
-    desc.setDescription("Pure virtual base steerable object");
-    return desc;
-  }
-}  // namespace cepgen
+ParametersDescription Steerable::description() {
+  auto desc = ParametersDescription("Steerable");
+  desc.setDescription("Pure virtual base steerable object");
+  return desc;
+}

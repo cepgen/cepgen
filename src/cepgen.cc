@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -73,8 +73,10 @@ int main(int argc, char* argv[]) {
 
   try {
     auto& params = gen.runParameters();
-    if (num_events >= 0)  // user specified a number of events to generate
+    if (num_events >= 0) {  // user specified a number of events to generate
       params.generation().setMaxGen(num_events);
+      params.generation().setPrintEvery(num_events / 20);
+    }
 
     if (params.generation().enabled() && !outputs.empty())
       for (const auto& output : outputs)
