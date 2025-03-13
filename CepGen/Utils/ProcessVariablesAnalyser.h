@@ -36,8 +36,8 @@ namespace cepgen::utils {
 
     static ParametersDescription description();
 
-    void feed(double weight);
-    void analyse();
+    void feed(double weight) const;
+    void analyse() const;
 
   private:
     const proc::Process& proc_;

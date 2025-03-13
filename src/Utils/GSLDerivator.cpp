@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,56 +24,56 @@
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen::utils {
-  class GSLDerivator : public Derivator {
-  public:
-    explicit GSLDerivator(const ParametersList& params) : Derivator(params), mode_(steerAs<int, Mode>("mode")) {}
+using namespace cepgen;
+using namespace cepgen::utils;
 
-    static ParametersDescription description() {
-      auto desc = Derivator::description();
-      desc.setDescription("GSL numerical differentiation algorithm");
-      desc.addAs<int, Mode>("mode", Mode::central)
-          .setDescription("mode used for the adaptive difference algorithm")
-          .allow(0, "central")
-          .allow(1, "forward")
-          .allow(2, "backward");
-      return desc;
+class GSLDerivator final : public Derivator {
+public:
+  explicit GSLDerivator(const ParametersList& params) : Derivator(params), mode_(steerAs<int, Mode>("mode")) {}
+
+  static ParametersDescription description() {
+    auto desc = Derivator::description();
+    desc.setDescription("GSL numerical differentiation algorithm");
+    desc.addAs<int, Mode>("mode", Mode::central)
+        .setDescription("mode used for the adaptive difference algorithm")
+        .allow(0, "central")
+        .allow(1, "forward")
+        .allow(2, "backward");
+    return desc;
+  }
+
+  /// Evaluate the derivative of a function at a given value
+  /// \param[in] func function to derive
+  /// \param[in] x coordinate
+  /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
+  double derivate(const FunctionWrapper& func, double x, double h = -1.) const override {
+    int res{GSL_SUCCESS};
+    double val, val_unc;
+    const double step_size = h > 0. ? h : h_;
+    auto gfunc = GSLFunctionWrapper::build(func);
+    switch (mode_) {
+      case Mode::central:
+        res = gsl_deriv_central(gfunc.get(), x, step_size, &val, &val_unc);
+        break;
+      case Mode::forward:
+        res = gsl_deriv_forward(gfunc.get(), x, step_size, &val, &val_unc);
+        break;
+      case Mode::backward:
+        res = gsl_deriv_backward(gfunc.get(), x, step_size, &val, &val_unc);
+        break;
     }
+    if (res != GSL_SUCCESS)
+      CG_WARNING("GSLDerivator") << "Failed to evaluate the derivative. GSL error: " << gsl_strerror(res) << ".";
+    return val;
+  }
 
-    /// Evaluate the derivative of a function at a given value
-    /// \param[in] func function to derive
-    /// \param[in] x coordinate
-    /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-    double derivate(const FunctionWrapper& func, double x, double h = -1.) const override {
-      int res{GSL_SUCCESS};
-      double val, val_unc;
-      const double step_size = h > 0. ? h : h_;
-      auto gfunc = utils::GSLFunctionWrapper::build(func);
-      switch (mode_) {
-        case Mode::central:
-          res = gsl_deriv_central(gfunc.get(), x, step_size, &val, &val_unc);
-          break;
-        case Mode::forward:
-          res = gsl_deriv_forward(gfunc.get(), x, step_size, &val, &val_unc);
-          break;
-        case Mode::backward:
-          res = gsl_deriv_backward(gfunc.get(), x, step_size, &val, &val_unc);
-          break;
-      }
-      if (res != GSL_SUCCESS)
-        CG_WARNING("GSLDerivator") << "Failed to evaluate the derivative. GSL error: " << gsl_strerror(res) << ".";
-      return val;
-    }
-
-    enum struct Mode {
-      central,  ///< adaptive central difference algorithm
-      forward,  ///< adaptive forward difference algorithm
-      backward  ///< adaptive backward difference algorithm
-    };
-
-  private:
-    const Mode mode_;
+  enum struct Mode {
+    central,  ///< adaptive central difference algorithm
+    forward,  ///< adaptive forward difference algorithm
+    backward  ///< adaptive backward difference algorithm
   };
-}  // namespace cepgen::utils
-using cepgen::utils::GSLDerivator;
+
+private:
+  const Mode mode_;
+};
 REGISTER_DERIVATOR("gsl", GSLDerivator);

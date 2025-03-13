@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ namespace cepgen {
     /// Copy constructor
     LoggedMessage(const LoggedMessage&) noexcept;
     /// Default destructor
-    virtual ~LoggedMessage() noexcept override;
+    ~LoggedMessage() noexcept override;
 
     /// Printout operator for message type
     friend std::ostream& operator<<(std::ostream&, const MessageType&);

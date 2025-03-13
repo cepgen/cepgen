@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2015-2023  Laurent Forthomme
+ *  Copyright (C) 2015-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,63 +21,62 @@
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen::utils {
-  Logger::Logger(Logger::StreamHandler os) : output_(std::move(os)) {
-    if (output_.get() != &std::cout)
-      CG_INFO("Logger") << "New logger initialised for output@0x" << output_.get() << ".";
-  }
+using namespace cepgen::utils;
 
-  Logger& Logger::get(std::ostream* os) {
-    static Logger log(os ? std::unique_ptr<std::ostream, std::default_delete<std::ostream> >(os)
-                         : StreamHandler(&std::cout, [](std::ostream*) -> void {}));
-    return log;
-  }
+Logger::Logger(StreamHandler os) : output_(std::move(os)) {
+  if (output_.get() != &std::cout)
+    CG_INFO("Logger") << "New logger initialised for output@0x" << output_.get() << ".";
+}
 
-  void Logger::addExceptionRule(const std::string& rule) {
-    allowed_exc_.emplace_back(rule, std::regex_constants::extended);
-  }
+Logger& Logger::get(std::ostream* os) {
+  static Logger log(os ? std::unique_ptr<std::ostream>(os) : StreamHandler(&std::cout, [](std::ostream*) -> void {}));
+  return log;
+}
 
-  bool Logger::passExceptionRule(const std::string& tmpl, const Level& lev) const {
-    if (level_ >= lev)
-      return true;
-    if (allowed_exc_.empty())
-      return false;
-    for (const auto& rule : allowed_exc_)
-      try {
-        if (std::regex_match(tmpl, rule))
-          return true;
-      } catch (const std::regex_error& err) {
-        throw std::runtime_error("Failed to evaluate regex for logging tool.\n" + std::string(err.what()));
-      }
+void Logger::addExceptionRule(const std::string& rule) {
+  allowed_exc_.emplace_back(rule, std::regex_constants::extended);
+}
+
+bool Logger::passExceptionRule(const std::string& tmpl, const Level& lev) const {
+  if (level_ >= lev)
+    return true;
+  if (allowed_exc_.empty())
     return false;
-  }
+  for (const auto& rule : allowed_exc_)
+    try {
+      if (std::regex_match(tmpl, rule))
+        return true;
+    } catch (const std::regex_error& err) {
+      throw std::runtime_error("Failed to evaluate regex for logging tool.\n" + std::string(err.what()));
+    }
+  return false;
+}
 
-  void Logger::setOutput(std::ostream* os) { output_.reset(os); }
+void Logger::setOutput(std::ostream* os) { output_.reset(os); }
 
-  Logger::StreamHandler& Logger::output() {
-    static StreamHandler empty_output{nullptr};
-    if (level_ == Level::nothing)
-      return empty_output;
-    return output_;
-  }
+Logger::StreamHandler& Logger::output() {
+  static StreamHandler empty_output{nullptr};
+  if (level_ == Level::nothing)
+    return empty_output;
+  return output_;
+}
 
-  bool Logger::isTTY() const { return output_.get() == &std::cout || output_.get() == &std::cerr; }
-}  // namespace cepgen::utils
+bool Logger::isTTY() const { return output_.get() == &std::cout || output_.get() == &std::cerr; }
 
 namespace cepgen {
-  std::ostream& operator<<(std::ostream& os, const utils::Logger::Level& lvl) {
+  std::ostream& operator<<(std::ostream& os, const Logger::Level& lvl) {
     switch (lvl) {
-      case utils::Logger::Level::nothing:
+      case Logger::Level::nothing:
         return os << "None";
-      case utils::Logger::Level::error:
+      case Logger::Level::error:
         return os << "Errors";
-      case utils::Logger::Level::warning:
+      case Logger::Level::warning:
         return os << "Warnings";
-      case utils::Logger::Level::information:
+      case Logger::Level::information:
         return os << "Infos";
-      case utils::Logger::Level::debug:
+      case Logger::Level::debug:
         return os << "Debug";
-      case utils::Logger::Level::debugInsideLoop:
+      case Logger::Level::debugInsideLoop:
         return os << "Debug (in loops)";
     }
     return os << "Unknown severity";

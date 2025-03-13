@@ -136,7 +136,7 @@ namespace cepgen {
   };
 
   /// Specialisation of an \f$m\times 1\f$ matrix
-  class Vector : public Matrix {
+  class Vector final : public Matrix {
   public:
     /// Object constructor
     /// \param[in] num_coord vector multiplicity

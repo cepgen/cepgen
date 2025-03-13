@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,9 +57,9 @@ namespace cepgen::utils {
     /// \param[in] mode type of extraction (low/high/low-high)
     /// \param[in] num_bins total number of bins
     /// \param[in] bins_extractor method used to extract range of one single bin
-    std::set<double> extractBins(BinMode mode,
-                                 size_t num_bins,
-                                 const std::function<Limits(size_t)>& bins_extractor) const;
+    static std::set<double> extractBins(BinMode mode,
+                                        size_t num_bins,
+                                        const std::function<Limits(size_t)>& bins_extractor);
   };
 
   /// 1D histogram container
@@ -102,7 +102,7 @@ namespace cepgen::utils {
     inline size_t underflow() const { return underflow_; }
     inline size_t overflow() const { return overflow_; }
 
-    bool isHist1D() const override final { return true; }
+    bool isHist1D() const final { return true; }
 
   private:
     void buildFromBins(const std::vector<double>&);
@@ -168,7 +168,7 @@ namespace cepgen::utils {
     double maximum() const override;
     double integral(bool = false) const override;
 
-    struct contents_t : public std::array<size_t, 8> {
+    struct contents_t : std::array<size_t, 8> {
       contents_t() { std::fill(begin(), end(), 0ull); }
       size_t total() const;
       friend std::ostream& operator<<(std::ostream&, const contents_t&);
@@ -188,7 +188,7 @@ namespace cepgen::utils {
     };
     const contents_t& outOfRange() const { return out_of_range_values_; }
 
-    bool isHist2D() const override final { return true; }
+    bool isHist2D() const final { return true; }
 
   private:
     void buildFromBins(const std::vector<double>&, const std::vector<double>&);

@@ -42,9 +42,10 @@ namespace cepgen::mg5amc {
       std::for_each(coll.begin(), coll.end(), [](std::string& it) { it = utils::trim(it); });
       return coll;
     };
+    const auto proc_no_removals = utils::split(utils::trim(proc), '/')[0];
     //--- dirty fix to specify incoming- and outgoing states
     //    as extracted from the mg5_aMC process string
-    const auto prim_proc = utils::split(utils::trim(proc), ',')[0];
+    const auto prim_proc = utils::split(proc_no_removals, ',')[0];
     auto parts = trim_all(utils::split(prim_proc, '>'));
     if (parts.size() != 2)
       throw CG_FATAL("MadGraphInterface:unpackProcessParticles")

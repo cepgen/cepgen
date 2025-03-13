@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,12 +42,11 @@ namespace cepgen {
   template <size_t D, size_t N = 1>
   class GridHandler {
   public:
-    typedef std::vector<double> coord_t;     ///< Coordinates container
-    typedef std::array<double, N> values_t;  ///< Value(s) at a given coordinate
-
-  public:
     explicit GridHandler(const GridType& grid_type);  ///< Build a grid interpolator from a grid type
     virtual ~GridHandler() = default;
+
+    typedef std::vector<double> coord_t;     ///< Coordinates container
+    typedef std::array<double, N> values_t;  ///< Value(s) at a given coordinate
 
     values_t eval(const coord_t& in_coords) const;  ///< Interpolate a point to a given coordinate
 

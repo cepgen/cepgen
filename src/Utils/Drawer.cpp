@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,16 +21,18 @@
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen::utils {
-  Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
+using namespace cepgen::utils;
 
+Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
+
+Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
+  std::bitset<16> mod1(static_cast<int>(lhs.value())), mod2(static_cast<int>(rhs));
+  return Drawer::Mode(static_cast<Drawer::Mode::value_t>((mod1 | mod2).to_ulong()));
+}
+
+namespace cepgen::utils {
   bool operator&(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
     return static_cast<int>(lhs.value_) & static_cast<int>(rhs);
-  }
-
-  Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
-    std::bitset<16> mod1(static_cast<int>(lhs.value())), mod2(static_cast<int>(rhs));
-    return Drawer::Mode(static_cast<Drawer::Mode::value_t>((mod1 | mod2).to_ulong()));
   }
 
   std::ostream& operator<<(std::ostream& os, const Drawer::Mode& mode) {
@@ -52,20 +54,19 @@ namespace cepgen::utils {
     if (mode & Drawer::Mode::cont)
       os << sep << "cont", sep = "|";
     if (mode & Drawer::Mode::ratio)
-      os << sep << "ratio", sep = "|";
+      os << sep << "ratio";
     return os;
   }
 }  // namespace cepgen::utils
 
 namespace cepgen {
-  utils::Drawer::Mode operator|(const utils::Drawer::Mode::value_t& lhs, const utils::Drawer::Mode::value_t& rhs) {
+  Drawer::Mode operator|(const Drawer::Mode::value_t& lhs, const Drawer::Mode::value_t& rhs) {
     std::bitset<16> mod1(static_cast<int>(lhs)), mod2(static_cast<int>(rhs));
-    return utils::Drawer::Mode((mod1 | mod2).to_ulong());
+    return Drawer::Mode((mod1 | mod2).to_ulong());
   }
 }  // namespace cepgen
 
-cepgen::utils::Drawer::Mode& operator|=(cepgen::utils::Drawer::Mode& one,
-                                        const cepgen::utils::Drawer::Mode::value_t& oth) {
+Drawer::Mode& operator|=(Drawer::Mode& one, const Drawer::Mode::value_t& oth) {
   one = one | oth;
   return one;
 }

@@ -57,8 +57,8 @@ namespace cepgen::utils {
     virtual ~StreamCollector();
 
   private:
-    int secure_dup(int src);
-    void secure_pipe(int* pipes);
+    static int secure_dup(int src);
+    static void secure_pipe(int* pipes);
     static void secure_dup2(int src, int dest);
     static void secure_close(int& fd);
 

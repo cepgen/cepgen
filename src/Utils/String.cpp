@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ namespace cepgen::utils {
   /// String implementation of the boldification procedure
   template <>
   std::string boldify(std::string str) {
-    return colourise(str, Colour::none, Modifier::bold);
+    return colourise(std::move(str), Colour::none, Modifier::bold);
   }
 
   /// C-style character array implementation of the boldification procedure
@@ -151,7 +151,7 @@ namespace cepgen::utils {
   template <>
   std::string toString(const std::wstring& str) {
     typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
-    std::wstring_convert<convert_type, wchar_t> converter;
+    std::wstring_convert<convert_type> converter;
     return converter.to_bytes(str);
   }
 
@@ -171,7 +171,7 @@ namespace cepgen::utils {
 
   std::wstring toWstring(const std::string& str) {
     typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
-    std::wstring_convert<convert_type, wchar_t> converter;
+    std::wstring_convert<convert_type> converter;
     return converter.from_bytes(str);
   }
 

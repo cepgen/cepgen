@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,37 +25,37 @@
 #include "CepGen/Utils/Caller.h"
 #include "CepGen/Utils/String.h"
 
-namespace cepgen::utils {
-  Caller::Caller() : oldcout_(std::cout.rdbuf(os_cout_.rdbuf())), oldcerr_(std::cerr.rdbuf(os_cerr_.rdbuf())) {}
+using namespace cepgen::utils;
 
-  Caller::~Caller() {
-    std::cout.rdbuf(oldcout_);
-    std::cerr.rdbuf(oldcerr_);
-    if (const auto& str = os_cout_.str(); !str.empty())
-      CG_DEBUG("Caller") << "At end of caller call, the following output was generated:\n" << str;
-    if (const auto& str = os_cerr_.str(); !str.empty())
-      CG_WARNING("Caller") << "At end of caller call, the following error stream was generated:\n" << str;
-  }
+Caller::Caller() : oldcout_(std::cout.rdbuf(os_cout_.rdbuf())), oldcerr_(std::cerr.rdbuf(os_cerr_.rdbuf())) {}
 
-  std::string Caller::output() const { return os_cout_.str(); }
+Caller::~Caller() {
+  std::cout.rdbuf(oldcout_);
+  std::cerr.rdbuf(oldcerr_);
+  if (const auto& str = os_cout_.str(); !str.empty())
+    CG_DEBUG("Caller") << "At end of caller call, the following output was generated:\n" << str;
+  if (const auto& str = os_cerr_.str(); !str.empty())
+    CG_WARNING("Caller") << "At end of caller call, the following error stream was generated:\n" << str;
+}
 
-  std::string Caller::error() const { return os_cerr_.str(); }
+std::string Caller::output() const { return os_cout_.str(); }
 
-  std::string Caller::call(const std::vector<std::string>& commands) { return call(utils::merge(commands, " ")); }
+std::string Caller::error() const { return os_cerr_.str(); }
 
-  std::string Caller::call(const std::string& command) {
-    auto pipe = ::popen(command.c_str(), "r");
-    if (!pipe)
-      throw CG_FATAL("Caller") << "Failed to call the command '" << command << "'.";
-    std::array<char, 128> buffer;
-    std::string out;
-    while (!::feof(pipe))
-      if (::fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-        std::cout << buffer.data();
-        out += buffer.data();
-      }
-    if (auto rc = ::pclose(pipe); rc != EXIT_SUCCESS)
-      throw CG_FATAL("Caller") << "Command '" << command << "' failed with return code '" << rc << "'.";
-    return out;
-  }
-}  // namespace cepgen::utils
+std::string Caller::call(const std::vector<std::string>& commands) { return {call(utils::merge(commands, " "))}; }
+
+std::string Caller::call(const std::string& command) {
+  auto pipe = ::popen(command.c_str(), "r");
+  if (!pipe)
+    throw CG_FATAL("Caller") << "Failed to call the command '" << command << "'.";
+  std::array<char, 128> buffer;
+  std::string out;
+  while (!::feof(pipe))
+    if (::fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+      std::cout << buffer.data();
+      out += buffer.data();
+    }
+  if (auto rc = ::pclose(pipe); rc != EXIT_SUCCESS)
+    throw CG_FATAL("Caller") << "Command '" << command << "' failed with return code '" << rc << "'.";
+  return out;
+}
