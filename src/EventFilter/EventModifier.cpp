@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,32 +20,32 @@
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen {
-  EventModifier::EventModifier(const ParametersList& params)
-      : EventHandler(params), seed_(steerAs<int, long long>("seed")), max_trials_(steer<int>("maxTrials")) {
-    CG_DEBUG("EventModifier:init") << "\"" << name_ << "\"-type event modifier built with:\n\t"
-                                   << "* seed = " << seed_ << "\n\t"
-                                   << "* maximum trials: " << max_trials_;
-  }
+using namespace cepgen;
 
-  void EventModifier::readStrings(const std::vector<std::string>& params) {
-    if (params.empty())
-      return;
-    std::ostringstream os;
-    for (const auto& p : params) {
-      readString(p);
-      os << "\n\t  '" << p << "'";
-    }
-    CG_DEBUG("EventModifier:configure") << "Feeding \"" << name_ << "\" event modifier algorithm with:" << os.str();
-  }
+EventModifier::EventModifier(const ParametersList& params)
+    : EventHandler(params), seed_(steerAs<int, long long>("seed")), max_trials_(steer<int>("maxTrials")) {
+  CG_DEBUG("EventModifier:init") << "\"" << name_ << "\"-type event modifier built with:\n\t"
+                                 << "* seed = " << seed_ << "\n\t"
+                                 << "* maximum trials: " << max_trials_;
+}
 
-  ParametersDescription EventModifier::description() {
-    auto desc = EventHandler::description();
-    desc.add<int>("seed", -1).setDescription("Random number generator seed");
-    desc.add<int>("maxTrials", 1)
-        .setDescription(
-            "Maximum number of attempts to modify the event"
-            " before giving up and returning a zero-weight");
-    return desc;
+void EventModifier::readStrings(const std::vector<std::string>& params) {
+  if (params.empty())
+    return;
+  std::ostringstream os;
+  for (const auto& p : params) {
+    readString(p);
+    os << "\n\t  '" << p << "'";
   }
-}  // namespace cepgen
+  CG_DEBUG("EventModifier:configure") << "Feeding \"" << name_ << "\" event modifier algorithm with:" << os.str();
+}
+
+ParametersDescription EventModifier::description() {
+  auto desc = EventHandler::description();
+  desc.add<int>("seed", -1).setDescription("Random number generator seed");
+  desc.add<int>("maxTrials", 1)
+      .setDescription(
+          "Maximum number of attempts to modify the event"
+          " before giving up and returning a zero-weight");
+  return desc;
+}
