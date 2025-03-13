@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,23 +21,22 @@
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 
-namespace cepgen {
-  struct KMRGluonKTFlux final : public KTFlux {
-    using KTFlux::KTFlux;
-    static ParametersDescription description() {
-      auto desc = KTFlux::description();
-      desc.setDescription("Proton inelastic gluon emission (KMR flux)");
-      return desc;
-    }
-    double fluxMX2(double x, double kt2, double mx2) const override {
-      if (!x_range_.contains(x, true))
-        return 0.;
-      return kmr::GluonGrid::get()(x, kt2, mx2);
-    }
-    pdgid_t partonPdgId() const override { return PDG::gluon; }
-    bool fragmenting() const override { return false; }
-    double mass2() const override { return mp2_; }
-  };
-}  // namespace cepgen
+using namespace cepgen;
 
+struct KMRGluonKTFlux final : KTFlux {
+  using KTFlux::KTFlux;
+  static ParametersDescription description() {
+    auto desc = KTFlux::description();
+    desc.setDescription("Proton inelastic gluon emission (KMR flux)");
+    return desc;
+  }
+  double fluxMX2(double x, double kt2, double mx2) const override {
+    if (!x_range_.contains(x, true))
+      return 0.;
+    return kmr::GluonGrid::get()(x, kt2, mx2);
+  }
+  pdgid_t partonPdgId() const override { return PDG::gluon; }
+  bool fragmenting() const override { return false; }
+  double mass2() const override { return mp2_; }
+};
 REGISTER_KT_FLUX("KMR", 20, KMRGluonKTFlux);
