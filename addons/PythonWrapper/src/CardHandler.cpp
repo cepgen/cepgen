@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -166,19 +166,19 @@ namespace cepgen::python {
 
       // process definition
       if (auto process = plist_.get<ParametersList>("process"); !process.empty()) {
-        auto& pkin = process.operator[]<ParametersList>("kinematics");
+        auto& kinematics_parameters = process.operator[]<ParametersList>("kinematics");
         {  // remove extra layer of 'processParameters' and move it to the main process parameters block
           process += process.get<ParametersList>("processParameters");
           process.erase("processParameters");
           if (process.has<int>("mode")) {  // move the kinematics mode from process to the main kinematics block
-            pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
+            kinematics_parameters.set("mode", static_cast<int>(process.getAs<int, mode::Kinematics>("mode")));
             process.erase("mode");
           }
         }
         {  // remove extra layers of 'inKinematics' and 'outKinematics' and move them to the main kinematics block
-          pkin += process.get<ParametersList>("inKinematics");
+          kinematics_parameters += process.get<ParametersList>("inKinematics");
           process.erase("inKinematics");
-          pkin += process.get<ParametersList>("outKinematics");
+          kinematics_parameters += process.get<ParametersList>("outKinematics");
           process.erase("outKinematics");
         }
         if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator"); pkgen.name().empty())
@@ -198,7 +198,7 @@ namespace cepgen::python {
       }
 
       // event modification algorithms / hadronisers
-      auto parse_evtmod_module = [&](const ParametersList& mod) {
+      auto parse_event_modifier_parameters = [&](const ParametersList& mod) {
         runParameters()->addModifier(EventModifierFactory::get().build(mod));
         auto h = runParameters()->eventModifiersSequence().rbegin()->get();
         // split the configuration into a pre-initialisation and a post-initialisation of the module parts
@@ -208,10 +208,10 @@ namespace cepgen::python {
           h->readStrings(mod.get<std::vector<std::string> >(block));
       };
       if (const auto had = plist_.get<ParametersList>("hadroniser"); !had.empty())  // hadronisation algorithms (legacy)
-        parse_evtmod_module(had);
+        parse_event_modifier_parameters(had);
       for (const auto& mod :
            plist_.get<std::vector<ParametersList> >("eventSequence"))  // event modification algorithms
-        parse_evtmod_module(mod);
+        parse_event_modifier_parameters(mod);
 
       // output modules
       for (const auto& mod : plist_.get<std::vector<ParametersList> >("output"))
@@ -224,5 +224,5 @@ namespace cepgen::python {
     ParametersList& plist_;
   };
 }  // namespace cepgen::python
-using cepgen::python::CardHandler;
-REGISTER_CARD_HANDLER(".py", CardHandler);
+using PythonCardHandler = cepgen::python::CardHandler;
+REGISTER_CARD_HANDLER(".py", PythonCardHandler);
