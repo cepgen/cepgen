@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,23 +24,23 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen::root {
-  class AnalyticalIntegrator final : public cepgen::AnalyticIntegrator {
+  class AnalyticalIntegrator final : public AnalyticIntegrator {
   public:
     explicit AnalyticalIntegrator(const ParametersList& params)
-        : cepgen::AnalyticIntegrator(params),
-          integr_(steerAs<int, ROOT::Math::IntegrationOneDim::Type>("type"),
-                  steer<double>("epsabs"),
-                  steer<double>("epsrel"),
-                  steer<int>("limit"),
-                  steer<int>("rule")) {
+        : AnalyticIntegrator(params),
+          integrator_(steerAs<int, ROOT::Math::IntegrationOneDim::Type>("type"),
+                      steer<double>("epsabs"),
+                      steer<double>("epsrel"),
+                      steer<int>("limit"),
+                      steer<int>("rule")) {
       CG_DEBUG("root:AnalyticalIntegrator").log([this](auto& log) {
         log << "ROOT analytical integrator built with options:\n";
-        integr_.Options().Print(log.stream());
+        integrator_.Options().Print(log.stream());
       });
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::AnalyticIntegrator::description();
+      auto desc = AnalyticIntegrator::description();
       desc.setDescription("ROOT integration algorithms wrapper");
       desc.addAs<int>("type", ROOT::Math::IntegrationOneDim::Type::kDEFAULT).setDescription("type of integration");
       desc.add<double>("epsabs", -1.).setDescription("desired absolute error limit");
@@ -55,10 +55,10 @@ namespace cepgen::root {
       const auto func_local = utils::FunctionWrapper([&func, &params](double x) { return func(x, params); });
       const double xmin = lim.hasMin() ? lim.min() : range_.min();
       const double xmax = lim.hasMax() ? lim.max() : range_.max();
-      return integr_.Integral(func_local, xmin, xmax);
+      return integrator_.Integral(func_local, xmin, xmax);
     }
 
-    mutable ROOT::Math::IntegratorOneDim integr_;
+    mutable ROOT::Math::IntegratorOneDim integrator_;
   };
 }  // namespace cepgen::root
 using cepgen::root::AnalyticalIntegrator;

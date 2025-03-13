@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 
 namespace cepgen::root {
   /// Functional evaluator defined from a ROOT TFormula
-  class Functional final : public cepgen::utils::Functional {
+  class Functional final : public utils::Functional {
   public:
-    explicit Functional(const ParametersList& params) : cepgen::utils::Functional(params) {
+    explicit Functional(const ParametersList& params) : utils::Functional(params) {
       for (auto& var : vars_)
         func_.AddVariable(var, 0.);
       auto expr = expression_;
@@ -44,7 +44,7 @@ namespace cepgen::root {
     }
 
     inline static ParametersDescription description() {
-      auto desc = cepgen::utils::Functional::description();
+      auto desc = utils::Functional::description();
       desc.setDescription("Plain old TFormula evaluator from ROOT");
       return desc;
     }

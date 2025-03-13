@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ namespace ROOT {
     explicit CepGenRun();
     void clear();                                                       ///< Reinitialise the run tree
     void create();                                                      ///< Populate the run tree
-    inline TTree* tree() { return tree_.get(); }                        ///< Retrieve the ROOT tree
-    void fill();                                                        ///< Fill the run tree
+    inline TTree* tree() const { return tree_.get(); }                  ///< Retrieve the ROOT tree
+    void fill() const;                                                  ///< Fill the run tree
     void attach(TFile* file, const std::string& run_tree = TREE_NAME);  ///< Attach the run tree reader to a given tree
     /// Attach the run tree reader to a given file
     void attach(const std::string& filename, const std::string& run_tree = TREE_NAME) {
@@ -87,9 +87,9 @@ namespace ROOT {
     int role[MAX_PART];         ///< Particles role in the event
     int status[MAX_PART];       ///< Integer status code
 
-    void clear();                                 ///< Reinitialise the event content
-    inline TTree* tree() { return tree_.get(); }  ///< Retrieve the ROOT tree
-    void create();                                ///< Populate the tree and all associated branches
+    void clear();                                       ///< Reinitialise the event content
+    inline TTree* tree() const { return tree_.get(); }  ///< Retrieve the ROOT tree
+    void create();                                      ///< Populate the tree and all associated branches
 
     void attach();                                                      ///< Attach the event tree reader to a tree
     void attach(TFile* f, const std::string& events_tree = TREE_NAME);  ///< Attach the event tree reader to a file

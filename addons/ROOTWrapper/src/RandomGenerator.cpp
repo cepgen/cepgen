@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,28 +28,26 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen::root {
-  class RandomGenerator : public utils::RandomGenerator {
+  class RandomGenerator final : public utils::RandomGenerator {
   public:
     explicit RandomGenerator(const ParametersList& params) : utils::RandomGenerator(params) {
-      const auto& type = steer<std::string>("type");
-      if (type == "Ranlux")
-        rng_ = std::make_unique<TRandom1>();
+      if (const auto& type = steer<std::string>("type"); type == "Ranlux")
+        random_number_generator_ = std::make_unique<TRandom1>();
       else if (type == "Tausworthe")
-        rng_ = std::make_unique<TRandom2>();
+        random_number_generator_ = std::make_unique<TRandom2>();
       else if (type == "MersenneTwister")
-        rng_ = std::make_unique<TRandom3>();
+        random_number_generator_ = std::make_unique<TRandom3>();
       else if (type == "Ranluxpp")
-        rng_ = std::make_unique<TRandomRanluxpp>();
+        random_number_generator_ = std::make_unique<TRandomRanluxpp>();
       else if (type == "MixMax")
-        rng_ = std::make_unique<TRandomMixMax>();
+        random_number_generator_ = std::make_unique<TRandomMixMax>();
       else if (type == "MixMax17")
-        rng_ = std::make_unique<TRandomMixMax17>();
+        random_number_generator_ = std::make_unique<TRandomMixMax17>();
       else if (type == "MixMax256")
-        rng_ = std::make_unique<TRandomMixMax256>();
+        random_number_generator_ = std::make_unique<TRandomMixMax256>();
       else
         throw CG_FATAL("root:RandomGenerator") << "Random number generator engine invalid: '" << type << "'.";
-
-      rng_->SetSeed(seed_);
+      random_number_generator_->SetSeed(seed_);
     }
 
     static ParametersDescription description() {
@@ -67,17 +65,19 @@ namespace cepgen::root {
       return desc;
     }
 
-    int uniformInt(int min, int max) override { return min + rng_->Integer(max - min + 1); }
-    double uniform(double min, double max) override { return rng_->Uniform(min, max); }
-    double normal(double mean, double rms) override { return rng_->Gaus(mean, rms); }
-    double exponential(double exponent) override { return rng_->Exp(exponent); }
-    double breitWigner(double mean, double scale) override { return rng_->BreitWigner(mean, scale); }
-    double landau(double location, double width) override { return rng_->Landau(location, width); }
-    int poisson(double mean) override { return rng_->Poisson(mean); }
+    int uniformInt(int min, int max) override { return min + random_number_generator_->Integer(max - min + 1); }
+    double uniform(double min, double max) override { return random_number_generator_->Uniform(min, max); }
+    double normal(double mean, double rms) override { return random_number_generator_->Gaus(mean, rms); }
+    double exponential(double exponent) override { return random_number_generator_->Exp(exponent); }
+    double breitWigner(double mean, double scale) override {
+      return random_number_generator_->BreitWigner(mean, scale);
+    }
+    double landau(double location, double width) override { return random_number_generator_->Landau(location, width); }
+    int poisson(double mean) override { return random_number_generator_->Poisson(mean); }
 
   private:
-    void* enginePtr() override { return rng_.get(); }
-    std::unique_ptr<TRandom> rng_;
+    void* enginePtr() override { return random_number_generator_.get(); }
+    std::unique_ptr<TRandom> random_number_generator_;
   };
 }  // namespace cepgen::root
 using ROOTRandomGenerator = cepgen::root::RandomGenerator;

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ namespace cepgen::root {
     explicit Integrator(const ParametersList& params)
         : cepgen::Integrator(params),
           type_(steer<std::string>("type")),
-          absTol_(steer<double>("absTol")),
-          relTol_(steer<double>("relTol")),
+          absolute_tolerance_(steer<double>("absTol")),
+          relative_tolerance_(steer<double>("relTol")),
           size_(steer<int>("size")) {
       {
         auto type = ROOT::Math::IntegratorMultiDim::Type::kDEFAULT;
@@ -44,7 +44,7 @@ namespace cepgen::root {
           type = ROOT::Math::IntegratorMultiDim::Type::kMISER;
         else if (type_ == "vegas")
           type = ROOT::Math::IntegratorMultiDim::Type::kVEGAS;
-        integr_.reset(new ROOT::Math::IntegratorMultiDim(type, absTol_, relTol_, size_));
+        integrator_.reset(new ROOT::Math::IntegratorMultiDim(type, absolute_tolerance_, relative_tolerance_, size_));
       }
       {
         auto type = ROOT::Math::IntegratorOneDim::Type::kDEFAULT;
@@ -58,14 +58,14 @@ namespace cepgen::root {
           type = ROOT::Math::IntegratorOneDim::Type::kADAPTIVESINGULAR;
         else if (type_ == "nonAdaptive")
           type = ROOT::Math::IntegratorOneDim::Type::kNONADAPTIVE;
-        integr_1d_.reset(new ROOT::Math::IntegratorOneDim(type, absTol_, relTol_, size_));
+        integrator_1d_.reset(new ROOT::Math::IntegratorOneDim(type, absolute_tolerance_, relative_tolerance_, size_));
       }
       //--- a bit of printout for debugging
       CG_DEBUG("Integrator:build") << "ROOT generic integrator built\n\t"
-                                   << "N-dimensional type: " << integr_->Name() << ",\n\t"
-                                   << "1-dimensional type: " << integr_1d_->Name() << ",\n\t"
-                                   << "Absolute tolerance: " << absTol_ << ",\n\t"
-                                   << "Relative tolerance: " << relTol_ << ",\n\t"
+                                   << "N-dimensional type: " << integrator_->Name() << ",\n\t"
+                                   << "1-dimensional type: " << integrator_1d_->Name() << ",\n\t"
+                                   << "Absolute tolerance: " << absolute_tolerance_ << ",\n\t"
+                                   << "Relative tolerance: " << relative_tolerance_ << ",\n\t"
                                    << "Number of sub-intervals: " << size_ << ".";
     }
 
@@ -81,37 +81,35 @@ namespace cepgen::root {
 
     void setLimits(const std::vector<Limits>& lims) override {
       cepgen::Integrator::setLimits(lims);
-      xlow_.clear();
-      xhigh_.clear();
+      x_low_.clear();
+      x_high_.clear();
       for (const auto& lim : limits_) {
-        xlow_.emplace_back(lim.min());
-        xhigh_.emplace_back(lim.max());
+        x_low_.emplace_back(lim.min());
+        x_high_.emplace_back(lim.max());
       }
     }
     Value integrate(Integrand& integrand) override {
       checkLimits(integrand);
 
       if (integrand.size() == 1) {
-        auto funct = [&](double x) -> double { return integrand.eval(std::vector<double>{x}); };
-        integr_1d_->SetFunction(funct);
-        return Value{integr_1d_->Integral(limits_.at(0).min(), limits_.at(0).max()), integr_1d_->Error()};
+        auto funct = [&](double x) -> double { return integrand.eval(std::vector{x}); };
+        integrator_1d_->SetFunction(funct);
+        return Value{integrator_1d_->Integral(limits_.at(0).min(), limits_.at(0).max()), integrator_1d_->Error()};
       }
-      auto funct = [&](const double* x) -> double {
-        return integrand.eval(std::vector<double>(x, x + integrand.size()));
-      };
-      integr_->SetFunction(funct, integrand.size());
-      return Value{integr_->Integral(xlow_.data(), xhigh_.data()), integr_->Error()};
+      auto funct = [&](const double* x) -> double { return integrand.eval(std::vector(x, x + integrand.size())); };
+      integrator_->SetFunction(funct, integrand.size());
+      return Value{integrator_->Integral(x_low_.data(), x_high_.data()), integrator_->Error()};
     }
 
   private:
-    const std::string type_;   ///< integration type (adaptive, MC methods, etc..)
-    const double absTol_;      ///< desired absolute Error
-    const double relTol_;      ///< desired relative Error
-    const unsigned int size_;  ///< maximum number of sub-intervals
+    const std::string type_;           ///< integration type (adaptive, MC methods, etc...)
+    const double absolute_tolerance_;  ///< desired absolute Error
+    const double relative_tolerance_;  ///< desired relative Error
+    const unsigned int size_;          ///< maximum number of sub-intervals
 
-    std::vector<double> xlow_, xhigh_;
-    std::unique_ptr<ROOT::Math::IntegratorMultiDim> integr_;
-    std::unique_ptr<ROOT::Math::IntegratorOneDim> integr_1d_;
+    std::vector<double> x_low_, x_high_;
+    std::unique_ptr<ROOT::Math::IntegratorMultiDim> integrator_;
+    std::unique_ptr<ROOT::Math::IntegratorOneDim> integrator_1d_;
   };
 }  // namespace cepgen::root
 using ROOTIntegrator = cepgen::root::Integrator;
