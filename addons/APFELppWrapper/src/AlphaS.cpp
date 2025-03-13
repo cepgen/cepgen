@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "CepGen/Physics/Coupling.h"
 
 namespace cepgen::apfelpp {
-  class AlphaS final : public cepgen::Coupling {
+  class AlphaS final : public Coupling {
   public:
     explicit AlphaS(const ParametersList& params)
         : cepgen::Coupling(params),
@@ -43,7 +43,7 @@ namespace cepgen::apfelpp {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("APFEL++ alpha(S) evolution algorithm");
       desc.add<bool>("useTabulated", true).setDescription("use the tabulated, fast values interpolator?");
       desc.add<double>("alphaSref", 0.118);

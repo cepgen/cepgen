@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ namespace cepgen::apfel {
       return desc;
     }
 
-    cepgen::pdgid_t partonPdgId() const override { return parton_pdgid_; }
+    pdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
     double fluxQ2(double x, double q2) const override {

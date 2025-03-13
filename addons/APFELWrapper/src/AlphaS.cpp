@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen::apfel {
-  class AlphaS final : public cepgen::Coupling {
+  class AlphaS final : public Coupling {
   public:
-    explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), q_range_(steer<Limits>("qrange")) {
+    explicit AlphaS(const ParametersList& params) : Coupling(params), q_range_(steer<Limits>("qrange")) {
       APFEL::SetPerturbativeOrder(steer<int>("order"));
       APFEL::SetPoleMasses(PDG::get().mass(4), PDG::get().mass(5), PDG::get().mass(6));
       APFEL::InitializeAPFEL();

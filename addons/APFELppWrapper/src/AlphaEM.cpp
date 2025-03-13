@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@
 #include "CepGen/Physics/Coupling.h"
 
 namespace cepgen::apfelpp {
-  class AlphaEM final : public cepgen::Coupling {
+  class AlphaEM final : public Coupling {
   public:
     explicit AlphaEM(const ParametersList& params)
-        : cepgen::Coupling(params),
+        : Coupling(params),
           alpha_em_(steer<double>("alphaQEDref"),
                     steer<double>("muQEDref"),
                     steer<std::vector<double> >("quarkThresholds"),
@@ -37,7 +37,7 @@ namespace cepgen::apfelpp {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("APFEL++ alpha(EM) evolution algorithm");
       desc.add<double>("alphaQEDref", 1. / 128);
       desc.add<double>("muQEDref", 91.1876);

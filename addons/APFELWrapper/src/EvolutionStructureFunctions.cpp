@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ namespace cepgen::apfel {
   class EvolutionStructureFunctions final : public strfun::Parameterisation {
   public:
     explicit EvolutionStructureFunctions(const ParametersList& params)
-        : strfun::Parameterisation(params),
+        : Parameterisation(params),
           proc_(steer<std::string>("processDIS")),
           q2_range_(steer<Limits>("q2range")),
           xbj_min_(steer<double>("xBjmin")) {
