@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,9 @@ namespace boost::cepgen {
     return out;
   }
 
-  pt::ptree pack(const ::cepgen::ParametersDescription& pdesc) { return pack(pdesc.parameters()); }
+  pt::ptree pack(const ::cepgen::ParametersDescription& parameters_description) {
+    return pack(parameters_description.parameters());
+  }
 
   pt::ptree pack(const ::cepgen::ParametersList& params) {
     pt::ptree out;
@@ -127,13 +129,13 @@ namespace boost::cepgen {
         if (it.first.empty())
           try {  // try to parse as a parameters list
             out.operator[]<std::vector<::cepgen::ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
-          } catch (const boost::exception&) {
+          } catch (const exception&) {
             try {  // try to parse as a float
               out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
-            } catch (const boost::exception&) {
+            } catch (const exception&) {
               try {  // try to parse as an integer
                 out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
-              } catch (const boost::exception&) {  // does not work, must be a string
+              } catch (const exception&) {  // does not work, must be a string
                 out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
               }
             }
@@ -144,13 +146,13 @@ namespace boost::cepgen {
         if (it.second.get_value<std::string>().find('.') != std::string::npos)
           try {  // try to parse float if contains a '.'
             out.set<double>(it.first, it.second.get_value<double>());
-          } catch (const boost::exception&) {  // does not work as a float, must be a string
+          } catch (const exception&) {  // does not work as a float, must be a string
             out.set<std::string>(it.first, it.second.get_value<std::string>());
           }
         else
           try {  //  try to parse integer
             out.set<int>(it.first, it.second.get_value<int>());
-          } catch (const boost::exception&) {  // does not work as an integer, must be a string
+          } catch (const exception&) {  // does not work as an integer, must be a string
             out.set<std::string>(it.first, it.second.get_value<std::string>());
           }
       }

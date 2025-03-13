@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ py::list std_vector_to_py_list(const std::vector<T>& vec) {
 template <class T>
 std::vector<T> py_tuple_to_std_vector(const py::tuple& tuple) {
   std::vector<T> vec;
-  for (ssize_t i = 0; i < py::len(tuple); ++i)
+  for (ssize_t i = 0; i < len(tuple); ++i)
     vec.emplace_back(py::extract<T>(tuple[i]));
   return vec;
 }
@@ -62,7 +62,7 @@ std::vector<T> py_tuple_to_std_vector(const py::tuple& tuple) {
 template <class T>
 std::vector<T> py_list_to_std_vector(const py::list& list) {
   std::vector<T> vec;
-  for (ssize_t i = 0; i < py::len(list); ++i)
+  for (ssize_t i = 0; i < len(list); ++i)
     vec.emplace_back(py::extract<T>(list[i]));
   return vec;
 }
@@ -90,7 +90,7 @@ py::object adapt_unique(std::unique_ptr<T> (C::*fn)(Args...)) {
 }
 
 template <typename T>
-inline py::object adapt_reference(T* ptr) {
+py::object adapt_reference(T* ptr) {
   typename py::reference_existing_object::apply<T*>::type converter;
   return py::object(py::handle(converter(ptr)));
 }

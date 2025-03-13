@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,31 +22,31 @@
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Utils/FunctionWrapper.h"
 
-namespace cepgen {
-  /// Gauss-Legendre integration algorithm
-  template <size_t N>
-  class BoostGaussLegendreAnalyticalIntegrator final : public AnalyticIntegrator {
-  public:
-    explicit BoostGaussLegendreAnalyticalIntegrator(const ParametersList& params) : AnalyticIntegrator(params) {}
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = AnalyticIntegrator::description();
-      desc.setDescription("Boost Gauss-Legendre integration algorithm");
-      return desc;
-    }
+/// Gauss-Legendre integration algorithm
+template <size_t N>
+class BoostGaussLegendreAnalyticalIntegrator final : public AnalyticIntegrator {
+public:
+  explicit BoostGaussLegendreAnalyticalIntegrator(const ParametersList& params) : AnalyticIntegrator(params) {}
 
-  private:
-    double run(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
-      return boost::math::quadrature::gauss<double, N>::integrate(
-          func, lim.hasMin() ? lim.min() : range_.min(), lim.hasMax() ? lim.max() : range_.max());
-    }
-  };
-}  // namespace cepgen
-typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<7> BGLIntegrator7;
-typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<15> BGLIntegrator15;
-typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<20> BGLIntegrator20;
-typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<25> BGLIntegrator25;
-typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<30> BGLIntegrator30;
+  static ParametersDescription description() {
+    auto desc = AnalyticIntegrator::description();
+    desc.setDescription("Boost Gauss-Legendre integration algorithm");
+    return desc;
+  }
+
+private:
+  double run(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
+    return boost::math::quadrature::gauss<double, N>::integrate(
+        func, lim.hasMin() ? lim.min() : range_.min(), lim.hasMax() ? lim.max() : range_.max());
+  }
+};
+using BGLIntegrator7 = BoostGaussLegendreAnalyticalIntegrator<7>;
+using BGLIntegrator15 = BoostGaussLegendreAnalyticalIntegrator<15>;
+using BGLIntegrator20 = BoostGaussLegendreAnalyticalIntegrator<20>;
+using BGLIntegrator25 = BoostGaussLegendreAnalyticalIntegrator<25>;
+using BGLIntegrator30 = BoostGaussLegendreAnalyticalIntegrator<30>;
 REGISTER_ANALYTIC_INTEGRATOR("boost_gl7", BGLIntegrator7);
 REGISTER_ANALYTIC_INTEGRATOR("boost_gl15", BGLIntegrator15);
 REGISTER_ANALYTIC_INTEGRATOR("boost_gl20", BGLIntegrator20);

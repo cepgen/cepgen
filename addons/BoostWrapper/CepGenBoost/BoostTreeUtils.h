@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,14 +22,15 @@
 #include <boost/property_tree/ptree.hpp>
 
 namespace cepgen {
+  class Limits;
   class RunParameters;
   class ParametersDescription;
+  class ParametersList;
 }  // namespace cepgen
-namespace boost {
-  namespace pt = property_tree;
-}
 
 namespace boost::cepgen {
+  namespace pt = property_tree;
+
   static constexpr const char* DAUGH_KEY = "DAUGHTER";
   static constexpr const char* MIN_KEY = "min";
   static constexpr const char* MAX_KEY = "max";

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,37 +22,36 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
-namespace cepgen {
-  /// Boost's Naive integration algorithm
-  class NaiveBoostIntegrator final : public Integrator {
-  public:
-    explicit NaiveBoostIntegrator(const ParametersList& params) : Integrator(params) {}
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = Integrator::description();
-      desc.setDescription("\"Naive\" Boost integrator");
-      return desc;
-    }
+/// Boost's Naive integration algorithm
+class NaiveBoostIntegrator final : public Integrator {
+public:
+  explicit NaiveBoostIntegrator(const ParametersList& params) : Integrator(params) {}
 
-    void setLimits(const std::vector<Limits>& lims) override {
-      Integrator::setLimits(lims);
-      bounds_.clear();
-      std::transform(
-          limits_.begin(), limits_.end(), std::back_inserter(bounds_), [](const auto& lim) { return lim.raw(); });
-    }
-    Value integrate(Integrand& integrand) override {
-      checkLimits(integrand);
+  static ParametersDescription description() {
+    auto desc = Integrator::description();
+    desc.setDescription("\"Naive\" Boost integrator");
+    return desc;
+  }
 
-      auto funct = [&integrand](const std::vector<double>& coord) -> double { return integrand.eval(coord); };
-      boost::math::quadrature::naive_monte_carlo<double, decltype(funct)> mc(funct, bounds_, 1.e-2, true, 1);
-      auto task = mc.integrate();
+  void setLimits(const std::vector<Limits>& lims) override {
+    Integrator::setLimits(lims);
+    bounds_.clear();
+    std::transform(
+        limits_.begin(), limits_.end(), std::back_inserter(bounds_), [](const auto& lim) { return lim.raw(); });
+  }
+  Value integrate(Integrand& integrand) override {
+    checkLimits(integrand);
 
-      return Value{task.get(), mc.current_error_estimate()};
-    }
+    auto funct = [&integrand](const std::vector<double>& coord) -> double { return integrand.eval(coord); };
+    boost::math::quadrature::naive_monte_carlo<double, decltype(funct)> mc(funct, bounds_, 1.e-2, true, 1);
+    auto task = mc.integrate();
 
-  private:
-    std::vector<std::pair<double, double> > bounds_;
-  };
-}  // namespace cepgen
+    return Value{task.get(), mc.current_error_estimate()};
+  }
 
+private:
+  std::vector<std::pair<double, double> > bounds_;
+};
 REGISTER_INTEGRATOR("Naive", NaiveBoostIntegrator);

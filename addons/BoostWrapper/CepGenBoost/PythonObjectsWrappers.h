@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,17 +30,17 @@ struct PartonFluxWrap : cepgen::PartonFlux, py::wrapper<cepgen::PartonFlux> {
   bool ktFactorised() const override {
     if (py::override ov = this->get_override("ktFactorised"))
       return ov();
-    return cepgen::PartonFlux::ktFactorised();
+    return PartonFlux::ktFactorised();
   }
   bool fragmenting() const override {
     if (py::override ov = this->get_override("fragmenting"))
       return ov();
-    return cepgen::PartonFlux::fragmenting();
+    return PartonFlux::fragmenting();
   }
   cepgen::pdgid_t partonPdgId() const override {
     if (py::override ov = this->get_override("partonPdgId"))
       return ov();
-    return cepgen::PartonFlux::partonPdgId();
+    return PartonFlux::partonPdgId();
   }
   //double mass2() const override { return this->get_override("mass2")(); }
 };
@@ -49,12 +49,12 @@ struct KTFluxWrap : cepgen::KTFlux, py::wrapper<cepgen::KTFlux> {
   double fluxMX2(double x, double kt2, double mx2) const override {
     if (py::override ov = this->get_override("fluxMX2"))
       return ov(x, kt2, mx2);
-    return cepgen::KTFlux::fluxMX2(x, kt2, mx2);
+    return KTFlux::fluxMX2(x, kt2, mx2);
   }
   double fluxQ2(double x, double kt2, double q2) const override {
     if (py::override ov = this->get_override("fluxQ2"))
       return ov(x, kt2, q2);
-    return cepgen::KTFlux::fluxQ2(x, kt2, q2);
+    return KTFlux::fluxQ2(x, kt2, q2);
   }
 };
 
@@ -62,12 +62,12 @@ struct CollinearFluxWrap : cepgen::CollinearFlux, py::wrapper<cepgen::CollinearF
   double fluxMX2(double x, double mx2) const override {
     if (py::override ov = this->get_override("fluxMX2"))
       return ov(x, mx2);
-    return cepgen::CollinearFlux::fluxMX2(x, mx2);
+    return CollinearFlux::fluxMX2(x, mx2);
   }
   double fluxQ2(double x, double q2) const override {
     if (py::override ov = this->get_override("fluxQ2"))
       return ov(x, q2);
-    return cepgen::CollinearFlux::fluxQ2(x, q2);
+    return CollinearFlux::fluxQ2(x, q2);
   }
 };
 
