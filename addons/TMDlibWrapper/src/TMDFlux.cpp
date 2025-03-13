@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,8 +26,9 @@
 #include "CepGen/Utils/StreamCollector.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
-class TMDFlux : public cepgen::KTFlux {
+class TMDFlux final : public KTFlux {
 public:
   explicit TMDFlux(const ParametersList& params) : KTFlux(params), parton_pdgid_(steer<int>("partonPdgId")) {
     tmd_.setVerbosity(steer<int>("verbosity"));
@@ -41,23 +42,23 @@ public:
   }
 
   static ParametersDescription description() {
-    auto desc = cepgen::KTFlux::description();
+    auto desc = KTFlux::description();
     desc.setDescription("TMDlib kt-dependent flux");
-    desc.add<int>("verbosity", 99).setDescription("TMDlib evaluator verbosity");
-    desc.add<std::string>("set", "PB-NLO+QED-HERAI+II-set2").setDescription("dataset name");
-    desc.add<int>("replica", -1).setDescription("dataset replica");
+    desc.add("set", "PB-NLO+QED-HERAI+II-set2"s).setDescription("dataset name");
+    desc.add("verbosity", 99).setDescription("TMDlib evaluator verbosity");
+    desc.add("replica", -1).setDescription("dataset replica");
     desc.addAs<int, pdgid_t>("partonPdgId", PDG::photon);
     return desc;
   }
 
-  bool fragmenting() const final { return true; }
+  bool fragmenting() const override { return true; }
   double mass2() const override { return mp2_; }
   pdgid_t partonPdgId() const override { return parton_pdgid_; }
 
   double fluxQ2(double x, double kt2, double q2) const override {
     if (!utils::positive(x))
       return 0.;
-    std::unordered_map<int, double> vals_map;
+    std::unordered_map<int, double> values_map;
     {
       std::string buf;
       auto sc = utils::StreamCollector(buf);
@@ -65,18 +66,18 @@ public:
                   0.,  // xbar
                   std::sqrt(kt2),
                   std::sqrt(q2),  // evolution scale mu
-                  vals_map[PDG::up],
-                  vals_map[PDG::down],
-                  vals_map[4],  // sea
-                  vals_map[3],  // charm
-                  vals_map[5],  // bottom
-                  vals_map[PDG::gluon],
-                  vals_map[PDG::photon]);
+                  values_map[PDG::up],
+                  values_map[PDG::down],
+                  values_map[4],  // sea
+                  values_map[3],  // charm
+                  values_map[5],  // bottom
+                  values_map[PDG::gluon],
+                  values_map[PDG::photon]);
     }
-    if (vals_map.count(parton_pdgid_) == 0)
+    if (values_map.count(parton_pdgid_) == 0)
       throw CG_ERROR("TMDFlux:fluxQ2") << "Parton id=" << static_cast<PDG::Id>(parton_pdgid_)
                                        << " is not handled by this TMD evaluator.";
-    return vals_map.at(parton_pdgid_);
+    return values_map.at(parton_pdgid_);
   }
 
 private:
