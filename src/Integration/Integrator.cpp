@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,57 +23,57 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 
-namespace cepgen {
-  Integrator::Integrator(const ParametersList& params)
-      : NamedModule(params),
-        rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
-        verbosity_(steer<int>("verbose")) {}
+using namespace cepgen;
 
-  void Integrator::checkLimits(const Integrand& integrand) {
-    const auto ps_size = integrand.size();
-    if (ps_size == 0)
-      throw CG_FATAL("Integrator:checkLimits") << "Invalid phase space dimension for integrand: " << ps_size << ".";
-    else if (limits_.empty())
-      setLimits(std::vector<Limits>(ps_size, Limits{0., 1.}));
-    else if (limits_.size() != ps_size) {
-      CG_DEBUG("Integrator:checkLimits") << "Incompatible phase space size: prepared=" << limits_.size()
-                                         << ", integrand=" << ps_size << ".";
-      auto limits = limits_;
-      const auto booked_size = limits.size();
-      if (booked_size < ps_size)
-        for (size_t i = 0; i < ps_size - booked_size; ++i)
-          limits.emplace_back(0., 1.);
-      else
-        limits.resize(ps_size);
-      setLimits(limits);
-    }
+Integrator::Integrator(const ParametersList& params)
+    : NamedModule(params),
+      rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
+      verbosity_(steer<int>("verbose")) {}
+
+void Integrator::checkLimits(const Integrand& integrand) {
+  const auto ps_size = integrand.size();
+  if (ps_size == 0)
+    throw CG_FATAL("Integrator:checkLimits") << "Invalid phase space dimension for integrand: " << ps_size << ".";
+  if (limits_.empty())
+    setLimits(std::vector(ps_size, Limits{0., 1.}));
+  else if (limits_.size() != ps_size) {
+    CG_DEBUG("Integrator:checkLimits") << "Incompatible phase space size: prepared=" << limits_.size()
+                                       << ", integrand=" << ps_size << ".";
+    auto limits = limits_;
+    const auto booked_size = limits.size();
+    if (booked_size < ps_size)
+      for (size_t i = 0; i < ps_size - booked_size; ++i)
+        limits.emplace_back(0., 1.);
+    else
+      limits.resize(ps_size);
+    setLimits(limits);
   }
+}
 
-  double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
+double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
-  double Integrator::uniform(const Limits& lim) const { return rnd_gen_->uniform(lim.min(), lim.max()); }
+double Integrator::uniform(const Limits& lim) const { return rnd_gen_->uniform(lim.min(), lim.max()); }
 
-  Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
-                              const ParametersList& params,
-                              size_t num_vars) {
-    return integrate(func, params, std::vector<Limits>(num_vars, Limits{0., 1.}));
-  }
+Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& function,
+                            const ParametersList& parameters,
+                            size_t num_vars) {
+  return integrate(function, parameters, std::vector(num_vars, Limits{0., 1.}));
+}
 
-  Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
-                              const ParametersList& params,
-                              const std::vector<Limits>& limits) {
-    auto integrator = IntegratorFactory::get().build(params);
-    integrator->setLimits(limits);
-    auto integrand = FunctionIntegrand(limits.size(), func);
-    return integrator->integrate(integrand);
-  }
+Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& function,
+                            const ParametersList& parameters,
+                            const std::vector<Limits>& limits) {
+  auto integrator = IntegratorFactory::get().build(parameters);
+  integrator->setLimits(limits);
+  auto integrand = FunctionIntegrand(limits.size(), function);
+  return integrator->integrate(integrand);
+}
 
-  ParametersDescription Integrator::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed integrator");
-    desc.add<int>("verbose", 1).setDescription("Verbosity level");
-    desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
-        .setDescription("random number generator engine");
-    return desc;
-  }
-}  // namespace cepgen
+ParametersDescription Integrator::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("Unnamed integrator");
+  desc.add<int>("verbose", 1).setDescription("Verbosity level");
+  desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
+      .setDescription("random number generator engine");
+  return desc;
+}

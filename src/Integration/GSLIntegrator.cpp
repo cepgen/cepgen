@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,40 +24,40 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 
-namespace cepgen {
-  GSLIntegrator::GSLIntegrator(const ParametersList& params) : Integrator(params) {
-    CG_DEBUG("Integrator:build") << "Random numbers generator: " << gsl_rng_name(rnd_gen_->engine<gsl_rng>()) << ".";
+using namespace cepgen;
+
+GSLIntegrator::GSLIntegrator(const ParametersList& params) : Integrator(params) {
+  CG_DEBUG("Integrator:build") << "Random numbers generator: " << gsl_rng_name(rnd_gen_->engine<gsl_rng>()) << ".";
+}
+
+void GSLIntegrator::setIntegrand(Integrand& integrand) {
+  //--- specify the integrand through the GSL wrapper
+  function_ = [&integrand](double* x, size_t num_dimensions, void*) -> double {
+    return integrand.eval(std::vector(x, x + num_dimensions));
+  };
+  gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());
+  if (!gsl_function_)
+    throw CG_FATAL("GSLIntegrator:setIntegrand") << "Integrand was not properly set.";
+  if (gsl_function_->dim <= 0)
+    throw CG_FATAL("GSLIntegrator:setIntegrand") << "Invalid phase space dimension: " << gsl_function_->dim << ".";
+
+  CG_DEBUG("GSLIntegrator:setIntegrand") << "Number of integration dimensions: " << gsl_function_->dim << ".";
+
+  checkLimits(integrand);  // check the integration bounds
+}
+
+void GSLIntegrator::setLimits(const std::vector<Limits>& limits) {
+  Integrator::setLimits(limits);
+  x_low_.clear();
+  x_high_.clear();
+  for (const auto& lim : limits_) {
+    x_low_.emplace_back(lim.min());
+    x_high_.emplace_back(lim.max());
   }
+}
 
-  void GSLIntegrator::setIntegrand(Integrand& integrand) {
-    //--- specify the integrand through the GSL wrapper
-    function_ = [&integrand](double* x, size_t num_dimensions, void*) -> double {
-      return integrand.eval(std::vector<double>(x, x + num_dimensions));
-    };
-    gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());
-    if (!gsl_function_)
-      throw CG_FATAL("GSLIntegrator:setIntegrand") << "Integrand was not properly set.";
-    if (gsl_function_->dim <= 0)
-      throw CG_FATAL("GSLIntegrator:setIntegrand") << "Invalid phase space dimension: " << gsl_function_->dim << ".";
-
-    CG_DEBUG("GSLIntegrator:setIntegrand") << "Number of integration dimensions: " << gsl_function_->dim << ".";
-
-    checkLimits(integrand);  // check the integration bounds
-  }
-
-  void GSLIntegrator::setLimits(const std::vector<Limits>& limits) {
-    Integrator::setLimits(limits);
-    x_low_.clear();
-    x_high_.clear();
-    for (const auto& lim : limits_) {
-      x_low_.emplace_back(lim.min());
-      x_high_.emplace_back(lim.max());
-    }
-  }
-
-  ParametersDescription GSLIntegrator::description() {
-    auto desc = Integrator::description();
-    desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("gsl"));
-    return desc;
-  }
-}  // namespace cepgen
+ParametersDescription GSLIntegrator::description() {
+  auto desc = Integrator::description();
+  desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("gsl"));
+  return desc;
+}

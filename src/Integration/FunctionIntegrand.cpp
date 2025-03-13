@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,23 +19,22 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/FunctionIntegrand.h"
 
-namespace cepgen {
-  FunctionIntegrand::FunctionIntegrand(size_t num_dimensions,
-                                       const std::function<double(const std::vector<double>&)>& func)
-      : function_(func), num_dimensions_(num_dimensions) {}
+using namespace cepgen;
 
-  double FunctionIntegrand::eval(const std::vector<double>& x) {
-    if (x.size() != size())
-      throw CG_FATAL("FunctionIntegrand:eval")
-          << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
+FunctionIntegrand::FunctionIntegrand(size_t num_dimensions,
+                                     const std::function<double(const std::vector<double>&)>& func)
+    : function_(func), num_dimensions_(num_dimensions) {}
 
-    //--- calculate weight for the phase space point to probe
-    double weight = function_(x);
+double FunctionIntegrand::eval(const std::vector<double>& x) {
+  if (x.size() != size())
+    throw CG_FATAL("FunctionIntegrand:eval")
+        << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
 
-    //--- a bit of useful debugging
-    CG_DEBUG_LOOP("FunctionIntegrand:eval")
-        << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
+  //--- calculate weight for the phase space point to probe
+  double weight = function_(x);
 
-    return weight;
-  }
-}  // namespace cepgen
+  //--- a bit of useful debugging
+  CG_DEBUG_LOOP("FunctionIntegrand:eval") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
+
+  return weight;
+}

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,25 +17,26 @@
  */
 
 #include "CepGen/Integration/AnalyticIntegrator.h"
+
 #include "CepGen/Utils/FunctionWrapper.h"
 
-namespace cepgen {
-  AnalyticIntegrator::AnalyticIntegrator(const ParametersList& params)
-      : NamedModule(params),
-        range_(steer<Limits>("range")),
-        func_params_(steer<ParametersList>("params")),
-        verbosity_(steer<int>("verbosity")) {}
+using namespace cepgen;
 
-  double AnalyticIntegrator::integrate(const std::function<double(double)>& func, const Limits& lim) const {
-    return run(utils::FunctionWrapper(func), nullptr, lim);
-  }
+AnalyticIntegrator::AnalyticIntegrator(const ParametersList& params)
+    : NamedModule(params),
+      range_(steer<Limits>("range")),
+      func_params_(steer<ParametersList>("params")),
+      verbosity_(steer<int>("verbosity")) {}
 
-  ParametersDescription AnalyticIntegrator::description() {
-    auto desc = ParametersDescription();
-    desc.add<Limits>("range", Limits{0., 1.}).setDescription("integration range");
-    desc.add<ParametersDescription>("params", ParametersDescription())
-        .setDescription("parameters for the function to be integrated");
-    desc.add<int>("verbosity", 0).setDescription("integrator verbosity");
-    return desc;
-  }
-}  // namespace cepgen
+double AnalyticIntegrator::integrate(const std::function<double(double)>& func, const Limits& lim) const {
+  return run(utils::FunctionWrapper(func), nullptr, lim);
+}
+
+ParametersDescription AnalyticIntegrator::description() {
+  auto desc = ParametersDescription();
+  desc.add<Limits>("range", Limits{0., 1.}).setDescription("integration range");
+  desc.add<ParametersDescription>("params", ParametersDescription())
+      .setDescription("parameters for the function to be integrated");
+  desc.add<int>("verbosity", 0).setDescription("integrator verbosity");
+  return desc;
+}
