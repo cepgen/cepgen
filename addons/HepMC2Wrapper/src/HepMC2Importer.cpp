@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,47 +28,47 @@
 #include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGenHepMC2/HepMC2EventInterface.h"
 
-namespace cepgen {
-  /// Handler for the HepMC file output
-  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-  /// \date Dec 2022
-  class HepMC2Importer final : public EventImporter {
-  public:
-    /// Class constructor
-    explicit HepMC2Importer(const ParametersList& params)
-        : EventImporter(params), reader_(new HepMC::IO_GenEvent(steer<std::string>("filename"), std::ios::in)) {
-      if (!reader_)
-        throw CG_FATAL("HepMC2Importer") << "Failed to initialise HepMCv2 reader.";
-      CG_INFO("HepMC2Importer") << "Interfacing module initialised "
-                                << "for HepMC version " << HEPMC_VERSION << " and HepMC ASCII file '"
-                                << steer<std::string>("filename") << "' with I/O state " << reader_->rdstate() << ".";
-    }
+using namespace cepgen;
 
-    bool operator>>(Event& evt) override {
-      HepMC::GenEvent event;
-      if (!reader_->fill_next_event(&event))
-        return false;
-      if (!cross_section_retrieved_) {
-        if (const auto xsec = event.cross_section(); xsec)
-          setCrossSection(Value{xsec->cross_section(), xsec->cross_section_error()});
-        cross_section_retrieved_ = true;
-      }
-      CG_DEBUG("HepMC2Importer").log([&event](auto& log) { event.print(log.stream()); });
-      evt = Event(static_cast<const HepMC::CepGenEvent&>(event));
-      return true;
-    }
+/// Handler for the HepMC file output
+/// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+/// \date Dec 2022
+class HepMC2Importer final : public EventImporter {
+public:
+  /// Class constructor
+  explicit HepMC2Importer(const ParametersList& params)
+      : EventImporter(params), reader_(new HepMC::IO_GenEvent(steer<std::string>("filename"), std::ios::in)) {
+    if (!reader_)
+      throw CG_FATAL("HepMC2Importer") << "Failed to initialise HepMCv2 reader.";
+    CG_INFO("HepMC2Importer") << "Interfacing module initialised "
+                              << "for HepMC version " << HEPMC_VERSION << " and HepMC ASCII file '"
+                              << steer<std::string>("filename") << "' with I/O state " << reader_->rdstate() << ".";
+  }
 
-    static ParametersDescription description() {
-      auto desc = EventImporter::description();
-      desc.setDescription("HepMC2 ASCII file importer module");
-      desc.add<std::string>("filename", "input.hepmc").setDescription("Input filename");
-      return desc;
+  bool operator>>(Event& evt) override {
+    HepMC::GenEvent event;
+    if (!reader_->fill_next_event(&event))
+      return false;
+    if (!cross_section_retrieved_) {
+      if (const auto xsec = event.cross_section(); xsec)
+        setCrossSection(Value{xsec->cross_section(), xsec->cross_section_error()});
+      cross_section_retrieved_ = true;
     }
+    CG_DEBUG("HepMC2Importer").log([&event](auto& log) { event.print(log.stream()); });
+    evt = Event(static_cast<const HepMC::CepGenEvent&>(event));
+    return true;
+  }
 
-  private:
-    void initialise() override {}
-    const std::unique_ptr<HepMC::IO_GenEvent> reader_;
-    bool cross_section_retrieved_{false};
-  };
-}  // namespace cepgen
+  static ParametersDescription description() {
+    auto desc = EventImporter::description();
+    desc.setDescription("HepMC2 ASCII file importer module");
+    desc.add<std::string>("filename", "input.hepmc").setDescription("Input filename");
+    return desc;
+  }
+
+private:
+  void initialise() override {}
+  const std::unique_ptr<HepMC::IO_GenEvent> reader_;
+  bool cross_section_retrieved_{false};
+};
 REGISTER_EVENT_IMPORTER("hepmc2", HepMC2Importer);
