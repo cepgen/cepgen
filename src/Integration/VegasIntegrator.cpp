@@ -154,7 +154,7 @@ Value VegasIntegrator::integrate(Integrand& integrand) {
                                             &x_high_[0],
                                             gsl_function_->dim,
                                             0.2 * num_function_calls_,
-                                            rnd_gen_->engine<gsl_rng>(),
+                                            random_number_generator_->engine<gsl_rng>(),
                                             vegas_state_.get(),
                                             &result,
                                             &absolute_error);
@@ -189,7 +189,7 @@ void VegasIntegrator::warmup(size_t num_calls) {
                                           &x_high_[0],
                                           gsl_function_->dim,
                                           num_calls,
-                                          rnd_gen_->engine<gsl_rng>(),
+                                          random_number_generator_->engine<gsl_rng>(),
                                           vegas_state_.get(),
                                           &result,
                                           &absolute_error);

@@ -27,7 +27,7 @@
 using namespace cepgen;
 
 GSLIntegrator::GSLIntegrator(const ParametersList& params) : Integrator(params) {
-  CG_DEBUG("Integrator:build") << "Random numbers generator: " << gsl_rng_name(rnd_gen_->engine<gsl_rng>()) << ".";
+  CG_DEBUG("Integrator:build") << "Random numbers generator: " << gsl_rng_name(random_number_generator_->engine<gsl_rng>()) << ".";
 }
 
 void GSLIntegrator::setIntegrand(Integrand& integrand) {

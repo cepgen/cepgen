@@ -49,7 +49,7 @@ public:
                                             &x_high_[0],
                                             gsl_function_->dim,
                                             num_function_calls_,
-                                            rnd_gen_->engine<gsl_rng>(),
+                                            random_number_generator_->engine<gsl_rng>(),
                                             plain_state.get(),
                                             &result,
                                             &absolute_error);

@@ -56,7 +56,7 @@ namespace cepgen {
                            const std::vector<Limits>&);
 
   protected:
-    const std::unique_ptr<utils::RandomGenerator> rnd_gen_;
+    const std::unique_ptr<utils::RandomGenerator> random_number_generator_;
     int verbosity_;               ///< Integrator verbosity
     std::vector<Limits> limits_;  ///< List of per-variable integration limits
   };

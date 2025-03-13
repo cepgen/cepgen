@@ -27,7 +27,7 @@ using namespace cepgen;
 
 Integrator::Integrator(const ParametersList& params)
     : NamedModule(params),
-      rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
+      random_number_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
       verbosity_(steer<int>("verbose")) {}
 
 void Integrator::checkLimits(const Integrand& integrand) {
@@ -52,7 +52,7 @@ void Integrator::checkLimits(const Integrand& integrand) {
 
 double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
-double Integrator::uniform(const Limits& lim) const { return rnd_gen_->uniform(lim.min(), lim.max()); }
+double Integrator::uniform(const Limits& lim) const { return random_number_generator_->uniform(lim.min(), lim.max()); }
 
 Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& function,
                             const ParametersList& parameters,
