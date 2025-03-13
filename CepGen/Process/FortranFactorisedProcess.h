@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,16 +27,16 @@ namespace cepgen::proc {
   public:
     /// Construct a Fortran-CepGen interface object using a double precision argument-less F77 function
     /// \param[in] func a double precision argument-less Fortran function returning the event weight
-    explicit FortranFactorisedProcess(const ParametersList&, const std::function<double(void)>& func);
+    explicit FortranFactorisedProcess(const ParametersList&, const std::function<double()>& func);
     ProcessPtr clone() const override { return std::make_unique<FortranFactorisedProcess>(*this); }
 
     static ParametersList kProcParameters;
 
   private:
-    void prepareFactorisedPhaseSpace() override final;
-    double computeFactorisedMatrixElement() override final;
+    void prepareFactorisedPhaseSpace() final;
+    double computeFactorisedMatrixElement() final;
 
-    const std::function<double(void)> func_;  ///< Function to be called for weight computation
+    const std::function<double()> func_;  ///< Function to be called for weight computation
 
     // mapped variables
     double m_y1_{0.};           ///< First outgoing particle rapidity

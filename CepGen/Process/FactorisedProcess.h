@@ -36,7 +36,7 @@ namespace cepgen::proc {
     FactorisedProcess(const FactorisedProcess&);
 
     double computeWeight() override;
-    void fillKinematics() override final;
+    void fillKinematics() final;
 
     static ParametersDescription description();
 
@@ -44,7 +44,7 @@ namespace cepgen::proc {
 
   protected:
     void addEventContent() override;
-    void prepareKinematics() override final;
+    void prepareKinematics() final;
 
     virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)

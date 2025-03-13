@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace cepgen::proc {
   public:
     explicit Process(const ParametersList&);
     Process(const Process&);  ///< Copy constructor for a user process
-    virtual ~Process() = default;
+    ~Process() override = default;
     Process& operator=(const Process&);  ///< Assignment operator
 
     static ParametersDescription description();
@@ -175,8 +175,8 @@ namespace cepgen::proc {
     double t2_{-1.};       ///< Second parton virtuality
     double x1_{0.};        ///< First parton fractional momentum
     double x2_{0.};        ///< Second parton fractional momentum
-    std::unique_ptr<Coupling> alphaem_;  ///< Electromagnetic running coupling algorithm
-    std::unique_ptr<Coupling> alphas_;   ///< Strong running coupling algorithm
+    std::unique_ptr<Coupling> alpha_em_;  ///< Electromagnetic running coupling algorithm
+    std::unique_ptr<Coupling> alpha_s_;   ///< Strong running coupling algorithm
     /// Handler to a variable mapped by this process
     struct MappingVariable {
       std::string name;         ///< Variable name for debugging
