@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,13 +27,13 @@ namespace cepgen::pythia8 {
   class AlphaEM final : public Coupling {
   public:
     explicit AlphaEM(const ParametersList& params)
-        : Coupling(params), pythia_(new Pythia8::Pythia), alphaem_(new Pythia8::AlphaEM) {
+        : Coupling(params), pythia_(new Pythia8::Pythia), alpha_em_(new Pythia8::AlphaEM) {
       pythia_->settings.parm("StandardModel:alphaEM0", steer<double>("alphaEM0"));
       pythia_->settings.parm("StandardModel:alphaEMmZ", steer<double>("alphaEMmZ"));
-      alphaem_->init(steer<int>("order"), &pythia_->settings);
+      alpha_em_->init(steer<int>("order"), &pythia_->settings);
     }
 
-    inline static ParametersDescription description() {
+    static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(EM) running");
       desc.add<int>("order", 1);
@@ -42,11 +42,11 @@ namespace cepgen::pythia8 {
       return desc;
     }
 
-    inline double operator()(double q) const override { return alphaem_->alphaEM(q * q); }
+    double operator()(double q) const override { return alpha_em_->alphaEM(q * q); }
 
   private:
     const std::unique_ptr<Pythia8::Pythia> pythia_;
-    const std::unique_ptr<Pythia8::AlphaEM> alphaem_;
+    const std::unique_ptr<Pythia8::AlphaEM> alpha_em_;
   };
 }  // namespace cepgen::pythia8
 using PythiaAlphaEM = cepgen::pythia8::AlphaEM;

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,8 +52,8 @@ namespace cepgen::pythia6 {
   void pygive(const std::string& line) { pygive_(line.c_str(), line.length()); }
 
   void pyjoin(std::vector<int> join) {
-    int njoin = join.size();
-    return pyjoin_(njoin, *join.data());
+    int num_junctions = join.size();
+    return pyjoin_(num_junctions, *join.data());
   }
 
   int pyk(int id, int qty) { return pyk_(id, qty); }
@@ -77,17 +77,17 @@ namespace cepgen::pythia6 {
   double pyp(int id, int qty) { return pyp_(id, qty); }
 
   int pythia6Status(int cg_status) {
-    switch (static_cast<cepgen::Particle::Status>(cg_status)) {
-      case cepgen::Particle::Status::PrimordialIncoming:
+    switch (static_cast<Particle::Status>(cg_status)) {
+      case Particle::Status::PrimordialIncoming:
         return 21;
-      case cepgen::Particle::Status::FinalState:
-      case cepgen::Particle::Status::Undecayed:
+      case Particle::Status::FinalState:
+      case Particle::Status::Undecayed:
         return 1;
-      case cepgen::Particle::Status::Unfragmented:
+      case Particle::Status::Unfragmented:
         return 3;
-      case cepgen::Particle::Status::Fragmented:
-      case cepgen::Particle::Status::Propagator:
-      case cepgen::Particle::Status::Incoming:
+      case Particle::Status::Fragmented:
+      case Particle::Status::Propagator:
+      case Particle::Status::Incoming:
         return 11;
       default:
         throw CG_FATAL("pythia6:status") << "No conversion rule for CepGen status code: " << cg_status << ".";
@@ -97,23 +97,23 @@ namespace cepgen::pythia6 {
   int cepgenStatus(int py_status) {
     switch (py_status) {
       case 1:
-        return static_cast<int>(cepgen::Particle::Status::FinalState);
+        return static_cast<int>(Particle::Status::FinalState);
       case 3:
-        return static_cast<int>(cepgen::Particle::Status::Propagator);
+        return static_cast<int>(Particle::Status::Propagator);
       case 11:
-        return static_cast<int>(cepgen::Particle::Status::Fragmented);
+        return static_cast<int>(Particle::Status::Fragmented);
       case 21:
-        return static_cast<int>(cepgen::Particle::Status::PrimordialIncoming);
+        return static_cast<int>(Particle::Status::PrimordialIncoming);
       default:
         return py_status;
     }
   }
 
   void checkPDGid(int pdg_id) {
-    if (cepgen::PDG::get().has(pdg_id))
+    if (PDG::get().has(pdg_id))
       return;
-    const auto name = pythia6::pyname(pdg_id);
-    cepgen::ParticleProperties prop;
+    const auto name = pyname(pdg_id);
+    ParticleProperties prop;
     prop.pdgid = pdg_id;
     prop.name = name;
     prop.human_name = name;
@@ -123,6 +123,6 @@ namespace cepgen::pythia6 {
     if (const auto ch = pychge(pdg_id); std::fabs(ch) > 0)
       prop.charges = {ch, -ch};
     prop.fermion = false;
-    cepgen::PDG::get().define(prop);
+    PDG::get().define(prop);
   }
 }  // namespace cepgen::pythia6

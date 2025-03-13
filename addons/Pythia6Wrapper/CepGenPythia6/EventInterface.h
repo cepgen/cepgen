@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Modes.h"
 
 namespace cepgen {
@@ -47,7 +48,7 @@ namespace cepgen::pythia6 {
     utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
     std::vector<Particle::Role> roles_;
 
-    std::pair<short, short> pickPartonsContent();
+    std::pair<short, short> pickPartonsContent() const;
 
     using string_t = std::vector<int>;
     std::vector<string_t> evt_strings_;

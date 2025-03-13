@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@
 namespace cepgen::pythia8 {
   class AlphaS final : public Coupling {
   public:
-    explicit AlphaS(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaStrong) {
-      alphas_->init(
+    explicit AlphaS(const ParametersList& params) : Coupling(params), alpha_s_(new Pythia8::AlphaStrong) {
+      alpha_s_->init(
           steer<double>("alphaSvalue"), steer<int>("alphaSorder"), steer<int>("alphaSnfmax"), steer<bool>("useCMW"));
     }
 
-    inline static ParametersDescription description() {
+    static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(S) running");
       desc.add<double>("alphaSvalue", 0.13);
@@ -41,10 +41,10 @@ namespace cepgen::pythia8 {
       return desc;
     }
 
-    inline double operator()(double q) const override { return alphas_->alphaS(q * q); }
+    double operator()(double q) const override { return alpha_s_->alphaS(q * q); }
 
   private:
-    const std::unique_ptr<Pythia8::AlphaStrong> alphas_;
+    const std::unique_ptr<Pythia8::AlphaStrong> alpha_s_;
   };
 }  // namespace cepgen::pythia8
 using Pythia8AlphaS = cepgen::pythia8::AlphaS;

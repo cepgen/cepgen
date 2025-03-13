@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2024  Laurent Forthomme
+ *  Copyright (C) 2016-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen::pythia8 {
   /// Pythia8 handler for the LHE file output
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Sep 2016
-  class LHEFHandler : public EventExporter {
+  class LHEFHandler final : public EventExporter {
   public:
     explicit LHEFHandler(const ParametersList& params)
         : EventExporter(params),
@@ -57,7 +57,7 @@ namespace cepgen::pythia8 {
       }
       lhaevt_->openLHEF(filename_);
     }
-    inline ~LHEFHandler() {
+    ~LHEFHandler() override {
       if (lhaevt_)
         lhaevt_->closeLHEF(false);  // we do not want to rewrite the init block
       if (gzip_)
@@ -66,7 +66,7 @@ namespace cepgen::pythia8 {
 #endif
     }
 
-    inline static ParametersDescription description() {
+    static ParametersDescription description() {
       auto desc = EventExporter::description();
       desc.setDescription("Pythia 8-based LHEF output module");
       desc.add<bool>("compress", true);
@@ -74,7 +74,7 @@ namespace cepgen::pythia8 {
       return desc;
     }
 
-    inline void initialise() override {
+    void initialise() override {
       std::ostringstream oss_init;
       oss_init << "<!--\n" << banner() << "\n-->";
       oss_init << std::endl;  // LHEF is usually not as beautifully parsed as a standard XML...
@@ -95,13 +95,13 @@ namespace cepgen::pythia8 {
       lhaevt_->initLHEF();
     }
 
-    inline bool operator<<(const Event& ev) override {
+    bool operator<<(const Event& ev) override {
       lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
       pythia_->next();
       lhaevt_->eventLHEF();
       return true;
     }
-    inline void setCrossSection(const Value& cross_section) override {
+    void setCrossSection(const Value& cross_section) override {
       lhaevt_->setCrossSection(0, cross_section, cross_section.uncertainty());
     }
 

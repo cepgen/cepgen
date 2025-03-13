@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,22 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Utils/Drawer.h"
+
 #include <Pythia8/Basics.h>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Version.h"
 
-using namespace cepgen;
-
 namespace cepgen::pythia8 {
-  class Drawer : public cepgen::utils::Drawer {
+  class Drawer final : public utils::Drawer {
   public:
-    explicit Drawer(const ParametersList& params)
-        : cepgen::utils::Drawer(params), hist_plot_(steer<bool>("histPlot")) {}
+    explicit Drawer(const ParametersList& params) : utils::Drawer(params), hist_plot_(steer<bool>("histPlot")) {}
 
     static ParametersDescription description() {
       auto desc = cepgen::utils::Drawer::description();
@@ -80,10 +78,8 @@ namespace cepgen::pythia8 {
           if (!first_histogram)
             first_histogram = hist;
           histograms.emplace_back(convert(*hist, mode));
-        } else {
-          CG_WARNING("pythia8:Drawer:draw") << "Multiplotter only supports 1D histograms.";
-          continue;
-        }
+        } else
+          CG_WARNING("pythia8:Drawer:draw") << "Multi-plotter only supports 1D histograms.";
       if (histograms.empty())
         return *this;
       if (!first_histogram)
