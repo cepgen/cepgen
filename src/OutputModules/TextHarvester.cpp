@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,16 +19,15 @@
 #include "CepGen/EventFilter/EventHarvester.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 
-namespace cepgen {
-  struct TextHarvester final : EventHarvester {
-    using EventHarvester::EventHarvester;
-    static ParametersDescription description() {
-      auto desc = EventHarvester::description();
-      desc.setDescription("Text-based event harvester");
-      desc.add<std::string>("plotter", "text");
-      return desc;
-    }
-  };
-}  // namespace cepgen
+using namespace cepgen;
 
+struct TextHarvester final : EventHarvester {
+  using EventHarvester::EventHarvester;
+  static ParametersDescription description() {
+    auto desc = EventHarvester::description();
+    desc.setDescription("Text-based event harvester");
+    desc.add<std::string>("plotter", "text");
+    return desc;
+  }
+};
 REGISTER_EXPORTER("text", TextHarvester);

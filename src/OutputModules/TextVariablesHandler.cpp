@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,66 +23,64 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 
-namespace cepgen {
-  /**
-     * \brief Handler for the generic text file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
-  class TextVariablesHandler : public EventExporter {
-  public:
-    explicit TextVariablesHandler(const ParametersList& params)
-        : EventExporter(params),
-          file_(steer<std::string>("filename")),
-          variables_(steer<std::vector<std::string> >("variables")),
-          save_banner_(steer<bool>("saveBanner")),
-          save_variables_(steer<bool>("saveVariables")),
-          separator_(steer<std::string>("separator")) {
-      //--- extract list of variables to store in output file
-      oss_vars_.clear();
-      std::string sep;
-      for (const auto& var : variables_)
-        oss_vars_ << sep << var, sep = separator_;
-    }
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = EventExporter::description();
-      desc.setDescription("Text dump of variables");
-      desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
-      desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to dump");
-      desc.add<bool>("saveBanner", true).setDescription("Also save the boilerplate in output files?");
-      desc.add<bool>("saveVariables", true).setDescription("Save the variable(s) into an output file?");
-      desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
-      return desc;
-    }
+/// Handler for the generic text file output
+/// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+/// \date Jul 2019
+class TextVariablesHandler final : public EventExporter {
+public:
+  explicit TextVariablesHandler(const ParametersList& params)
+      : EventExporter(params),
+        file_(steer<std::string>("filename")),
+        variables_(steer<std::vector<std::string> >("variables")),
+        save_banner_(steer<bool>("saveBanner")),
+        save_variables_(steer<bool>("saveVariables")),
+        separator_(steer<std::string>("separator")) {
+    //--- extract list of variables to store in output file
+    oss_vars_.clear();
+    std::string sep;
+    for (const auto& var : variables_)
+      oss_vars_ << sep << var, sep = separator_;
+  }
 
-    bool operator<<(const Event& ev) override {
-      if (variables_.empty())
-        return true;
-      std::string sep;
-      for (const auto& var : variables_)  // write down the variables list in the file
-        file_ << sep << browser_.get(ev, var), sep = separator_;
-      file_ << "\n";
+  static ParametersDescription description() {
+    auto desc = EventExporter::description();
+    desc.setDescription("Text dump of variables");
+    desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
+    desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to dump");
+    desc.add<bool>("saveBanner", true).setDescription("Also save the boilerplate in output files?");
+    desc.add<bool>("saveVariables", true).setDescription("Save the variable(s) into an output file?");
+    desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
+    return desc;
+  }
+
+  bool operator<<(const Event& ev) override {
+    if (variables_.empty())
       return true;
-    }
+    std::string sep;
+    for (const auto& var : variables_)  // write down the variables list in the file
+      file_ << sep << browser_.get(ev, var), sep = separator_;
+    file_ << "\n";
+    return true;
+  }
 
-  private:
-    void initialise() override {
-      if (save_banner_)
-        file_ << banner("#") << "\n";
-      if (save_variables_)
-        file_ << "# " << oss_vars_.str() << "\n";
-    }
+private:
+  void initialise() override {
+    if (save_banner_)
+      file_ << banner("#") << "\n";
+    if (save_variables_)
+      file_ << "# " << oss_vars_.str() << "\n";
+  }
 
-    std::ofstream file_;
-    //--- variables definition
-    const std::vector<std::string> variables_;
-    const bool save_banner_, save_variables_;
-    const std::string separator_;
+  std::ofstream file_;
+  //--- variables definition
+  const std::vector<std::string> variables_;
+  const bool save_banner_, save_variables_;
+  const std::string separator_;
 
-    const utils::EventBrowser browser_;
+  const utils::EventBrowser browser_;
 
-    std::ostringstream oss_vars_;
-  };
-}  // namespace cepgen
+  std::ostringstream oss_vars_;
+};
 REGISTER_EXPORTER("vars", TextVariablesHandler);
