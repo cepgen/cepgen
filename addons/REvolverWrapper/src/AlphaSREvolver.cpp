@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,32 +21,31 @@
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Physics/Coupling.h"
 
-namespace cepgen {
-  class AlphaSREvolver final : public Coupling {
-  public:
-    explicit AlphaSREvolver(const ParametersList& params)
-        : Coupling(params),
-          qc_(steer<double>("qCentral")),
-          qevol_(steer<double>("qEvol")),
-          order_(steer<int>("order")),
-          central2_(revo::RunPar(order_, qc_, qevol_), order_) {}
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = Coupling::description();
-      desc.setDescription("REvolver alpha(S) evolution algorithm");
-      desc.add<int>("order", 5);
-      desc.add<double>("qCentral", 0.0822);
-      desc.add<double>("qEvol", 1508.04);
-      return desc;
-    }
+class AlphaSREvolver final : public Coupling {
+public:
+  explicit AlphaSREvolver(const ParametersList& params)
+      : Coupling(params),
+        qc_(steer<double>("qCentral")),
+        qevol_(steer<double>("qEvol")),
+        order_(steer<int>("order")),
+        central2_(revo::RunPar(order_, qc_, qevol_), order_) {}
 
-    double operator()(double q) const override { return central2_.alpha(q); }
+  static ParametersDescription description() {
+    auto desc = Coupling::description();
+    desc.setDescription("REvolver alpha(S) evolution algorithm");
+    desc.add<int>("order", 5);
+    desc.add<double>("qCentral", 0.0822);
+    desc.add<double>("qEvol", 1508.04);
+    return desc;
+  }
 
-  private:
-    const double qc_, qevol_;
-    const int order_;
-    revo::Core central2_;
-  };
-}  // namespace cepgen
+  double operator()(double q) const override { return central2_.alpha(q); }
 
+private:
+  const double qc_, qevol_;
+  const int order_;
+  revo::Core central2_;
+};
 REGISTER_ALPHAS_MODULE("revolver", AlphaSREvolver);

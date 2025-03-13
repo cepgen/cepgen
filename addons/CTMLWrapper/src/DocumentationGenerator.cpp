@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,14 @@ namespace cepgen::ctml {
   /// CTML documentation generator object
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Apr 2022
-  class DocumentationGenerator final : public cepgen::utils::DocumentationGenerator {
+  class DocumentationGenerator final : public utils::DocumentationGenerator {
   public:
-    inline explicit DocumentationGenerator(const ParametersList& params)
-        : cepgen::utils::DocumentationGenerator(params),
+    explicit DocumentationGenerator(const ParametersList& params)
+        : utils::DocumentationGenerator(params),
           bare_(steer<bool>("bare")),
           container_(CTML::Node("div.container-fluid")) {}
 
-    inline static ParametersDescription description() {
+    static ParametersDescription description() {
       auto desc = cepgen::utils::DocumentationGenerator::description();
       desc.setDescription("CTML HTML document generator helper");
       desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
@@ -49,7 +49,7 @@ namespace cepgen::ctml {
       return desc;
     }
 
-    inline std::string describe() override {
+    std::string describe() override {
       doc_.AppendNodeToHead(CTML::Node("title", "CepGen v" + version::tag + " modules documentation"));
       if (!bare_ && steer<bool>("useBS")) {
         doc_.AppendNodeToHead(
