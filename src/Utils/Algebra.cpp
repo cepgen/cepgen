@@ -303,7 +303,9 @@ double& VectorRef::operator()(size_t i) { return *gsl_vector_ptr(&vector, i); }
 
 double VectorRef::operator()(size_t i) const { return gsl_vector_get(&vector, i); }
 
-std::ostream& operator<<(std::ostream& os, const VectorRef& ref) { return os << "Ref" << Vector(ref); }
+namespace cepgen {
+  std::ostream& operator<<(std::ostream& os, const VectorRef& ref) { return os << "Ref" << Vector(ref); }
+}  // namespace cepgen
 
 //---------------------------------------------------------------------------
 
