@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,10 +31,11 @@
   }                                                                            \
   static_assert(true, "")
 
+namespace cepgen::utils {
+  class Functional;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  namespace utils {
-    class Functional;
-  }
   /// A functional objects factory
   DEFINE_FACTORY(FunctionalFactory, utils::Functional, "Functionals factory");
 }  // namespace cepgen

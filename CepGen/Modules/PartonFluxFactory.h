@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,10 +55,10 @@ namespace cepgen {
       return instance;
     }
 
-    ParametersDescription describeParameters(const std::string& name,
-                                             const ParametersList& params = ParametersList()) const;
-    bool elastic(const ParametersList&) const;     ///< Is the beam modelling elastic?
-    int partonPdgId(const ParametersList&) const;  ///< Type of parton exchanged
+    static ParametersDescription describeParameters(const std::string& name,
+                                                    const ParametersList& params = ParametersList());
+    static bool elastic(const ParametersList&);     ///< Is the beam modelling elastic?
+    static int partonPdgId(const ParametersList&);  ///< Type of parton exchanged
   };
 }  // namespace cepgen
 

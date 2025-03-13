@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,10 +31,11 @@
   }                                                                        \
   static_assert(true, "")
 
+namespace cepgen::utils {
+  class Drawer;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  namespace utils {
-    class Drawer;
-  }
   /// A plotting utilities factory
   DEFINE_FACTORY(DrawerFactory, utils::Drawer, "Drawing utility factory");
 }  // namespace cepgen

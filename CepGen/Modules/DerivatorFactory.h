@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,21 +22,20 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic derivator object builder definition
-#define REGISTER_DERIVATOR(name, obj)                                           \
-  namespace cepgen {                                                            \
-    namespace utils {                                                           \
-      struct BUILDERNM(obj) {                                                   \
-        BUILDERNM(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
-      };                                                                        \
-      static const BUILDERNM(obj) gDeriv##obj;                                  \
-    }                                                                           \
-  }                                                                             \
+#define REGISTER_DERIVATOR(name, obj)                                         \
+  namespace cepgen::utils {                                                   \
+    struct BUILDERNM(obj) {                                                   \
+      BUILDERNM(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
+    };                                                                        \
+    static const BUILDERNM(obj) gDeriv##obj;                                  \
+  }                                                                           \
   static_assert(true, "")
 
+namespace cepgen::utils {
+  class Derivator;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  namespace utils {
-    class Derivator;
-  }
   /// An analytical derivator objects factory
   DEFINE_FACTORY(DerivatorFactory, utils::Derivator, "Derivators factory");
 }  // namespace cepgen

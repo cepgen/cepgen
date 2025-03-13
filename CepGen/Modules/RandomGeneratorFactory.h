@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,10 +31,11 @@
   }                                                                                 \
   static_assert(true, "")
 
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  namespace utils {
-    class RandomGenerator;
-  }
   /// A random number generator algorithms factory
   DEFINE_FACTORY(RandomGeneratorFactory, utils::RandomGenerator, "Random number generator factory");
 }  // namespace cepgen

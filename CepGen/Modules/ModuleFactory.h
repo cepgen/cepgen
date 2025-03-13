@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ namespace cepgen {
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
     inline void registerModule(const std::string& name, const ParametersList& def_params = ParametersList()) {
-      static_assert(std::is_base_of<T, U>::value,
+      static_assert(std::is_base_of_v<T, U>,
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (has(name)) {
         std::ostringstream oss;
@@ -88,8 +88,8 @@ namespace cepgen {
 
     std::string describe(const std::string& name) const;  ///< Describe one named module
     /// Describe the parameters of one named module
-    /// \param[in] params Parameters (incl. the name) to steer the description
-    ParametersDescription describeParameters(const ParametersList& params) const;
+    /// \param[in] parameters Parameters (incl. the name) to steer the description
+    ParametersDescription describeParameters(const ParametersList& parameters) const;
     /// Describe the parameters of one named module
     /// \param[in] name Name of the module to describe
     /// \param[in] params Additional parameters to steer the description

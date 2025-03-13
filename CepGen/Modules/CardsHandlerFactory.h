@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,26 +22,25 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a cards handler definition to the list of handled parsers
-#define REGISTER_CARD_HANDLER(name, obj)                                           \
-  namespace cepgen {                                                               \
-    namespace card {                                                               \
-      struct BUILDERNM(obj) {                                                      \
-        BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
-      };                                                                           \
-      static const BUILDERNM(obj) gCard##obj;                                      \
-    }                                                                              \
-  }                                                                                \
+#define REGISTER_CARD_HANDLER(name, obj)                                         \
+  namespace cepgen::card {                                                       \
+    struct BUILDERNM(obj) {                                                      \
+      BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
+    };                                                                           \
+    static const BUILDERNM(obj) gCard##obj;                                      \
+  }                                                                              \
   static_assert(true, "")
+
+namespace cepgen::card {
+  class Handler;
+}  // namespace cepgen::card
 
 namespace cepgen {
   class RunParameters;
-  namespace card {
-    class Handler;
-  }
   /// A cards handler base factory
   DEFINE_FACTORY(BaseCardsHandlerFactory, card::Handler, "Cards handlers factory");
   /// A cards handler factory
-  struct CardsHandlerFactory : public BaseCardsHandlerFactory {
+  struct CardsHandlerFactory : BaseCardsHandlerFactory {
     using BaseCardsHandlerFactory::BaseCardsHandlerFactory;
     static CardsHandlerFactory& get();
     /// Build one instance of a cards handler

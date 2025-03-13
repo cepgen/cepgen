@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic import module definition to the factory
+/// Add a generic event import module definition to the factory
 #define REGISTER_EVENT_IMPORTER(name, obj)                                        \
   namespace cepgen {                                                              \
     struct BUILDERNM(obj) {                                                       \

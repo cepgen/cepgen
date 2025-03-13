@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace cepgen {
   class PhaseSpaceGenerator;
   /// A phase space mapping algorithms factory
   DEFINE_FACTORY(BasePhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
-  struct PhaseSpaceGeneratorFactory : public BasePhaseSpaceGeneratorFactory {
+  struct PhaseSpaceGeneratorFactory : BasePhaseSpaceGeneratorFactory {
     static PhaseSpaceGeneratorFactory& get();
     std::unique_ptr<PhaseSpaceGenerator> build(const ParametersList&) const override;
   };

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,24 +21,23 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a form factors definition to the list of handled parameterisation
-#define REGISTER_FORMFACTORS(name, obj)                                           \
-  namespace cepgen {                                                              \
-    namespace formfac {                                                           \
-      struct BUILDERNM(obj) {                                                     \
-        BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
-      };                                                                          \
-      static const BUILDERNM(obj) gFF##obj;                                       \
-    }                                                                             \
-  }                                                                               \
+/// Add an electromagnetic form factors definition to the list of handled parameterisation
+#define REGISTER_FORMFACTORS(name, obj)                                         \
+  namespace cepgen::formfac {                                                   \
+    struct BUILDERNM(obj) {                                                     \
+      BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
+    };                                                                          \
+    static const BUILDERNM(obj) gFF##obj;                                       \
+  }                                                                             \
   static_assert(true, "")
 
+namespace cepgen::formfac {
+  class Parameterisation;
+  /// Standard dipole handler name
+  static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
+}  // namespace cepgen::formfac
+
 namespace cepgen {
-  namespace formfac {
-    class Parameterisation;
-    /// Standard dipole handler name
-    static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
-  }  // namespace formfac
   /// A form factors parameterisations factory
   DEFINE_FACTORY(FormFactorsFactory, formfac::Parameterisation, "Nucleon form factors factory");
 }  // namespace cepgen

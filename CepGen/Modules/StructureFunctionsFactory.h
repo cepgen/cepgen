@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,40 +22,37 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(name, id, obj)                                                                      \
-  namespace cepgen {                                                                                        \
-    namespace strfun {                                                                                      \
-      struct BUILDERNM(obj) {                                                                               \
-        BUILDERNM(obj)() { StructureFunctionsFactory::get().addIndex(id, name).registerModule<obj>(name); } \
-      };                                                                                                    \
-      static const BUILDERNM(obj) gStrFun##obj;                                                             \
-    }                                                                                                       \
-  }                                                                                                         \
+#define REGISTER_STRFUN(name, id, obj)                                                                    \
+  namespace cepgen::strfun {                                                                              \
+    struct BUILDERNM(obj) {                                                                               \
+      BUILDERNM(obj)() { StructureFunctionsFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                                    \
+    static const BUILDERNM(obj) gStrFun##obj;                                                             \
+  }                                                                                                       \
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
-#define REGISTER_SIGRAT(name, id, obj)                                                               \
-  namespace cepgen {                                                                                 \
-    namespace sigrat {                                                                               \
-      struct BUILDERNM(obj) {                                                                        \
-        BUILDERNM(obj)() { SigmaRatiosFactory::get().addIndex(id, name).registerModule<obj>(name); } \
-      };                                                                                             \
-      static const BUILDERNM(obj) gSigRat##obj;                                                      \
-    }                                                                                                \
-  }                                                                                                  \
+#define REGISTER_SIGRAT(name, id, obj)                                                             \
+  namespace cepgen::sigrat {                                                                       \
+    struct BUILDERNM(obj) {                                                                        \
+      BUILDERNM(obj)() { SigmaRatiosFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                             \
+    static const BUILDERNM(obj) gSigRat##obj;                                                      \
+  }                                                                                                \
   static_assert(true, "")
 
+namespace cepgen::strfun {
+  class Parameterisation;
+}  // namespace cepgen::strfun
+namespace cepgen::sigrat {
+  class Parameterisation;
+}  // namespace cepgen::sigrat
+
 namespace cepgen {
-  namespace strfun {
-    class Parameterisation;
-  }
   /// A structure functions parameterisations factory
   DEFINE_FACTORY(StructureFunctionsFactory,
                  strfun::Parameterisation,
                  "Nucleon structure functions parameterisations factory");
-  namespace sigrat {
-    class Parameterisation;
-  }
   /// A sigma ratio parameterisations factory
   DEFINE_FACTORY(SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
 }  // namespace cepgen
