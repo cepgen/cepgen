@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,22 +20,22 @@
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 
-namespace cepgen::card {
-  Handler::Handler(const ParametersList& params)
-      : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
-    if (!filename_.empty())
-      parseFile(filename_);
-  }
+using namespace cepgen::card;
 
-  Handler& Handler::setRunParameters(const RunParameters* params) {
-    rt_params_.reset(const_cast<RunParameters*>(params));
-    return *this;
-  }
+Handler::Handler(const ParametersList& params)
+    : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
+  if (!filename_.empty())
+    parseFile(filename_);
+}
 
-  ParametersDescription Handler::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Generic steering cards handler");
-    desc.add<std::string>("filename", "").setDescription("Steering card to parse");
-    return desc;
-  }
-}  // namespace cepgen::card
+Handler& Handler::setRunParameters(const RunParameters* params) {
+  rt_params_.reset(const_cast<RunParameters*>(params));
+  return *this;
+}
+
+cepgen::ParametersDescription Handler::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("Generic steering cards handler");
+  desc.add<std::string>("filename", "").setDescription("Steering card to parse");
+  return desc;
+}
