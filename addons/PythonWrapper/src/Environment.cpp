@@ -34,7 +34,6 @@ using namespace cepgen::python;
 //------------------------------------------------------------------
 
 Environment::Environment(const ParametersList& params) : SteeredObject(params) {
-  const auto cepgen_path = fs::path(utils::env::get("CEPGEN_PATH", "."));
   for (const auto& path : utils::env::searchPaths()) {
     const auto fs_path = fs::path(path);
     utils::env::append("PYTHONPATH", fs_path);

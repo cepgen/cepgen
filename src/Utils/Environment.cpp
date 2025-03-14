@@ -34,7 +34,6 @@ namespace cepgen::utils::env {
     const auto cepgen_path = fs::path(get("CEPGEN_PATH", "."));
     return std::vector<std::string>{fs::current_path(),
                                     fs::current_path().parent_path(),
-                                    fs::current_path().parent_path().parent_path(),
                                     cepgen_path,
                                     cepgen_path / "CepGen",
                                     cepgen_path / "lib",
