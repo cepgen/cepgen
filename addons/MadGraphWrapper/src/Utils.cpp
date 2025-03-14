@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,33 +36,24 @@
 using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
-  ProcessParticles unpackProcessParticles(const std::string& proc) {
+  ProcessParticles unpackProcessParticles(const std::string& process_string) {
     ProcessParticles out;
-    auto trim_all = [](std::vector<std::string> coll) -> std::vector<std::string> {
-      std::for_each(coll.begin(), coll.end(), [](std::string& it) { it = utils::trim(it); });
-      return coll;
-    };
-    const auto proc_no_removals = utils::split(utils::trim(proc), '/')[0];
+    const auto process_no_removals = utils::split(utils::trim(process_string), '/').at(0);
     //--- dirty fix to specify incoming- and outgoing states
     //    as extracted from the mg5_aMC process string
-    const auto prim_proc = utils::split(proc_no_removals, ',')[0];
-    auto parts = trim_all(utils::split(prim_proc, '>'));
+    const auto primary_process = utils::split(process_no_removals, ',', true).at(0);
+    const auto parts = utils::split(primary_process, '>', true);
     if (parts.size() != 2)
       throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-          << "Unable to unpack particles from process name: \"" << proc << "\" -> " << parts << "!";
-    //--- incoming parton-like particles
-    auto prim_parts = trim_all(utils::split(parts[0], ' '));
-    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Primary particles: " << prim_parts;
-    if (prim_parts.size() != 2)
+          << "Unable to unpack particles from process name: \"" << process_string << "\" -> " << parts << "!";
+    out.first = utils::split(parts.at(0), ' ', true);  // incoming parton-like particles
+    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Primary particles: " << out.first << ".";
+    if (out.first.size() != 2)
       throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-          << "Unable to unpack particles from primary particles list: \"" << parts[0] << "\" -> " << prim_parts << "!";
-    for (const auto& p : prim_parts)
-      out.first.emplace_back(p);
-    //---- outgoing system
-    auto dec_parts = trim_all(utils::split(parts[1], ' '));
-    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Outgoing system: " << dec_parts;
-    for (auto& p : dec_parts)
-      out.second.emplace_back(p);
+          << "Unable to unpack particles from primary particles list: \"" << parts.at(0) << "\" -> " << out.first
+          << "!";
+    out.second = utils::split(parts.at(1), ' ', true);  // outgoing, central system
+    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Outgoing system: " << out.second << ".";
     return out;
   }
 
@@ -188,6 +179,7 @@ namespace cepgen::mg5amc {
 
   std::string normalise(const std::string& proc_name, const std::string& model) {
     return (!model.empty() ? model + "__" : "") +
-           utils::replaceAll(proc_name, {{" ", "_"}, {">", "_to_"}, {"+", "p"}, {"-", "m"}, {"~", "bar"}});
+           utils::replaceAll(proc_name,
+                             {{" ", "_"}, {">", "_to_"}, {"+", "p"}, {"-", "m"}, {"~", "bar"}, {"/", "_exc_"}});
   }
 }  // namespace cepgen::mg5amc
