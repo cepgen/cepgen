@@ -235,17 +235,15 @@ namespace cepgen::utils {
                        : format("%s%s", word.c_str(), num > 1. ? "s" : "");
   }
 
-  std::vector<std::string> split(const std::string& str, char delim, bool trim) {
-    std::vector<std::string> out;
+  std::vector<std::string> split(const std::string& str, char delim, bool trim_parts) {
     if (str.empty())
-      return out;
+      return {};
     std::string token;
     std::istringstream iss(str);
-    while (std::getline(iss, token, delim)) {
-      const auto tok = trim ? ltrim(rtrim(token)) : token;
-      if (!trim || !tok.empty())
+    std::vector<std::string> out;
+    while (std::getline(iss, token, delim))
+      if (const auto tok = trim_parts ? trim(token) : token; !trim_parts || !tok.empty())
         out.emplace_back(tok);
-    }
     return out;
   }
 

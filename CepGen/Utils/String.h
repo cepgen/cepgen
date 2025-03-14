@@ -118,7 +118,7 @@ namespace cepgen::utils {
   /// Replace all occurrences of multiple texts by others
   std::string replaceAll(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
   /// Split a string according to a separation character
-  std::vector<std::string> split(const std::string&, char, bool trim = false);
+  std::vector<std::string> split(const std::string&, char, bool trim_parts = false);
   /// Merge a printable type in a single string
   template <typename T>
   inline std::string merge(const T& val, const std::string&) {
