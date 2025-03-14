@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ int main(int argc, char* argv[]) {
     if (plt) {
       (void)plt->draw(hist);
       (void)plt->draw(hist_resampled);
+      hist_resampled.scale(hist.integral() / hist_resampled.integral());
       (void)plt->draw({&hist, &hist_resampled}, "histograms_generated_resampled");
     }
   }
