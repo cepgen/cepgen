@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,10 +20,9 @@
 #define CepGenMadGraph_MadGraphProcess_h
 
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Physics/Momentum.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
+  class Momentum;
   /// Wrapper around a generic MadGraph process definition
   class MadGraphProcess : public NamedModule<MadGraphProcess> {
   public:

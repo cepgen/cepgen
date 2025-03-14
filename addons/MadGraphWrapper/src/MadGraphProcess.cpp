@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,29 +18,30 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/ModuleFactory.h"
+#include "CepGen/Physics/Momentum.h"
 #include "CepGenMadGraph/MadGraphProcess.h"
 
-namespace cepgen {
-  MadGraphProcess::MadGraphProcess(const ParametersList& params)
-      : NamedModule(params),
-        incoming_pdgids_(steer<std::vector<int> >("incomingSystem")),
-        central_pdgids_(steer<std::vector<int> >("outgoingSystem")) {}
+using namespace cepgen;
 
-  MadGraphProcess& MadGraphProcess::setMomentum(size_t i, const Momentum& mom) {
-    if (i >= mom_.size())
-      throw CG_FATAL("MadGraphProcess") << "Invalid index for momentum: " << i << "!";
-    mom_[i][0] = mom.energy();
-    mom_[i][1] = mom.px();
-    mom_[i][2] = mom.py();
-    mom_[i][3] = mom.pz();
-    return *this;
-  }
+MadGraphProcess::MadGraphProcess(const ParametersList& params)
+    : NamedModule(params),
+      incoming_pdgids_(steer<std::vector<int> >("incomingSystem")),
+      central_pdgids_(steer<std::vector<int> >("outgoingSystem")) {}
 
-  ParametersDescription MadGraphProcess::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("generic mg5_aMC@NLO process");
-    desc.add<std::vector<int> >("incomingSystem", {}).setDescription("list of incoming partons for the process");
-    desc.add<std::vector<int> >("outgoingSystem", {}).setDescription("list of central particles generated");
-    return desc;
-  }
-}  // namespace cepgen
+MadGraphProcess& MadGraphProcess::setMomentum(size_t i, const Momentum& mom) {
+  if (i >= mom_.size())
+    throw CG_FATAL("MadGraphProcess") << "Invalid index for momentum: " << i << "!";
+  mom_[i][0] = mom.energy();
+  mom_[i][1] = mom.px();
+  mom_[i][2] = mom.py();
+  mom_[i][3] = mom.pz();
+  return *this;
+}
+
+ParametersDescription MadGraphProcess::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("generic mg5_aMC@NLO process");
+  desc.add<std::vector<int> >("incomingSystem", {}).setDescription("list of incoming partons for the process");
+  desc.add<std::vector<int> >("outgoingSystem", {}).setDescription("list of central particles generated");
+  return desc;
+}

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 // generation performed by MG5_aMC.
 // Include it in your source file prior to any linking with libCepGenMadGraph.
 
+#include "CepGen/Physics/Momentum.h"
 #include "CepGenMadGraph/MadGraphProcess.h"
 #include "CepGenMadGraph/MadGraphProcessFactory.h"
 
