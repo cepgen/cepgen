@@ -403,12 +403,12 @@ void Process::setKinematics() {
 
 ParametersDescription Process::description() {
   auto desc = ParametersDescription();
-  desc.add<ParametersDescription>("alphaEM", AlphaEMFactory::get().describeParameters("fixed"))
-      .setDescription("electromagnetic coupling evolution algorithm");
-  desc.add<ParametersDescription>("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
+  desc.add("alphaEM", AlphaEMFactory::get().describeParameters("fixed"))
+      .setDescription("e-m coupling evolution algorithm");
+  desc.add("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
       .setDescription("strong coupling evolution algorithm");
-  desc.add<bool>("hasEvent", true).setDescription("does the process carry an event definition");
-  desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
+  desc.add("hasEvent", true).setDescription("does the process carry an event definition");
+  desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
       .setDescription("random number generator engine");
   desc.add("kinematics", Kinematics::description());
   return desc;

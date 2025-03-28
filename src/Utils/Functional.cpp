@@ -54,7 +54,7 @@ double Functional::operator()(const std::vector<double>& x) const {
 }
 
 ParametersList Functional::fromExpression(const std::string& expr, const std::vector<std::string>& vars) {
-  return ParametersList().set<std::string>("expression", expr).set<std::vector<std::string> >("variables", vars);
+  return ParametersList().set("expression", expr).set("variables", vars);
 }
 
 ParametersDescription Functional::description() {

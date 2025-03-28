@@ -38,7 +38,7 @@ public:
   static ParametersDescription description() {
     auto desc = PartonsPhaseSpaceGenerator::description();
     desc.setDescription("KT-dependent phase space mapper");
-    desc.add<bool>("logPartonVirtuality", true);
+    desc.add("logPartonVirtuality", true).setDescription("generate linearly to log(Q^2) instead of Q^2?");
     return desc;
   }
 

@@ -125,7 +125,7 @@ private:
     if (!pdg_input_path_.empty())
       pdg::MCDFileParser::parse(pdg_input_path_);
     if (!kmr_grid_path_.empty())
-      kmr::GluonGrid::get(ParametersList().set<std::string>("path", kmr_grid_path_));
+      kmr::GluonGrid::get(ParametersList().set("path", kmr_grid_path_));
 
     //--- build the ticker if required
     if (timer_)
@@ -143,10 +143,9 @@ private:
         if (pmod_ != "2") {
           beam1_elastic = false;
           auto sf_params = StructureFunctionsFactory::get().describeParameters(pmod_).parameters();
-          sf_params.set<ParametersList>("sigmaRatio",
-                                        SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
+          sf_params.set("sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
           if (pmod_ == "205" /* MSTWgrid */ && !mstw_grid_path_.empty())
-            sf_params.set<std::string>("gridPath", mstw_grid_path_);
+            sf_params.set("gridPath", mstw_grid_path_);
           kin_params.set("structureFunctions", sf_params);
         }
       }
@@ -194,7 +193,7 @@ private:
       for (const auto& mod : utils::split(out_mod_name_, ',')) {
         ParametersList outm;
         if (out_files.size() > i && !out_files.at(i).empty())
-          outm.set<std::string>("filename", out_files.at(i));
+          outm.set("filename", out_files.at(i));
         runParameters()->addEventExporter(EventExporterFactory::get().build(mod, outm));
         ++i;
       }
@@ -444,22 +443,22 @@ void LpairHandler::setParameter(const std::string& key, const std::string& value
   // particular case for the double as we cannot rely on casting exceptions
   if (value.find('.') != std::string::npos)
     try {
-      set<double>(key, std::stod(value));
+      set(key, std::stod(value));
       return;
     } catch (const std::logic_error&) {
       for (const auto& let : value)
         if (isalpha(let) && let != 'E' && let != 'e') {
-          set<std::string>(key, value);
+          set(key, value);
           return;
         }
       throw CG_FATAL("LpairHandler:setParameter")
           << "Failed to parse a floating-point parameter \"" << key << "\" → \"" << value << "\"!";
     }
   try {
-    set<int>(key, std::stoi(value));
+    set(key, std::stoi(value));
   } catch (const std::logic_error&) {
     try {
-      set<std::string>(key, value);
+      set(key, value);
     } catch (const std::logic_error&) {
       throw CG_FATAL("LpairHandler:setParameter")
           << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";

@@ -46,8 +46,8 @@ public:
     auto desc = PhaseSpaceGenerator::description();
     desc.setDescription("2-to-4 phase space mapper");
     desc.add("partonsGenerator", ""s).setDescription("type of partons generator algorithm to use");
-    desc.add<std::vector<int> >("ids", {}).setDescription("list of particles produced");
-    desc.add<bool>("randomiseCharge", true).setDescription("randomise the charges of the central system (if charged)?");
+    desc.add("ids", std::vector<int>{}).setDescription("list of particles produced");
+    desc.add("randomiseCharge", true).setDescription("randomise the charges of the central system (if charged)?");
     return desc;
   }
 

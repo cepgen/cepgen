@@ -209,9 +209,9 @@ ParametersList& ParametersList::feed(const std::string& raw_args) {
     else if (words.size() == 2) {  // basic key:value
       const auto& value = words.at(1);
       if (utils::isInt(value))
-        set<int>(key, std::stoi(value));
+        set(key, std::stoi(value));
       else if (utils::isFloat(value))
-        set<double>(key, std::stod(value));
+        set(key, std::stod(value));
       else if (value[0] == value[value.size() - 1] && (value[0] == '\'' || value[0] == '"'))  // string parameter
         set(key, value.substr(1, value.size() - 2));
       else {
@@ -224,12 +224,12 @@ ParametersList& ParametersList::feed(const std::string& raw_args) {
           const auto limits = utils::split(value, '>');
           if (limits.size() != 2)
             throw CG_FATAL("ParametersList:feed") << "Failed to parse limits value '" << value << "'.";
-          set<Limits>(key, Limits{std::stod(limits.at(0)), std::stod(limits.at(1))});
+          set(key, Limits{std::stod(limits.at(0)), std::stod(limits.at(1))});
         } else {
           auto parsed_value = value;
           if (value.size() > 2 && value[0] == value[value.size() - 1] && (value[0] == '"' || value[0] == '\''))
             parsed_value = parsed_value.substr(1, value.size() - 2);
-          set<std::string>(key, parsed_value);
+          set(key, parsed_value);
         }
       }
     } else
@@ -288,7 +288,7 @@ bool ParametersList::hasName() const { return has<std::string>(MODULE_NAME); }
 
 std::string ParametersList::name(const std::string& def) const { return get<std::string>(MODULE_NAME, def); }
 
-ParametersList& ParametersList::setName(const std::string& value) { return set<std::string>(MODULE_NAME, value); }
+ParametersList& ParametersList::setName(const std::string& value) { return set(MODULE_NAME, value); }
 
 std::vector<std::string> ParametersList::keys(bool name_key) const {
   std::vector<std::string> out{};
@@ -499,7 +499,7 @@ ParticleProperties ParametersList::get<ParticleProperties>(const std::string& ke
 template <>
 ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
   PDG::get().define(value);
-  return set<ParametersList>(key, value.parameters());
+  return set(key, value.parameters());
 }
 
 template <>

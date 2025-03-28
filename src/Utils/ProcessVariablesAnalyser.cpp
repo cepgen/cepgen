@@ -30,13 +30,10 @@ ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, co
     : SteeredObject(params), proc_(proc) {
   for (const auto& var : proc_.mapped_variables_)
     if (auto hist = steer<ParametersList>(var.name); !hist.empty())
-      hists_.insert(std::make_pair(var.name, new Hist1D(hist.set<std::string>("name", var.name))));
+      hists_.insert(std::make_pair(var.name, new Hist1D(hist.set("name", var.name))));
     else
-      hists_.insert(std::make_pair(var.name,
-                                   new Hist1D(ParametersList()
-                                                  .set<std::string>("name", var.name)
-                                                  .set<int>("nbinsX", 50)
-                                                  .set<Limits>("xrange", var.limits))));
+      hists_.insert(std::make_pair(
+          var.name, new Hist1D(ParametersList().set("name", var.name).set("nbinsX", 50).set("xrange", var.limits))));
 }
 
 void ProcessVariablesAnalyser::feed(double weight) const {
