@@ -21,6 +21,7 @@
 #include "CepGen/Modules/CardsHandlerFactory.h"
 
 using namespace cepgen::card;
+using namespace std::string_literals;
 
 Handler::Handler(const ParametersList& params)
     : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
@@ -36,6 +37,6 @@ Handler& Handler::setRunParameters(const RunParameters* params) {
 cepgen::ParametersDescription Handler::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Generic steering cards handler");
-  desc.add<std::string>("filename", "").setDescription("Steering card to parse");
+  desc.add("filename", ""s).setDescription("Steering card to parse");
   return desc;
 }

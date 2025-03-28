@@ -58,10 +58,7 @@ ParametersDescription& ParametersDescription::operator+=(const ParametersDescrip
     if (oth.parameters().has<ParametersList>(key)) {
       const auto& desc = get(key);
       ParametersList::erase(key);
-      add<ParametersDescription>(key, oth.get(key))
-          .setDescription(desc.description())
-          .allowedValues()
-          .append(desc.allowedValues());
+      add(key, oth.get(key)).setDescription(desc.description()).allowedValues().append(desc.allowedValues());
     }
   obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
   obj_values_.append(oth.obj_values_);

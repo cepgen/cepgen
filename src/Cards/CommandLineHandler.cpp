@@ -48,7 +48,7 @@ public:
   static ParametersDescription description() {
     auto desc = Handler::description();
     desc.setDescription("Command line configuration parser");
-    desc.add<std::vector<std::string> >("args", {}).setDescription("Collection of arguments to be parsed");
+    desc.add("args", std::vector<std::string>{}).setDescription("Collection of arguments to be parsed");
     return desc;
   }
 
@@ -99,22 +99,20 @@ public:
         proc = ParametersList(runParameters()->process().parameters()) + proc;
       runParameters()->setProcess(ProcessFactory::get().build(proc));
       if (proc.has<int>("mode"))
-        pars_kin.set<int>("mode", proc.get<int>("mode"));
+        pars_kin.set("mode", proc.get<int>("mode"));
     }
 
     if (!pars_kin.empty()) {
       //----- set auxiliary information for phase space definition
       if (pars_kin.has<int>("strfun"))
         pars_kin
-            .set<ParametersList>(
-                "structureFunctions",
-                StructureFunctionsFactory::get().describeParameters(pars_kin.get<int>("strfun")).parameters())
+            .set("structureFunctions",
+                 StructureFunctionsFactory::get().describeParameters(pars_kin.get<int>("strfun")).parameters())
             .erase("strfun");
       else if (pars_kin.has<std::string>("strfun"))
         pars_kin
-            .set<ParametersList>(
-                "structureFunctions",
-                StructureFunctionsFactory::get().describeParameters(pars_kin.get<std::string>("strfun")).parameters())
+            .set("structureFunctions",
+                 StructureFunctionsFactory::get().describeParameters(pars_kin.get<std::string>("strfun")).parameters())
             .erase("strfun");
       else if (pars_kin.has<ParametersList>("strfun"))
         pars_kin.rename("strfun", "structureFunctions");
@@ -136,7 +134,7 @@ public:
     if (gen.has<int>("nprn"))
       runParameters()->generation().setPrintEvery(gen.get<int>("nprn"));
     if (gen.has<int>("seed"))
-      runParameters()->integrator().set<int>("seed", gen.get<int>("seed"));
+      runParameters()->integrator().set("seed", gen.get<int>("seed"));
 
     //----- event modification modules
     if (const auto& mod = pars.get<ParametersList>("eventmod"); !mod.keys(true).empty()) {

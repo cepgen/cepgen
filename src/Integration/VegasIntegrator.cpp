@@ -26,6 +26,7 @@
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
 class VegasIntegrator final : public GSLIntegrator {
@@ -41,14 +42,14 @@ public:
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
     desc.setDescription("Vegas stratified sampling integrator");
-    desc.add<int>("numFunctionCalls", 100'000);
-    desc.add<double>("chiSqCut", 1.5);
-    desc.add<bool>("treat", true).setDescription("Phase space treatment");
-    desc.add<int>("iterations", 10);
-    desc.add<double>("alpha", 1.25);
+    desc.add("numFunctionCalls", 100'000);
+    desc.add("chiSqCut", 1.5);
+    desc.add("treat", true).setDescription("Phase space treatment");
+    desc.add("iterations", 10);
+    desc.add("alpha", 1.25);
     desc.addAs<int, Mode>("mode", Mode::stratified);
-    desc.add<std::string>("loggingOutput", "cerr");
-    desc.add<int>("verbose", -1);
+    desc.add("loggingOutput", "cerr"s);
+    desc.add("verbose", -1);
     return desc;
   }
 

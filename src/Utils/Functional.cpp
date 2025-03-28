@@ -23,6 +23,7 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 Functional::Functional(const ParametersList& params)
     : NamedModule(params),
@@ -59,7 +60,7 @@ ParametersList Functional::fromExpression(const std::string& expr, const std::ve
 ParametersDescription Functional::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Unnamed functional evaluator");
-  desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to evaluate");
-  desc.add<std::string>("expression", "").setDescription("Functional expression");
+  desc.add("variables", std::vector<std::string>{}).setDescription("List of variables to evaluate");
+  desc.add("expression", ""s).setDescription("Functional expression");
   return desc;
 }

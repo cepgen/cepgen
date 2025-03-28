@@ -72,8 +72,8 @@ Value Integrator::integrate(const std::function<double(const std::vector<double>
 ParametersDescription Integrator::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Unnamed integrator");
-  desc.add<int>("verbose", 1).setDescription("Verbosity level");
-  desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
+  desc.add("verbose", 1).setDescription("Verbosity level");
+  desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
       .setDescription("random number generator engine");
   return desc;
 }

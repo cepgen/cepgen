@@ -41,7 +41,7 @@ public:
   static ParametersDescription description() {
     auto desc = GeneratorWorker::description();
     desc.setDescription("Grid-optimised worker");
-    desc.add<int>("binSize", 3);
+    desc.add("binSize", 3);
     return desc;
   }
 

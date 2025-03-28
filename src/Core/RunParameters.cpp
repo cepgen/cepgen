@@ -165,8 +165,8 @@ void RunParameters::addTamingFunction(std::unique_ptr<utils::Functional> fct) {
 
 ParametersDescription RunParameters::description() {
   auto desc = ParametersDescription();
-  desc.add<ParametersDescription>("integrator", IntegratorFactory::get().describeParameters("Vegas"));
-  desc.add<ParametersDescription>("generation", Generation::description());
+  desc.add("integrator", IntegratorFactory::get().describeParameters("Vegas"));
+  desc.add("generation", Generation::description());
   return desc;
 }
 
@@ -297,13 +297,13 @@ RunParameters::Generation::Generation(const ParametersList& params) : SteeredObj
 
 ParametersDescription RunParameters::Generation::description() {
   auto desc = ParametersDescription();
-  desc.add<ParametersDescription>("worker", GeneratorWorkerFactory::get().describeParameters("grid_optimised"))
+  desc.add("worker", GeneratorWorkerFactory::get().describeParameters("grid_optimised"))
       .setDescription("type of generator worker to use for event generation");
-  desc.add<int>("maxgen", 0).setDescription("Number of events to generate");
-  desc.add<int>("printEvery", 10000).setDescription("Printing frequency for the events content");
-  desc.add<double>("targetLumi", -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
-  desc.add<bool>("symmetrise", false).setDescription("Are events to be symmetrised wrt beam collinear axis");
-  desc.add<int>("numThreads", 1).setDescription("Number of threads to use for event generation");
-  desc.add<int>("numPoints", 100);
+  desc.add("maxgen", 0).setDescription("Number of events to generate");
+  desc.add("printEvery", 10'000).setDescription("Printing frequency for the events content");
+  desc.add("targetLumi", -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
+  desc.add("symmetrise", false).setDescription("Are events to be symmetrised wrt beam collinear axis");
+  desc.add("numThreads", 1).setDescription("Number of threads to use for event generation");
+  desc.add("numPoints", 100);
   return desc;
 }

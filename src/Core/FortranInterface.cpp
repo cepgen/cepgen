@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,14 +59,12 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
     kBuiltKtFluxParameterisations[fmode] = KTFluxFactory::get().build(
         fmode,
         ParametersList()
-            .set<double>("mass", min)
-            .set<ParametersList>("structureFunctions",
-                                 StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
-            .set<ParametersList>(
-                "formFactors",
-                FormFactorsFactory::get()
-                    .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
-                    .parameters()));
+            .set("mass", min)
+            .set("structureFunctions", StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
+            .set("formFactors",
+                 FormFactorsFactory::get()
+                     .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
+                     .parameters()));
   return kBuiltKtFluxParameterisations.at(fmode)->fluxMX2(x, kt2, mout * mout);
 }
 

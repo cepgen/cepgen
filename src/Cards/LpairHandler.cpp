@@ -311,10 +311,10 @@ void LpairHandler::init() {
 
   //-------------------------------------------------------------------------------------------
   // General parameters
-  registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
-  registerParameter<int>("IEND", "Generation type", &iend_);
-  registerParameter<int>("DEBG", "Debugging verbosity", &log_level_);
-  registerParameter<int>("LOGE", "Extended logging", &ext_log_);
+  registerParameter("TIMR", "Enable the time ticker", &timer_);
+  registerParameter("IEND", "Generation type", &iend_);
+  registerParameter("DEBG", "Debugging verbosity", &log_level_);
+  registerParameter("LOGE", "Extended logging", &ext_log_);
   registerGenerationParameter<int>("NTHR", "Number of threads to use for events generation", "numThreads");
   registerGenerationParameter<int>("NCSG", "Number of points to probe", "numPoints");
   registerGenerationParameter<int>("NGEN", "Number of events to generate", "maxgen");
@@ -327,12 +327,12 @@ void LpairHandler::init() {
 
   //-------------------------------------------------------------------------------------------
   // Process kinematics parameters
-  registerParameter<std::string>("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
-  registerParameter<std::string>("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
-  registerParameter<std::string>("PDGI", "Input file for PDG information", &pdg_input_path_);
-  registerParameter<std::string>("PMOD", "Outgoing primary particles' mode", &pmod_);
-  registerParameter<std::string>("EMOD", "Outgoing primary particles' mode", &emod_);
-  registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
+  registerParameter("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
+  registerParameter("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
+  registerParameter("PDGI", "Input file for PDG information", &pdg_input_path_);
+  registerParameter("PMOD", "Outgoing primary particles' mode", &pmod_);
+  registerParameter("EMOD", "Outgoing primary particles' mode", &emod_);
+  registerParameter("RTYP", "R-ratio computation type", &sr_type_);
   registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
   registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
   registerKinematicsParameter<int>("MODE", "Subprocess' mode", "mode");
@@ -376,7 +376,7 @@ void LpairHandler::init() {
   registerIntegratorParameter<int>("ITMX", "Number of integration iterations", "iterations");
   registerIntegratorParameter<int>("NCVG", "Number of function calls to perform", "numFunctionCalls");
   registerProcessParameter<int>("METHOD", "Computation method (kT-factorisation)", "method");
-  registerParameter<int>("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
+  registerParameter("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
   registerKinematicsParameter<double>(
       "PTMIN", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
   registerKinematicsParameter<double>(

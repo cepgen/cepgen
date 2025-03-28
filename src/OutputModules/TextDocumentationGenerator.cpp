@@ -35,11 +35,10 @@ public:
   static ParametersDescription description() {
     auto desc = DocumentationGenerator::description();
     desc.setDescription("Bare text documentation generator");
-    desc.add<bool>("modulesOnly", false).setDescription("only list the module names (for a category)?");
-    desc.add<bool>("camelCaseModulesNames", false).setDescription("write modules in camel case?");
-    desc.add<bool>("light", false).setDescription("lightweight module description (without parameters)");
-    desc.add<bool>("dumpParameters", false)
-        .setDescription("dump the parameters list along with their parameters description?");
+    desc.add("modulesOnly", false).setDescription("only list the module names (for a category)?");
+    desc.add("camelCaseModulesNames", false).setDescription("write modules in camel case?");
+    desc.add("light", false).setDescription("lightweight module description (without parameters)");
+    desc.add("dumpParameters", false).setDescription("dump parameters list along with their parameters description?");
     return desc;
   }
 

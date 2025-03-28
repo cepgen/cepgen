@@ -25,6 +25,7 @@
 #include "CepGen/Utils/Value.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Simple event dump module
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -49,9 +50,9 @@ public:
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("Simple text-based event dumper");
-    desc.add<bool>("saveBanner", true).setDescription("Save boilerplate in output file?");
-    desc.add<int>("printEvery", 10).setDescription("Period at which events are dumped");
-    desc.add<std::string>("filename", "").setDescription("Output filename");
+    desc.add("saveBanner", true).setDescription("Save boilerplate in output file?");
+    desc.add("printEvery", 10).setDescription("Period at which events are dumped");
+    desc.add("filename", ""s).setDescription("Output filename");
     return desc;
   }
 

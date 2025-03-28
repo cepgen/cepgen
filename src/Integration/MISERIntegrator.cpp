@@ -33,13 +33,12 @@ public:
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
     desc.setDescription("MISER adaptive importance sampling integrator");
-    desc.add<int>("numFunctionCalls", 50'000)
-        .setDescription("Number of function calls per phase space point evaluation");
-    desc.add<double>("estimateFraction", 0.1);
-    desc.add<int>("minCalls", 16 * 10);
-    desc.add<int>("minCallsPerBisection", 32 * 16 * 10);
-    desc.add<double>("alpha", 2.);
-    desc.add<double>("dither", 0.1);
+    desc.add("numFunctionCalls", 50'000).setDescription("Number of function calls per phase space point evaluation");
+    desc.add("estimateFraction", 0.1);
+    desc.add("minCalls", 16 * 10);
+    desc.add("minCallsPerBisection", 32 * 16 * 10);
+    desc.add("alpha", 2.);
+    desc.add("dither", 0.1);
     return desc;
   }
 

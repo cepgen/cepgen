@@ -42,10 +42,8 @@ void EventModifier::readStrings(const std::vector<std::string>& params) {
 
 ParametersDescription EventModifier::description() {
   auto desc = EventHandler::description();
-  desc.add<int>("seed", -1).setDescription("Random number generator seed");
-  desc.add<int>("maxTrials", 1)
-      .setDescription(
-          "Maximum number of attempts to modify the event"
-          " before giving up and returning a zero-weight");
+  desc.add("seed", -1).setDescription("Random number generator seed");
+  desc.add("maxTrials", 1)
+      .setDescription("Maximum number of attempts to modify the event before giving up and returning a zero-weight");
   return desc;
 }

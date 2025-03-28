@@ -33,7 +33,7 @@ public:
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
     desc.setDescription("Plain (trial/error) integrator");
-    desc.add<int>("numFunctionCalls", 50'000);
+    desc.add("numFunctionCalls", 50'000);
     return desc;
   }
 

@@ -34,9 +34,8 @@ double AnalyticIntegrator::integrate(const std::function<double(double)>& func, 
 
 ParametersDescription AnalyticIntegrator::description() {
   auto desc = ParametersDescription();
-  desc.add<Limits>("range", Limits{0., 1.}).setDescription("integration range");
-  desc.add<ParametersDescription>("params", ParametersDescription())
-      .setDescription("parameters for the function to be integrated");
-  desc.add<int>("verbosity", 0).setDescription("integrator verbosity");
+  desc.add("range", Limits{0., 1.}).setDescription("integration range");
+  desc.add("params", ParametersDescription{}).setDescription("parameters for the integrand");
+  desc.add("verbosity", 0).setDescription("integrator verbosity");
   return desc;
 }

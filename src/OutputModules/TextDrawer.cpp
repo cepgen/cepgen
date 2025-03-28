@@ -47,8 +47,8 @@ public:
   static ParametersDescription description() {
     auto desc = Drawer::description();
     desc.setDescription("Text-based drawing module");
-    desc.add<int>("width", 50);
-    desc.add<bool>("colourise", true).setDescription("colourise the output (for TTY-compatible displays)");
+    desc.add("width", 50);
+    desc.add("colourise", true).setDescription("colourise the output (for TTY-compatible displays)");
     return desc;
   }
 

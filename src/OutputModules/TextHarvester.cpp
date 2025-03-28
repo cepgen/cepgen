@@ -20,13 +20,14 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 struct TextHarvester final : EventHarvester {
   using EventHarvester::EventHarvester;
   static ParametersDescription description() {
     auto desc = EventHarvester::description();
     desc.setDescription("Text-based event harvester");
-    desc.add<std::string>("plotter", "text");
+    desc.add("plotter", "text"s);
     return desc;
   }
 };

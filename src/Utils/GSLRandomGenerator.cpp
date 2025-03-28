@@ -26,6 +26,7 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 class GSLRandomGenerator final : public utils::RandomGenerator {
 public:
@@ -56,7 +57,7 @@ public:
   static ParametersDescription description() {
     auto desc = utils::RandomGenerator::description();
     desc.setDescription("GSL random number generator engine");
-    desc.add<std::string>("type", "mt19937")
+    desc.add("type", "mt19937"s)
         .allow("mt19937", "Mersenne-Twister generator")
         .allow("taus", "maximally equi-distributed combined Tausworthe generator by L’Ecuyer")
         .allow("taus2",

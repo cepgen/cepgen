@@ -24,6 +24,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Handler for the generic text file output
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -47,11 +48,11 @@ public:
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("Text dump of variables");
-    desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
-    desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to dump");
-    desc.add<bool>("saveBanner", true).setDescription("Also save the boilerplate in output files?");
-    desc.add<bool>("saveVariables", true).setDescription("Save the variable(s) into an output file?");
-    desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
+    desc.add("filename", "output.txt"s).setDescription("Output filename for variables dump");
+    desc.add("variables", std::vector<std::string>{}).setDescription("List of variables to dump");
+    desc.add("saveBanner", true).setDescription("Also save the boilerplate in output files?");
+    desc.add("saveVariables", true).setDescription("Save the variable(s) into an output file?");
+    desc.add("separator", "\t"s).setDescription("Base separator in output file");
     return desc;
   }
 

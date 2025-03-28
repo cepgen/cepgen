@@ -24,6 +24,7 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 class STLRandomGenerator : public utils::RandomGenerator {
 public:
@@ -60,7 +61,7 @@ public:
   static ParametersDescription description() {
     auto desc = RandomGenerator::description();
     desc.setDescription("STL random number generator engine");
-    desc.add<std::string>("type", "default")
+    desc.add("type", "default"s)
         .allow("default", "implementation-defined algorithm")
         .allow("minstd_rand0",
                "Discovered in 1969 by Lewis, Goodman and Miller, adopted as \"Minimal standard\" in 1988 by Park and "
