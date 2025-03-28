@@ -35,7 +35,7 @@ namespace cepgen {
     virtual double mass2() const = 0;                    ///< Initiator particle squared mass (in \f${\rm GeV}^2/c^4\f$)
 
   protected:
-    const double prefactor_;
+    const double alpha_over_pi_;
     const double mp_, mp2_;
     const Limits x_range_{0., 1.};
   };

@@ -51,7 +51,7 @@ public:
       return 0.;
     const auto q2min = utils::kt::q2(x, 0. /* kt2 */, mp2_);
     const auto fq4 = std::pow(1 + q2 / scale_, -4);  // Q^2-dependent form factor
-    return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) * factorA(1. + scale_ / q2min) * fq4;
+    return alpha_over_pi_ * 0.5 * (1. + std::pow(1. - x, 2)) * factorA(1. + scale_ / q2min) * fq4;
   }
 
 private:

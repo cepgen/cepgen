@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
@@ -29,12 +31,15 @@ using namespace cepgen;
 class EPACollinearFlux final : public CollinearFlux {
 public:
   explicit EPACollinearFlux(const ParametersList& params)
-      : CollinearFlux(params), ff_(FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))) {}
+      : CollinearFlux(params),
+        ff_(FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))),
+        beam_particle_mass2_(std::pow(steer<ParticleProperties>("pdgId").mass, 2)) {}
 
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("EPA FF-dependent flux");
     desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
+    desc.addAs<int, pdgid_t>("pdgId", PDG::proton).setDescription("beam particle PDG id");
     return desc;
   }
 
@@ -48,11 +53,12 @@ public:
     if (q2min == 0. || q2 < q2min)
       return 0.;
     const auto form_factors = (*ff_)(q2);
-    return prefactor_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM);
+    return alpha_over_pi_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM);
   }
 
 private:
-  double mass2() const override { return mp2_; }
+  double mass2() const override { return beam_particle_mass2_; }
   const std::unique_ptr<formfac::Parameterisation> ff_;
+  const double beam_particle_mass2_;
 };
 REGISTER_COLLINEAR_FLUX("EPAFlux", EPACollinearFlux);

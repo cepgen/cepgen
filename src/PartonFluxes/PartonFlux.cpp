@@ -24,7 +24,7 @@ using namespace cepgen;
 
 PartonFlux::PartonFlux(const ParametersList& params)
     : NamedModule(params),
-      prefactor_(constants::ALPHA_EM * M_1_PI),
+      alpha_over_pi_(constants::ALPHA_EM * M_1_PI),
       mp_(PDG::get().mass(PDG::proton)),
       mp2_(mp_ * mp_) {}
 

@@ -58,7 +58,7 @@ public:
     const double ela2 = pow(ff.GE, 2);
     //const double ela3 = kt2 / q2;
     const auto z = static_cast<unsigned short>(hi_.Z);
-    return prefactor_ * z * z * ela1 * ela2 / q2;
+    return alpha_over_pi_ * z * z * ela1 * ela2 / q2;
   }
 
   double fluxMX2(double x, double kt2, double) const override { return fluxQ2(x, kt2, utils::kt::q2(x, kt2, mass2())); }

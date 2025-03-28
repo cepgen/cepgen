@@ -53,7 +53,7 @@ public:
     const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
     const double qnorm = 1. - q2min / q2;
     const auto& formfac = (*ff_)(q2);
-    return prefactor_ * formfac.FE * qnorm * qnorm / q2;
+    return alpha_over_pi_ * formfac.FE * qnorm * qnorm / q2;
   }
 
 protected:
@@ -76,7 +76,7 @@ struct BudnevElasticNucleonKTFlux : ElasticNucleonKTFlux {
     const auto& formfac = (*ff_)(q2);
     const double f_D = formfac.FE * (1. - x) * qnorm;
     const double f_C = formfac.FM;
-    return prefactor_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
+    return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
   }
 };
 
