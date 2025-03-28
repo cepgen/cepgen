@@ -61,11 +61,11 @@ public:
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("kt-integrated coll.flux");
-    desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
+    desc.add("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
         .setDescription("Steering parameters for the analytical integrator");
-    desc.add<ParametersDescription>("ktFlux", PartonFluxFactory::get().describeParameters("BudnevElastic"))
+    desc.add("ktFlux", PartonFluxFactory::get().describeParameters("BudnevElastic"))
         .setDescription("Type of unintegrated kT-dependent parton flux");
-    desc.add<Limits>("kt2range", {0., 1.e4})
+    desc.add("kt2range", Limits{0., 1.e4})
         .setDescription("kinematic range for the parton transverse virtuality, in GeV^2");
     return desc;
   }

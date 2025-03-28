@@ -60,12 +60,12 @@ namespace cepgen::formfac {
     inline static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Arrington et al.");
-      desc.add<int>("mode", 0)
-          .setDescription("Parameterisation mode")
+      desc.add("mode", 0)
           .allow(0, "original")
           .allow(1, "fit of quoted Ge+dGe values")
           .allow(2, "fit of quoted Ge-dGe values")
-          .allow(3, "fit of quoted Ge values");
+          .allow(3, "fit of quoted Ge values")
+          .setDescription("Parameterisation mode");
       return desc;
     }
 

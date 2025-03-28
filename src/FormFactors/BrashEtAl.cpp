@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,11 +61,10 @@ namespace cepgen::formfac {
   ParametersDescription BrashEtAl::description() {
     auto desc = Parameterisation::description();
     desc.setDescription("Brash et al.");
-    desc.add<std::vector<double> >("coeffGM", {0.116, 2.874, 0.241, 1.006, 0.345})
+    desc.add("coeffGM", std::vector{0.116, 2.874, 0.241, 1.006, 0.345})
         .setDescription("coefficients for the G_M functional form");
-    desc.add<std::vector<double> >("coeffR", {0.13, 0.04})
-        .setDescription("coefficients for the G_E/G_M ratio functional form");
-    desc.add<double>("q2max", 7.7).setDescription("maximal Q^2 supported (in GeV^2)");
+    desc.add("coeffR", std::vector{0.13, 0.04}).setDescription("coefficients for the G_E/G_M ratio functional form");
+    desc.add("q2max", 7.7).setDescription("maximal Q^2 supported (in GeV^2)");
     return desc;
   }
 }  // namespace cepgen::formfac

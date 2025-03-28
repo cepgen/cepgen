@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,14 +56,12 @@ namespace cepgen::formfac {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Proton inelastic (SF)");
-      desc.add<ParametersDescription>("structureFunctions",
-                                      StructureFunctionsFactory::get().describeParameters("LUXLike"))
+      desc.add("structureFunctions", StructureFunctionsFactory::get().describeParameters("LUXLike"))
           .setDescription("type of structure functions parameterisation for the dissociative emission");
-      desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
+      desc.add("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
           .setDescription("type of numerical integrator algorithm to use");
-      desc.add<bool>("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
-      desc.add<Limits>("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.})
-          .setDescription("diffractive mass range (in GeV/c^2)");
+      desc.add("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
+      desc.add("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.}).setDescription("diffractive mass range (in GeV/c^2)");
       return desc;
     }
 

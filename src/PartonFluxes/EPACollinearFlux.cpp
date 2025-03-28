@@ -38,7 +38,7 @@ public:
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("EPA FF-dependent flux");
-    desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton).setDescription("beam particle PDG id");
     return desc;
   }

@@ -40,7 +40,7 @@ public:
   static ParametersDescription description() {
     auto desc = KTFlux::description();
     desc.setDescription("Nucl. el. photon emission");
-    desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
     return desc;
   }
   bool fragmenting() const final { return false; }
@@ -88,7 +88,7 @@ public:
   static ParametersDescription description() {
     auto desc = BudnevElasticNucleonKTFlux::description();
     desc.setDescription("Lepton el. photon emission (Budnev flux)");
-    desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
     desc.addAs<int, pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
     return desc;
   }
@@ -114,7 +114,7 @@ public:
     auto desc = ElasticNucleonKTFlux::description();
     desc.setDescription("HI el. photon emission");
     desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
-    desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
     return desc;
   }
 

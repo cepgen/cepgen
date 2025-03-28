@@ -41,7 +41,7 @@ public:
     auto desc = KTFlux::description();
     desc.setDescription("Elastic photon emission from heavy ion (from Starlight)");
     desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
-    desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
     return desc;
   }
 

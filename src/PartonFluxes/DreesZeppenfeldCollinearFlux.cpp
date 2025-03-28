@@ -38,8 +38,8 @@ public:
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("Drees-Zeppenfeld Q^{2}-dependent flux");
-    desc.add<double>("scale", 0.71).setDescription("factorisation scale (in GeV^2)");
-    desc.add<std::vector<double> >("coeffsA", {-11. / 6, 3., -1.5, 1. / 3});
+    desc.add("scale", 0.71).setDescription("factorisation scale (in GeV^2)");
+    desc.add("coeffsA", std::vector{-11. / 6, 3., -1.5, 1. / 3});
     return desc;
   }
 

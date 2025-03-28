@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,17 +42,17 @@ namespace cepgen::formfac {
     inline static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Mergell et al.");
-      desc.add<double>("a1rho", 1.0317);
-      desc.add<double>("a2rho", 5.7824);
-      desc.add<double>("b1rho", 0.0875);
-      desc.add<double>("b2rho", 0.3907);
-      desc.add<double>("c1rho", 0.3176);
-      desc.add<double>("c2rho", 0.1422);
-      desc.add<double>("d1rho", 0.5496);
-      desc.add<double>("d2rho", 0.5362);
-      desc.add<double>("q20inv", 1. / 0.35);
-      desc.add<double>("LambdaSq", 9.733);
-      desc.add<double>("gamma", 2.148);
+      desc.add("a1rho", 1.0317);
+      desc.add("a2rho", 5.7824);
+      desc.add("b1rho", 0.0875);
+      desc.add("b2rho", 0.3907);
+      desc.add("c1rho", 0.3176);
+      desc.add("c2rho", 0.1422);
+      desc.add("d1rho", 0.5496);
+      desc.add("d2rho", 0.5362);
+      desc.add("q20inv", 1. / 0.35);
+      desc.add("LambdaSq", 9.733);
+      desc.add("gamma", 2.148);
       return desc;
     }
 

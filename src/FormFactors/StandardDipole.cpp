@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,8 +33,7 @@ namespace cepgen::formfac {
       auto desc = Parameterisation::description();
       desc.setDescription("Standard dipole");
       desc.add<pdgid_t>("pdgId", PDG::proton);
-      desc.add<double>("scale", 0.71)
-          .setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
+      desc.add("scale", 0.71).setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
       return desc;
     }
 
