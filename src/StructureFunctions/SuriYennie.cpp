@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,29 +39,26 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Suri-Yennie");
-      desc.add<bool>("hasW1W2", true);
-      desc.add<double>("C1", 0.86926);
-      desc.add<double>("C2", 2.23422);
-      desc.add<double>("D1", 0.12549);
-      desc.add<double>("rho2", 0.585);
-      desc.add<double>("Cp", 0.96);
-      desc.add<double>("Bp", 0.63);
+      desc.add("hasW1W2", true);
+      desc.add("C1", 0.86926);
+      desc.add("C2", 2.23422);
+      desc.add("D1", 0.12549);
+      desc.add("rho2", 0.585);
+      desc.add("Cp", 0.96);
+      desc.add("Bp", 0.63);
       return desc;
     }
 
     inline void eval() override {
-      const double mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), dm2 = mx2 - mp2_, en = args_.q2 + dm2;  // [GeV^2]
-      const double nu_value = nu(args_.xbj, args_.q2), x_pr = args_.q2 / (args_.q2 + mx2),
-                   tau = 0.25 * args_.q2 * inv_mp_ * inv_mp_;
-      const double mq = rho2_ + args_.q2;
+      const auto mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), dm2 = mx2 - mp2_, en = args_.q2 + dm2;  // [GeV^2]
+      const auto nu_value = nu(args_.xbj, args_.q2), x_pr = args_.q2 / (args_.q2 + mx2),
+                 tau = 0.25 * args_.q2 * inv_mp_ * inv_mp_;
+      const auto mq = rho2_ + args_.q2, inv_q2 = 1. / args_.q2;
 
-      const double inv_q2 = 1. / args_.q2;
-
-      const double fm = inv_q2 * (c1_ * dm2 * std::pow(rho2_ / mq, 2) +
-                                  c2_ * mp2_ * std::pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_)));
-      const double fe = (tau * fm + d1_ * dm2 * args_.q2 * rho2_ * std::pow(dm2 * inv_mp_ / mq / en, 2)) /
-                        (1. + nu_value * nu_value * inv_q2);
-
+      const auto fm = inv_q2 * (c1_ * dm2 * std::pow(rho2_ / mq, 2) +
+                                c2_ * mp2_ * std::pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_))),
+                 fe = (tau * fm + d1_ * dm2 * args_.q2 * rho2_ * std::pow(dm2 * inv_mp_ / mq / en, 2)) /
+                      (1. + nu_value * nu_value * inv_q2);
       setFE(fe);
       setFM(fm);
       setW1(0.5 * fm * args_.q2 * inv_mp_);
@@ -81,12 +78,12 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = SuriYennie::description();
       desc.setDescription("Suri-Yennie (alternative)");
-      desc.add<double>("C1", 0.6303);
-      desc.add<double>("C2", 2.3049);
-      desc.add<double>("D1", 0.04681);
-      desc.add<double>("rho2", 1.05);
-      desc.add<double>("Cp", 1.23);
-      desc.add<double>("Bp", 0.61);
+      desc.add("C1", 0.6303);
+      desc.add("C2", 2.3049);
+      desc.add("D1", 0.04681);
+      desc.add("rho2", 1.05);
+      desc.add("Cp", 1.23);
+      desc.add("Bp", 0.61);
       return desc;
     }
   };

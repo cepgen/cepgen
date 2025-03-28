@@ -33,7 +33,7 @@ PartonicParameterisation::PartonicParameterisation(const ParametersList& params)
 ParametersDescription PartonicParameterisation::description() {
   auto desc = Parameterisation::description();
   desc.setDescription("Partonic structure functions parameterisation");
-  desc.add<int>("numFlavours", 4)
+  desc.add("numFlavours", 4)
       .setDescription("Number of parton flavours to consider in summation")
       .allow(1, "down quark only")
       .allow(2, "down+up quarks")
@@ -50,16 +50,16 @@ void PartonicParameterisation::eval() {
   for (int i = 0; i < num_flavours_; ++i) {
     const double prefactor = 1. / 9. * Q_TIMES_3.at(i) * Q_TIMES_3.at(i);
     const double xq = evalxQ2(QUARK_PDG_IDS.at(i), args_.xbj, args_.q2),
-                 xqbar = evalxQ2(-QUARK_PDG_IDS.at(i), args_.xbj, args_.q2);
+                 xq_bar = evalxQ2(-QUARK_PDG_IDS.at(i), args_.xbj, args_.q2);
     switch (mode_) {
       case Mode::full:
-        f2 += prefactor * (xq + xqbar);
+        f2 += prefactor * (xq + xq_bar);
         break;
       case Mode::valence:
-        f2 += prefactor * (xq - xqbar);
+        f2 += prefactor * (xq - xq_bar);
         break;
       case Mode::sea:
-        f2 += prefactor * (2. * xqbar);
+        f2 += prefactor * (2. * xq_bar);
         break;
     }
   }

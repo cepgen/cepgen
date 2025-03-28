@@ -1,8 +1,8 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2024  Laurent Forthomme
- *                     2016  Antoni Szczurek
- *                     2016  Volodymyr Uleshchenko
+ *  Copyright (C) 2016-2025  Laurent Forthomme
+ *                2016       Antoni Szczurek
+ *                2016       Volodymyr Uleshchenko
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Szczurek-Uleshchenko (based on GRV parton content)");
-      desc.add<double>("q2shift", 0.8);
+      desc.add("q2shift", 0.8);
       return desc;
     }
 
@@ -58,7 +58,7 @@ namespace cepgen::strfun {
 
       // standard partonic structure function
       const double F2_aux = 4. / 9. * (xuv + 2. * xus) + 1. / 9. * (xdv + 2. * xds) + 1. / 9. * (2. * xss);
-      setF2(F2_aux * args_.q2 / amu2);  // F2 corrected for low Q^2 behaviour
+      setF2(F2_aux * args_.q2 / amu2);  // corrected for low Q^2 behaviour
     }
     const float q2_shift_;  ///< \f$Q^2\f$ scale shift
   };

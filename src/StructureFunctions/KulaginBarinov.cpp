@@ -34,10 +34,12 @@
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/GridHandler.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::strfun {
   /// Kulagin and Barinov hybrid parameterisation
   /// \cite Kulagin:2021mee
-  class KulaginBarinov : public Parameterisation {
+  class KulaginBarinov final : public Parameterisation {
   public:
     explicit KulaginBarinov(const ParametersList& params)
         : Parameterisation(params),
@@ -83,8 +85,8 @@ namespace cepgen::strfun {
               grid_file >> sfs[idx_sf];  // FT, F2
               sfs[idx_sf] += sfnht(xbj, q2);
             }
-            CG_DEBUG("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector<double>{xbj, q2} << "("
-                                            << std::vector<size_t>{idx_xbj, idx_q2} << "): " << sfs;
+            CG_DEBUG("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector{xbj, q2} << "("
+                                            << std::vector{idx_xbj, idx_q2} << "): " << sfs;
             sfs_grid_.insert({xbj, q2}, sfs);
           }
         }
@@ -96,76 +98,64 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Kulagin-Barinov (hybrid)");
-      desc.add<ParametersDescription>("derivator", DerivatorFactory::get().describeParameters("gsl"));
+      desc.add("derivator", DerivatorFactory::get().describeParameters("gsl"));
       desc.addParametersDescriptionVector(
           "resonances",
           ResonanceObject::description(),
           {ParametersList()  // Delta(1232)
-               .set<double>("mass", 1.2270)
-               .set<double>("width", 0.11279)
-               .set<int>("angularMomentum", 1)
-               .set<double>("x0", 0.055384)
-               .set<std::vector<double> >("a", {0.31115, 2.0294, 1.6713, 2.76})
-               .set<std::vector<double> >("c", {0.05029, 0., 0.42522})
-               .set<ParametersList>(
-                   "branchingRatios",
-                   ParametersList().set<double>("singlePi", 1.).set<double>("doublePi", 0.).set<double>("eta", 0.)),
+               .set("mass", 1.2270)
+               .set("width", 0.11279)
+               .set("angularMomentum", 1)
+               .set("x0", 0.055384)
+               .set("a", std::vector{0.31115, 2.0294, 1.6713, 2.76})
+               .set("c", std::vector{0.05029, 0., 0.42522})
+               .set("branchingRatios", ParametersList().set("singlePi", 1.).set("doublePi", 0.).set("eta", 0.)),
            ParametersList()  // N(1440)
-               .set<double>("mass", 1.4497)
-               .set<double>("width", 0.40223)
-               .set<int>("angularMomentum", 1)
-               .set<double>("x0", 0.1125)
-               .set<std::vector<double> >("a", {0.089547, 0.18087, 0.23431, 4.1173})
-               .set<std::vector<double> >("c", {0., 0.23847, 1.4982})
-               .set<ParametersList>(
-                   "branchingRatios",
-                   ParametersList().set<double>("singlePi", 0.65).set<double>("doublePi", 0.35).set<double>("eta", 0.)),
+               .set("mass", 1.4497)
+               .set("width", 0.40223)
+               .set("angularMomentum", 1)
+               .set("x0", 0.1125)
+               .set("a", std::vector{0.089547, 0.18087, 0.23431, 4.1173})
+               .set("c", std::vector{0., 0.23847, 1.4982})
+               .set("branchingRatios", ParametersList().set("singlePi", 0.65).set("doublePi", 0.35).set("eta", 0.)),
            ParametersList()  // R1
-               .set<double>("mass", 1.5123)
-               .set<double>("width", 0.094542)
-               .set<int>("angularMomentum", 2)
-               .set<double>("x0", 0.4959)
-               .set<std::vector<double> >("a", {0.10677, 0.24897, 0.55621, 3.0798})
-               .set<std::vector<double> >("c", {0.091979, -0.10652, 1.0758})
-               .set<ParametersList>(
-                   "branchingRatios",
-                   ParametersList().set<double>("singlePi", 0.75).set<double>("doublePi", 0.25).set<double>("eta", 0.)),
+               .set("mass", 1.5123)
+               .set("width", 0.094542)
+               .set("angularMomentum", 2)
+               .set("x0", 0.4959)
+               .set("a", std::vector{0.10677, 0.24897, 0.55621, 3.0798})
+               .set("c", std::vector{0.091979, -0.10652, 1.0758})
+               .set("branchingRatios", ParametersList().set("singlePi", 0.75).set("doublePi", 0.25).set("eta", 0.)),
            ParametersList()  // R2
-               .set<double>("mass", 1.5764)
-               .set<double>("width", 0.50046)
-               .set<int>("angularMomentum", 0)
-               .set<double>("x0", 0.30969)
-               .set<std::vector<double> >("a", {0.38953, -0.17962, 0.37638, 2.9622})
-               .set<std::vector<double> >("c", {0., 0., 0.})
-               .set<ParametersList>(
-                   "branchingRatios",
-                   ParametersList().set<double>("singlePi", 0.15).set<double>("doublePi", 0.85).set<double>("eta", 0.)),
+               .set("mass", 1.5764)
+               .set("width", 0.50046)
+               .set("angularMomentum", 0)
+               .set("x0", 0.30969)
+               .set("a", std::vector{0.38953, -0.17962, 0.37638, 2.9622})
+               .set("c", std::vector{0., 0., 0.})
+               .set("branchingRatios", ParametersList().set("singlePi", 0.15).set("doublePi", 0.85).set("eta", 0.)),
            ParametersList()  // R3
-               .set<double>("mass", 1.7002)
-               .set<double>("width", 0.11768)
-               .set<int>("angularMomentum", 2)
-               .set<double>("x0", 0.25831)
-               .set<std::vector<double> >("a", {0.067075, 0.097330, 0.27891, 3.5372})
-               .set<std::vector<double> >("c", {0.12027, 0., 0.89367})
-               .set<ParametersList>("branchingRatios",
-                                    ParametersList()
-                                        .set<double>("singlePi", 0.15)
-                                        .set<double>("doublePi", 0.6)
-                                        .set<double>("eta", 0.25))});
+               .set("mass", 1.7002)
+               .set("width", 0.11768)
+               .set("angularMomentum", 2)
+               .set("x0", 0.25831)
+               .set("a", std::vector{0.067075, 0.097330, 0.27891, 3.5372})
+               .set("c", std::vector{0.12027, 0., 0.89367})
+               .set("branchingRatios", ParametersList().set("singlePi", 0.15).set("doublePi", 0.6).set("eta", 0.25))});
       // DIS block
       auto dis_desc = ParametersDescription();
-      dis_desc.add<double>("bg1l", 3.4742);
-      dis_desc.add<double>("bg2l", 0.54193);
-      dis_desc.add<double>("pml", 1.1).setDescription("exponent of t dependence for FL");
-      dis_desc.add<double>("bg1t", 0.14453);
-      dis_desc.add<double>("bg2t", 3.1297);
-      dis_desc.add<double>("pmt", 1.6302).setDescription("exponent of t dependence for FT");
-      desc.add<ParametersDescription>("disParameters", dis_desc);
+      dis_desc.add("bg1l", 3.4742);
+      dis_desc.add("bg2l", 0.54193);
+      dis_desc.add("pml", 1.1).setDescription("exponent of t dependence for FL");
+      dis_desc.add("bg1t", 0.14453);
+      dis_desc.add("bg2t", 3.1297);
+      dis_desc.add("pmt", 1.6302).setDescription("exponent of t dependence for FT");
+      desc.add("disParameters", dis_desc);
 
-      desc.add<double>("t0", 2.);
-      desc.add<Limits>("Q2range", Limits{1.e-12, 1.e3});
-      desc.add<Limits>("Q2gridRange", Limits{0.8, 1.e3}).setDescription("Q^2 range covered by the grid");
-      desc.add<std::string>("gridFile", "a08tmc.dat").setDescription("path to the DIS grid");
+      desc.add("t0", 2.);
+      desc.add("Q2range", Limits{1.e-12, 1.e3});
+      desc.add("Q2gridRange", Limits{0.8, 1.e3}).setDescription("Q^2 range covered by the grid");
+      desc.add("gridFile", "a08tmc.dat"s).setDescription("path to the DIS grid");
       return desc;
     }
 
@@ -187,8 +177,8 @@ namespace cepgen::strfun {
 
       static ParametersDescription description() {
         auto desc = ResonanceObject::description();
-        desc.add<std::vector<double> >("a", std::vector<double>(4, 0.));
-        desc.add<std::vector<double> >("c", std::vector<double>(3, 0.));
+        desc.add("a", std::vector(4, 0.));
+        desc.add("c", std::vector(3, 0.));
         return desc;
       }
 
@@ -197,7 +187,7 @@ namespace cepgen::strfun {
         const double width_t = partialWidth(kin);
         if (width_t <= 0.)
           return false;
-        // off-shell effect on electrocouplings
+        // off-shell effect on electro-couplings
         const double f_gamma = photonWidth(kin) / width_;
         const double mass2 = mass_ * mass_;
 

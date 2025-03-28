@@ -39,39 +39,39 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Fiore-Brasse (low-mass resonances)");
-      desc.add<double>("s0", 1.14);
-      desc.add<double>("norm", 0.021).setDescription("absolute normalisation factor");
+      desc.add("s0", 1.14);
+      desc.add("norm", 0.021).setDescription("absolute normalisation factor");
       // add the list of resonances
       desc.addParametersDescriptionVector("resonances",
                                           Resonance::description(),
-                                          {ParametersList()  // N*(1520)
-                                               .set<double>("alpha0", -0.8377)
-                                               .set<double>("alpha1", 0.95)
-                                               .set<double>("alpha2", 0.1473)
-                                               .set<double>("a", 1.0)
-                                               .set<double>("q02", 2.4617)
-                                               .set<int>("spinTimesTwo", 3),
-                                           ParametersList()  // N*(1680)
-                                               .set<double>("alpha0", -0.37)
-                                               .set<double>("alpha1", 0.95)
-                                               .set<double>("alpha2", 0.1471)
-                                               .set<double>("a", 0.5399)
-                                               .set<double>("q02", 2.4617)
-                                               .set<int>("spinTimesTwo", 5),
-                                           ParametersList()  // Δ(1236)
-                                               .set<double>("alpha0", 0.0038)
-                                               .set<double>("alpha1", 0.85)
-                                               .set<double>("alpha2", 0.1969)
-                                               .set<double>("a", 4.2225)
-                                               .set<double>("q02", 1.5722)
-                                               .set<int>("spinTimesTwo", 3),
-                                           ParametersList()  // exotic
-                                               .set<double>("alpha0", 0.5645)
-                                               .set<double>("alpha1", 0.1126)
-                                               .set<double>("alpha2", 1.3086)
-                                               .set<double>("a", 19.2694)
-                                               .set<double>("q02", 4.5259)
-                                               .set<int>("spinTimesTwo", 2)})
+                                          {ParametersList()
+                                               .set("alpha0", -0.8377)
+                                               .set("alpha1", 0.95)
+                                               .set("alpha2", 0.1473)
+                                               .set("a", 1.0)
+                                               .set("q02", 2.4617)
+                                               .set("spinTimesTwo", 3) /* N*(1520) */,
+                                           ParametersList()
+                                               .set("alpha0", -0.37)
+                                               .set("alpha1", 0.95)
+                                               .set("alpha2", 0.1471)
+                                               .set("a", 0.5399)
+                                               .set("q02", 2.4617)
+                                               .set("spinTimesTwo", 5) /* N*(1680) */,
+                                           ParametersList()
+                                               .set("alpha0", 0.0038)
+                                               .set("alpha1", 0.85)
+                                               .set("alpha2", 0.1969)
+                                               .set("a", 4.2225)
+                                               .set("q02", 1.5722)
+                                               .set("spinTimesTwo", 3) /* Δ(1236) */,
+                                           ParametersList()
+                                               .set("alpha0", 0.5645)
+                                               .set("alpha1", 0.1126)
+                                               .set("alpha2", 1.3086)
+                                               .set("a", 19.2694)
+                                               .set("q02", 4.5259)
+                                               .set("spinTimesTwo", 2) /* exotic */})
           .setDescription("collection of resonances parameters");
       return desc;
     }
@@ -92,12 +92,12 @@ namespace cepgen::strfun {
 
       static ParametersDescription description() {
         auto desc = ParametersDescription();
-        desc.add<double>("alpha0", 0.);
-        desc.add<double>("alpha1", 0.);
-        desc.add<double>("alpha2", 0.);
-        desc.add<double>("a", 0.).setDescription("resonance weight in total amplitude");
-        desc.add<double>("q02", 0.);
-        desc.add<int>("spinTimesTwo", 0).setDescription("spin of the resonance (x1/2)");
+        desc.add("alpha0", 0.);
+        desc.add("alpha1", 0.);
+        desc.add("alpha2", 0.);
+        desc.add("a", 0.).setDescription("resonance weight in total amplitude");
+        desc.add("q02", 0.);
+        desc.add("spinTimesTwo", 0).setDescription("spin of the resonance (x1/2)");
         return desc;
       }
 
@@ -163,39 +163,39 @@ namespace cepgen::strfun {
 
     static ParametersDescription description() {
       auto desc = FioreBrasse::description();
-      desc.add<double>("s0", 1.2871);
-      desc.add<double>("norm", 0.0207);
+      desc.add("s0", 1.2871);
+      desc.add("norm", 0.0207);
       // add the list of resonances
       desc.addParametersDescriptionVector("resonances",
                                           Resonance::description(),
-                                          {ParametersList()  // N*(1520)
-                                               .set<double>("alpha0", -0.8070)
-                                               .set<double>("alpha1", 0.9632)
-                                               .set<double>("alpha2", 0.1387)
-                                               .set<double>("a", 1.0)
-                                               .set<double>("q02", 2.6066)
-                                               .set<int>("spinTimesTwo", 3),
-                                           ParametersList()  // N*(1680)
-                                               .set<double>("alpha0", -0.3640)
-                                               .set<double>("alpha1", 0.9531)
-                                               .set<double>("alpha2", 0.1239)
-                                               .set<double>("a", 0.6086)
-                                               .set<double>("q02", 2.6066)
-                                               .set<int>("spinTimesTwo", 5),
-                                           ParametersList()  // Δ(1236)
-                                               .set<double>("alpha0", -0.0065)
-                                               .set<double>("alpha1", 0.8355)
-                                               .set<double>("alpha2", 0.2320)
-                                               .set<double>("a", 4.7279)
-                                               .set<double>("q02", 1.4828)
-                                               .set<int>("spinTimesTwo", 3),
-                                           ParametersList()  // exotic
-                                               .set<double>("alpha0", 0.5484)
-                                               .set<double>("alpha1", 0.1373)
-                                               .set<double>("alpha2", 1.3139)
-                                               .set<double>("a", 14.7267)
-                                               .set<double>("q02", 4.6041)
-                                               .set<int>("spinTimesTwo", 2)});
+                                          {ParametersList()
+                                               .set("alpha0", -0.8070)
+                                               .set("alpha1", 0.9632)
+                                               .set("alpha2", 0.1387)
+                                               .set("a", 1.0)
+                                               .set("q02", 2.6066)
+                                               .set("spinTimesTwo", 3) /* N*(1520) */,
+                                           ParametersList()
+                                               .set("alpha0", -0.3640)
+                                               .set("alpha1", 0.9531)
+                                               .set("alpha2", 0.1239)
+                                               .set("a", 0.6086)
+                                               .set("q02", 2.6066)
+                                               .set("spinTimesTwo", 5) /* N*(1680) */,
+                                           ParametersList()
+                                               .set("alpha0", -0.0065)
+                                               .set("alpha1", 0.8355)
+                                               .set("alpha2", 0.2320)
+                                               .set("a", 4.7279)
+                                               .set("q02", 1.4828)
+                                               .set("spinTimesTwo", 3) /* Δ(1236) */,
+                                           ParametersList()
+                                               .set("alpha0", 0.5484)
+                                               .set("alpha1", 0.1373)
+                                               .set("alpha2", 1.3139)
+                                               .set("a", 14.7267)
+                                               .set("q02", 4.6041)
+                                               .set("spinTimesTwo", 2) /* exotic */});
       return desc;
     }
   };

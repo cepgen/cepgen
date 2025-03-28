@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,14 +25,15 @@
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::strfun {
   /// CLAS parameterisation for nucleon data at \f$Q^2\f$ > 0.5 GeV\f$^2\f$ and \f$x_{\rm Bj}\f$ > 0.15
   /// \note This code was provided on 2016-04-13 by Silvano Simula and reflects the parameterisation used in \cite Osipenko:2003bu (CLAS) and described in \cite Ricco:1998yr.
-  class CLAS : public Parameterisation {
+  class CLAS final : public Parameterisation {
   public:
     explicit CLAS(const ParametersList& params) : Parameterisation(params), mpi0_(PDG::get().mass(PDG::piZero)) {
-      const auto& model = steer<std::string>("model");
-      if (model == "proton")
+      if (const auto& model = steer<std::string>("model"); model == "proton")
         mod_params_ = Parameters::standard_proton();
       else if (model == "neutron")
         mod_params_ = Parameters::standard_neutron();
@@ -45,11 +46,11 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("CLAS");
-      desc.add<std::string>("model", "proton")
-          .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)")
+      desc.add("model", "proton"s)
           .allow("proton", "parton-from-proton")
           .allow("deuteron", "parton-from-deuteron")
-          .allow("neutron", "parton-from-neutron");
+          .allow("neutron", "parton-from-neutron")
+          .setDescription("Nucleon modelling");
       return desc;
     }
 

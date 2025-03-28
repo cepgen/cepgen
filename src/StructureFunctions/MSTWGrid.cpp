@@ -26,12 +26,13 @@
 #include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Utils/String.h"
 
-/// Martin-Stirling-Thorne-Watt PDFs structure functions
+using namespace std::string_literals;
+
+/// Martin-Stirling-Thorne-Watt environment
 namespace mstw {
-  /// A \f$F_{2,L}\f$ grid interpolator
+  /// A MSTW \f$F_{2,L}\f$ structure functions grid interpolator
   class Grid final : public cepgen::strfun::Parameterisation, cepgen::GridHandler<2, 2> {
   public:
-    /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList& params)
         : Parameterisation(params), GridHandler(cepgen::GridType::logarithmic) {
       {  // file readout part
@@ -43,16 +44,13 @@ namespace mstw {
         file.read(reinterpret_cast<char*>(&header_), sizeof(header_t));
 
         // first checks on the file header
-
         if (header_.magic != GOOD_MAGIC)
           throw CG_FATAL("MSTW") << "Wrong magic number retrieved: " << header_.magic << ", expecting " << GOOD_MAGIC
                                  << ".";
-
         if (header_.nucleon != header_t::proton)
           throw CG_FATAL("MSTW") << "Only proton structure function grids can be retrieved for this purpose!";
 
         // retrieve all points and evaluate grid boundaries
-
         sfval_t val{};
         while (file.read(reinterpret_cast<char*>(&val), sizeof(sfval_t)))
           insert({val.xbj, val.q2}, {val.f2, val.fl});
@@ -70,22 +68,16 @@ namespace mstw {
     static cepgen::ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("MSTW grid (perturbative)");
-      desc.add<std::string>("gridPath", "mstw_sf_scan_nnlo.dat").setDescription("Path to the MSTW grid content");
+      desc.add("gridPath", "mstw_sf_scan_nnlo.dat"s).setDescription("Path to the MSTW grid content");
       return desc;
     }
 
     /// Grid header information as parsed from the file
     struct header_t {
-      /// Interpolation order
-      enum order_t : unsigned short { lo = 0, nlo = 1, nnlo = 2 };
-      /// Confidence level
-      enum cl_t : unsigned short { cl68 = 0, cl95 = 1 };
-      /// Type of nucleon interpolated
-      enum nucleon_t : unsigned short { proton = 1, neutron = 2 };
-      unsigned int magic;  ///< Grid file magic number
-      order_t order;       ///< Interpolation order
-      cl_t cl;             ///< Confidence level
-      nucleon_t nucleon;   ///< Type of nucleon interpolated
+      unsigned int magic;                                                   ///< Grid file magic number
+      enum order_t : unsigned short { lo = 0, nlo = 1, nnlo = 2 } order;    ///< Interpolation order
+      enum cl_t : unsigned short { cl68 = 0, cl95 = 1 } cl;                 ///< Confidence level
+      enum nucleon_t : unsigned short { proton = 1, neutron = 2 } nucleon;  ///< Type of nucleon interpolated
     };
     /// Structure functions value at a given \f$Q^2/x_{\rm Bj}\f$ coordinate
     struct sfval_t {
@@ -97,7 +89,7 @@ namespace mstw {
 
     /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
     void eval() override {
-      const auto& val = cepgen::GridHandler<2, 2>::eval({args_.xbj, args_.q2});
+      const auto& val = GridHandler::eval({args_.xbj, args_.q2});
       setF2(val.at(0));
       setFL(val.at(1));
     }

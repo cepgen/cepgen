@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *                2017       Wolfgang Schaefer
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -57,9 +57,9 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("LUXlike (hybrid)");
-      desc.add<double>("Q2cut", 9.);
-      desc.add<std::vector<double> >("W2limits", {3., 4.});
-      desc.add<double>("higherTwist", 5.5);
+      desc.add("Q2cut", 9.);
+      desc.add("W2limits", std::vector{3., 4.});
+      desc.add("higherTwist", 5.5);
       desc.add("resonancesSF", StructureFunctionsFactory::get().describeParameters("ChristyBosted"));
       desc.add("perturbativeSF", StructureFunctionsFactory::get().describeParameters("MSTWGrid"));
       desc.add("continuumSF", StructureFunctionsFactory::get().describeParameters("GD11p"));

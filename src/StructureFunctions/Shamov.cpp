@@ -31,14 +31,14 @@ namespace cepgen::strfun {
       auto desc = Parameterisation::description();
       desc.setDescription("Shamov (hybrid, soft)");
       desc.addAs<int, Mode>("mode", Mode::RealResAndNonRes).setDescription("sub-structure functions choice");
-      desc.add<int>("fitModel", 2);
-      desc.add<double>("q20", 0.65 /* 0.36 */)
+      desc.add("fitModel", 2);
+      desc.add("q20", 0.65 /* 0.36 */)
           .setDescription("first parameter for non-resonant gamma-p cross section q^2 dependence");
-      desc.add<double>("rPower", 0.71 /* 0.52 */)
+      desc.add("rPower", 0.71 /* 0.52 */)
           .setDescription("second parameter for non-resonant gamma-p cross section q^2 dependence");
-      desc.add<double>("gm0", 1.).setDescription("scaling factor for the magnetic form factor template fit");
-      desc.add<double>("gmb", 0.984).setDescription("exponential parameter for the magnetic form factor template fit");
-      desc.add<double>("lowQ2", 1.e-7);
+      desc.add("gm0", 1.).setDescription("scaling factor for the magnetic form factor template fit");
+      desc.add("gmb", 0.984).setDescription("exponential parameter for the magnetic form factor template fit");
+      desc.add("lowQ2", 1.e-7);
       return desc;
     }
 

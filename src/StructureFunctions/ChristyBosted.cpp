@@ -69,8 +69,8 @@ namespace cepgen::strfun {
         q2_eff = q20_ + delq2 / (1. + delq2 / (q21_ - q20_));
         w2_eff = utils::mX2(args_.xbj, q2_eff, mp2_);
       }
-      const double sigT = resmod507(Polarisation::transverse, w2_eff, q2_eff);
-      const double sigL = resmod507(Polarisation::longitudinal, w2_eff, q2_eff);
+      const double sigT = resmod507(transverse, w2_eff, q2_eff);
+      const double sigL = resmod507(longitudinal, w2_eff, q2_eff);
 
       double f2 = prefactor_ * (1. - args_.xbj) * q2_eff / gamma2(args_.xbj, q2_eff) * (sigT + sigL) /
                   constants::GEVM2_TO_PB * 1.e6;
@@ -106,9 +106,9 @@ namespace cepgen::strfun {
 
       static ParametersDescription description() {
         auto desc = ResonanceObject::description();
-        desc.add<double>("A0T", 0.);
-        desc.add<double>("A0L", 0.);
-        desc.add<std::vector<double> >("fitParameters", std::vector<double>(5, 0.));
+        desc.add("A0T", 0.);
+        desc.add("A0L", 0.);
+        desc.add("fitParameters", std::vector(5, 0.));
         return desc;
       }
 
@@ -151,18 +151,16 @@ namespace cepgen::strfun {
       static ParametersDescription description() {
         auto desc = ParametersDescription();
         desc.setDescription("Set of parameters for one given direction");
-        desc.add<double>("sig0", 0.);
-        desc.add<std::vector<double> >("fitParameters", std::vector<double>(4, 0.));
+        desc.add("sig0", 0.);
+        desc.add("fitParameters", std::vector(4, 0.));
         return desc;
       }
       double sig0;
       std::vector<double> fit_pars;
     };
-    double m0_;
-    /// Collection of resonance parameterisations
-    std::vector<Resonance> resonances_;
-    /// Three-dimensional parameterisation of the continuum
-    std::vector<ContinuumDirection> continuum_;
+    const double m0_;
+    std::vector<Resonance> resonances_;          ///< Collection of resonance parameterisations
+    std::vector<ContinuumDirection> continuum_;  ///< Three-dimensional parameterisation of the continuum
     const double q20_;
     const double q21_;
     const double mpi_, mpi2_;
@@ -170,8 +168,7 @@ namespace cepgen::strfun {
   };
 
   double ChristyBosted::resmod507(const Polarisation& pol, double w2, double q2) const {
-    const double w = sqrt(w2);
-    const double q20 = pol == Polarisation::transverse ? 0.05 : 0.125;
+    const double w = sqrt(w2), q20 = pol == transverse ? 0.05 : 0.125;
 
     //--- kinematics needed for threshold relativistic B-W
     const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
@@ -183,25 +180,23 @@ namespace cepgen::strfun {
         });
 
     //--- non-resonant background calculation
-    const double xpr = 1. / (1. + (w2 - mx_min_ * mx_min_) / (q2 + q20));
+    const auto xpr = 1. / (1. + (w2 - mx_min_ * mx_min_) / (q2 + q20));
     if (xpr > 1.)
       return 0.;
 
     double sig_nr = 0.;
     switch (pol) {
-      case Polarisation::transverse: {  // transverse
-        const double wdif = w - mx_min_;
-        if (wdif >= 0.) {
+      case transverse: {
+        if (const double wdif = w - mx_min_; wdif >= 0.) {
           for (unsigned short i = 0; i < 2; ++i) {
             const auto& dir = continuum_.at(i);  // direction for this continuum
             const double expo = dir.fit_pars.at(1) + dir.fit_pars.at(2) * q2 + dir.fit_pars.at(3) * q2 * q2;
             sig_nr += dir.sig0 / pow(q2 + dir.fit_pars.at(0), expo) * pow(wdif, i + 1.5);
           }
         }
-
         sig_nr *= xpr;
       } break;
-      case Polarisation::longitudinal: {  // longitudinal
+      case longitudinal: {
         const auto& dir = continuum_.at(2);
         const double expo = dir.fit_pars.at(0);
         const double xb = utils::xBj(q2, mp2_, w2);
@@ -217,111 +212,91 @@ namespace cepgen::strfun {
   ParametersDescription ChristyBosted::description() {
     auto desc = Parameterisation::description();
     desc.setDescription("Christy-Bosted (low-mass resonances)");
-    desc.add<double>("m0", 4.2802);
-    desc.add<double>("q20", 8.).setDescription("Q^2 scale for the modification of the parameterisation");
-    desc.add<double>("q21", 30.);
+    desc.add("m0", 4.2802);
+    desc.add("q20", 8.).setDescription("Q^2 scale for the modification of the parameterisation");
+    desc.add("q21", 30.);
     desc.addParametersDescriptionVector(
         "continuum",
         ContinuumDirection::description(),
         {// transverse direction x
-         ParametersList()
-             .set<double>("sig0", 246.06)
-             .set<std::vector<double> >("fitParameters", {0.067469, 1.3501, 0.12054, -0.0038495}),
+         ParametersList().set("sig0", 246.06).set("fitParameters", std::vector{0.067469, 1.3501, 0.12054, -0.0038495}),
          // transverse direction y
-         ParametersList()
-             .set<double>("sig0", -89.360)
-             .set<std::vector<double> >("fitParameters", {0.20977, 1.5715, 0.090736, 0.010362}),
+         ParametersList().set("sig0", -89.360).set("fitParameters", std::vector{0.20977, 1.5715, 0.090736, 0.010362}),
          // longitudinal direction z
-         ParametersList()
-             .set<double>("sig0", 86.746)
-             .set<std::vector<double> >("fitParameters", {4.0294, 3.1285, 0.33403, 4.9623})});
+         ParametersList().set("sig0", 86.746).set("fitParameters", std::vector{4.0294, 3.1285, 0.33403, 4.9623})});
     desc.addParametersDescriptionVector(
             "resonances",
             Resonance::description(),
             {//--- P33(1232)
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 1.).set<double>("doublePi", 0.).set<double>("eta", 0.))
-                 .set<int>("angularMomentum", 1)
-                 .set<double>("x0", 0.14462 /* 0.15 */)
-                 .set<double>("mass", 1.2298)
-                 .set<double>("width", 0.13573)
-                 .set<std::vector<double> >("fitParameters", {4.2291, 1.2598, 2.1242, 19.910, 0.22587})
-                 .set<double>("A0T", 7.7805)
-                 .set<double>("A0L", 29.414),
+                 .set("branchingRatios", ParametersList().set("singlePi", 1.).set("doublePi", 0.).set("eta", 0.))
+                 .set("angularMomentum", 1)
+                 .set("x0", 0.14462 /* 0.15 */)
+                 .set("mass", 1.2298)
+                 .set("width", 0.13573)
+                 .set("fitParameters", std::vector{4.2291, 1.2598, 2.1242, 19.910, 0.22587})
+                 .set("A0T", 7.7805)
+                 .set("A0L", 29.414),
              //--- S11(1535)
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 0.45).set<double>("doublePi", 0.1).set<double>("eta", 0.45))
-                 .set<int>("angularMomentum", 0)
-                 .set<double>("x0", 0.215)
-                 .set<double>("mass", 1.5304)
-                 .set<double>("width", 0.220)
-                 .set<std::vector<double> >("fitParameters", {6823.2, 33521., 2.5686, 0., 0.})
-                 .set<double>("A0T", 6.3351)
-                 .set<double>("A0L", 0.),
+                 .set("branchingRatios", ParametersList().set("singlePi", 0.45).set("doublePi", 0.1).set("eta", 0.45))
+                 .set("angularMomentum", 0)
+                 .set("x0", 0.215)
+                 .set("mass", 1.5304)
+                 .set("width", 0.220)
+                 .set("fitParameters", std::vector{6823.2, 33521., 2.5686, 0., 0.})
+                 .set("A0T", 6.3351)
+                 .set("A0L", 0.),
              //--- D13(1520)
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 0.65).set<double>("doublePi", 0.35).set<double>("eta", 0.))
-                 .set<int>("angularMomentum", 2)
-                 .set<double>("x0", 0.215)
-                 .set<double>("mass", 1.5057)
-                 .set<double>("width", 0.082956)
-                 .set<std::vector<double> >("fitParameters", {21.240, 0.055746, 2.4886, 97.046, 0.31042})
-                 .set<double>("A0T", 0.60347)
-                 .set<double>("A0L", 157.92),
+                 .set("branchingRatios", ParametersList().set("singlePi", 0.65).set("doublePi", 0.35).set("eta", 0.))
+                 .set("angularMomentum", 2)
+                 .set("x0", 0.215)
+                 .set("mass", 1.5057)
+                 .set("width", 0.082956)
+                 .set("fitParameters", std::vector{21.240, 0.055746, 2.4886, 97.046, 0.31042})
+                 .set("A0T", 0.60347)
+                 .set("A0L", 157.92),
              //--- F15(1680)
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 0.65).set<double>("doublePi", 0.35).set<double>("eta", 0.))
-                 .set<int>("angularMomentum", 3)
-                 .set<double>("x0", 0.215)
-                 .set<double>("mass", 1.6980)
-                 .set<double>("width", 0.095782)
-                 .set<std::vector<double> >("fitParameters", {-0.28789, 0.18607, 0.063534, 0.038200, 1.2182})
-                 .set<double>("A0T", 2.3305)
-                 .set<double>("A0L", 4.2160),
+                 .set("branchingRatios", ParametersList().set("singlePi", 0.65).set("doublePi", 0.35).set("eta", 0.))
+                 .set("angularMomentum", 3)
+                 .set("x0", 0.215)
+                 .set("mass", 1.6980)
+                 .set("width", 0.095782)
+                 .set("fitParameters", std::vector{-0.28789, 0.18607, 0.063534, 0.038200, 1.2182})
+                 .set("A0T", 2.3305)
+                 .set("A0L", 4.2160),
              //--- S11(1650)
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 0.4).set<double>("doublePi", 0.5).set<double>("eta", 0.1))
-                 .set<int>("angularMomentum", 0)
-                 .set<double>("x0", 0.215)
-                 .set<double>("mass", 1.6650)
-                 .set<double>("width", 0.10936)
-                 .set<std::vector<double> >("fitParameters", {-0.56175, 0.38964, 0.54883, 0.31393, 2.9997})
-                 .set<double>("A0T", 1.9790)
-                 .set<double>("A0L", 13.764),
+                 .set("branchingRatios", ParametersList().set("singlePi", 0.4).set("doublePi", 0.5).set("eta", 0.1))
+                 .set("angularMomentum", 0)
+                 .set("x0", 0.215)
+                 .set("mass", 1.6650)
+                 .set("width", 0.10936)
+                 .set("fitParameters", std::vector{-0.56175, 0.38964, 0.54883, 0.31393, 2.9997})
+                 .set("A0T", 1.9790)
+                 .set("A0L", 13.764),
              //--- P11(1440) roper
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 0.65).set<double>("doublePi", 0.35).set<double>("eta", 0.))
-                 .set<int>("angularMomentum", 1)
-                 .set<double>("x0", 0.215)
-                 .set<double>("mass", 1.4333)
-                 .set<double>("width", 0.37944)
-                 .set<std::vector<double> >("fitParameters", {46.213, 0.19221, 1.9141, 0.053743, 1.3091})
-                 .set<double>("A0T", 0.022506)
-                 .set<double>("A0L", 5.5124),
+                 .set("branchingRatios", ParametersList().set("singlePi", 0.65).set("doublePi", 0.35).set("eta", 0.))
+                 .set("angularMomentum", 1)
+                 .set("x0", 0.215)
+                 .set("mass", 1.4333)
+                 .set("width", 0.37944)
+                 .set("fitParameters", std::vector{46.213, 0.19221, 1.9141, 0.053743, 1.3091})
+                 .set("A0T", 0.022506)
+                 .set("A0L", 5.5124),
              //--- F37(1950)
              ParametersList()
-                 .set<ParametersList>(
-                     "branchingRatios",
-                     ParametersList().set<double>("singlePi", 0.5).set<double>("doublePi", 0.5).set<double>("eta", 0.))
-                 .set<int>("angularMomentum", 3)
-                 .set<double>("x0", 0.215)
-                 .set<double>("mass", 1.9341)
-                 .set<double>("width", 0.380)
-                 .set<std::vector<double> >("fitParameters", {0., 0., 1., 1.8951, 0.51376})
-                 .set<double>("A0T", 3.4187)
-                 .set<double>("A0L", 1.8951)})
+                 .set("branchingRatios", ParametersList().set("singlePi", 0.5).set("doublePi", 0.5).set("eta", 0.))
+                 .set("angularMomentum", 3)
+                 .set("x0", 0.215)
+                 .set("mass", 1.9341)
+                 .set("width", 0.380)
+                 .set("fitParameters", std::vector{0., 0., 1., 1.8951, 0.51376})
+                 .set("A0T", 3.4187)
+                 .set("A0L", 1.8951)})
         .setDescription("collection of resonances modelled in this fit");
 
     return desc;

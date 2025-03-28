@@ -65,11 +65,11 @@ namespace cepgen::sigrat {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("E143 (experimental)");
-      desc.add<double>("q2_b", 0.34);
-      desc.add<double>("lambda2", 0.2 * 0.2);
-      desc.add<std::vector<double> >("a", {0.0485, 0.5470, 2.0621, -0.3804, 0.5090, -0.0285});
-      desc.add<std::vector<double> >("b", {0.0481, 0.6114, -0.3509, -0.4611, 0.7172, -0.0317});
-      desc.add<std::vector<double> >("c", {0.0577, 0.4644, 1.8288, 12.3708, -43.1043, 41.7415});
+      desc.add("q2_b", 0.34);
+      desc.add("lambda2", 0.2 * 0.2);
+      desc.add("a", std::vector{0.0485, 0.5470, 2.0621, -0.3804, 0.5090, -0.0285});
+      desc.add("b", std::vector{0.0481, 0.6114, -0.3509, -0.4611, 0.7172, -0.0317});
+      desc.add("c", std::vector{0.0577, 0.4644, 1.8288, 12.3708, -43.1043, 41.7415});
       return desc;
     }
 
@@ -113,8 +113,8 @@ namespace cepgen::sigrat {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("SLAC (experimental)");
-      desc.add<double>("lambda2", 0.04);
-      desc.add<std::vector<double> >("b", {0.0635, 0.5747, -0.3534});
+      desc.add("lambda2", 0.04);
+      desc.add("b", std::vector{0.0635, 0.5747, -0.3534});
       return desc;
     }
 
@@ -145,9 +145,9 @@ namespace cepgen::sigrat {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("CLAS (experimental)");
-      desc.add<std::vector<double> >("p", {0.041, 0.592, 0.331});
-      desc.add<double>("wth", 2.5);
-      desc.add<double>("q20", 0.3);
+      desc.add("p", std::vector{0.041, 0.592, 0.331});
+      desc.add("wth", 2.5);
+      desc.add("q20", 0.3);
       return desc;
     }
 
@@ -184,17 +184,16 @@ namespace cepgen::sigrat {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Sibirtsev-Blunden (theoretical)");
-      desc.add<double>("a", 0.014);
-      desc.add<double>("b1", -0.07);
-      desc.add<double>("b2", -0.8);
-      desc.add<double>("c", 41.);
+      desc.add("a", 0.014);
+      desc.add("b1", -0.07);
+      desc.add("b2", -0.8);
+      desc.add("c", 41.);
       return desc;
     }
 
     double operator()(double /* xbj */, double q2, double& err) const override {
       err = 0.;
-      //--- equation (10) of reference paper
-      return a_ * q2 * (exp(b1_ * q2) + c_ * exp(b2_ * q2));
+      return a_ * q2 * (exp(b1_ * q2) + c_ * exp(b2_ * q2));  // equation (10) of reference paper
     }
 
   private:
