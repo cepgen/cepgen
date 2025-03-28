@@ -40,8 +40,8 @@ NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
 
 ParametersDescription NachtmannAmplitudes::EFTParameters::description() {
   auto desc = ParametersDescription();
-  desc.add<double>("s1", 0.);
-  desc.add<double>("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
+  desc.add("s1", 0.);
+  desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
   return desc;
 }
 
@@ -243,7 +243,7 @@ std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, 
 ParametersDescription NachtmannAmplitudes::description() {
   auto desc = ParametersDescription();
   desc.addAs<int, Mode>("model", Mode::SM).setDescription("SM/anomalous model to consider");
-  desc.add<ParametersDescription>("eftParameters", EFTParameters::description());
+  desc.add("eftParameters", EFTParameters::description());
   return desc;
 }
 

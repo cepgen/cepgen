@@ -34,7 +34,7 @@ public:
   static ParametersDescription description() {
     auto desc = Coupling::description();
     desc.setDescription("Running alpha(EM) evolution algorithm");
-    desc.add<double>("c", 1.).setDescription(
+    desc.add("c", 1.).setDescription(
         "running parameter (0 is constant alphaQED, 1 is QED evolution, best L3 fit value is 1.05 +- 0.07 +- 0.14)");
     return desc;
   }

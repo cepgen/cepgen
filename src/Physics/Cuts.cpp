@@ -73,19 +73,19 @@ bool Central::contain(const Particles& parts, const Event*) const {
 
 ParametersDescription Central::description() {
   auto desc = ParametersDescription();
-  desc.add<Limits>("pt", Limits{0.}).setDescription("Single particle pt (GeV/c)");
-  desc.add<Limits>("eta", Limits{}).setDescription("Single particle eta");
-  desc.add<Limits>("phi", Limits{0., 2. * M_PI}).setDescription("Single particle azimuthal angle");
-  desc.add<Limits>("rapidity", Limits{}).setDescription("Single particle rapidity");
-  desc.add<Limits>("energy", Limits{}).setDescription("Single particle energy (GeV)");
-  desc.add<Limits>("mass", Limits{}).setDescription("Single particle mass (GeV/c^2)");
-  desc.add<Limits>("ptsum", Limits{}).setDescription("System pt (GeV/c)");
-  desc.add<Limits>("etasum", Limits{}).setDescription("System eta");
-  desc.add<Limits>("energysum", Limits{}).setDescription("System energy (GeV)");
-  desc.add<Limits>("invmass", Limits{}).setDescription("System mass (GeV/c^2)");
-  desc.add<Limits>("ptdiff", Limits{}).setDescription("System D(pt) (GeV/c)");
-  desc.add<Limits>("dphi", Limits{}).setDescription("System D(phi) (rad)");
-  desc.add<Limits>("rapiditydiff", Limits{}).setDescription("System D(Y)");
+  desc.add("pt", Limits{0.}).setDescription("Single particle pt (GeV/c)");
+  desc.add("eta", Limits{}).setDescription("Single particle eta");
+  desc.add("phi", Limits{0., 2. * M_PI}).setDescription("Single particle azimuthal angle");
+  desc.add("rapidity", Limits{}).setDescription("Single particle rapidity");
+  desc.add("energy", Limits{}).setDescription("Single particle energy (GeV)");
+  desc.add("mass", Limits{}).setDescription("Single particle mass (GeV/c^2)");
+  desc.add("ptsum", Limits{}).setDescription("System pt (GeV/c)");
+  desc.add("etasum", Limits{}).setDescription("System eta");
+  desc.add("energysum", Limits{}).setDescription("System energy (GeV)");
+  desc.add("invmass", Limits{}).setDescription("System mass (GeV/c^2)");
+  desc.add("ptdiff", Limits{}).setDescription("System D(pt) (GeV/c)");
+  desc.add("dphi", Limits{}).setDescription("System D(phi) (rad)");
+  desc.add("rapiditydiff", Limits{}).setDescription("System D(Y)");
   return desc;
 }
 
@@ -164,8 +164,8 @@ bool Remnants::contain(const Particles& parts, const Event* evt) const {
 
 ParametersDescription Remnants::description() {
   auto desc = ParametersDescription();
-  desc.add<Limits>("mx", Limits{Remnants::MX_MIN, 1.e3}).setDescription("Diffractive mass (GeV/c^2)");
-  desc.add<Limits>("yj", Limits{}).setDescription("Diffractive jet rapidity");
-  desc.add<Limits>("xi", Limits{}).setDescription("Longit.fract.mom. loss (\"xi\")");
+  desc.add("mx", Limits{MX_MIN, 1.e3}).setDescription("Diffractive mass (GeV/c^2)");
+  desc.add("yj", Limits{}).setDescription("Diffractive jet rapidity");
+  desc.add("xi", Limits{}).setDescription("Longit.fract.mom. loss (\"xi\")");
   return desc;
 }

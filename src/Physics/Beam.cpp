@@ -33,7 +33,7 @@ Beam::Beam(const ParametersList& params)
 ParametersDescription Beam::description() {
   auto desc = ParametersDescription();
   desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
-  desc.add<double>("pz", 0.);
+  desc.add("pz", 0.);
   return desc;
 }
 

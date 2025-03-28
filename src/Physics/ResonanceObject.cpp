@@ -42,11 +42,11 @@ ResonanceObject::ResonanceObject(const ParametersList& params)
 ParametersDescription ResonanceObject::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Set of physical properties for one resonance");
-  desc.add<ParametersDescription>("branchingRatios", BranchingRatios::description());
-  desc.add<int>("angularMomentum", 0).setDescription("meson angular momentum");
-  desc.add<double>("x0", 0.).setDescription("damping parameter");
-  desc.add<double>("mass", 0.).setDescription("mass, in GeV/c^2");
-  desc.add<double>("width", 0.).setDescription("full width, in GeV");
+  desc.add("branchingRatios", BranchingRatios::description());
+  desc.add("angularMomentum", 0).setDescription("meson angular momentum");
+  desc.add("x0", 0.).setDescription("damping parameter");
+  desc.add("mass", 0.).setDescription("mass, in GeV/c^2");
+  desc.add("width", 0.).setDescription("full width, in GeV");
   return desc;
 }
 
@@ -106,8 +106,8 @@ ResonanceObject::BranchingRatios::BranchingRatios(const ParametersList& params)
 
 ParametersDescription ResonanceObject::BranchingRatios::description() {
   auto desc = ParametersDescription();
-  desc.add<double>("singlePi", 0.).setDescription("branching fraction for a resonance decay into a single pion");
-  desc.add<double>("doublePi", 0.).setDescription("branching fraction for a resonance decay into a pion pair");
-  desc.add<double>("eta", 0.).setDescription("branching fraction for a resonance decay into an eta");
+  desc.add("singlePi", 0.).setDescription("branching fraction for a resonance decay into a single pion");
+  desc.add("doublePi", 0.).setDescription("branching fraction for a resonance decay into a pion pair");
+  desc.add("eta", 0.).setDescription("branching fraction for a resonance decay into an eta");
   return desc;
 }

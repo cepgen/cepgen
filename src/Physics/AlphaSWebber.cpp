@@ -43,9 +43,9 @@ public:
   static ParametersDescription description() {
     auto desc = Coupling::description();
     desc.setDescription("Webber alpha(S) evolution algorithm");
-    desc.add<int>("Nc", 3).setDescription("number of colours considered");
-    desc.add<int>("nf", 3).setDescription("number of fermion flavours considered");
-    desc.add<double>("Lambda", 0.25).setDescription("evolution scale (in GeV)");
+    desc.add("Nc", 3).setDescription("number of colours considered");
+    desc.add("nf", 3).setDescription("number of fermion flavours considered");
+    desc.add("Lambda", 0.25).setDescription("evolution scale (in GeV)");
     return desc;
   }
 

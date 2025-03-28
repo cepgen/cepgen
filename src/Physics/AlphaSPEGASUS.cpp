@@ -51,10 +51,10 @@ public:
   static ParametersDescription description() {
     auto desc = Coupling::description();
     desc.setDescription("PEGASUS alpha(S) evolution algorithm");
-    desc.add<int>("iord", 2).setDescription("Evolution order");
-    desc.add<double>("fr2", 1.);
-    desc.add<double>("mur", 1.);
-    desc.add<double>("asmur", 0.49128);
+    desc.add("iord", 2).setDescription("Evolution order");
+    desc.add("fr2", 1.);
+    desc.add("mur", 1.);
+    desc.add("asmur", 0.49128);
     return desc;
   }
 

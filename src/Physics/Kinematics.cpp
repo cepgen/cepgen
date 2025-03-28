@@ -21,6 +21,7 @@
 #include "CepGen/Utils/Message.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
@@ -36,7 +37,7 @@ void Kinematics::setParameters(const ParametersList& params) {
       minimum_final_state_.emplace_back(static_cast<pdgid_t>(pdg));
 
   if (const auto kmr_grid_path = steerPath("kmrGridPath"); !kmr_grid_path.empty())  // grid path for gluon emission
-    kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
+    kmr::GluonGrid::get(ParametersList(params_).set("path", kmr_grid_path));
 }
 
 const ParametersList& Kinematics::parameters() const {
@@ -53,6 +54,6 @@ ParametersDescription Kinematics::description() {
   auto desc = ParametersDescription();
   desc += IncomingBeams::description();
   desc += CutsList::description();
-  desc.add<std::string>("kmrGridPath", "").setDescription("path to the KMR interpolation grid");
+  desc.add("kmrGridPath", ""s).setDescription("path to the KMR interpolation grid");
   return desc;
 }

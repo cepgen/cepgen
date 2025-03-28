@@ -101,8 +101,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   else if (p1z * p2z > 0. && p2z > 0.)
     p2z *= -1.;
 
-  plist_pos.set<double>("pz", +fabs(p1z)).set<int>("pdgId", pos_pdg);
-  plist_neg.set<double>("pz", -fabs(p2z)).set<int>("pdgId", neg_pdg);
+  plist_pos.set("pz", +fabs(p1z)).set<int>("pdgId", pos_pdg);
+  plist_neg.set("pz", -fabs(p2z)).set<int>("pdgId", neg_pdg);
 
   //--- form factors
   ParametersList pos_formfac, neg_formfac;
@@ -119,8 +119,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   //--- structure functions
   const auto structure_functions_parameters = steer<ParametersList>("structureFunctions");
   if (!structure_functions_parameters.empty()) {
-    plist_pos.set<ParametersList>("structureFunctions", structure_functions_parameters);
-    plist_neg.set<ParametersList>("structureFunctions", structure_functions_parameters);
+    plist_pos.set("structureFunctions", structure_functions_parameters);
+    plist_neg.set("structureFunctions", structure_functions_parameters);
   }
   //--- parton fluxes
   ParametersList pos_flux, neg_flux;
@@ -156,20 +156,18 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   plist_neg.set("partonFlux", neg_flux);
 
   if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
-    plist_pos.set<bool>("elastic",
-                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
-    plist_neg.set<bool>("elastic",
-                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
+    plist_pos.set("elastic", mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
+    plist_neg.set("elastic", mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
   } else {
     const auto set_beam_elasticity = [](ParametersList& plist_beam) {
       if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux"); !parton_flux_mod.name().empty())
-        plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
+        plist_beam.set("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
       else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors"); !formfac_mod.name().empty())
-        plist_beam.set<bool>("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
+        plist_beam.set("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
       else {
         CG_WARNING("IncomingBeams") << "Neither kinematics mod, parton flux modelling, or form factors modelling "
                                        "were set. Assuming elastic emission.";
-        plist_beam.set<bool>("elastic", true);
+        plist_beam.set("elastic", true);
       }
     };
     set_beam_elasticity(plist_pos);
@@ -222,7 +220,7 @@ mode::Kinematics IncomingBeams::modeFromBeams(const Beam& pos, const Beam& neg) 
   return mode::Kinematics::InelasticInelastic;
 }
 
-void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
+void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) const {
   static constexpr unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
   sf_model = (sf_model == 0 ? 11 /* SuriYennie */ : sf_model);
   sr_model = (sr_model == 0 ? 4 /* SibirtsevBlunden */ : sr_model);
@@ -242,9 +240,9 @@ void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
 const ParametersList& IncomingBeams::parameters() const {
   params_ = ParametersList(SteeredObject::parameters())
                 .set<int>("beam1id", pos_beam_.integerPdgId())
-                .set<double>("beam1pz", +pos_beam_.momentum().pz())
+                .set("beam1pz", +pos_beam_.momentum().pz())
                 .set<int>("beam2id", neg_beam_.integerPdgId())
-                .set<double>("beam2pz", -neg_beam_.momentum().pz())
+                .set("beam2pz", -neg_beam_.momentum().pz())
                 .setAs<int, mode::Kinematics>("mode", mode());
   if (HeavyIon::isHI(pos_beam_.integerPdgId())) {
     const auto hi1 = HeavyIon::fromPdgId(std::abs(pos_beam_.integerPdgId()));
@@ -260,16 +258,16 @@ const ParametersList& IncomingBeams::parameters() const {
 ParametersDescription IncomingBeams::description() {
   auto desc = ParametersDescription();
   desc.addAs<int, pdgid_t>("beam1id", PDG::invalid).setDescription("PDG id of the positive-z beam particle");
-  desc.add<int>("beam1A", 0).setDescription("Atomic weight of the positive-z ion beam");
+  desc.add("beam1A", 0).setDescription("Atomic weight of the positive-z ion beam");
   desc.addAs<int, Element>("beam1Z", Element::invalid).setDescription("Atomic number of the positive-z ion beam");
   desc.addAs<int, pdgid_t>("beam2id", PDG::invalid).setDescription("PDG id of the negative-z beam particle");
-  desc.add<int>("beam2A", 0).setDescription("Atomic weight of the negative-z ion beam");
+  desc.add("beam2A", 0).setDescription("Atomic weight of the negative-z ion beam");
   desc.addAs<int, Element>("beam2Z", Element::invalid).setDescription("Atomic number of the negative-z ion beam");
-  desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
-  desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
-  desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
-  desc.add<std::vector<double> >("energies", {}).setDescription("Beam energies (in GeV/c)");
-  desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
+  desc.add("pdgIds", std::vector<ParametersList>{}).setDescription("PDG description of incoming beam particles");
+  desc.add("pdgIds", std::vector<int>{}).setDescription("PDG ids of incoming beam particles");
+  desc.add("pz", std::vector<double>{}).setDescription("Beam momenta (in GeV/c)");
+  desc.add("energies", std::vector<double>{}).setDescription("Beam energies (in GeV/c)");
+  desc.add("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
   desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
       .setDescription("Process kinematics mode")
       .allow(1, "elastic")
@@ -283,8 +281,7 @@ ParametersDescription IncomingBeams::description() {
           std::vector<ParametersList>(
               2, FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler).parameters()))
       .setDescription("Beam form factors modelling");
-  desc.add<ParametersDescription>("structureFunctions",
-                                  StructureFunctionsFactory::get().describeParameters("SuriYennie"))
+  desc.add("structureFunctions", StructureFunctionsFactory::get().describeParameters("SuriYennie"))
       .setDescription("Beam inelastic structure functions modelling");
   return desc;
 }

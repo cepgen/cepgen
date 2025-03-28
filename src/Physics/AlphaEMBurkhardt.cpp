@@ -31,7 +31,7 @@ public:
   static ParametersDescription description() {
     auto desc = Coupling::description();
     desc.setDescription("Burkhardt et al. alpha(EM) evolution algorithm");
-    desc.add<double>("q2min", 2.e-6).setDescription("Minimum Q^2 to start alpha(EM) evolution");
+    desc.add("q2min", 2.e-6).setDescription("Minimum Q^2 to start alpha(EM) evolution");
     return desc;
   }
 

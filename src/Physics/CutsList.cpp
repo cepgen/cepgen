@@ -46,8 +46,8 @@ void CutsList::setParameters(const ParametersList& params) {
       .set("central", central.parameters())
       .set("remnants", remnants.parameters());
   for (const auto& cuts_vs_part : central_particles)  // per-PDGid selection
-    params_.operator[]<ParametersList>("cuts").set<ParametersList>(std::to_string(cuts_vs_part.first),
-                                                                   cuts_vs_part.second.parameters());
+    params_.operator[]<ParametersList>("cuts").set(std::to_string(cuts_vs_part.first),
+                                                   cuts_vs_part.second.parameters());
   CG_DEBUG("CutsList:setParameters") << "User specified the following cuts list:\n" << *this << ".";
   for (const auto& key : params_.keys()) {
     if (key == "initial" || key == "central" || key == "remnants" || key == "cuts") {

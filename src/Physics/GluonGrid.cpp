@@ -31,7 +31,7 @@ GluonGrid& GluonGrid::get(const cepgen::ParametersList& params) {
 }
 
 GluonGrid::GluonGrid(const cepgen::ParametersList& params)
-    : GridHandler<3, 1>(cepgen::GridType::linear /*grid is already logarithmic*/),
+    : GridHandler(cepgen::GridType::linear /*grid is already logarithmic*/),
       SteeredObject(params),
       grid_path_(steerPath("path")) {
   CG_INFO("GluonGrid") << "Building the KMR grid evaluator.";

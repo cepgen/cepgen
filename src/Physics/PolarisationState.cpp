@@ -48,8 +48,8 @@ PolarisationState::Polarisations PolarisationState::computePolarisations(const M
 ParametersDescription PolarisationState::description() {
   auto desc = ParametersDescription();
   desc.addAs<int, Mode>("mode", Mode::invalid);
-  desc.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First polarisation states");
-  desc.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second polarisation states");
+  desc.add("W1", std::vector{-1, 0, 1}).setDescription("First polarisation states");
+  desc.add("W2", std::vector{-1, 0, 1}).setDescription("Second polarisation states");
   return desc;
 }
 

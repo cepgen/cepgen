@@ -23,6 +23,7 @@
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredObject(params) {
   charges.reserve(4);
@@ -67,13 +68,13 @@ short ParticleProperties::integerCharge() const {
 ParametersDescription ParticleProperties::description() {
   auto desc = ParametersDescription();
   desc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
-  desc.add<std::string>("name", "n/a").setDescription("particle computer-readable name");
-  desc.add<std::string>("description", "n/a").setDescription("particle human-readable name");
-  desc.add<int>("colours", 0).setDescription("colour factor");
-  desc.add<double>("mass", 0.).setDescription("particle mass (in GeV/c^2)");
-  desc.add<double>("width", 0.).setDescription("particle width (in GeV)");
-  desc.add<std::vector<int> >("charges", {}).setDescription("possible electric charges (in units of e)");
-  desc.add<bool>("fermion", false).setDescription("is the particle following the Fermi-Dirac statistics?");
+  desc.add("name", "n/a"s).setDescription("particle computer-readable name");
+  desc.add("description", "n/a"s).setDescription("particle human-readable name");
+  desc.add("colours", 0).setDescription("colour factor");
+  desc.add("mass", 0.).setDescription("particle mass (in GeV/c^2)");
+  desc.add("width", 0.).setDescription("particle width (in GeV)");
+  desc.add("charges", std::vector<int>{}).setDescription("possible electric charges (in units of e)");
+  desc.add("fermion", false).setDescription("is the particle following the Fermi-Dirac statistics?");
   return desc;
 }
 

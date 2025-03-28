@@ -29,7 +29,7 @@ public:
   static ParametersDescription description() {
     auto desc = Coupling::description();
     desc.setDescription("Constant alpha(EM)");
-    desc.add<double>("value", constants::ALPHA_EM).setDescription("Constant value for alpha(EM)");
+    desc.add("value", constants::ALPHA_EM).setDescription("Constant value for alpha(EM)");
     return desc;
   }
 
