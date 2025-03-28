@@ -43,7 +43,7 @@ namespace cepgen {
     /// Build a module
     inline SteeredObject() : Steerable(T::description().parameters()) {}
     explicit inline SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
-    virtual ~SteeredObject() = default;
+    ~SteeredObject() override = default;
 
     /// Equality operator
     inline bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }

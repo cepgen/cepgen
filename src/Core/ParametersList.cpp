@@ -136,7 +136,7 @@ namespace cepgen {
     }
     if (!keys_erased.empty())
       CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
-      //--- concatenate all typed lists
+    //--- concatenate all typed lists
 #define __TYPE_ENUM(type, map, name) map.insert(oth.map.begin(), oth.map.end());
     REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
@@ -382,8 +382,18 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <typename T>
+  size_t ParametersList::erase(const std::string& key) {
+    throw CG_FATAL("ParametersList") << "Invalid type for key '" << key << "'.";
+  }
+
+  template <typename T>
   bool ParametersList::has(const std::string& key) const {
     throw CG_FATAL("ParametersList") << "Invalid type for key '" << key << "'.";
+  }
+
+  template <typename T>
+  std::vector<std::string> ParametersList::keysOf() const {
+    throw CG_FATAL("ParametersList") << "Invalid type to retrieve keys from.";
   }
 
   template <typename T>
@@ -498,11 +508,11 @@ namespace cepgen {
 
   template <>
   std::vector<std::string> ParametersList::keysOf<ParticleProperties>() const {
-    std::vector<std::string> pdesc_keys;
+    std::vector<std::string> steered_parameters_keys;
     for (const auto& key : keys())
       if (get<ParticleProperties>(key, ParticleProperties(-1)) != ParticleProperties(-1))
-        pdesc_keys.emplace_back(key);
-    return pdesc_keys;
+        steered_parameters_keys.emplace_back(key);
+    return steered_parameters_keys;
   }
 }  // namespace cepgen
 
