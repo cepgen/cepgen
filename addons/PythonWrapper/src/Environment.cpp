@@ -91,7 +91,7 @@ void Environment::setProgramName(const std::string& filename) {
 
 ParametersDescription Environment::description() {
   auto desc = ParametersDescription();
-  desc.add<int>("verbosity", 0).setDescription("overall Python verbosity");
-  desc.add<int>("debug", 0).setDescription("debugging level");
+  desc.add("verbosity", 0).setDescription("overall Python verbosity");
+  desc.add("debug", 0).setDescription("debugging level");
   return desc;
 }

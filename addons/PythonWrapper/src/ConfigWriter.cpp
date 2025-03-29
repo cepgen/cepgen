@@ -184,9 +184,9 @@ std::string ConfigWriter::operator()() const { return os_.str(); }
 
 ParametersDescription ConfigWriter::description() {
   auto desc = ParametersDescription();
-  desc.add<bool>("importPath", false).setDescription("prepare the Python environment with path?");
-  desc.add<bool>("camelCaseModuleNames", false).setDescription("convert the module names to camel case?");
-  desc.add<int>("tabLength", 4).setDescription("number of spaces for one tabulation");
-  desc.add<std::string>("filename", "").setDescription("Python output filename");
+  desc.add("importPath", false).setDescription("prepare the Python environment with path?");
+  desc.add("camelCaseModuleNames", false).setDescription("convert the module names to camel case?");
+  desc.add("tabLength", 4).setDescription("number of spaces for one tabulation");
+  desc.add("filename", ""s).setDescription("Python output filename");
   return desc;
 }

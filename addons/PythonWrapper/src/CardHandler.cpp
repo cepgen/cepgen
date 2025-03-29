@@ -87,8 +87,8 @@ namespace cepgen::python {
     static ParametersDescription description() {
       auto desc = Handler::description();
       desc.setDescription("Python 2/3 cards parser");
-      desc.add<int>("debugging", 0).setDescription("debugging level");
-      desc.add<int>("verbosity", 0).setDescription("verbosity level");
+      desc.add("debugging", 0).setDescription("debugging level");
+      desc.add("verbosity", 0).setDescription("verbosity level");
       return desc;
     }
 

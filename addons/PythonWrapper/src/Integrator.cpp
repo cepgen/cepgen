@@ -24,6 +24,8 @@
 #include "CepGenPython/Environment.h"
 #include "CepGenPython/Error.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::python {
   class Integrator final : public cepgen::Integrator {
   public:
@@ -60,10 +62,10 @@ namespace cepgen::python {
     static ParametersDescription description() {
       auto desc = cepgen::Integrator::description();
       desc.setDescription("Python integration algorithm");
-      desc.add<std::string>("module", "IntegrationAlgos.Vegas")
+      desc.add("module", "IntegrationAlgos.Vegas"s)
           .setDescription("name of the Python module embedding the integrate() function");
-      desc.add<int>("iterations", 10);
-      desc.add<int>("evals", 1000);
+      desc.add("iterations", 10);
+      desc.add("evals", 1000);
       return desc;
     }
     static Integrand* gIntegrand;

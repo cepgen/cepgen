@@ -112,7 +112,7 @@ namespace cepgen::python {
   ParametersDescription Functional::description() {
     auto desc = utils::Functional::description();
     desc.setDescription("Python mathematical expression evaluator");
-    desc.add<std::string>("functionName", "custom_functional")
+    desc.add("functionName", "custom_functional"s)
         .setDescription("Python function name (in case multiple instance have to be declared in a same environment)");
     return desc;
   }
