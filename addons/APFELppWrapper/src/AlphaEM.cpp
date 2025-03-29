@@ -39,14 +39,14 @@ namespace cepgen::apfelpp {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("APFEL++ alpha(EM) evolution algorithm");
-      desc.add<double>("alphaQEDref", 1. / 128);
-      desc.add<double>("muQEDref", 91.1876);
-      desc.add<std::vector<double> >("quarkThresholds", {0., 0., 0., M_SQRT2, 4.5, 175.});
-      desc.add<std::vector<double> >("leptonThresholds", {0., 0., 1.777});
-      desc.add<int>("order", 0)
-          .setDescription("QED evolution order")
+      desc.add("alphaQEDref", 1. / 128);
+      desc.add("muQEDref", 91.1876);
+      desc.add("quarkThresholds", std::vector{0., 0., 0., M_SQRT2, 4.5, 175.});
+      desc.add("leptonThresholds", std::vector{0., 0., 1.777});
+      desc.add("order", 0)
           .allow(0, "leading order")
-          .allow(1, "next-to-leading order");
+          .allow(1, "next-to-leading order")
+          .setDescription("QED evolution order");
       return desc;
     }
 

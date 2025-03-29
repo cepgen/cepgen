@@ -37,9 +37,9 @@ namespace cepgen::apfel {
     static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("APFEL alpha(S) evolution algorithm");
-      desc.add<bool>("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
-      desc.add<int>("order", 2).setDescription("QCD perturbative evolution order");
-      desc.add<Limits>("qrange", {1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
+      desc.add("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
+      desc.add("order", 2).setDescription("QCD perturbative evolution order");
+      desc.add("qrange", Limits{1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
       return desc;
     }
 

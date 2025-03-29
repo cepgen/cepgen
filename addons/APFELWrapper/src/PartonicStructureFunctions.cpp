@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,9 +49,9 @@ namespace cepgen::apfel {
     static ParametersDescription description() {
       auto desc = PartonicParameterisation::description();
       desc.setDescription("APFEL (partonic)");
-      desc.add<int>("perturbativeOrder", 2);
-      desc.add<Limits>("qrange", {1., 100.});
-      desc.add<double>("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
+      desc.add("perturbativeOrder", 2);
+      desc.add("qrange", Limits{1., 100.});
+      desc.add("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
       return desc;
     }
 

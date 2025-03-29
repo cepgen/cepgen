@@ -25,6 +25,8 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Message.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::apfel {
   /// Generic partonic level perturbative structure functions built from an external PDFs grid
   class CollinearFlux final : public cepgen::CollinearFlux {
@@ -55,14 +57,14 @@ namespace cepgen::apfel {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("APFEL coll.flux");
-      desc.add<std::string>("set", "").setDescription("LHAPDF set to use at the initial scale");
-      desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
-      desc.add<Limits>("qrange", {1., 100.})
+      desc.add("set", ""s).setDescription("LHAPDF set to use at the initial scale");
+      desc.addAs<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
+      desc.add("qrange", Limits{1., 100.})
           .setDescription("virtuality range (in GeV) for the PDFs/alphaQCD/alphaQED evolutions");
-      desc.add<int>("maxFlavourPDFs", 7)
+      desc.add("maxFlavourPDFs", 7)
           .setDescription("maximum number of flavours that the evolution of alphaQCD and alphaQED can reach");
-      desc.add<int>("perturbativeOrder", 2).setDescription("evolution perturbative order");
-      desc.add<bool>("fastEvolution", false).setDescription("toggle the fast evolution");
+      desc.add("perturbativeOrder", 2).setDescription("evolution perturbative order");
+      desc.add("fastEvolution", false).setDescription("toggle the fast evolution");
       return desc;
     }
 

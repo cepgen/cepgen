@@ -55,7 +55,7 @@ namespace cepgen::apfel {
       auto desc = strfun::Parameterisation::description();
       desc.setDescription("APFEL DIS structure functions");
       desc.add("q2range", Limits{1., 1.e6}).setDescription("evolution scale range, in GeV^2");
-      desc.add<double>("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
+      desc.add("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
       desc.add("massScheme", "FFNS"s /*"FONLL-A"s*/).setDescription("mass scheme for the structure functions");
       desc.add("processDIS", "NC"s).setDescription("process of the structure functions (EM, NC, or CC)");
       desc.add("perturbativeOrder", 0)
@@ -64,10 +64,9 @@ namespace cepgen::apfel {
           .allow(1, "NLO")
           .allow(2, "NNLO")
           .allow(3, "NNNLO");
-      desc.add<int>("maxFlavourAlpha", 5)
+      desc.add("maxFlavourAlpha", 5)
           .setDescription("maximum number of flavours that the evolution of alpha(S) and alpha(EM) can reach");
-      desc.add<int>("maxFlavourPDFs", 5)
-          .setDescription("maximum number of flavours that the evolution of PDFs can reach");
+      desc.add("maxFlavourPDFs", 5).setDescription("maximum number of flavours that the evolution of PDFs can reach");
       desc.add("pdfSet", "CT14lo"s).setDescription("name of the PDF set to be used at the initial scale");
       desc.add("targetDIS", "isoscalar"s);
       return desc;
