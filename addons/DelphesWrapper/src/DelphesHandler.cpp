@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
 #include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/Value.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
-  /**
-     * \brief Export handler for Delphes
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
+  /// Export handler for Delphes
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2019
   class DelphesHandler : public EventExporter {
   public:
     explicit DelphesHandler(const ParametersList&);
@@ -45,9 +45,9 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = EventExporter::description();
       desc.setDescription("Delphes interfacing module");
-      desc.add<std::string>("filename", "output.delphes.root");
-      desc.add<std::string>("inputCard", "input.tcl");
-      desc.add<bool>("compress", false);
+      desc.add("filename", "output.delphes.root"s);
+      desc.add("inputCard", "input.tcl"s);
+      desc.add("compress", false);
       return desc;
     }
 

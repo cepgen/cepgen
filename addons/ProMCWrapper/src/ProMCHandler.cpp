@@ -35,6 +35,7 @@
 #include "CepGen/Version.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Handler for the ProMC file output
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -66,9 +67,9 @@ public:
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("ProMC file output module");
-    desc.add<std::string>("filename", "output.promc");
-    desc.add<bool>("compress", false);
-    desc.add<std::string>("logFile", "logfile.txt");
+    desc.add("filename", "output.promc"s);
+    desc.add("compress", false);
+    desc.add("logFile", "logfile.txt"s);
     return desc;
   }
 
