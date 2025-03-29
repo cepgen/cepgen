@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+
+using namespace std::string_literals;
 
 namespace cepgen::pythia8 {
   class CollinearFlux final : public cepgen::CollinearFlux {
@@ -70,23 +72,23 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("Pythia 8 coll.flux");
-      desc.add<std::string>("type", "Proton2gammaDZ")
-          .setDescription("type of PDF evaluator to use")
+      desc.add("type", "Proton2gammaDZ"s)
           .allow("Lepton", "photon-from-lepton modelling")
           .allow("LHAGrid1", "LHAPDF grid modelling")
           .allow("MSTWpdf", "MSTW grid modelling")
           .allow("Proton2gammaDZ", "Drees-Zeppenfeld photon emission from proton")
           .allow("Nucleus2gamma", "photon-from-HI emission")
-          .allow("ProtonPoint", "point-like photon emission from proton");
-      desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
-      desc.add<pdgid_t>("beamPdgId", PDG::proton).setDescription("beam particle PDG identifier");
+          .allow("ProtonPoint", "point-like photon emission from proton")
+          .setDescription("type of PDF evaluator to use");
+      desc.addAs<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
+      desc.addAs<pdgid_t>("beamPdgId", PDG::proton).setDescription("beam particle PDG identifier");
       auto lepton_desc = ParametersDescription();
-      lepton_desc.add<double>("sqrtS", -1.);
-      lepton_desc.add<double>("Q2max", 50.);
-      desc.add<ParametersDescription>("leptonParameters", lepton_desc);
+      lepton_desc.add("sqrtS", -1.);
+      lepton_desc.add("Q2max", 50.);
+      desc.add("leptonParameters", lepton_desc);
       auto hi_desc = ParametersDescription();
-      hi_desc.add<double>("bmin", 0.).setDescription("minimum impact parameter for integration");
-      desc.add<ParametersDescription>("hiParameters", hi_desc);
+      hi_desc.add("bmin", 0.).setDescription("minimum impact parameter for integration");
+      desc.add("hiParameters", hi_desc);
       return desc;
     }
 

@@ -36,9 +36,9 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(EM) running");
-      desc.add<int>("order", 1);
-      desc.add<double>("alphaEM0", 0.00729735);
-      desc.add<double>("alphaEMmZ", 0.00781751);
+      desc.add("order", 1);
+      desc.add("alphaEM0", 0.00729735);
+      desc.add("alphaEMmZ", 0.00781751);
       return desc;
     }
 

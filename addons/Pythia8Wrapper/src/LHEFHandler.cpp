@@ -28,6 +28,8 @@
 #include "CepGen/Utils/Value.h"
 #include "CepGenPythia8/PythiaEventInterface.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::pythia8 {
   /// Pythia8 handler for the LHE file output
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -49,12 +51,8 @@ namespace cepgen::pythia8 {
 #endif
         gzip_ = true;
       }
-      {
-        auto file_tmp = std::ofstream(filename_);
-        if (!file_tmp.is_open())
-          throw CG_FATAL("pythia8:LHEFHandler")
-              << "Failed to open output filename \"" << filename_ << "\" for writing!";
-      }
+      if (auto file_tmp = std::ofstream(filename_); !file_tmp.is_open())
+        throw CG_FATAL("pythia8:LHEFHandler") << "Failed to open output filename '" << filename_ << "' for writing.";
       lhaevt_->openLHEF(filename_);
     }
     ~LHEFHandler() override {
@@ -69,8 +67,8 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = EventExporter::description();
       desc.setDescription("Pythia 8-based LHEF output module");
-      desc.add<bool>("compress", true);
-      desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
+      desc.add("compress", true);
+      desc.add("filename", "output.lhe"s).setDescription("Output filename");
       return desc;
     }
 

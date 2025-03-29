@@ -41,13 +41,13 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(S) running in SU(N) model");
-      desc.add<int>("Ngauge", 1);
-      desc.add<int>("nFlav", 1);
-      desc.add<int>("alphaOrder", 0);
-      desc.add<bool>("setLambda", false);
-      desc.add<double>("Lambda", 0.4);
-      desc.add<double>("alphaFSR", 0.1);
-      desc.add<double>("alphaFSRrefScale", 91.188);
+      desc.add("Ngauge", 1);
+      desc.add("nFlav", 1);
+      desc.add("alphaOrder", 0);
+      desc.add("setLambda", false);
+      desc.add("Lambda", 0.4);
+      desc.add("alphaFSR", 0.1);
+      desc.add("alphaFSRrefScale", 91.188);
       return desc;
     }
 

@@ -29,6 +29,7 @@
 #include "CepGenPythia8/PythiaEventInterface.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Interface to the Pythia8 hadronisation algorithm
 /// \note It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
@@ -52,11 +53,9 @@ public:
   static ParametersDescription description() {
     auto desc = Hadroniser::description();
     desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
-    desc.add<bool>("correctCentralSystem", false)
-        .setDescription("Correct the kinematics of the central system whenever required");
-    desc.add<bool>("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
-    desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
-        .setDescription("Output filename for a backup of the last Pythia configuration snapshot");
+    desc.add("correctCentralSystem", false).setDescription("correct central system kinematics if required");
+    desc.add("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
+    desc.add("outputConfig", "last_pythia_config.cmd"s).setDescription("last Pythia configuration snapshot filenams");
     return desc;
   }
 

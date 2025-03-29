@@ -16,12 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Utils/Drawer.h"
-
 #include <Pythia8/Basics.h>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Version.h"
@@ -34,8 +33,7 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = cepgen::utils::Drawer::description();
       desc.setDescription("Pythia 8 plotter");
-      desc.add<bool>("histPlot", true)
-          .setDescription("write Python code that can generate a PDF file with the spectra?");
+      desc.add("histPlot", true).setDescription("write Python code that can generate a PDF file with the spectra?");
       return desc;
     }
 

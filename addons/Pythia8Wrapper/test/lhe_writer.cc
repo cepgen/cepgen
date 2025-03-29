@@ -20,8 +20,8 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   // initialise the LHEF writer
-  auto lhef_mod = cepgen::EventExporterFactory::get().build(
-      "lhef", cepgen::ParametersList().set<std::string>("filename", output_file));
+  auto lhef_mod =
+      cepgen::EventExporterFactory::get().build("lhef", cepgen::ParametersList().set("filename", output_file));
 
   // randomise the number of events to be written in the output file
   auto rng = cepgen::RandomGeneratorFactory::get().build("stl");

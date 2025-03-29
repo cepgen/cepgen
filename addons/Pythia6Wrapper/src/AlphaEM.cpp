@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,18 +35,18 @@ namespace cepgen::pythia6 {
     inline static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("Pythia6 modelling of alpha(EM) running");
-      desc.add<int>("mode", mstu(101))
-          .setDescription("procedure for alpha(EM) evaluation")
+      desc.add("mode", mstu(101))
           .allow(0, "fix at 'fixedAlphaEM'")
           .allow(1, "running accounting to fermion loops")
-          .allow(2, "fix with low-high Q^2 splitting");
-      desc.add<double>("fixedAlphaEM", paru(101))
+          .allow(2, "fix with low-high Q^2 splitting")
+          .setDescription("procedure for alpha(EM) evaluation");
+      desc.add("fixedAlphaEM", paru(101))
           .setDescription("electromagnetic fine structure constant at vanishing mom.transfer");
-      desc.add<double>("sin2ThetaW", paru(102)).setDescription("weak mixing angle of the standard electroweak model");
-      desc.add<double>("highQ2alphaEM", paru(103))
+      desc.add("sin2ThetaW", paru(102)).setDescription("weak mixing angle of the standard electroweak model");
+      desc.add("highQ2alphaEM", paru(103))
           .setDescription("typical alpha(EM) in EW processes, intended for high-Q^2 for Z/W physics");
-      desc.add<double>("q2cut", paru(104)).setDescription("dividing line between low- and high-Q^2 if mode=2");
-      desc.add<double>("gf", paru(105)).setDescription("Fermi constant of weak interactions");
+      desc.add("q2cut", paru(104)).setDescription("dividing line between low- and high-Q^2 if mode=2");
+      desc.add("gf", paru(105)).setDescription("Fermi constant of weak interactions");
       return desc;
     }
 
