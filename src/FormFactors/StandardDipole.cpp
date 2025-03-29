@@ -32,7 +32,7 @@ namespace cepgen::formfac {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Standard dipole");
-      desc.add<pdgid_t>("pdgId", PDG::proton);
+      desc.addAs<pdgid_t>("pdgId", PDG::proton);
       desc.add("scale", 0.71).setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
       return desc;
     }

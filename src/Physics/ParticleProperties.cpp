@@ -67,7 +67,7 @@ short ParticleProperties::integerCharge() const {
 
 ParametersDescription ParticleProperties::description() {
   auto desc = ParametersDescription();
-  desc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
+  desc.addAs<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
   desc.add("name", "n/a"s).setDescription("particle computer-readable name");
   desc.add("description", "n/a"s).setDescription("particle human-readable name");
   desc.add("colours", 0).setDescription("colour factor");

@@ -72,9 +72,9 @@ void PartonsKTPhaseSpaceGenerator::initialise() {
   // pick a parton flux parameterisation for each beam
   auto set_flux_properties = [](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
     auto params = beam.partonFluxParameters();
-    const auto params_p_el = KTFluxFactory::get().describeParameters("BudnevElastic");
-    const auto params_p_inel = KTFluxFactory::get().describeParameters("BudnevInelastic");
-    const auto params_hi_el = KTFluxFactory::get().describeParameters("ElasticHeavyIon");
+    static const auto params_p_el = KTFluxFactory::get().describeParameters("BudnevElastic");
+    static const auto params_p_inel = KTFluxFactory::get().describeParameters("BudnevInelastic");
+    static const auto params_hi_el = KTFluxFactory::get().describeParameters("ElasticHeavyIon");
     if (params.name().empty()) {
       if (beam.elastic()) {
         if (HeavyIon::isHI(beam.integerPdgId()))

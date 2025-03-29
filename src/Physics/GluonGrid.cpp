@@ -64,6 +64,6 @@ double GluonGrid::operator()(double x, double kt2, double mu2) const {
 
 cepgen::ParametersDescription GluonGrid::description() {
   auto desc = cepgen::ParametersDescription();
-  desc.add<std::string>("path", DEFAULT_KMR_GRID_PATH);
+  desc.addAs<std::string>("path", DEFAULT_KMR_GRID_PATH);
   return desc;
 }

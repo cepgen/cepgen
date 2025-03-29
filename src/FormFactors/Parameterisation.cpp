@@ -46,7 +46,7 @@ const FormFactors& Parameterisation::operator()(double q2) {
 ParametersDescription Parameterisation::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Unnamed form factors parameterisation");
-  desc.add<pdgid_t>("pdgId", PDG::proton);
+  desc.addAs<pdgid_t>("pdgId", PDG::proton);
   return desc;
 }
 

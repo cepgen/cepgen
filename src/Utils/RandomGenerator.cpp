@@ -54,6 +54,6 @@ void* RandomGenerator::enginePtr() {
 ParametersDescription RandomGenerator::description() {
   auto desc = ParametersDescription();
   desc.setDescription("unnamed random generator");
-  desc.add<unsigned long long>("seed", time(nullptr)).setDescription("Random number generator seed");
+  desc.addAs<unsigned long long>("seed", time(nullptr)).setDescription("Random number generator seed");
   return desc;
 }
