@@ -114,32 +114,32 @@ namespace cepgen::hadr {
   ParametersDescription TauolaFilter::description() {
     auto desc = EventModifier::description();
     desc.setDescription("Tauola interface");
-    desc.add<bool>("debug", false).setDescription("debugging mode");
+    desc.add("debug", false).setDescription("debugging mode");
 
     auto pol_desc = ParametersDescription();
-    pol_desc.add<bool>("full", true);
-    pol_desc.add<bool>("GAMMA", Tauola::spin_correlation.GAMMA);
-    pol_desc.add<bool>("Z0", Tauola::spin_correlation.Z0);
-    pol_desc.add<bool>("HIGGS", Tauola::spin_correlation.HIGGS);
-    pol_desc.add<bool>("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
-    pol_desc.add<bool>("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
-    pol_desc.add<bool>("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
-    pol_desc.add<bool>("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
-    pol_desc.add<bool>("W_PLUS", Tauola::spin_correlation.W_PLUS);
-    pol_desc.add<bool>("W_MINUS", Tauola::spin_correlation.W_MINUS);
-    desc.add<ParametersDescription>("polarisations", pol_desc);
+    pol_desc.add("full", true);
+    pol_desc.add("GAMMA", Tauola::spin_correlation.GAMMA);
+    pol_desc.add("Z0", Tauola::spin_correlation.Z0);
+    pol_desc.add("HIGGS", Tauola::spin_correlation.HIGGS);
+    pol_desc.add("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
+    pol_desc.add("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
+    pol_desc.add("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
+    pol_desc.add("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
+    pol_desc.add("W_PLUS", Tauola::spin_correlation.W_PLUS);
+    pol_desc.add("W_MINUS", Tauola::spin_correlation.W_MINUS);
+    desc.add("polarisations", pol_desc);
 
     auto rad_desc = ParametersDescription();
-    rad_desc.add<bool>("enable", false);
-    rad_desc.add<double>("cutoff", -1.);
-    desc.add<ParametersDescription>("radiations", rad_desc);
+    rad_desc.add("enable", false);
+    rad_desc.add("cutoff", -1.);
+    desc.add("radiations", rad_desc);
 
-    desc.add<int>("sameParticleDecayMode", -1);
-    desc.add<int>("oppositeParticleDecayMode", -1);
+    desc.add("sameParticleDecayMode", -1);
+    desc.add("oppositeParticleDecayMode", -1);
 
     auto br_desc = ParametersDescription();
-    br_desc.add<int>("mode", -1).setDescription("decay mode");
-    br_desc.add<double>("branchingRatio", 0.).setDescription("branching fraction");
+    br_desc.add("mode", -1).setDescription("decay mode");
+    br_desc.add("branchingRatio", 0.).setDescription("branching fraction");
     desc.addParametersDescriptionVector("branchingRatios", br_desc, {});
     return desc;
   }
