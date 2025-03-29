@@ -41,8 +41,8 @@ public:
   static ParametersDescription description() {
     auto desc = MadGraphProcess::description();
     desc.setDescription("XXX_PROC_DESCRIPTION_XXX");
-    desc.add<std::vector<int> >("incomingSystem", {XXX_PART1_XXX, XXX_PART2_XXX});
-    desc.add<std::vector<int> >("outgoingSystem", {XXX_OUT_PART_XXX});
+    desc.add("incomingSystem", std::vector<int>{XXX_PART1_XXX, XXX_PART2_XXX});
+    desc.add("outgoingSystem", std::vector<int>{XXX_OUT_PART_XXX});
     return desc;
   }
 

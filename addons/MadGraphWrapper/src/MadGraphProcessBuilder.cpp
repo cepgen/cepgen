@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include "CepGenMadGraph/Utils.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 class MadGraphProcessBuilder : public proc::FactorisedProcess {
 public:
@@ -64,8 +65,8 @@ public:
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();
     desc.setDescription("MadGraph_aMC process builder");
-    desc.add<std::string>("lib", "").setDescription("Precompiled library for this process definition");
-    desc.add<std::string>("parametersCard", "param_card.dat").setDescription("Runtime MadGraph parameters card");
+    desc.add("lib", ""s).setDescription("Precompiled library for this process definition");
+    desc.add("parametersCard", "param_card.dat"s).setDescription("Runtime MadGraph parameters card");
     desc += MadGraphInterface::description();
     return desc;
   }

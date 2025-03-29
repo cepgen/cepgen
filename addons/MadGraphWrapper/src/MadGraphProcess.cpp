@@ -41,7 +41,7 @@ MadGraphProcess& MadGraphProcess::setMomentum(size_t i, const Momentum& mom) {
 ParametersDescription MadGraphProcess::description() {
   auto desc = ParametersDescription();
   desc.setDescription("generic mg5_aMC@NLO process");
-  desc.add<std::vector<int> >("incomingSystem", {}).setDescription("list of incoming partons for the process");
-  desc.add<std::vector<int> >("outgoingSystem", {}).setDescription("list of central particles generated");
+  desc.add("incomingSystem", std::vector<int>{}).setDescription("list of incoming partons for the process");
+  desc.add("outgoingSystem", std::vector<int>{}).setDescription("list of central particles generated");
   return desc;
 }

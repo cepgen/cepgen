@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@
 #include "CepGenMadGraph/MadGraphProcess.h"
 #include "CepGenMadGraph/Utils.h"
 #include "CepGenPython/Environment.h"
+
+using namespace std::string_literals;
 
 namespace cepgen {
   std::unordered_map<std::string, spdgid_t> MadGraphInterface::mg5_parts_ = {
@@ -263,13 +265,13 @@ namespace cepgen {
       } else if (vars.size() == 3 && vars.at(0) == "DECAY") {
         if (!block_params.empty())
           output.add(block_name, block_params);
-        auto& par = decay_params.add<double>(vars.at(1), std::stod(vars.at(2)));
+        auto& par = decay_params.add(vars.at(1), std::stod(vars.at(2)));
         if (ln.size() > 1)
           par.setDescription(ln.at(1));
         continue;
       }
       if (vars.size() == 2) {
-        auto& par = block_params.add<double>(vars.at(0), std::stod(vars.at(1)));
+        auto& par = block_params.add(vars.at(0), std::stod(vars.at(1)));
         if (ln.size() > 1)
           par.setDescription(ln.at(1));
       } else
@@ -302,18 +304,18 @@ namespace cepgen {
 
   ParametersDescription MadGraphInterface::description() {
     auto desc = ParametersDescription();
-    desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
-    desc.add<std::string>("model", "sm-full").setDescription("MadGraph_aMC model name");
-    desc.add<std::string>("cardPath", fs::temp_directory_path() / "cepgen_mg5_input.dat")
+    desc.add("process", ""s).setDescription("MadGraph_aMC process definition");
+    desc.add("model", "sm-full"s).setDescription("MadGraph_aMC model name");
+    desc.addAs<std::string>("cardPath", fs::temp_directory_path() / "cepgen_mg5_input.dat")
         .setDescription("Temporary file where to store the input card for MadGraph_aMC");
-    desc.add<std::string>("standaloneCppPath", "");
-    desc.add<std::string>("tmpDir", fs::temp_directory_path() / "cepgen_mg5_aMC")
+    desc.add("standaloneCppPath", ""s);
+    desc.addAs<std::string>("tmpDir", fs::temp_directory_path() / "cepgen_mg5_aMC")
         .setDescription("Temporary path where to store the MadGraph_aMC process definition files");
-    desc.add<std::string>("logFile", fs::temp_directory_path() / "cepgen_mg5_aMC.log")
+    desc.addAs<std::string>("logFile", fs::temp_directory_path() / "cepgen_mg5_aMC.log")
         .setDescription("Temporary path where to store the log for this run");
-    desc.add<ParametersDescription>("extraParticles", ParametersDescription())
+    desc.add("extraParticles", ParametersDescription{})
         .setDescription("define internal MadGraph alias for a particle name");
-    desc.add<ParametersDescription>("modelParameters", ParametersDescription())
+    desc.add("modelParameters", ParametersDescription{})
         .setDescription("list of model parameters for the process generation");
     return desc;
   }
