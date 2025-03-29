@@ -25,6 +25,8 @@
 #define LHAPDF_GE_6 1
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen::lhapdf {
   /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
   class AlphaS final : public Coupling {
@@ -43,8 +45,8 @@ namespace cepgen::lhapdf {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
-      desc.add<std::string>("pdfSet", "cteq66");
-      desc.add<int>("pdfMember", 0);
+      desc.add("pdfSet", "cteq66"s);
+      desc.add("pdfMember", 0);
       return desc;
     }
 

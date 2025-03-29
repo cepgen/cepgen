@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/PDG.h"
+
+using namespace std::string_literals;
 
 namespace cepgen::lhapdf {
   class CollinearFlux final : public cepgen::CollinearFlux {
@@ -59,10 +61,10 @@ namespace cepgen::lhapdf {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("LHAPDF coll.flux");
-      desc.add<std::string>("set", "LUXlep-NNPDF31_nlo_as_0118_luxqed").setDescription("PDFset to use");
-      desc.add<int>("member", 0).setDescription("PDF member");
-      desc.addAs<int, pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
-      desc.add<bool>("extrapolatePDF", false)
+      desc.add("set", "LUXlep-NNPDF31_nlo_as_0118_luxqed"s).setDescription("PDFset to use");
+      desc.add("member", 0).setDescription("PDF member");
+      desc.addAs<int>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
+      desc.add("extrapolatePDF", false)
           .setDescription("has the PDF? or extrapolate distribution from sum imbalance of other contributions?");
       return desc;
     }

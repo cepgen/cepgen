@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ namespace cepgen::lhapdf {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("ODE LHAPDF evol.algo.");
-      desc.add<int>("order", 5).setDescription("QCD order");
-      desc.add<double>("alphaSMZ", 0.118);
+      desc.add("order", 5).setDescription("QCD order");
+      desc.add("alphaSMZ", 0.118);
       return desc;
     }
 

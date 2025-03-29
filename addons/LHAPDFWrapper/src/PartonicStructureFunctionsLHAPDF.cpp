@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@
 #define LHAPDF_GE_6 1
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen::strfun {
   /// Generic partonic level perturbative structure functions built from an external PDFs grid
   class LHAPDFPartonic : public PartonicParameterisation {
@@ -45,9 +47,9 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = PartonicParameterisation::description();
       desc.setDescription("LHAPDF (partonic)");
-      desc.add<std::string>("pdfSet", "cteq66").setDescription("PDF modelling to be considered");
-      desc.add<int>("pdfCode", 0);
-      desc.add<int>("pdfMember", 0);
+      desc.add("pdfSet", "cteq66"s).setDescription("PDF modelling to be considered");
+      desc.add("pdfCode", 0);
+      desc.add("pdfMember", 0);
       return desc;
     }
 
