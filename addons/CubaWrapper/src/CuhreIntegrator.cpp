@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace cepgen::cuba {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Cuba implementation of the Cuhre algorithm");
-      desc.add<int>("key", 0).setDescription(
+      desc.add("key", 0).setDescription(
           "basic integration rule:\n"
           "key = 7, 9, 11, 13 selects the cubature rule of degree key. Note that the degree-11\n"
           "rule is available only in 3 dimensions, the degree-13 rule only in 2 dimensions.\n"

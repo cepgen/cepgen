@@ -145,15 +145,15 @@ namespace boost::cepgen {
       } catch (const ::cepgen::Exception&) {
         if (it.second.get_value<std::string>().find('.') != std::string::npos)
           try {  // try to parse float if contains a '.'
-            out.set<double>(it.first, it.second.get_value<double>());
+            out.set(it.first, it.second.get_value<double>());
           } catch (const exception&) {  // does not work as a float, must be a string
-            out.set<std::string>(it.first, it.second.get_value<std::string>());
+            out.set(it.first, it.second.get_value<std::string>());
           }
         else
           try {  //  try to parse integer
-            out.set<int>(it.first, it.second.get_value<int>());
+            out.set(it.first, it.second.get_value<int>());
           } catch (const exception&) {  // does not work as an integer, must be a string
-            out.set<std::string>(it.first, it.second.get_value<std::string>());
+            out.set(it.first, it.second.get_value<std::string>());
           }
       }
     }
@@ -168,17 +168,16 @@ namespace boost::cepgen {
       ::cepgen::Limits lim;
       plist.fill<double>(MIN_KEY, lim.min());
       plist.fill<double>(MAX_KEY, lim.max());
-      base.set<::cepgen::Limits>(name, lim);
+      base.set(name, lim);
     }
     //--- then check if daughter is a vector; if true, skip one hierarchy level
     else if (plist.has<std::vector<int>>(DAUGH_KEY))
-      base.set<std::vector<int>>(name, plist.get<std::vector<int>>(DAUGH_KEY));
-    else if (plist.has<std::vector<double>>(DAUGH_KEY)) {
-      auto vec = plist.get<std::vector<double>>(DAUGH_KEY);
-      base.set<std::vector<double>>(name, vec);
-    } else if (plist.has<std::vector<std::string>>(DAUGH_KEY))
-      base.set<std::vector<std::string>>(name, plist.get<std::vector<std::string>>(DAUGH_KEY));
+      base.set(name, plist.get<std::vector<int>>(DAUGH_KEY));
+    else if (plist.has<std::vector<double>>(DAUGH_KEY))
+      base.set(name, plist.get<std::vector<double>>(DAUGH_KEY));
+    else if (plist.has<std::vector<std::string>>(DAUGH_KEY))
+      base.set(name, plist.get<std::vector<std::string>>(DAUGH_KEY));
     else
-      base.set<::cepgen::ParametersList>(name, plist);
+      base.set(name, plist);
   }
 }  // namespace boost::cepgen

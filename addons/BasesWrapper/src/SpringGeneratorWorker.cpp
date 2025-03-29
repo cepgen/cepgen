@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,23 +51,20 @@ namespace cepgen {
         throw CG_FATAL("SpringGeneratorWorker:next") << "Spring generator is only compatible with Bases integrator.";
 
       CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
-
       sprng2_.ntrial = 0;
       sprng2_.miss = 0;
       int mxtry = max_trials_;
       spring_(integrand_call, mxtry);
       if (sprng2_.miss)
         return false;
-
-      // return with an accepted event
-      return storeEvent();
+      return storeEvent();  // return with an accepted event
     }
 
     static ParametersDescription description() {
       auto desc = GeneratorWorker::description();
       desc.setDescription("Spring/Bases worker");
-      desc.add<int>("maxTrials", 50).setDescription("maximum number of trials per generation");
-      desc.add<int>("verbose", 0);
+      desc.add("maxTrials", 50).setDescription("maximum number of trials per generation");
+      desc.add("verbose", 0);
       return desc;
     }
 
@@ -78,8 +75,7 @@ namespace cepgen {
         throw CG_FATAL("SpringGeneratorWorker") << "Integrand was not specified before event generation.";
       return gIntegrand->eval(std::vector<double>(in, in + gIntegrand->size()));
     }
-
-    const int max_trials_;
+    const int max_trials_;  ///< maximum number of trials per generation
   };
   Integrand* SpringGeneratorWorker::gIntegrand = nullptr;
 }  // namespace cepgen

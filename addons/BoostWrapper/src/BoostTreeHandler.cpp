@@ -137,7 +137,7 @@ public:
     //----- timing and logging
     if (runParameters()->timeKeeper())
       tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
-    log_.set<int>("level", static_cast<int>(utils::Logger::get().level()));
+    log_.set("level", static_cast<int>(utils::Logger::get().level()));
     //TODO: implement the exceptions filtering rules
     //for (const auto& mod : utils::Logger::get().exceptionRules())
     //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);

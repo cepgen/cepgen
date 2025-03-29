@@ -26,6 +26,8 @@
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::ctml {
   /// CTML documentation generator object
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -40,12 +42,11 @@ namespace cepgen::ctml {
     static ParametersDescription description() {
       auto desc = cepgen::utils::DocumentationGenerator::description();
       desc.setDescription("CTML HTML document generator helper");
-      desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
-      desc.add<std::string>("pageTitle", "Modules documentation")
-          .setDescription("documentation page upper level title");
-      desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
-      desc.add<bool>("showGit", false).setDescription("print out the git hash/branch in the output?");
-      desc.add<bool>("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
+      desc.add("output", "index.html"s).setDescription("output path for the generated HTML file");
+      desc.add("pageTitle", "Modules documentation"s).setDescription("documentation page upper level title");
+      desc.add("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
+      desc.add("showGit", false).setDescription("print out the git hash/branch in the output?");
+      desc.add("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
       return desc;
     }
 

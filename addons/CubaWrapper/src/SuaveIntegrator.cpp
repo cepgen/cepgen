@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,11 +38,11 @@ namespace cepgen::cuba {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Cuba implementation of the Suave algorithm");
-      desc.add<int>("NNew", 1000).setDescription("number of new integrand evaluations in each subdivision");
-      desc.add<int>("NMin", 2).setDescription(
+      desc.add("NNew", 1000).setDescription("number of new integrand evaluations in each subdivision");
+      desc.add("NMin", 2).setDescription(
           "minimum number of samples a former pass must contribute to a subregion to be considered in that region’s "
           "compound integral value");
-      desc.add<double>("Flatness", 50.).setDescription("type of norm used to compute the fluctuation of a sample");
+      desc.add("Flatness", 50.).setDescription("type of norm used to compute the fluctuation of a sample");
       return desc;
     }
 

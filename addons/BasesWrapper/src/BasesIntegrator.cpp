@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,10 +38,10 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Bases integration algorithm");
-      desc.add<int>("numFunctionCalls", 50'000);
-      desc.add<int>("intv", 1);
-      desc.add<int>("verbose", 0);
-      desc.add<std::vector<int> >("wildVars", {}).setDescription("list of 'wild' variables");
+      desc.add("numFunctionCalls", 50'000);
+      desc.add("intv", 1);
+      desc.add("verbose", 0);
+      desc.add("wildVars", std::vector<int>{}).setDescription("list of 'wild' variables");
       return desc;
     }
 

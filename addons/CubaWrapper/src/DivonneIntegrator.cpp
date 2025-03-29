@@ -45,27 +45,26 @@ namespace cepgen::cuba {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Cuba implementation of the Divonne algorithm");
-      desc.add<int>("Key1", 47).setDescription("sampling rule in the partitioning phase");
-      desc.add<int>("Key2", 1).setDescription("sampling rule in the final integration phase");
-      desc.add<int>("Key3", 1).setDescription(
-          "strategy for the refinement phase"
-          "(0 = do not treat the subregion any further, 1 = split the subregion up once more)");
-      desc.add<int>("MaxPass", 5).setDescription("thoroughness parameter of the partitioning phase");
-      desc.add<double>("Border", 0.).setDescription("border width of the integration region");
-      desc.add<double>("MaxChisq", 10.)
+      desc.add("Key1", 47).setDescription("sampling rule in the partitioning phase");
+      desc.add("Key2", 1).setDescription("sampling rule in the final integration phase");
+      desc.add("Key3", 1)
+          .allow(0, "do not treat the subregion any further")
+          .allow(1, "split the subregion up once more")
+          .setDescription("strategy for the refinement phase");
+      desc.add("MaxPass", 5).setDescription("thoroughness parameter of the partitioning phase");
+      desc.add("Border", 0.).setDescription("border width of the integration region");
+      desc.add("MaxChisq", 10.)
           .setDescription(
               "maximum chi-square value a single subregion is allowed to have in the final integration phase");
-      desc.add<double>("MinDeviation", 0.25)
+      desc.add("MinDeviation", 0.25)
           .setDescription(
               "fraction of the requested error of the entire integral, which determines whether it is worthwhile "
-              "further "
-              "examining a region that failed the chi-square test");
-      desc.add<std::vector<std::vector<double> > >("Given", {})
+              "further examining a region that failed the chi-square test");
+      desc.add("Given", std::vector<std::vector<double> >{})
           .setDescription("list of points where the integrand might have peaks");
-      desc.add<int>("LDXGiven", 0)
-          .setDescription("leading dimension of xgiven, i.e. the offset between one point and the next in memory");
-      desc.add<int>("NExtra", 0)
-          .setDescription("maximum number of extra points the peak-finder subroutine will return");
+      desc.add("LDXGiven", 0)
+          .setDescription("leading dimension of xgiven, i.e. offset between one point and next in memory");
+      desc.add("NExtra", 0).setDescription("maximum number of extra points the peak-finder subroutine will return");
       return desc;
     }
 

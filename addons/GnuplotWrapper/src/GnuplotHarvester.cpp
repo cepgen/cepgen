@@ -20,13 +20,14 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 struct GnuplotHarvester final : EventHarvester {
   using EventHarvester::EventHarvester;
   static ParametersDescription description() {
     auto desc = EventHarvester::description();
     desc.setDescription("Gnuplot event harvester");
-    desc.add<std::string>("plotter", "gnuplot");
+    desc.add("plotter", "gnuplot"s);
     return desc;
   }
 };

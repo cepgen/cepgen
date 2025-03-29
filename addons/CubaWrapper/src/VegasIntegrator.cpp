@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,11 +39,11 @@ namespace cepgen::cuba {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Cuba implementation of the VEGAS algorithm");
-      desc.add<int>("NStart", 1000).setDescription("number of integrand evaluations per iteration to start with");
-      desc.add<int>("NIncrease", 500).setDescription("increase in the number of integrand evaluations per iteration");
-      desc.add<int>("NBatch", 1000)
+      desc.add("NStart", 1000).setDescription("number of integrand evaluations per iteration to start with");
+      desc.add("NIncrease", 500).setDescription("increase in the number of integrand evaluations per iteration");
+      desc.add("NBatch", 1000)
           .setDescription("number of points sent in one MathLink packet to be sampled by Mathematica");
-      desc.add<int>("GridNo", 0).setDescription("slot in the internal grid table");
+      desc.add("GridNo", 0).setDescription("slot in the internal grid table");
       return desc;
     }
 

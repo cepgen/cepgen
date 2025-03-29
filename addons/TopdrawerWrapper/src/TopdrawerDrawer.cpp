@@ -36,6 +36,8 @@
 #define TD TOSTRING(TD_BIN)
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen::utils {
   class TopdrawerDrawer : public Drawer {
   public:
@@ -389,8 +391,8 @@ namespace cepgen::utils {
   ParametersDescription TopdrawerDrawer::description() {
     auto desc = Drawer::description();
     desc.setDescription("Topdrawer plotter");
-    desc.add<std::string>("font", "duplex").setDescription("Topdrawer font to use");
-    desc.add<bool>("filling", true).setDescription("allow to fill the whole available space?");
+    desc.add("font", "duplex"s).setDescription("Topdrawer font to use");
+    desc.add("filling", true).setDescription("allow to fill the whole available space?");
     return desc;
   }
 }  // namespace cepgen::utils

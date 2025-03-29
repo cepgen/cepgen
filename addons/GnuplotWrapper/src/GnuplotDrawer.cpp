@@ -56,11 +56,11 @@ public:
   static ParametersDescription description() {
     auto desc = Drawer::description();
     desc.setDescription("Gnuplot drawing utility");
-    desc.add<std::string>("extension", "png");
-    desc.add<bool>("persist", false);
-    desc.add<std::vector<std::string> >("size", {"30cm", "20cm"});
-    desc.add<std::string>("font", "");
-    desc.add<std::string>("plotStyle", "lp");
+    desc.add("extension", "png"s);
+    desc.add("persist", false);
+    desc.add("size", std::vector{"30cm"s, "20cm"s});
+    desc.add("font", ""s);
+    desc.add("plotStyle", "lp"s);
     return desc;
   }
 

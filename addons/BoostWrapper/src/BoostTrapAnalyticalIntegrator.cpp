@@ -35,8 +35,8 @@ public:
   static ParametersDescription description() {
     auto desc = AnalyticIntegrator::description();
     desc.setDescription("Boost trapezoidal integration algorithm");
-    desc.add<int>("limit", 1000).setDescription("maximum number of sub-intervals to build");
-    desc.add<double>("tolerance", 1.e-6).setDescription("maximal tolerance");
+    desc.add("limit", 1000).setDescription("maximum number of sub-intervals to build");
+    desc.add("tolerance", 1.e-6).setDescription("maximal tolerance");
     return desc;
   }
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,13 +41,13 @@ namespace cepgen::cuba {
   ParametersDescription Integrator::description() {
     auto desc = cepgen::Integrator::description();
     desc.setDescription("Cuba generic integration algorithm");
-    desc.add<int>("ncomp", 1).setDescription("number of components of the integrand");
-    desc.add<int>("nvec", 1).setDescription("number of samples received by the integrand");
-    desc.add<double>("epsrel", 1.e-3).setDescription("requested relative accuracy");
-    desc.add<double>("epsabs", 1.e-12).setDescription("requested absolute accuracy");
-    desc.add<int>("mineval", 0).setDescription("minimum number of integrand evaluations required");
-    desc.add<int>("maxeval", 50'000).setDescription("(approximate) maximum number of integrand evaluations allowed");
-    desc.add<int>("verbose", 0);
+    desc.add("ncomp", 1).setDescription("number of components of the integrand");
+    desc.add("nvec", 1).setDescription("number of samples received by the integrand");
+    desc.add("epsrel", 1.e-3).setDescription("requested relative accuracy");
+    desc.add("epsabs", 1.e-12).setDescription("requested absolute accuracy");
+    desc.add("mineval", 0).setDescription("minimum number of integrand evaluations required");
+    desc.add("maxeval", 50'000).setDescription("(approximate) maximum number of integrand evaluations allowed");
+    desc.add("verbose", 0);
     return desc;
   }
 

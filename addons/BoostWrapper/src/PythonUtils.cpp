@@ -29,20 +29,19 @@ cepgen::ParametersList py_dict_to_plist(const py::dict& dict) {
     py::extract<py::object> val_ext(kv[1]);
     const std::string val_type{py::extract<const char*>(val_ext().attr("__class__").attr("__name__"))};
     if (val_type == "int")
-      plist.set<int>(key, py::extract<int>(val_ext()));
+      plist.set(key, py::extract<int>(val_ext()));
     else if (val_type == "str")
-      plist.set<std::string>(key, std::string{py::extract<const char*>(val_ext())});
+      plist.set(key, std::string{py::extract<const char*>(val_ext())});
     else if (val_type == "float")
-      plist.set<double>(key, py::extract<double>(val_ext()));
+      plist.set(key, py::extract<double>(val_ext()));
     else if (val_type == "dict")
-      plist.set<cepgen::ParametersList>(key, py_dict_to_plist(py::extract<py::dict>(val_ext())));
+      plist.set(key, py_dict_to_plist(py::extract<py::dict>(val_ext())));
     else if (val_type == "tuple") {
       const py::tuple& tuple = py::extract<py::tuple>(val_ext());
       const std::string el_type{py::extract<const char*>(tuple[0].attr("__class__").attr("__name__"))};
       if (el_type == "float") {
-        const auto items = py_tuple_to_std_vector<double>(py::extract<py::tuple>(val_ext()));
-        if (items.size() == 2)
-          plist.set<cepgen::Limits>(key, cepgen::Limits(items.at(0), items.at(1)));
+        if (const auto items = py_tuple_to_std_vector<double>(py::extract<py::tuple>(val_ext())); items.size() == 2)
+          plist.set(key, cepgen::Limits{items.at(0), items.at(1)});
       } else
         throw CG_FATAL("py_dict_to_plist")
             << "Tuple unpacking is not (yet) handling the Python '" << val_type << "' type for key='" << key << "'.";
