@@ -35,9 +35,9 @@ public:
   static ParametersDescription description() {
     auto desc = Coupling::description();
     desc.setDescription("REvolver alpha(S) evolution algorithm");
-    desc.add<int>("order", 5);
-    desc.add<double>("qCentral", 0.0822);
-    desc.add<double>("qEvol", 1508.04);
+    desc.add("order", 5);
+    desc.add("qCentral", 0.0822);
+    desc.add("qEvol", 1508.04);
     return desc;
   }
 
