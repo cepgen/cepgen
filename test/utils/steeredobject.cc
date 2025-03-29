@@ -6,6 +6,8 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
 
+using namespace std::string_literals;
+
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
@@ -15,10 +17,10 @@ int main(int argc, char* argv[]) {
     }
     static cepgen::ParametersDescription description() {
       auto desc = cepgen::ParametersDescription();
-      desc.add<int>("foo", 42);
-      desc.add<double>("bar", M_PI);
-      desc.add<std::string>("baz", "test™");
-      desc.add<bool>("bat", false);
+      desc.add("foo", 42);
+      desc.add("bar", M_PI);
+      desc.add("baz", "test™"s);
+      desc.add("bat", false);
       return desc;
     }
     int foo;

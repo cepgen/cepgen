@@ -14,7 +14,7 @@ public:
   const cepgen::ParticleProperties& particleProperties() const { return particle_props_; }
   static cepgen::ParametersDescription description() {
     auto desc = cepgen::ParametersDescription();
-    desc.add<cepgen::pdgid_t>("particleProps", cepgen::PDG::muon);
+    desc.addAs<cepgen::pdgid_t>("particleProps", cepgen::PDG::muon);
     return desc;
   }
 
