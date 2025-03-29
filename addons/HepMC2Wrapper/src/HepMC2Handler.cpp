@@ -29,6 +29,7 @@
 
 using namespace cepgen;
 using namespace HepMC;
+using namespace std::string_literals;
 
 /// Handler for the HepMC file output
 /// \tparam T HepMC writer handler (format-dependent)
@@ -46,7 +47,7 @@ public:
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("HepMC2 ASCII file output module");
-    desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
+    desc.add("filename", "output.hepmc"s).setDescription("Output filename");
     return desc;
   }
 

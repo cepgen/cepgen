@@ -29,6 +29,7 @@
 #include "CepGenHepMC2/HepMC2EventInterface.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Handler for the HepMC file output
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -62,7 +63,7 @@ public:
   static ParametersDescription description() {
     auto desc = EventImporter::description();
     desc.setDescription("HepMC2 ASCII file importer module");
-    desc.add<std::string>("filename", "input.hepmc").setDescription("Input filename");
+    desc.add("filename", "input.hepmc"s).setDescription("Input filename");
     return desc;
   }
 

@@ -30,6 +30,7 @@
 #include "CepGenHepMC3/HepMC3EventInterface.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// HepMC3 handler for the LHEF file import
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -54,7 +55,7 @@ public:
   static ParametersDescription description() {
     auto desc = EventImporter::description();
     desc.setDescription("HepMC3 LHEF file importer module");
-    desc.add<std::string>("filename", "input.lhef").setDescription("Input filename");
+    desc.add("filename", "input.lhef"s).setDescription("Input filename");
     return desc;
   }
 

@@ -26,6 +26,7 @@
 
 using namespace cepgen;
 using namespace std;  // account for improper scoping in following include
+using namespace std::string_literals;
 
 #include <HepMC3/LHEF.h>
 
@@ -42,8 +43,8 @@ public:
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("HepMC 3-based LHEF output module");
-    desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
-    desc.add<bool>("compress", false);
+    desc.add("filename", "output.lhe"s).setDescription("Output filename");
+    desc.add("compress", false);
     return desc;
   }
 
