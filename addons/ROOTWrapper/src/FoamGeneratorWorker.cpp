@@ -28,6 +28,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Foam generator worker algorithm as developed by S. Jadach
 /// (Institute of Nuclear Physics, Krakow, PL)
@@ -53,16 +54,18 @@ public:
   static ParametersDescription description() {
     auto desc = GeneratorWorker::description();
     desc.setDescription("Foam generator worker");
-    desc.add<std::string>("rngEngine", "MersenneTwister")
-        .setDescription(
-            "Set random number generator engine (currently handled: 'Ranlux', 'generic', 'MersenneTwister')");
-    desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
-    desc.add<int>("nCells", 1000);
-    desc.add<int>("nSampl", 200);
-    desc.add<int>("nBin", 8);
-    desc.add<int>("EvPerBin", 25);
-    desc.add<int>("verbose", 0).setDescription("Verbosity level");
-    desc.add<unsigned long long>("seed", 42ull);
+    desc.add("rngEngine", "MersenneTwister"s)
+        .allow("Ranlux")
+        .allow("generic")
+        .allow("MersenneTwister")
+        .setDescription("random number generator engine");
+    desc.add("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
+    desc.add("nCells", 1000);
+    desc.add("nSampl", 200);
+    desc.add("nBin", 8);
+    desc.add("EvPerBin", 25);
+    desc.add("verbose", 0).setDescription("Verbosity level");
+    desc.add("seed", 42ull);
     return desc;
   }
 

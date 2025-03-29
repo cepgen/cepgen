@@ -27,6 +27,8 @@
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::root {
   class RandomGenerator final : public utils::RandomGenerator {
   public:
@@ -53,15 +55,15 @@ namespace cepgen::root {
     static ParametersDescription description() {
       auto desc = utils::RandomGenerator::description();
       desc.setDescription("ROOT random number generator engine");
-      desc.add<std::string>("type", "Ranlux")
-          .setDescription("random number engine")
+      desc.add("type", "Ranlux"s)
           .allow("Ranlux")
           .allow("Tausworthe")
           .allow("MersenneTwister")
           .allow("Ranluxpp")
           .allow("MixMax")
           .allow("MixMax17")
-          .allow("MixMax256");
+          .allow("MixMax256")
+          .setDescription("random number engine");
       return desc;
     }
 

@@ -39,12 +39,12 @@ public:
     auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
     desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("root"));
-    desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
-    desc.add<int>("nCells", 1000);
-    desc.add<int>("nSampl", 200);
-    desc.add<int>("nBin", 8);
-    desc.add<int>("EvPerBin", 25);
-    desc.add<int>("verbose", 0).setDescription("Verbosity level");
+    desc.add("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
+    desc.add("nCells", 1000);
+    desc.add("nSampl", 200);
+    desc.add("nBin", 8);
+    desc.add("EvPerBin", 25);
+    desc.add("verbose", 0).setDescription("Verbosity level");
     return desc;
   }
 

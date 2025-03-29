@@ -24,6 +24,8 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/Message.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::root {
   /// ROOT general-purpose integration algorithm
   class Integrator final : public cepgen::Integrator {
@@ -72,10 +74,10 @@ namespace cepgen::root {
     static ParametersDescription description() {
       auto desc = cepgen::Integrator::description();
       desc.setDescription("ROOT general purpose MC integrator");
-      desc.add<std::string>("type", "default");
-      desc.add<double>("absTol", -1.);
-      desc.add<double>("relTol", -1.);
-      desc.add<int>("size", 0);
+      desc.add("type", "default"s);
+      desc.add("absTol", -1.);
+      desc.add("relTol", -1.);
+      desc.add("size", 0);
       return desc;
     }
 

@@ -44,7 +44,7 @@ namespace cepgen::root {
       auto desc = utils::Drawer::description();
       desc.add("filename", "canvas"s).setDescription("default filename for the output");
       desc.add("format", "pdf"s).setDescription("default extension for the output");
-      desc.add<int>("palette", kLightTemperature).setDescription("ROOT colour palette to use");
+      desc.addAs<int>("palette", kLightTemperature).setDescription("ROOT colour palette to use");
       return desc;
     }
 

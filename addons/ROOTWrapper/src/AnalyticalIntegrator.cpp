@@ -43,10 +43,10 @@ namespace cepgen::root {
       auto desc = AnalyticIntegrator::description();
       desc.setDescription("ROOT integration algorithms wrapper");
       desc.addAs<int>("type", ROOT::Math::IntegrationOneDim::Type::kDEFAULT).setDescription("type of integration");
-      desc.add<double>("epsabs", -1.).setDescription("desired absolute error limit");
-      desc.add<double>("epsrel", -1.).setDescription("desired relative error limit");
-      desc.add<int>("limit", 0).setDescription("maximum number of subintervals to build");
-      desc.add<int>("rule", 0).setDescription("Gauss-Kronrod integration rule (only for GSL kADAPTIVE type)");
+      desc.add("epsabs", -1.).setDescription("desired absolute error limit");
+      desc.add("epsrel", -1.).setDescription("desired relative error limit");
+      desc.add("limit", 0).setDescription("maximum number of subintervals to build");
+      desc.add("rule", 0).setDescription("Gauss-Kronrod integration rule (only for GSL kADAPTIVE type)");
       return desc;
     }
 

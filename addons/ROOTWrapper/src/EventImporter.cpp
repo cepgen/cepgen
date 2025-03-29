@@ -26,6 +26,8 @@
 #include "CepGen/Utils/Value.h"
 #include "CepGenRoot/ROOTTreeInfo.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::root {
   /// ROOT handler for an event tree import
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -44,7 +46,7 @@ namespace cepgen::root {
     static ParametersDescription description() {
       auto desc = cepgen::EventImporter::description();
       desc.setDescription("ROOT TTree importer module");
-      desc.add<std::string>("filename", "output.root").setDescription("Input filename");
+      desc.add("filename", "output.root"s).setDescription("Input filename");
       return desc;
     }
 

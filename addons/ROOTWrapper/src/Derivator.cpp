@@ -31,7 +31,7 @@ namespace cepgen::root {
     static ParametersDescription description() {
       auto desc = utils::Derivator::description();
       desc.setDescription("ROOT derivation algorithm (Richardson's extrapolation method)");
-      desc.add<int>("order", 1).setDescription("order of the derivation");
+      desc.add("order", 1).setDescription("order of the derivation");
       return desc;
     }
 

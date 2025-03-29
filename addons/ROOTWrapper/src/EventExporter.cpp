@@ -32,6 +32,8 @@
 #include "CepGen/Version.h"
 #include "CepGenRoot/ROOTTreeInfo.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::root {
   /// Handler for the storage of events in a ROOT format
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -54,9 +56,9 @@ namespace cepgen::root {
     static ParametersDescription description() {
       auto desc = cepgen::EventExporter::description();
       desc.setDescription("ROOT TTree storage module");
-      desc.add<std::string>("filename", "output.root").setDescription("Output filename");
-      desc.add<bool>("compress", false).setDescription("Compress the event content? (merge down two-parton system)");
-      desc.add<bool>("autoFilename", false).setDescription("automatically generate the output filename");
+      desc.add("filename", "output.root"s).setDescription("Output filename");
+      desc.add("compress", false).setDescription("Compress the event content? (merge down two-parton system)");
+      desc.add("autoFilename", false).setDescription("automatically generate the output filename");
       return desc;
     }
 

@@ -33,6 +33,7 @@
 #include "CepGen/Utils/Value.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Handler for the generic ROOT file output
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -58,17 +59,17 @@ public:
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("ROOT histogramming/profiling module");
-    desc.add<std::string>("filename", "output.root").setDescription("Output filename");
+    desc.add("filename", "output.root"s).setDescription("Output filename");
     auto var_desc = ParametersDescription();
-    var_desc.add<std::string>("title", "").setDescription("Variable description");
-    var_desc.add<int>("nbins", -1);
-    var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
-    var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
-    var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
-    var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
-    var_desc.add<int>("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
-    var_desc.add<Limits>("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
-    var_desc.add<bool>("profile", false);
+    var_desc.add("title", ""s).setDescription("Variable description");
+    var_desc.add("nbins", -1);
+    var_desc.add("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
+    var_desc.add("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+    var_desc.add("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
+    var_desc.add("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+    var_desc.add("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
+    var_desc.add("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
+    var_desc.add("profile", false);
     desc.addParametersDescriptionVector("variables", var_desc);
     return desc;
   }
