@@ -31,7 +31,7 @@ namespace cepgen {
 namespace boost::cepgen {
   namespace pt = property_tree;
 
-  static constexpr const char* DAUGH_KEY = "DAUGHTER";
+  static constexpr const char* DAUGHTER_KEY = "DAUGHTER";
   static constexpr const char* MIN_KEY = "min";
   static constexpr const char* MAX_KEY = "max";
 

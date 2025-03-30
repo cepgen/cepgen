@@ -34,7 +34,7 @@ public:
   static ParametersDescription description() {
     auto desc = AnalyticIntegrator::description();
     desc.setDescription("Boost Gauss-Kronrod integration algorithm");
-    desc.add("limit", 1000).setDescription("maximum number of subintervals to build");
+    desc.add("limit", 1000).setDescription("maximum number of sub-intervals to build");
     desc.add("tolerance", std::numeric_limits<double>::infinity()).setDescription("maximal tolerance");
     return desc;
   }

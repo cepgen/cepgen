@@ -121,22 +121,22 @@ namespace boost::cepgen {
   }
 
   ::cepgen::ParametersList unpack(const pt::ptree& tree) {
-    ::cepgen::ParametersList out;
+    ::cepgen::ParametersList out{};
     if (tree.empty())
       return out;
     for (const auto& it : tree) {
       try {  // this might be a vector
         if (it.first.empty())
           try {  // try to parse as a parameters list
-            out.operator[]<std::vector<::cepgen::ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
+            out.operator[]<std::vector<::cepgen::ParametersList>>(DAUGHTER_KEY).emplace_back(unpack(it.second));
           } catch (const exception&) {
             try {  // try to parse as a float
-              out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
+              out.operator[]<std::vector<double>>(DAUGHTER_KEY).emplace_back(it.second.get_value<double>());
             } catch (const exception&) {
               try {  // try to parse as an integer
-                out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
+                out.operator[]<std::vector<int>>(DAUGHTER_KEY).emplace_back(it.second.get_value<int>());
               } catch (const exception&) {  // does not work, must be a string
-                out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
+                out.operator[]<std::vector<std::string>>(DAUGHTER_KEY).emplace_back(it.second.get_value<std::string>());
               }
             }
           }
@@ -171,12 +171,12 @@ namespace boost::cepgen {
       base.set(name, lim);
     }
     //--- then check if daughter is a vector; if true, skip one hierarchy level
-    else if (plist.has<std::vector<int>>(DAUGH_KEY))
-      base.set(name, plist.get<std::vector<int>>(DAUGH_KEY));
-    else if (plist.has<std::vector<double>>(DAUGH_KEY))
-      base.set(name, plist.get<std::vector<double>>(DAUGH_KEY));
-    else if (plist.has<std::vector<std::string>>(DAUGH_KEY))
-      base.set(name, plist.get<std::vector<std::string>>(DAUGH_KEY));
+    else if (plist.has<std::vector<int>>(DAUGHTER_KEY))
+      base.set(name, plist.get<std::vector<int>>(DAUGHTER_KEY));
+    else if (plist.has<std::vector<double>>(DAUGHTER_KEY))
+      base.set(name, plist.get<std::vector<double>>(DAUGHTER_KEY));
+    else if (plist.has<std::vector<std::string>>(DAUGHTER_KEY))
+      base.set(name, plist.get<std::vector<std::string>>(DAUGHTER_KEY));
     else
       base.set(name, plist);
   }
