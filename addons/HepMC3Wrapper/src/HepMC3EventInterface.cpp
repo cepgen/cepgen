@@ -48,8 +48,8 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
   unsigned short idx = 0;
   for (const auto& part_orig : evt.particles()) {
     const auto& mom_orig = part_orig.momentum();
-    FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
-    auto part = make_shared<GenParticle>(pmom, part_orig.integerPdgId(), (int)part_orig.status());
+    FourVector momentum(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
+    auto part = make_shared<GenParticle>(momentum, part_orig.integerPdgId(), static_cast<int>(part_orig.status()));
     part->set_generated_mass(cepgen::PDG::get().mass(part_orig.pdgId()));
     assoc_map_[idx] = part;
 
@@ -92,19 +92,19 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
           vcm->add_particle_out(part);
         // if part of the decay chain of central system, find parents
         else if (assoc_map_.count(m1) != 0) {
-          auto vprod = assoc_map_.at(m1)->end_vertex();
+          auto production_vertex = assoc_map_.at(m1)->end_vertex();
           std::list<short> ids{m1};  // list of mother particles
           if (assoc_map_.count(m2) != 0 && m2 > m1) {
             ids.resize(m2 - m1 + 1);
             std::iota(ids.begin(), ids.end(), m1);
           }
-          if (!vprod) {
-            vprod = make_shared<GenVertex>();
+          if (!production_vertex) {
+            production_vertex = make_shared<GenVertex>();
             for (const auto& id : ids)
-              vprod->add_particle_in(assoc_map_.at(id));
-            add_vertex(vprod);
+              production_vertex->add_particle_in(assoc_map_.at(id));
+            add_vertex(production_vertex);
           }
-          vprod->add_particle_out(part);
+          production_vertex->add_particle_out(part);
         } else
           throw CG_FATAL("HepMC3:fillEvent") << "Other particle requested! Not yet implemented!";
       } break;
@@ -124,7 +124,7 @@ CepGenEvent::operator cepgen::Event() const {
     auto convert_momentum = [](const FourVector& mom) -> cepgen::Momentum {
       return cepgen::Momentum::fromPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.e());
     };
-    auto cg_part = cepgen::Particle(role, 0, (cepgen::Particle::Status)part.status());
+    auto cg_part = cepgen::Particle(role, 0, static_cast<cepgen::Particle::Status>(part.status()));
     cg_part.setPdgId((long)part.pdg_id());
     cg_part.setMomentum(convert_momentum(part.momentum()));
     return cg_part;
@@ -279,8 +279,9 @@ void CepGenEvent::dump() const {
       for (const auto& opPtr : vtxPtr->particles_out())
         log << "\n      * " << opPtr->pdg_id() << " (status: " << opPtr->status() << "): " << opPtr->momentum(),
             out_sys += opPtr->momentum();
-      const auto imbal = in_sys - out_sys;
-      log << "\n     total: " << out_sys << "\n    (im)balance: " << imbal << " (norm: " << imbal.length() << ").";
+      const auto momentum_imbalance = in_sys - out_sys;
+      log << "\n     total: " << out_sys << "\n    (im)balance: " << momentum_imbalance
+          << " (norm: " << momentum_imbalance.length() << ").";
     }
     log << "\n" << std::string(70, '-');
   });

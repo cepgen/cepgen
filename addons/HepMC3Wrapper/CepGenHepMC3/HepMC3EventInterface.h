@@ -32,17 +32,12 @@ namespace HepMC3 {
   /// Interfacing between CepGen and HepMC event definitions
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2019
-  class CepGenEvent : public GenEvent {
+  class CepGenEvent final : public GenEvent {
   public:
-    /// Construct an event interface from a CepGen Event object
-    explicit CepGenEvent(const cepgen::Event&);
-    /// Extract a CepGen Event object from a HepMC3 GenEvent object
-    operator cepgen::Event() const;
-    /// Write the event content in the standard stream
-    void dump() const;
-
-    /// Merge this event with another CepGen event record
-    void merge(cepgen::Event&) const;
+    explicit CepGenEvent(const cepgen::Event&);  ///< Construct an event interface from a CepGen Event object
+    explicit operator cepgen::Event() const;     ///< Extract a CepGen Event object from a HepMC3 GenEvent object
+    void dump() const;                           ///< Write the event content in the standard stream
+    void merge(cepgen::Event&) const;            ///< Merge this event with another CepGen event record
 
   private:
     std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > assoc_map_;

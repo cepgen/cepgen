@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,12 +31,10 @@ namespace HepMC {
   /// Interfacing between CepGen and HepMC2 event definitions
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2019
-  class CepGenEvent : public GenEvent {
+  class CepGenEvent final : public GenEvent {
   public:
-    /// Construct an event interface from a CepGen Event object
-    explicit CepGenEvent(const cepgen::Event& ev);
-    /// Extract a CepGen Event object from a HepMC2 GenEvent object
-    operator cepgen::Event() const;
+    explicit CepGenEvent(const cepgen::Event& ev);  ///< Construct an event interface from a CepGen Event object
+    explicit operator cepgen::Event() const;        ///< Extract a CepGen Event object from a HepMC2 GenEvent object
 
   private:
     std::unordered_map<unsigned short, GenParticle*> assoc_map_;

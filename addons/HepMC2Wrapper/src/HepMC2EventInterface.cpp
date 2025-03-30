@@ -20,14 +20,12 @@
 #include <HepMC/GenParticle.h>
 #include <HepMC/GenVertex.h>
 #include <HepMC/SimpleVector.h>
-#include <HepMC/Version.h>
 
 #include <list>
 #include <numeric>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
@@ -41,7 +39,6 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
 
   weights().push_back(1.);  // unweighted events
 
-  // filling the particles content
   const FourVector origin(0., 0., 0., 0.);
   int cm_id = 0;
 
@@ -56,7 +53,7 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
 
   auto *v1 = new GenVertex(origin), *v2 = new GenVertex(origin), *vcm = new GenVertex(origin);
   unsigned short idx = 1;
-  for (const auto& part_orig : evt.particles()) {
+  for (const auto& part_orig : evt.particles()) {  // filling the particles content
     auto* part = convert_particle(part_orig);
     part->suggest_barcode(idx);
     assoc_map_[idx] = part;
@@ -82,8 +79,7 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
         v2->add_particle_out(part);
         vcm->add_particle_in(part);
         break;
-      case cepgen::Particle::Role::Intermediate:
-        // skip the two-parton system and propagate the parentage
+      case cepgen::Particle::Role::Intermediate:  // skip the two-parton system and propagate the parentage
         cm_id = idx;
         continue;
       case cepgen::Particle::Role::CentralSystem:
@@ -92,27 +88,24 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
         if (moth.empty())
           // skip disconnected lines
           continue;
-        // get mother(s) id(s)
-        const short m1 = *moth.begin();
-        const short m2 = moth.size() > 1 ? *moth.rbegin() : -1;
-        // check if particle is connected to the two-parton system
-        if (m1 == cm_id || (m2 >= 0 && (m1 < cm_id && cm_id <= m2)))  // also supports range
+        if (const auto m1 = *moth.begin(), m2 = moth.size() > 1 ? *moth.rbegin() : -1;  // get mother(s) id(s)
+            m1 == cm_id ||
+            (m2 >= 0 && (m1 < cm_id && cm_id <= m2)))  // check if particle is connected to the two-parton system
           vcm->add_particle_out(part);
-        // if part of the decay chain of central system, find parents
-        else if (assoc_map_.count(m1) != 0) {
-          auto vprod = assoc_map_.at(m1)->end_vertex();
-          std::list<short> ids{m1};  // list of mother particles
+        else if (assoc_map_.count(m1) != 0) {  // if part of the decay chain of central system, find parents
+          auto production_vertex = assoc_map_.at(m1)->end_vertex();
+          std::list ids{m1};  // list of mother particles
           if (assoc_map_.count(m2) != 0 && m2 > m1) {
             ids.resize(m2 - m1 + 1);
             std::iota(ids.begin(), ids.end(), m1);
           }
-          if (!vprod) {
-            vprod = new GenVertex();
+          if (!production_vertex) {
+            production_vertex = new GenVertex();
             for (const auto& id : ids)
-              vprod->add_particle_in(assoc_map_.at(id));
-            add_vertex(vprod);
+              production_vertex->add_particle_in(assoc_map_.at(id));
+            add_vertex(production_vertex);
           }
-          vprod->add_particle_out(part);
+          production_vertex->add_particle_out(part);
         } else {
           if (v1)
             delete v1;
@@ -146,7 +139,7 @@ CepGenEvent::operator cepgen::Event() const {
       return cepgen::Momentum::fromPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.e());
     };
     auto cg_part = cepgen::Particle(role, 0, static_cast<cepgen::Particle::Status>(part.status()));
-    cg_part.setPdgId((long)part.pdg_id());
+    cg_part.setPdgId(part.pdg_id());
     cg_part.setMomentum(convert_momentum(part));
     return cg_part;
   };

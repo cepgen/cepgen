@@ -48,7 +48,7 @@ public:
     return desc;
   }
 
-  bool operator<<(const Event& cg_ev) override {
+  bool operator<<(const Event& cepgen_event) override {
     if (!header_initialised_) {
       lhe_output_->init();  // ensure everything is properly parsed
       header_initialised_ = true;
@@ -58,9 +58,9 @@ public:
     hepeup.XWGTUP = 1.;
     hepeup.XPDWUP = std::pair<double, double>(0., 0.);
     hepeup.SCALUP = 0.;
-    hepeup.AQEDUP = cg_ev.metadata("alphaEM");
-    hepeup.AQCDUP = cg_ev.metadata("alphaS");
-    const auto cg_particles = compress_ ? cg_ev.compress().particles() : cg_ev.particles();
+    hepeup.AQEDUP = cepgen_event.metadata("alphaEM");
+    hepeup.AQCDUP = cepgen_event.metadata("alphaS");
+    const auto cg_particles = compress_ ? cepgen_event.compress().particles() : cepgen_event.particles();
     hepeup.resize(cg_particles.size());
     for (unsigned short ip = 0; ip < hepeup.NUP; ++ip) {
       const auto& cg_part = cg_particles.at(ip);

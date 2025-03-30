@@ -73,9 +73,9 @@ public:
 private:
   void initialise() override {}
 
-  std::unique_ptr<T> output_;             ///< writer object
-  std::shared_ptr<GenCrossSection> xs_;   ///< generator cross section and error
-  std::shared_ptr<GenRunInfo> run_info_;  ///< auxiliary information on run
+  const std::unique_ptr<T> output_;             ///< writer object
+  const std::shared_ptr<GenCrossSection> xs_;   ///< generator cross-section and error
+  const std::shared_ptr<GenRunInfo> run_info_;  ///< auxiliary information on run
 };
 
 //----------------------------------------------------------------------
