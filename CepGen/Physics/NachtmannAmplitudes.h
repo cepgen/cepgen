@@ -29,7 +29,7 @@ namespace cepgen {
   class ParametersList;
   /// Amplitudes computational tool, as developed by Nachtmann et al.
   /// \cite Nachtmann:2005en
-  class NachtmannAmplitudes : public SteeredObject<NachtmannAmplitudes> {
+  class NachtmannAmplitudes final : public SteeredObject<NachtmannAmplitudes> {
   public:
     explicit NachtmannAmplitudes(const ParametersList&);
 
@@ -41,7 +41,7 @@ namespace cepgen {
     /// Helper container to handle all kinematics variables computation once
     class Kinematics {
     public:
-      Kinematics(double mw2, double shat, double that, double uhat);
+      explicit Kinematics(double mw2, double shat, double that, double uhat);
       bool operator!=(const Kinematics&) const;
       friend std::ostream& operator<<(std::ostream&, const Kinematics&);
       static Kinematics fromScosTheta(double shat, double cos_theta, double mw2);
@@ -71,14 +71,14 @@ namespace cepgen {
   private:
     const Mode mode_;
     /// Collection of parameters for the EFT extension
-    const struct EFTParameters : SteeredObject<EFTParameters> {
+    const struct EFTParameters final : SteeredObject<EFTParameters> {
       explicit EFTParameters(const ParametersList&);
       const double s1, mH;
       double c1() const { return sqrt(1. - s1 * s1); }
       static ParametersDescription description();
     } eft_ext_;
     /// Simple container for helicity components
-    struct Helicities {
+    struct HelicityStates {
       short lam1;  ///< first incoming photon
       short lam2;  ///< second incoming photon
       short lam3;  ///< first outgoing W
@@ -88,12 +88,12 @@ namespace cepgen {
     const double G_EM;
 
     /// Compute the amplitude for the Standard model
-    std::complex<double> amplitudeSM(const Kinematics&, const Helicities&) const;
-    std::complex<double> amplitudeW(const Kinematics&, const Helicities&) const;
-    std::complex<double> amplitudeWbar(const Kinematics&, const Helicities&) const;
-    std::complex<double> amplitudephiW(const Kinematics&, const Helicities&) const;
-    std::complex<double> amplitudeWB(const Kinematics&, const Helicities&) const;
-    std::complex<double> amplitudeWbarB(const Kinematics&, const Helicities&) const;
+    std::complex<double> amplitudeSM(const Kinematics&, const HelicityStates&) const;
+    std::complex<double> amplitudeW(const Kinematics&, const HelicityStates&) const;
+    std::complex<double> amplitudeWbar(const Kinematics&, const HelicityStates&) const;
+    std::complex<double> amplitudephiW(const Kinematics&, const HelicityStates&) const;
+    std::complex<double> amplitudeWB(const Kinematics&, const HelicityStates&) const;
+    std::complex<double> amplitudeWbarB(const Kinematics&, const HelicityStates&) const;
   };
 }  // namespace cepgen
 

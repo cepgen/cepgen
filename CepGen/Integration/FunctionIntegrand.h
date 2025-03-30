@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 namespace cepgen {
   /// Wrapper to the function to be integrated
-  class FunctionIntegrand : public Integrand {
+  class FunctionIntegrand final : public Integrand {
   public:
     explicit FunctionIntegrand(size_t, const std::function<double(const std::vector<double>&)>&);
 

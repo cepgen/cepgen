@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <cmath>
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Cuts.h"
@@ -64,8 +65,8 @@ bool Central::contain(const Particles& parts, const Event*) const {
     return false;
   if (parts.size() > 1) {  // look at correlations
     const auto &mom1 = parts.at(0).momentum(), &mom2 = parts.at(1).momentum();
-    if (!pt_diff.contains(fabs(mom1.pt() - mom2.pt())) || !phi_diff.contains(mom1.deltaPhi(mom2)) ||
-        !rapidity_diff.contains(fabs(mom1.rapidity() - mom2.rapidity())))
+    if (!pt_diff.contains(std::fabs(mom1.pt() - mom2.pt())) || !phi_diff.contains(mom1.deltaPhi(mom2)) ||
+        !rapidity_diff.contains(std::fabs(mom1.rapidity() - mom2.rapidity())))
       return false;
   }
   return true;
@@ -156,7 +157,7 @@ bool Remnants::contain(const Particles& parts, const Event* evt) const {
       continue;
     if (evt && xi.valid() && !xi.contains(1. - part.momentum().pz() / (*evt)(*part.mothers().begin()).momentum().pz()))
       return false;
-    if (!yj.contains(fabs(part.momentum().rapidity())))
+    if (!yj.contains(std::fabs(part.momentum().rapidity())))
       return false;
   }
   return true;

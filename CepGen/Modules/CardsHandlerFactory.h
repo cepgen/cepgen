@@ -40,7 +40,7 @@ namespace cepgen {
   /// A cards handler base factory
   DEFINE_FACTORY(BaseCardsHandlerFactory, card::Handler, "Cards handlers factory");
   /// A cards handler factory
-  struct CardsHandlerFactory : BaseCardsHandlerFactory {
+  struct CardsHandlerFactory final : BaseCardsHandlerFactory {
     using BaseCardsHandlerFactory::BaseCardsHandlerFactory;
     static CardsHandlerFactory& get();
     /// Build one instance of a cards handler

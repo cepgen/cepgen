@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// \brief Specify a random numbers generator seed for the external module
+    /// Specify a random numbers generator seed for the external module
     /// \param[in] seed An RNG seed
     void setSeed(long long seed) { seed_ = seed; }
 
@@ -45,7 +45,7 @@ namespace cepgen {
     /// \param[in] fast run a faster version of the algorithm (whenever available)
     /// \return Boolean stating whether the modification occurred successfully
     virtual bool run(Event& ev, double& weight, bool fast = false) = 0;
-    inline virtual void setCrossSection(const Value&) {}  ///< Specify the cross section value, in pb
+    inline virtual void setCrossSection(const Value&) {}  ///< Specify the cross-section value, in pb
 
   protected:
     long long seed_{0ll};           ///< Random numbers generator seed fed to the algorithm

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,8 @@ namespace cepgen {
 
   protected:
     void setIntegrand(Integrand&);
-    /// A functor wrapping GSL function footprint
-    std::function<double(double*, size_t, void*)> function_;
-    /// GSL structure storing the function to be integrated by this
-    /// integrator instance (along with its parameters)
+    std::function<double(double*, size_t, void*)> function_;  ///< A functor wrapping GSL function footprint
+    /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
     std::unique_ptr<gsl_monte_function> gsl_function_;
     std::vector<double> x_low_, x_high_;
   };

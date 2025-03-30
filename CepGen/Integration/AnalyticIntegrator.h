@@ -46,7 +46,7 @@ namespace cepgen {
     /// \param[in] range (optional) integration range
     template <typename T>
     inline double integrate(const utils::FunctionWrapper& func, const T& obj, const Limits& range = {}) const {
-      return run(func, (void*)&obj, range);
+      return run(func, const_cast<void*>(reinterpret_cast<const void*>(&obj)), range);
     }
 
   protected:

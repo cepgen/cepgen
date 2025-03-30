@@ -22,7 +22,7 @@
 #include <memory>
 #include <sstream>
 
-#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Core/ParametersDescription.h"
 
 /// Name of the object builder
 #define BUILDERNM(obj) obj##Builder

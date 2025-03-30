@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"

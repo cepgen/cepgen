@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
 #include <iomanip>
 
 #include "CepGen/Event/Particle.h"
@@ -84,7 +85,7 @@ Particle& Particle::setMomentum(const Momentum& mom, bool off_shell) {
 
 Particle& Particle::setMomentum(double px, double py, double pz, double e) {
   momentum_.setP(px, py, pz).setEnergy(e);
-  if (fabs(e - momentum_.energy()) > 1.e-6)  // more than 1 eV difference
+  if (std::fabs(e - momentum_.energy()) > 1.e-6)  // more than 1 eV difference
     CG_WARNING("Particle") << "Energy difference: " << e - momentum_.energy();
   return *this;
 }

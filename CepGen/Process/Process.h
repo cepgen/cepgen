@@ -19,6 +19,8 @@
 #ifndef CepGen_Process_Process_h
 #define CepGen_Process_Process_h
 
+#include <cmath>
+
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"

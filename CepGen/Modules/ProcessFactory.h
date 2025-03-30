@@ -37,22 +37,21 @@
 /// Convert a token into a string
 #define STRINGIFY(name) #name
 /// Add the Fortran process definition to the list of handled processes
-#define REGISTER_FORTRAN_PROCESS(name, descr, f77_func)                           \
-  extern "C" {                                                                    \
-  extern double f77_func##_();                                                    \
-  }                                                                               \
-  struct PROCESS_F77_NAME(name) : public cepgen::proc::FortranFactorisedProcess { \
-    PROCESS_F77_NAME(name)                                                        \
-    (const cepgen::ParametersList& params = cepgen::ParametersList())             \
-        : cepgen::proc::FortranFactorisedProcess(params, f77_func##_) {           \
-      cepgen::proc::FortranFactorisedProcess::kProcParameters = params;           \
-    }                                                                             \
-    static cepgen::ParametersDescription description() {                          \
-      auto desc = cepgen::proc::FortranFactorisedProcess::description();          \
-      desc.setDescription(descr);                                                 \
-      return desc;                                                                \
-    }                                                                             \
-  };                                                                              \
+#define REGISTER_FORTRAN_PROCESS(name, descr, f77_func)                                              \
+  extern "C" {                                                                                       \
+  extern double f77_func##_();                                                                       \
+  }                                                                                                  \
+  struct PROCESS_F77_NAME(name) : cepgen::proc::FortranFactorisedProcess {                           \
+    explicit PROCESS_F77_NAME(name)(const cepgen::ParametersList& params = cepgen::ParametersList()) \
+        : cepgen::proc::FortranFactorisedProcess(params, f77_func##_) {                              \
+      cepgen::proc::FortranFactorisedProcess::kProcParameters = params;                              \
+    }                                                                                                \
+    static cepgen::ParametersDescription description() {                                             \
+      auto desc = cepgen::proc::FortranFactorisedProcess::description();                             \
+      desc.setDescription(descr);                                                                    \
+      return desc;                                                                                   \
+    }                                                                                                \
+  };                                                                                                 \
   REGISTER_PROCESS(STRINGIFY(name), F77_##name)
 
 namespace cepgen::proc {

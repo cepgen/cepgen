@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace cepgen::utils {
 
 namespace cepgen {
   /// Wrapper to the function to be integrated
-  class ProcessIntegrand : public Integrand {
+  class ProcessIntegrand final : public Integrand {
   public:
     explicit ProcessIntegrand(const proc::Process&);
     explicit ProcessIntegrand(const RunParameters*);

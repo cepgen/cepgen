@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include <set>
 
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Hasher.h"
@@ -91,10 +90,10 @@ namespace cepgen {
       role_ = role;
       return *this;
     }
-    inline Status status() const { return (Status)status_; }  ///< Particle status
+    inline Status status() const { return static_cast<Status>(status_); }  ///< Particle status
     /// Set the particle decay/stability status
     inline Particle& setStatus(Status status) {
-      status_ = (int)status;
+      status_ = static_cast<int>(status);
       return *this;
     }
     /// Set the particle decay/stability status
@@ -152,15 +151,15 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&, const Particle&);  ///< Human-readable dump of particle information
 
   protected:
-    int id_{-1};                          ///< Unique identifier in an event
-    bool antiparticle_{false};            ///< Are we dealing with the particle or antiparticle?
-    Momentum momentum_;                   ///< Momentum properties handler
-    float helicity_{0.};                  ///< Helicity
-    Role role_{Role::UnknownRole};        ///< Role in the process
-    int status_{(int)Status::Undefined};  ///< Decay/stability status
-    ParticlesIds mothers_;                ///< List of mother particles
-    ParticlesIds daughters_;              ///< List of daughter particles
-    pdgid_t pdg_id_{(pdgid_t)0};          ///< PDG id
+    int id_{-1};                                       ///< Unique identifier in an event
+    bool antiparticle_{false};                         ///< Are we dealing with the particle or antiparticle?
+    Momentum momentum_;                                ///< Momentum properties handler
+    float helicity_{0.};                               ///< Helicity
+    Role role_{Role::UnknownRole};                     ///< Role in the process
+    int status_{static_cast<int>(Status::Undefined)};  ///< Decay/stability status
+    ParticlesIds mothers_;                             ///< List of mother particles
+    ParticlesIds daughters_;                           ///< List of daughter particles
+    pdgid_t pdg_id_{0};                                ///< PDG id
   };
 
   // --- particle containers
@@ -175,7 +174,7 @@ namespace cepgen {
   public:
     ParticlesMap() = default;
     ParticlesMap(const ParticlesMap&);             ///< Copy constructor
-    ParticlesMap& operator=(const ParticlesMap&);  ///, Assignment operator
+    ParticlesMap& operator=(const ParticlesMap&);  ///< Assignment operator
     ~ParticlesMap() = default;
   };
 }  // namespace cepgen

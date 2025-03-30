@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,13 +35,12 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// Ensure the integration bounds are properly set
-    void checkLimits(const Integrand&);
-    /// Specify the variables limits on integration
+    void checkLimits(const Integrand&);  ///< Ensure the integration bounds are properly set
+    /// Set variables integration limits
     virtual void setLimits(const std::vector<Limits>& limits) { limits_ = limits; }
 
-    /// Compute the function value at the given phase space point
-    virtual double eval(Integrand&, const std::vector<double>&) const;
+    virtual double eval(Integrand&, const std::vector<double>&) const;  ///< Compute function value at one point
+
     /// Generate a uniformly distributed (between 0 and 1) random number
     virtual double uniform(const Limits& = {0., 1.}) const;
 

@@ -83,7 +83,7 @@ bool NachtmannAmplitudes::Kinematics::operator!=(const Kinematics& oth) const {
 
 std::complex<double> NachtmannAmplitudes::operator()(
     const Kinematics& kin, short lam1, short lam2, short lam3, short lam4) const {
-  const Helicities hel{lam1, lam2, lam3, lam4};
+  const HelicityStates hel{lam1, lam2, lam3, lam4};
 
   //--- per-helicity amplitude
   switch (mode_) {
@@ -109,7 +109,7 @@ std::complex<double> NachtmannAmplitudes::operator()(
   throw CG_FATAL("NachtmannAmplitudes") << "Invalid mode: " << mode_ << "!";
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, const Helicities& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, const HelicityStates& hel) const {
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return 1i * G_EM_SQ * kin.invA * kin.inv_gamma2 *
            ((kin.gamma2 + 1.) * (1. - hel.lam1 * hel.lam2) * kin.sin_theta2 - (1. + hel.lam1 * hel.lam2));
@@ -131,7 +131,7 @@ std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, con
           (1. - hel.lam1 * hel.lam2) * (1. - hel.lam3 * hel.lam4) * kin.cos_theta2);
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, const Helicities& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, const HelicityStates& hel) const {
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return 3i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA * kin.inv_gamma2 * kin.sin_theta2 *
            (1. + hel.lam1 * hel.lam2);
@@ -155,7 +155,7 @@ std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, cons
                kin.cos_theta2 * (3 + hel.lam1 * hel.lam2 + 2 * hel.lam3 * hel.lam4)));
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, const Helicities& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, const HelicityStates& hel) const {
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return -3 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * kin.invA * kin.sin_theta2 *
            (hel.lam1 + hel.lam2);
@@ -175,7 +175,7 @@ std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, c
                             kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4)));
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, const Helicities& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, const HelicityStates& hel) const {
   const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return -0.25i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * invB * (1. + kin.beta2) *
@@ -189,7 +189,7 @@ std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, c
          (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, const Helicities& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, const HelicityStates& hel) const {
   const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return 2i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
@@ -216,7 +216,7 @@ std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, con
              (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, const Helicities& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, const HelicityStates& hel) const {
   CG_WARNING("NachtmannAmplitudes") << "Mode " << mode_ << " is not yet properly handled!";
   const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal

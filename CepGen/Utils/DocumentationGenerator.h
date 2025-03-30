@@ -19,7 +19,7 @@
 #ifndef CepGen_Utils_DocumentationGenerator_h
 #define CepGen_Utils_DocumentationGenerator_h
 
-#include "CepGen/Modules/ModuleFactory.h"
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen::utils {
   /// Documentation generator object
