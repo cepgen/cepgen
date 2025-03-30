@@ -33,7 +33,7 @@ using namespace std::string_literals;
 
 namespace cepgen::strfun {
   /// Generic partonic level perturbative structure functions built from an external PDFs grid
-  class LHAPDFPartonic : public PartonicParameterisation {
+  class LHAPDFPartonic final : public PartonicParameterisation {
   public:
     /// Quarks types
     enum class Mode { full = 0, valence = 1, sea = 2 };
@@ -56,12 +56,10 @@ namespace cepgen::strfun {
   private:
     void initialise();
     double evalxQ2(int flavour, double xbj, double q2) override;
-    /// String-type PDF identifier (default)
-    std::string pdf_set_;
-    /// Integer-type PDF identifier (if no string version is provided)
-    int pdf_code_;
-    /// PDF set used
-    int pdf_member_;
+
+    std::string pdf_set_;   ///< String-type PDF identifier (default)
+    const int pdf_code_;    ///< Integer-type PDF identifier (if no string version is provided)
+    const int pdf_member_;  ///< PDF set used
     bool initialised_{false};
 
 #ifdef LHAPDF_GE_6
