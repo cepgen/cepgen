@@ -34,8 +34,8 @@ namespace ROOT {
     static CepGenRun load(const std::string&, const std::string& run_tree = TREE_NAME);
 
     double sqrt_s{-1.};                ///< Centre of mass energy for beam particles
-    double xsect{-1.};                 ///< Process cross section, in pb
-    double errxsect{-1.};              ///< Uncertainty on process cross section, in pb
+    double xsect{-1.};                 ///< Process cross-section, in pb
+    double errxsect{-1.};              ///< Uncertainty on process cross-section, in pb
     unsigned int num_events{0};        ///< Number of events generated in run
     unsigned int litigious_events{0};  ///< Number of litigious events in run
     std::string process_name;          ///< Unique name of the process generated in this run

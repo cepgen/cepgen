@@ -40,7 +40,7 @@ namespace cepgen::root {
     /// \param[in] x_coordinate coordinate
     /// \param[in] step_size (optional) step size ; if not provided, will use default algorithm value
     double derivate(const utils::FunctionWrapper& function, double x_coordinate, double step_size) const override {
-      auto root_function = TF1(
+      const auto root_function = TF1(
           "cepgen_functional",
           [&function](double vars[1], double* pars) { return function(vars[0], static_cast<void*>(pars)); },
           0.,

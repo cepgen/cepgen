@@ -119,7 +119,7 @@ namespace cepgen::root {
       const auto &x_range = drawable.xAxis().range(), &y_range = drawable.yAxis().range();
       histogram->GetXaxis()->SetTitle(delatexify(drawable.xAxis().label()));
       histogram->GetYaxis()->SetTitle(delatexify(drawable.yAxis().label()));
-      histogram->SetLineWidth(std::max((short)3, histogram->GetLineWidth()));
+      histogram->SetLineWidth(std::max(static_cast<short>(3), histogram->GetLineWidth()));
       if (x_range.valid())
         histogram->GetXaxis()->SetLimits(x_range.min(), x_range.max());
       if (y_range.valid()) {
@@ -154,14 +154,16 @@ namespace cepgen::root {
       auto colour = ROOTCanvas::colours.at(i % ROOTCanvas::colours.size());
       auto style = i + 1;
       if (obj->isHist1D()) {
-        if (auto* hist = new TH1D(convert(*dynamic_cast<const utils::Hist1D*>(obj))); hist) {
+        if (auto* hist_obj = dynamic_cast<const utils::Hist1D*>(obj); hist_obj) {
+          auto* hist = new TH1D(convert(*hist_obj));
           hist->SetLineColor(colour);
           hist->SetLineStyle(style);
           hs->Add(hist);
           canvas.AddLegendEntry(hist, hist->GetTitle(), "l");
         }
       } else if (obj->isGraph1D()) {
-        if (auto* gr = new TGraphErrors(convert(*dynamic_cast<const utils::Graph1D*>(obj))); gr) {
+        if (auto* graph_obj = dynamic_cast<const utils::Graph1D*>(obj); graph_obj) {
+          auto* gr = new TGraphErrors(convert(*graph_obj));
           gr->SetLineColor(colour);
           gr->SetLineStyle(style);
           mg->Add(gr);
@@ -182,10 +184,10 @@ namespace cepgen::root {
         hs->Draw(((mode & Mode::bar ? "hist"s : ""s) + (mode & Mode::nostack ? "nostack"s : ""s)).data());
       if (has_graphs)
         mg->Draw(("l"s + (!has_hists ? "a" : "")).c_str());
-      if (has_hists) {
+      if (has_hists && first) {
         postDraw(hs->GetHistogram(), *first);
         canvas.Prettify(hs);
-      } else if (has_graphs) {
+      } else if (has_graphs && first) {
         postDraw(mg->GetHistogram(), *first);
         canvas.Prettify(mg);
       }
@@ -204,7 +206,7 @@ namespace cepgen::root {
         }
       } else if (obj->isGraph2D()) {
         if (const auto* graph = dynamic_cast<const utils::Graph2D*>(obj); graph) {
-          auto* gr = new TGraph2D(convert(*graph));
+          auto* gr = new TGraph2DErrors(convert(*graph));
           setMode(canvas, mode);
           if (mode & Mode::col)
             gr->Draw("colz");

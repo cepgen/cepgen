@@ -43,16 +43,16 @@ public:
   explicit ROOTHistsHandler(const ParametersList&);
   ~ROOTHistsHandler() override {
     // finalisation of the output file
-    for (const auto& hist : hists1d_)
-      hist.second->Write(hist.first.c_str());
-    for (const auto& hist : hists2d_)
-      hist.second->Write(utils::merge(hist.first, "_vs_").c_str());
-    for (const auto& hist : hists3d_)
-      hist.second->Write(utils::merge(hist.first, "_vs_").c_str());
-    for (const auto& hist : profiles1d_)
-      hist.second->Write(utils::merge(hist.first, "_vs_").c_str());
-    for (const auto& hist : profiles2d_)
-      hist.second->Write(utils::merge(hist.first, "_vs_").c_str());
+    for (const auto& [names, hist] : hists1d_)
+      hist->Write(names.c_str());
+    for (const auto& [names, hist] : hists2d_)
+      hist->Write(utils::merge(names, "_vs_").c_str());
+    for (const auto& [names, hist] : hists3d_)
+      hist->Write(utils::merge(names, "_vs_").c_str());
+    for (const auto& [names, hist] : profiles1d_)
+      hist->Write(utils::merge(names, "_vs_").c_str());
+    for (const auto& [names, hist] : profiles2d_)
+      hist->Write(utils::merge(names, "_vs_").c_str());
     file_->Close();  // ROOT and its sumptuous memory management disallows the "delete" here
   }
 

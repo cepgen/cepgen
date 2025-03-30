@@ -215,7 +215,7 @@ bool CepGenEvent::next(cepgen::Event& ev) {
   for (unsigned short i = 0; i < np; ++i) {
     cepgen::Particle part;
     part.setRole(static_cast<cepgen::Particle::Role>(role[i]));
-    part.setPdgId((long)pdg_id[i]);
+    part.setPdgId(pdg_id[i]);
     part.setStatus(static_cast<cepgen::Particle::Status>(status[i]));
     part.setMomentum(cepgen::Momentum::fromPtEtaPhiE(pt[i], eta[i], phi[i], E[i]));
     ev.addParticle(part);
