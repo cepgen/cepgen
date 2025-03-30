@@ -67,7 +67,7 @@ Environment::~Environment() {
         << "Python environment is set to be finalised while it was not initialised in the first place.";
 }
 
-bool Environment::initialised() const { return Py_IsInitialized(); }
+bool Environment::initialised() { return Py_IsInitialized(); }
 
 void Environment::setProgramName(const std::string& filename) {
   const size_t fn_len = filename.length() + 1;

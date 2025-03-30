@@ -61,11 +61,11 @@ namespace cepgen::python {
       const auto filename = pythonPath(file);
       Environment environment(params_);
       environment.setProgramName(filename);
-      auto cfg = ObjectPtr::importModule(filename) /* new */;
-      if (!cfg)
+      if (const auto cfg = ObjectPtr::importModule(filename) /* new */; cfg)
+        parseParameters(cfg);
+      else
         throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
                        << " (parsed from '" << file << "').";
-      parseParameters(cfg);
       parse();
       return *this;
     }
@@ -73,13 +73,13 @@ namespace cepgen::python {
       const std::string name = "Cards.Core";
       Environment environment(params_);
       environment.setProgramName(name);
-      auto cfg = ObjectPtr::defineModule(name, utils::merge(str, "\n")) /* new */;
-      if (!cfg)
+      if (const auto cfg = ObjectPtr::defineModule(name, utils::merge(str, "\n")) /* new */; cfg)
+        parseParameters(cfg);
+      else
         throw PY_ERROR << "Failed to parse a configuration string:\n"
                        << std::string(80, '-') << "\n"
                        << str << "\n"
                        << std::string(80, '-');
-      parseParameters(cfg);
       parse();
       return *this;
     }
@@ -124,7 +124,7 @@ namespace cepgen::python {
     }
     void parse() {
       // logging module
-      auto logging = plist_.get<ParametersList>("logger");
+      const auto logging = plist_.get<ParametersList>("logger");
       utils::Logger::get().setLevel(logging.getAs<int, utils::Logger::Level>("level", utils::Logger::get().level()));
       utils::Logger::get().setExtended(logging.get<bool>("extended", utils::Logger::get().extended()));
       for (const auto& log_mod : logging.get<std::vector<std::string> >("enabledModules"))
@@ -191,16 +191,16 @@ namespace cepgen::python {
 
       // generation parameters
       runParameters()->integrator() += plist_.get<ParametersList>("integrator");
-      if (auto pgen = plist_.get<ParametersList>("generator"); !pgen.empty()) {
+      if (const auto pgen = plist_.get<ParametersList>("generator"); !pgen.empty()) {
         runParameters()->generation().setParameters(plist_.get<ParametersList>("generator"));
-        if (auto maxgen = pgen.get<int>("numEvents", -1); maxgen > 0)
-          runParameters()->generation().setMaxGen(maxgen);
+        if (const auto num_events = pgen.get<int>("numEvents", -1); num_events > 0)
+          runParameters()->generation().setMaxGen(num_events);
       }
 
       // event modification algorithms / hadronisers
       auto parse_event_modifier_parameters = [&](const ParametersList& mod) {
         runParameters()->addModifier(EventModifierFactory::get().build(mod));
-        auto h = runParameters()->eventModifiersSequence().rbegin()->get();
+        const auto h = runParameters()->eventModifiersSequence().rbegin()->get();
         // split the configuration into a pre-initialisation and a post-initialisation of the module parts
         h->readStrings(mod.get<std::vector<std::string> >("preConfiguration"));
         h->initialise(*runParameters());

@@ -87,8 +87,8 @@ namespace cepgen::python {
             CG_WARNING("python:Functional") << "Invalid size for return vector of function '" << name_
                                             << "': " << vec.size() << ". Values: " << vec << ".";
           return vec.at(0);
-        } else
-          throw PY_ERROR << "Empty result vector returned from function '" << name_ << "'.";
+        }
+        throw PY_ERROR << "Empty result vector returned from function '" << name_ << "'.";
       }
       throw PY_ERROR << "Invalid return type for function '" << name_ << "' call: " << return_value << ".";
     };

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen::python {
     static ParametersDescription description();
 
     void setProgramName(const std::string&);  ///< Set the name of the Python program
-    bool initialised() const;                 ///< Is the python environment already initialised?
+    static bool initialised();                ///< Is the python environment already initialised?
 
   private:
 #if PY_VERSION_HEX >= 0x03080000
