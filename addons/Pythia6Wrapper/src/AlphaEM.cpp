@@ -33,7 +33,7 @@ namespace cepgen::pythia6 {
     }
 
     inline static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("Pythia6 modelling of alpha(EM) running");
       desc.add("mode", mstu(101))
           .allow(0, "fix at 'fixedAlphaEM'")

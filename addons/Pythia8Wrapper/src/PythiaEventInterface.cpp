@@ -171,17 +171,10 @@ void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
     addCepGenParticle(part1, -2);
     addCepGenParticle(part2, -2);
 
-    if (type == Type::centralAndFullBeamRemnants) {
-      //=========================================================================================
-      // full beam remnants content
-      //=========================================================================================
-
-      for (const auto& forward_system :
-           {cepgen::Particle::Role::OutgoingBeam1, cepgen::Particle::Role::OutgoingBeam2}) {
+    if (type == Type::centralAndFullBeamRemnants)  // full beam remnants content
+      for (const auto& forward_system : {cepgen::Particle::Role::OutgoingBeam1, cepgen::Particle::Role::OutgoingBeam2})
         for (const auto& p : ev(forward_system))
           addCepGenParticle(p, INVALID_ID, findMothers(ev, p));
-      }
-    }
   }
 
   //=============================================================================================
@@ -195,9 +188,9 @@ void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
       mothers = findMothers(ev, p);
     try {
       if (cepgen::PDG::get().colours(p.pdgId()) > 1) {
-        if (p.integerPdgId() > 0)  //--- particle
+        if (p.integerPdgId() > 0)  // particle
           colours.first = central_colour;
-        else  //--- anti-particle
+        else  // anti-particle
           colours.second = central_colour;
       }
     } catch (const cepgen::Exception&) {
@@ -214,15 +207,16 @@ void CepGenEvent::setProcess(int id, double cross_section, double q2_scale, doub
   py_cg_corresp_.clear();
 }
 
-unsigned short CepGenEvent::cepgenId(unsigned short py_id) const {
-  if (py_cg_corresp_.count(py_id) == 0)
+unsigned short CepGenEvent::cepgenId(unsigned short pythia_id) const {
+  if (py_cg_corresp_.count(pythia_id) == 0)
     return INVALID_ID;
-  return py_cg_corresp_.at(py_id);
+  return py_cg_corresp_.at(pythia_id);
 }
 
-unsigned short CepGenEvent::pythiaId(unsigned short cg_id) const {
-  auto it = std::find_if(
-      py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
+unsigned short CepGenEvent::pythiaId(unsigned short cepgen_id) const {
+  const auto it = std::find_if(py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cepgen_id](const auto& py_cg) {
+    return py_cg.second == cepgen_id;
+  });
   if (it != py_cg_corresp_.end())
     return it->first;
   return INVALID_ID;
@@ -264,7 +258,9 @@ void CepGenEvent::addCepGenParticle(const cepgen::Particle& part,
               0.);
 }
 
-void CepGenEvent::addCorresp(unsigned short py_id, unsigned short cg_id) { py_cg_corresp_[py_id] = cg_id; }
+void CepGenEvent::addCorresp(unsigned short pythia_id, unsigned short cepgen_id) {
+  py_cg_corresp_[pythia_id] = cepgen_id;
+}
 
 void CepGenEvent::dumpCorresp() const {
   CG_INFO("CepGenEvent:dump").log([&](auto& msg) {
@@ -274,16 +270,16 @@ void CepGenEvent::dumpCorresp() const {
   });
 }
 
-std::pair<int, int> CepGenEvent::findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const {
+std::pair<int, int> CepGenEvent::findMothers(const cepgen::Event& cepgen_event,
+                                             const cepgen::Particle& cepgen_particle) const {
   std::pair out = {0, 0};
 
-  const auto& mothers = p.mothers();
+  const auto& mothers = cepgen_particle.mothers();
   if (mothers.empty())
     return out;
   const unsigned short moth1_cg_id = *mothers.begin();
-  out.first = pythiaId(moth1_cg_id);
-  if (out.first == INVALID_ID) {
-    const auto& moth = ev(moth1_cg_id);
+  if (out.first = pythiaId(moth1_cg_id); out.first == INVALID_ID) {
+    const auto& moth = cepgen_event(moth1_cg_id);
     out = {(moth.mothers().size() > 0) ? pythiaId(*moth.mothers().begin()) : 0,
            (moth.mothers().size() > 1) ? pythiaId(*moth.mothers().rbegin()) : 0};
   }

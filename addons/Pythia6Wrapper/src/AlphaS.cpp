@@ -37,7 +37,7 @@ namespace cepgen::pythia6 {
     }
 
     inline static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("Pythia6 modelling of alpha(S) running");
       desc.add("order", mstu(111))
           .allow(0, "fixed at 'fixedAlphaS'")

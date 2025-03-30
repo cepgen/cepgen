@@ -31,7 +31,7 @@ namespace cepgen::pythia8 {
     explicit Drawer(const ParametersList& params) : utils::Drawer(params), hist_plot_(steer<bool>("histPlot")) {}
 
     static ParametersDescription description() {
-      auto desc = cepgen::utils::Drawer::description();
+      auto desc = utils::Drawer::description();
       desc.setDescription("Pythia 8 plotter");
       desc.add("histPlot", true).setDescription("write Python code that can generate a PDF file with the spectra?");
       return desc;

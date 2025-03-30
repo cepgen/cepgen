@@ -300,8 +300,7 @@ void Pythia8Hadroniser::updateEvent(Event& event, double& weight) const {
           continue;
         else if ( p.mother2() > i || p.mother2() <= offset_ )
           continue;*/
-    else {
-      //----- new particle to be added
+    else {  // new particle to be added
       const unsigned short role = findRole(event, p);
       switch (static_cast<Particle::Role>(role)) {
         case Particle::Role::OutgoingBeam1:

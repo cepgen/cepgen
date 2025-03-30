@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ using namespace cepgen;
 
 /// Interface to the Pythia 6 algorithm
 /// \note It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
-class Pythia6Hadroniser : public hadr::Hadroniser {
+class Pythia6Hadroniser final : public hadr::Hadroniser {
 public:
   explicit Pythia6Hadroniser(const ParametersList& params)
       : Hadroniser(params),
@@ -65,9 +65,9 @@ public:
                                        << utils::s("string object", evt.numStrings(), true)
                                        << " identified and constructed.";
 
-    const int old_npart = pyjets_.n;
+    const auto old_particles_multiplicity = pyjets_.n;
     evt.run();  // run the hadronisation/decay
-    if (!fast && pyjets_.n == old_npart)
+    if (!fast && pyjets_.n == old_particles_multiplicity)
       return false;  // hadronisation failed
 
     return true;

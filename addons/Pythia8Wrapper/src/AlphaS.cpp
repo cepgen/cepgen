@@ -32,7 +32,7 @@ namespace cepgen::pythia8 {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(S) running");
       desc.add("alphaSvalue", 0.13);
       desc.add("alphaSorder", 1);

@@ -10,9 +10,9 @@ using namespace std;
 int main() {
   cepgen::initialise();
 
-  int seed1 = 1234567, seed2 = 7654321;
+  constexpr auto seed1 = 1234567, seed2 = 7654321;
 
-  auto cg_pythia = cepgen::EventModifierFactory::get().build("pythia8");
+  const auto cg_pythia = cepgen::EventModifierFactory::get().build("pythia8");
   cg_pythia->readString("Random:seed = " + to_string(seed1));
 
   auto pythia = cg_pythia->engine<Pythia8::Pythia>();

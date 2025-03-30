@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
+#include <cmath>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
@@ -152,10 +152,10 @@ void EventInterface::fillEventBlock() {
 
 void EventInterface::run() {
   fillEventBlock();
-  const auto old_npart = pyjets_.n;
+  const auto old_particles_multiplicity = pyjets_.n;
   pyexec();
   //--- update the event
-  for (int p = old_npart; p < pyjets_.n; ++p) {
+  for (int p = old_particles_multiplicity; p < pyjets_.n; ++p) {
     // filter the first particles already present in the event
     const auto pdg_id = std::abs(pyjets_.k[1][p]);
     checkPDGid(pdg_id);
@@ -180,10 +180,9 @@ void EventInterface::run() {
 }
 
 std::pair<short, short> EventInterface::pickPartonsContent() const {
-  const auto ranudq = rnd_->uniformInt(0, 9);
-  if (ranudq < 1)
+  if (const auto ranudq = rnd_->uniformInt(0, 9); ranudq < 1)
     return {PDG::down, 2203};  // (d,uu1)
-  if (ranudq < 5)
+  else if (ranudq < 5)
     return {PDG::up, 2101};  // (u,ud0)
   return {PDG::up, 2103};    // (u,ud1)
 }
