@@ -46,19 +46,19 @@ namespace cepgen {
 
     void setValue(size_t, float);  ///< Set the function value for a given grid coordinate
     /// Shoot a phase space point for a grid coordinate
-    void shoot(const Integrator* integ, size_t coord, std::vector<double>& out) const;
+    void shoot(const Integrator* integrator, size_t coordinate, std::vector<double>& out) const;
     /// Number of points already shot for a given grid coordinate
-    inline size_t numPoints(size_t coord) const { return num_points_.at(coord); }
+    inline size_t numPoints(size_t coordinate) const { return num_points_.at(coordinate); }
     /// Specify a new trial has been attempted for bin
-    inline void increment(size_t coord) { num_points_.at(coord)++; }
+    inline void increment(size_t coordinate) { num_points_.at(coordinate)++; }
 
     inline bool prepared() const { return gen_prepared_; }                       ///< Has the grid been prepared
     inline void setPrepared(bool prepared = true) { gen_prepared_ = prepared; }  ///< Mark the grid as prepared
 
     /// Correction to apply on the next phase space point generation
-    inline float correctionValue() const { return correc_; }
+    inline float correctionValue() const { return correction_; }
     /// Set the correction to apply on the next phase space point generation
-    inline void setCorrectionValue(float correc) { correc_ = correc; }
+    inline void setCorrectionValue(float correction) { correction_ = correction; }
     bool correct(size_t);  ///< Apply the correction requested at the previous generation
 
     void rescale(size_t, float);
@@ -71,8 +71,8 @@ namespace cepgen {
     const double inv_mbin_;     ///< Weight of each grid coordinate
     size_t num_dimensions_{0};  ///< Phase space multiplicity
     bool gen_prepared_{false};  ///< Has the grid been already prepared?
-    float correc_{0.};          ///< Correction to apply on the next phase space point generation
-    float correc2_{0.};
+    float correction_{0.};      ///< Correction to apply on the next phase space point generation
+    float correction2_{0.};
     std::vector<coord_t> coords_;     ///< Point coordinates in grid
     std::vector<size_t> num_points_;  ///< Number of functions values evaluated for this point
     std::vector<float> f_max_;        ///< Maximal value of the function at one given point

@@ -23,27 +23,27 @@
 
 using namespace cepgen;
 
-FunctionalIntegrand::FunctionalIntegrand(const std::string& expr,
-                                         const std::vector<std::string>& vars,
-                                         const std::string& func_eval)
-    : func_(
-          FunctionalFactory::get().build(func_eval, ParametersList().set("expression", expr).set("variables", vars))) {
-  CG_DEBUG("FunctionalIntegrand") << "Built a " << func_eval << " " << func_->variables().size()
-                                  << "-dimensional functional with variables " << func_->variables() << " (" << vars
-                                  << "): " << func_->expression() << ".";
+FunctionalIntegrand::FunctionalIntegrand(const std::string& expression,
+                                         const std::vector<std::string>& variables,
+                                         const std::string& functional_evaluator)
+    : functional_(FunctionalFactory::get().build(
+          functional_evaluator, ParametersList().set("expression", expression).set("variables", variables))) {
+  CG_DEBUG("FunctionalIntegrand") << "Built a " << functional_evaluator << " " << functional_->variables().size()
+                                  << "-dimensional functional with variables " << functional_->variables() << " ("
+                                  << variables << "): " << functional_->expression() << ".";
 }
 
 double FunctionalIntegrand::eval(const std::vector<double>& x) {
-  if (!func_)
+  if (!functional_)
     throw CG_FATAL("FunctionalIntegrand:eval") << "Functional object was not properly initialised!";
   if (x.size() != size())
     throw CG_FATAL("FunctionalIntegrand:eval")
         << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
-  return (*func_)(x);
+  return (*functional_)(x);
 }
 
 size_t FunctionalIntegrand::size() const {
-  if (!func_)
+  if (!functional_)
     throw CG_FATAL("FunctionalIntegrand:eval") << "Functional object was not properly initialised!";
-  return func_->variables().size();
+  return functional_->variables().size();
 }

@@ -32,12 +32,12 @@ GSLIntegrator::GSLIntegrator(const ParametersList& params) : Integrator(params) 
 }
 
 void GSLIntegrator::setIntegrand(Integrand& integrand) {
-  //--- specify the integrand through the GSL wrapper
+  // specify the integrand through the GSL wrapper
   function_ = [&integrand](double* x, size_t num_dimensions, void*) -> double {
     return integrand.eval(std::vector(x, x + num_dimensions));
   };
-  gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());
-  if (!gsl_function_)
+  if (gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());
+      !gsl_function_)
     throw CG_FATAL("GSLIntegrator:setIntegrand") << "Integrand was not properly set.";
   if (gsl_function_->dim <= 0)
     throw CG_FATAL("GSLIntegrator:setIntegrand") << "Invalid phase space dimension: " << gsl_function_->dim << ".";

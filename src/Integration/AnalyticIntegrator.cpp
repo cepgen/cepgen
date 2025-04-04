@@ -17,7 +17,6 @@
  */
 
 #include "CepGen/Integration/AnalyticIntegrator.h"
-
 #include "CepGen/Utils/FunctionWrapper.h"
 
 using namespace cepgen;
@@ -25,7 +24,7 @@ using namespace cepgen;
 AnalyticIntegrator::AnalyticIntegrator(const ParametersList& params)
     : NamedModule(params),
       range_(steer<Limits>("range")),
-      func_params_(steer<ParametersList>("params")),
+      integrand_parameters_(steer<ParametersList>("params")),
       verbosity_(steer<int>("verbosity")) {}
 
 double AnalyticIntegrator::integrate(const std::function<double(double)>& func, const Limits& lim) const {

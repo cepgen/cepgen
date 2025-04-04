@@ -64,17 +64,16 @@ public:
 
     // launch the full integration
     double result, absolute_error;
-    int res = gsl_monte_miser_integrate(gsl_function_.get(),
-                                        &x_low_[0],
-                                        &x_high_[0],
-                                        gsl_function_->dim,
-                                        num_function_calls_,
-                                        random_number_generator_->engine<gsl_rng>(),
-                                        miser_state.get(),
-                                        &result,
-                                        &absolute_error);
-
-    if (res != GSL_SUCCESS)
+    if (const auto res = gsl_monte_miser_integrate(gsl_function_.get(),
+                                                   &x_low_[0],
+                                                   &x_high_[0],
+                                                   gsl_function_->dim,
+                                                   num_function_calls_,
+                                                   random_number_generator_->engine<gsl_rng>(),
+                                                   miser_state.get(),
+                                                   &result,
+                                                   &absolute_error);
+        res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                              << "GSL error: " << gsl_strerror(res) << ".";
 

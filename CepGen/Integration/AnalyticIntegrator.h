@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ namespace cepgen {
     virtual double run(const utils::FunctionWrapper& func, void* obj = nullptr, const Limits& range = {}) const = 0;
 
     const Limits range_;
-    const ParametersList func_params_;
+    const ParametersList integrand_parameters_;
     const int verbosity_;  ///< Integrator verbosity
   };
 }  // namespace cepgen

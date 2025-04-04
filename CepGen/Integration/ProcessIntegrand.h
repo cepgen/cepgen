@@ -62,11 +62,11 @@ namespace cepgen {
   private:
     void setProcess(const proc::Process&);
 
-    std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
-    const RunParameters* params_{nullptr};     ///< Generator-owned runtime parameters
-    const std::unique_ptr<utils::Timer> tmr_;  ///< Timekeeper for event generation
-    utils::EventBrowser bws_;                  ///< Event browser
-    bool storage_{false};                      ///< Is the next event to be generated to be stored?
+    std::unique_ptr<proc::Process> process_;        ///< Local instance of the physics process
+    const RunParameters* run_parameters_{nullptr};  ///< Generator-owned runtime parameters
+    const std::unique_ptr<utils::Timer> timer_;     ///< Timekeeper for event generation
+    utils::EventBrowser bws_;                       ///< Event browser
+    bool storage_{false};                           ///< Is the next event to be generated to be stored?
   };
 }  // namespace cepgen
 

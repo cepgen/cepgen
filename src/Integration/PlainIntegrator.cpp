@@ -44,15 +44,15 @@ public:
     const std::unique_ptr<gsl_monte_plain_state, decltype(&gsl_monte_plain_free)> plain_state(
         gsl_monte_plain_alloc(gsl_function_->dim), gsl_monte_plain_free);
     double result, absolute_error;
-    if (int res = gsl_monte_plain_integrate(gsl_function_.get(),
-                                            &x_low_[0],
-                                            &x_high_[0],
-                                            gsl_function_->dim,
-                                            num_function_calls_,
-                                            random_number_generator_->engine<gsl_rng>(),
-                                            plain_state.get(),
-                                            &result,
-                                            &absolute_error);
+    if (const auto res = gsl_monte_plain_integrate(gsl_function_.get(),
+                                                   &x_low_[0],
+                                                   &x_high_[0],
+                                                   gsl_function_->dim,
+                                                   num_function_calls_,
+                                                   random_number_generator_->engine<gsl_rng>(),
+                                                   plain_state.get(),
+                                                   &result,
+                                                   &absolute_error);
         res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                              << "GSL error: " << gsl_strerror(res) << ".";

@@ -76,23 +76,23 @@ private:
   double eval(Integrand& integrand, const std::vector<double>& x) const override {
     if (!treat_)  // by default, no grid treatment
       return integrand.eval(x);
-    //--- treatment of the integration grid
+    // treatment of the integration grid
     if (r_boxes_ == 0) {
       r_boxes_ = static_cast<size_t>(std::pow(vegas_state_->bins, integrand.size()));
       x_new_.resize(integrand.size());
     }
-    double w = r_boxes_;
+    auto weight = r_boxes_;
     for (size_t j = 0; j < integrand.size(); ++j) {
-      //--- find surrounding coordinates and interpolate
+      // find surrounding coordinates and interpolate
       const double z = x.at(j) * vegas_state_->bins;
       const auto id = static_cast<size_t>(z);  // coordinate of point before
       const double rel_pos = z - id;           // position between coordinates (norm.)
-      const double bin_width = (id == 0) ? COORD(1, j) : COORD(id + 1, j) - COORD(id, j);
-      //--- build new coordinate from linear interpolation
+      const double bin_width = id == 0 ? COORD(1, j) : COORD(id + 1, j) - COORD(id, j);
+      // build new coordinate from linear interpolation
       x_new_[j] = COORD(id + 1, j) - bin_width * (1. - rel_pos);
-      w *= bin_width;
+      weight *= bin_width;
     }
-    return w * integrand.eval(x_new_);
+    return weight * integrand.eval(x_new_);
   }
 
   const int num_function_calls_;
@@ -115,24 +115,23 @@ private:
 Value VegasIntegrator::integrate(Integrand& integrand) {
   setIntegrand(integrand);
 
-  //--- start by preparing the grid/state
+  // start by preparing the grid/state
   vegas_state_.reset(gsl_monte_vegas_alloc(gsl_function_->dim));
   gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
   vegas_params_.iterations = steer<int>("iterations");
   vegas_params_.alpha = steer<double>("alpha");
   vegas_params_.verbose = verbosity_;
   vegas_params_.mode = steer<int>("mode");
-  //--- output logging
-  const auto& log = steer<std::string>("loggingOutput");
-  if (log == "cerr")  // redirect all debugging information to the error stream
+  // output logging
+  if (const auto& log = steer<std::string>("loggingOutput");
+      log == "cerr"s)  // redirect all debugging information to the error stream
     vegas_params_.ostream = stderr;
-  else if (log == "cout")  // redirect all debugging information to the standard stream
+  else if (log == "cout"s)  // redirect all debugging information to the standard stream
     vegas_params_.ostream = stdout;
   else
     vegas_params_.ostream = fopen(log.c_str(), "w");
   gsl_monte_vegas_params_set(vegas_state_.get(), &vegas_params_);
 
-  //--- a bit of printout for debugging
   CG_DEBUG("Integrator:build") << "Vegas parameters:\n\t"
                                << "Number of iterations in Vegas: " << vegas_params_.iterations << ",\n\t"
                                << "α-value: " << vegas_params_.alpha << ",\n\t"
@@ -142,7 +141,7 @@ Value VegasIntegrator::integrate(Integrand& integrand) {
   if (!vegas_state_)
     throw CG_FATAL("Integrator:integrate") << "Vegas state not initialised!";
 
-  //--- launch integration
+  // launch integration
 
   warmup(25'000);  // warmup (prepare the grid)
 
@@ -150,15 +149,15 @@ Value VegasIntegrator::integrate(Integrand& integrand) {
   unsigned short chi_square = 0;
   double result, absolute_error;
   do {
-    if (int res = gsl_monte_vegas_integrate(gsl_function_.get(),
-                                            &x_low_[0],
-                                            &x_high_[0],
-                                            gsl_function_->dim,
-                                            0.2 * num_function_calls_,
-                                            random_number_generator_->engine<gsl_rng>(),
-                                            vegas_state_.get(),
-                                            &result,
-                                            &absolute_error);
+    if (const auto res = gsl_monte_vegas_integrate(gsl_function_.get(),
+                                                   &x_low_[0],
+                                                   &x_high_[0],
+                                                   gsl_function_->dim,
+                                                   0.2 * num_function_calls_,
+                                                   random_number_generator_->engine<gsl_rng>(),
+                                                   vegas_state_.get(),
+                                                   &result,
+                                                   &absolute_error);
         res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate")
           << "Error at iteration #" << chi_square << " while performing the integration!\n\t"
@@ -184,16 +183,15 @@ void VegasIntegrator::warmup(size_t num_calls) {
     throw CG_FATAL("Integrator:warmup") << "Vegas state not initialised!";
   // perform a first integration to warm up the grid
   double result = 0., absolute_error = 0.;
-  // ensure the operation was successful
-  if (int res = gsl_monte_vegas_integrate(gsl_function_.get(),
-                                          &x_low_[0],
-                                          &x_high_[0],
-                                          gsl_function_->dim,
-                                          num_calls,
-                                          random_number_generator_->engine<gsl_rng>(),
-                                          vegas_state_.get(),
-                                          &result,
-                                          &absolute_error);
+  if (const auto res = gsl_monte_vegas_integrate(gsl_function_.get(),
+                                                 &x_low_[0],
+                                                 &x_high_[0],
+                                                 gsl_function_->dim,
+                                                 num_calls,
+                                                 random_number_generator_->engine<gsl_rng>(),
+                                                 vegas_state_.get(),
+                                                 &result,
+                                                 &absolute_error);
 
       res != GSL_SUCCESS)
     throw CG_ERROR("VegasIntegrator:warmup") << "Failed to warm-up the Vegas grid.\n\t"

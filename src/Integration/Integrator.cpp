@@ -40,8 +40,7 @@ void Integrator::checkLimits(const Integrand& integrand) {
     CG_DEBUG("Integrator:checkLimits") << "Incompatible phase space size: prepared=" << limits_.size()
                                        << ", integrand=" << ps_size << ".";
     auto limits = limits_;
-    const auto booked_size = limits.size();
-    if (booked_size < ps_size)
+    if (const auto booked_size = limits.size(); booked_size < ps_size)
       for (size_t i = 0; i < ps_size - booked_size; ++i)
         limits.emplace_back(0., 1.);
     else
@@ -63,7 +62,7 @@ Value Integrator::integrate(const std::function<double(const std::vector<double>
 Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& function,
                             const ParametersList& parameters,
                             const std::vector<Limits>& limits) {
-  auto integrator = IntegratorFactory::get().build(parameters);
+  const auto integrator = IntegratorFactory::get().build(parameters);
   integrator->setLimits(limits);
   auto integrand = FunctionIntegrand(limits.size(), function);
   return integrator->integrate(integrand);

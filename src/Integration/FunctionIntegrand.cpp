@@ -16,25 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/FunctionIntegrand.h"
+
+#include "CepGen/Core/Exception.h"
 
 using namespace cepgen;
 
 FunctionIntegrand::FunctionIntegrand(size_t num_dimensions,
-                                     const std::function<double(const std::vector<double>&)>& func)
-    : function_(func), num_dimensions_(num_dimensions) {}
+                                     const std::function<double(const std::vector<double>&)>& function)
+    : function_(function), num_dimensions_(num_dimensions) {}
 
 double FunctionIntegrand::eval(const std::vector<double>& x) {
   if (x.size() != size())
     throw CG_FATAL("FunctionIntegrand:eval")
         << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
-
-  //--- calculate weight for the phase space point to probe
-  double weight = function_(x);
-
-  //--- a bit of useful debugging
+  const auto weight = function_(x);  // calculate weight for the phase space point to probe
   CG_DEBUG_LOOP("FunctionIntegrand:eval") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
-
   return weight;
 }
