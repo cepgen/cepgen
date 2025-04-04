@@ -17,6 +17,7 @@
  */
 
 #include <cmath>
+#include <ostream>
 
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"

@@ -21,7 +21,7 @@
 
 #include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen::formfac {
   /// Nucleon electromagnetic form factors parameterisation

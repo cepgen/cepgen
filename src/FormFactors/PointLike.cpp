@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace cepgen::formfac {
     const double fe_, fm_;
   };
 
-  struct PointLikeScalar final : public PointLike {
+  struct PointLikeScalar final : PointLike {
     explicit PointLikeScalar(const ParametersList& params) : PointLike(params, 1., 0.) {}
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
@@ -39,7 +39,7 @@ namespace cepgen::formfac {
     }
   };
 
-  struct PointLikeFermion final : public PointLike {
+  struct PointLikeFermion final : PointLike {
     explicit PointLikeFermion(const ParametersList& params) : PointLike(params, 1., 1.) {}
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
