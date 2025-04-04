@@ -38,8 +38,8 @@ namespace cepgen {
 
     inline bool elastic() const { return elastic_; }  ///< Does the beam remain on-shell after parton emission?
     /// Specify if the beam remains on-shell after parton emission
-    inline Beam& setElastic(bool el) {
-      elastic_ = el;
+    inline Beam& setElastic(bool elastic) {
+      elastic_ = elastic;
       return *this;
     }
 

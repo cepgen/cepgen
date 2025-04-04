@@ -268,10 +268,8 @@ double Momentum::beta() const {
   if (ene == 0.) {
     if (mom == 0.)
       return 0.;
-    else {
-      CG_WARNING("Momentum:beta") << "beta computed for t=0 momentum.";
-      return 1. / ene;
-    }
+    CG_WARNING("Momentum:beta") << "beta computed for t=0 momentum.";
+    return 1. / ene;
   }
   if (mass2() <= 0.)
     CG_WARNING("Momentum:beta") << "beta computed for an invalid, non-time-like momentum.";
@@ -288,7 +286,8 @@ double Momentum::gamma2() const {
   if (ene2 < mom2) {
     CG_WARNING("Momentum:gamma") << "gamma computed for an invalid space-like momentum.";
     return 0.;
-  } else if (ene2 == mom2)
+  }
+  if (ene2 == mom2)
     CG_WARNING("Momentum:gamma") << "gamma computed for a light-like momentum.";
   return ene2 / (ene2 - mom2);
 }
@@ -342,7 +341,6 @@ Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
   rotation_matrix[Z][X] = 0.;
   rotation_matrix[Z][Y] = sin_theta;
   rotation_matrix[Z][Z] = cos_theta;
-
   for (size_t i = X; i <= Z; ++i)
     for (size_t j = X; j <= Z; ++j)
       mom[i] += rotation_matrix[i][j] * (*this)[j];

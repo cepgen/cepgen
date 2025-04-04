@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,11 +22,10 @@
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
-  /// Alias for the integer-like particle PDG id
-  typedef unsigned long long pdgid_t;
-  typedef std::vector<pdgid_t> pdgids_t;
-  typedef long long spdgid_t;
-  typedef std::vector<spdgid_t> spdgids_t;
+  typedef unsigned long long pdgid_t;       ///< Alias for the integer-like particle PDG id
+  typedef std::vector<pdgid_t> pdgids_t;    ///< Alias for a collection of particles PDG ids
+  typedef long long spdgid_t;               ///< Alias for a signed particle PDG id (adding charge information)
+  typedef std::vector<spdgid_t> spdgids_t;  ///< Alias for a collection of particles signed PDG ids
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties final : SteeredObject<ParticleProperties> {
     explicit ParticleProperties(const ParametersList&);

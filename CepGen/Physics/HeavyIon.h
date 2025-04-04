@@ -19,8 +19,6 @@
 #ifndef CepGen_Physics_HeavyIon_h
 #define CepGen_Physics_HeavyIon_h
 
-#include <ostream>
-
 #include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
@@ -28,22 +26,21 @@ namespace cepgen {
   enum class Element {
     invalid = -1,
     neutron = 0,
-    H = 1,
-    C = 6,
-    O = 8,
-    Al = 13,
-    Cu = 29,
-    Xe = 54,
-    Au = 79,
-    Pb = 82,
-    U = 92
+    H = 1,    ///< hydrogen
+    C = 6,    ///< carbon
+    O = 8,    ///< oxygen
+    Al = 13,  ///< aluminium
+    Cu = 29,  ///< copper
+    Xe = 54,  ///< xenon
+    Au = 79,  ///< gold
+    Pb = 82,  ///< lead
+    U = 92    ///< uranium
   };
   std::ostream& operator<<(std::ostream& os, const Element& elem);
 
   /// Heavy ion container (Z+A)
   struct HeavyIon {
-    /// General constructor from mass and atomic number
-    explicit HeavyIon(unsigned short, const Element&);
+    explicit HeavyIon(unsigned short, const Element&);  ///< General constructor from mass and atomic number
 
     bool operator==(const HeavyIon& oth) const { return Z == oth.Z && A == oth.A; }
     bool operator!=(const HeavyIon& oth) const { return !(*this == oth); }
@@ -58,23 +55,19 @@ namespace cepgen {
     static bool isHI(const ParticleProperties&);  ///< Check if the particle properties are compatible with a HI
 
     /// Mass of a heavy ion, in GeV/c\f$^2\f$
-    /// \param hi Heavy ion type
-    static double mass(const HeavyIon& hi) { return hi.mass(); }
+    /// \param heavy_ion Heavy ion type
+    static double mass(const HeavyIon& heavy_ion) { return heavy_ion.mass(); }
 
     static inline HeavyIon proton() { return HeavyIon(1, Element::H); }         ///< Simple proton
     static inline HeavyIon neutron() { return HeavyIon(1, Element::neutron); }  ///< Simple neutron
     static inline HeavyIon Au() { return HeavyIon(197, Element::Au); }          ///< Standard gold
     static inline HeavyIon Pb() { return HeavyIon(207, Element::Pb); }          ///< Standard lead
 
-    /// Convert the HI into a custom PDG id
-    operator pdgid_t() const;
-    /// Human-readable expression of the ion
-    friend std::ostream& operator<<(std::ostream& os, const HeavyIon& hi);
+    operator pdgid_t() const;                                         ///< Convert the HI into a custom PDG id
+    friend std::ostream& operator<<(std::ostream&, const HeavyIon&);  ///< Human-readable expression of the ion
 
-    /// Atomic number
-    Element Z{Element::invalid};
-    /// Mass number
-    unsigned short A{0};
+    Element Z{Element::invalid};  ///< Atomic number
+    unsigned short A{0};          ///< Mass number
   };
 }  // namespace cepgen
 

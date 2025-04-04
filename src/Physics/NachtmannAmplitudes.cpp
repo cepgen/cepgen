@@ -157,22 +157,25 @@ std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, cons
 
 std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, const HelicityStates& hel) const {
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return -3 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * kin.invA * kin.sin_theta2 *
-           (hel.lam1 + hel.lam2);
+    return {-3 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * kin.invA * kin.sin_theta2 *
+                (hel.lam1 + hel.lam2),
+            0.};
 
   if (hel.lam4 == 0)  // transverse-longitudinal
-    return 1.5 * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
-           (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
-            kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3));
+    return {1.5 * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
+                (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
+                 kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3)),
+            0.};
 
   if (hel.lam3 == 0)  // longitudinal-transverse
     return amplitudeWbar(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
   // transverse-transverse
-  return -1.5 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
-         (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
-          kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
-                            kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4)));
+  return {-1.5 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
+              (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
+               kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
+                                 kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4))),
+          0.};
 }
 
 std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, const HelicityStates& hel) const {
@@ -182,7 +185,7 @@ std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, c
            (1. + hel.lam1 * hel.lam2);
 
   if (hel.lam4 == 0 || hel.lam3 == 0)  // transverse-longitudinal or longitudinal-transverse
-    return 0.;
+    return {0., 0.};
 
   // transverse-transverse
   return -0.125i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB *
@@ -220,24 +223,28 @@ std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, 
   CG_WARNING("NachtmannAmplitudes") << "Mode " << mode_ << " is not yet properly handled!";
   const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return 2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
-           0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * eft_ext_.s1 * eft_ext_.c1() * (1. + kin.beta2) *
-               static_cast<double>(hel.lam1 + hel.lam2);
+    return {2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
+                0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * eft_ext_.s1 * eft_ext_.c1() * (1. + kin.beta2) *
+                    static_cast<double>(hel.lam1 + hel.lam2),
+            0.};
 
   if (hel.lam4 == 0)  // transverse-longitudinal
-    return 0.5 * G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
-           (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
-            kin.cos_theta * (2. * kin.beta + kin.beta2 * static_cast<double>(hel.lam1 + hel.lam2) * hel.lam3));
+    return {0.5 * G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
+                (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
+                 kin.cos_theta * (2. * kin.beta + kin.beta2 * static_cast<double>(hel.lam1 + hel.lam2) * hel.lam3)),
+            0.};
 
   if (hel.lam3 == 0)  // longitudinal-transverse
     return amplitudeWbarB(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
   // transverse-transverse
-  return kin.invA * G_EM_SQ * eft_ext_.c1() * eft_ext_.c1() / eft_ext_.s1 *
-             (hel.lam3 * static_cast<double>(hel.lam1 + hel.lam2) + kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
-             (hel.lam3 + hel.lam4) -
-         0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * eft_ext_.s1 * eft_ext_.c1() *
-             eft_ext_.c1() * static_cast<double>(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4);
+  return {kin.invA * G_EM_SQ * eft_ext_.c1() * eft_ext_.c1() / eft_ext_.s1 *
+                  (hel.lam3 * static_cast<double>(hel.lam1 + hel.lam2) +
+                   kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
+                  (hel.lam3 + hel.lam4) -
+              0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * eft_ext_.s1 *
+                  eft_ext_.c1() * eft_ext_.c1() * static_cast<double>(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4),
+          0.};
 }
 
 ParametersDescription NachtmannAmplitudes::description() {

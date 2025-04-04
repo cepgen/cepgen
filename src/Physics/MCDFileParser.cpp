@@ -40,8 +40,7 @@ void MCDFileParser::parse(const std::string& path) {
     {  // pdg ids
       std::istringstream ss(line.substr(PDG_BEG, PDG_END));
       std::string buf;
-      // split for each PDG id
-      while (ss >> buf)
+      while (ss >> buf)  // split for each PDG id
         pdg_ids.emplace_back(std::stoi(buf));
     }
     {                                              // mass + error(s)
@@ -54,8 +53,7 @@ void MCDFileParser::parse(const std::string& path) {
     }
     {                                                // width + error(s)
       double width_err_low{0.}, width_err_high{0.};  // unused
-      const auto width_substr = cepgen::utils::trim(line.substr(WIDTH_BEG, WIDTH_END));
-      if (!width_substr.empty()) {
+      if (const auto width_substr = cepgen::utils::trim(line.substr(WIDTH_BEG, WIDTH_END)); !width_substr.empty()) {
         std::istringstream oss(width_substr);
         oss >> width >> width_err_low >> width_err_high;
       }
@@ -66,8 +64,7 @@ void MCDFileParser::parse(const std::string& path) {
       oss >> part_name >> part_charge_int;
       std::istringstream oss_ch(part_charge_int);
       std::string charge_int;
-      // split by ','
-      while (std::getline(oss_ch, charge_int, ',')) {
+      while (std::getline(oss_ch, charge_int, ',')) {  // split by ','
         if (MAP_CHARGE_STR.count(charge_int) == 0)
           throw CG_FATAL("MCDFileParser") << "Failed to retrieve an integer charge "
                                           << "for string \"" << charge_int << "\"!";
@@ -90,8 +87,7 @@ void MCDFileParser::parse(const std::string& path) {
       if (const auto ch = charges.at(i); ch != 0)
         prop.charges = {ch, -ch};
       switch (pdg_ids.at(i)) {
-        // start with quarks
-        case 1:
+        case 1:  // start with quarks
         case 2:
         case 3:
         case 4:
@@ -100,23 +96,19 @@ void MCDFileParser::parse(const std::string& path) {
           prop.colours = 3;
           prop.fermion = true;
           break;
-        // then move to leptons/neutrinos
-        case 11:
+        case 11:  // then move to leptons/neutrinos
         case 12:
         case 13:
         case 14:
         case 15:
         case 16:
-          prop.colours = 1;
           prop.fermion = true;
           break;
-        // then gluons
-        case 21:
+        case 21:  // then gluons
           prop.colours = 9;
           prop.fermion = false;
           break;
-        // and finally the rest
-        default:
+        default:  // and finally the rest
           break;
       }
       cepgen::PDG::get().define(prop);
