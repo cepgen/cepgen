@@ -324,7 +324,7 @@ ArgumentsParser::Parameter& ArgumentsParser::Parameter::parse() {
     }
   if (bool_variable_) {
     try {
-      *bool_variable_ = (std::stoi(value) != 0);
+      *bool_variable_ = std::stoi(value) != 0;
       return *this;
     } catch (const std::invalid_argument&) {
       *bool_variable_ = (strcasecmp("true", value.c_str()) == 0 || strcasecmp("yes", value.c_str()) == 0 ||

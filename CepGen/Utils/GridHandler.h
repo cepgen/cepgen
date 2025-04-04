@@ -62,13 +62,13 @@ namespace cepgen {
     const GridType grid_type_;                ///< Type of interpolation for the grid members
     std::map<coord_t, values_t> values_raw_;  ///< List of coordinates and associated value(s) in the grid
     /// Grid interpolation accelerator
-    std::vector<std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel*)> > accel_;
+    std::vector<std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel*)> > accelerators_;
     std::vector<std::unique_ptr<gsl_spline, void (*)(gsl_spline*)> > splines_1d_;  ///< Splines for linear interpolations
 #ifdef GSL_VERSION_ABOVE_2_1
     /// Splines for bilinear interpolations
     std::vector<std::unique_ptr<gsl_spline2d, void (*)(gsl_spline2d*)> > splines_2d_;
 #endif
-    std::array<coord_t, D> coords_;                    ///< Coordinates building up the grid
+    std::array<coord_t, D> coordinates_;               ///< Coordinates building up the grid
     std::array<std::unique_ptr<double[]>, N> values_;  ///< Values for all points in the grid
 
   private:
@@ -79,7 +79,7 @@ namespace cepgen {
       grid_point_t operator*(double c) const;
       grid_point_t operator+(const grid_point_t& rhs) const;
     };
-    bool init_{false};  ///< Has the extrapolator been initialised?
+    bool initialised_{false};  ///< Has the extrapolator been initialised?
   };
 }  // namespace cepgen
 

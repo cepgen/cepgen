@@ -31,12 +31,12 @@ using namespace cepgen;
 template <size_t D, size_t N>
 GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type) {
   for (size_t i = 0; i < D; ++i)
-    accel_.emplace_back(gsl_interp_accel_alloc(), gsl_interp_accel_free);
+    accelerators_.emplace_back(gsl_interp_accel_alloc(), gsl_interp_accel_free);
 }
 
 template <size_t D, size_t N>
 typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_coords) const {
-  if (!init_)
+  if (!initialised_)
     throw CG_FATAL("GridHandler") << "Grid extrapolator called but not initialised!";
 
   values_t out{};
@@ -51,12 +51,12 @@ typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_c
     default:
       break;
   }
-  //--- dimension of the vector space coordinate to evaluate
-  switch (D) {
+  switch (D) {  // dimension of the vector space coordinate to evaluate
     case 1: {
       for (size_t i = 0; i < N; ++i) {
-        int res = gsl_spline_eval_e(splines_1d_.at(i).get(), coord.at(0), accel_.at(0).get(), &out[i]);
-        if (res != GSL_SUCCESS) {
+        if (const auto res =
+                gsl_spline_eval_e(splines_1d_.at(i).get(), coord.at(0), accelerators_.at(0).get(), &out[i]);
+            res != GSL_SUCCESS) {
           out[i] = 0.;
           CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
                                     << "for x = " << in_coords.at(0) << " in grid with boundaries " << boundaries()
@@ -68,8 +68,9 @@ typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_c
 #ifdef GSL_VERSION_ABOVE_2_1
       const double x = coord.at(0), y = coord.at(1);
       for (size_t i = 0; i < N; ++i) {
-        int res = gsl_spline2d_eval_e(splines_2d_.at(i).get(), x, y, accel_.at(0).get(), accel_.at(1).get(), &out[i]);
-        if (res != GSL_SUCCESS) {
+        if (const auto res = gsl_spline2d_eval_e(
+                splines_2d_.at(i).get(), x, y, accelerators_.at(0).get(), accelerators_.at(1).get(), &out[i]);
+            res != GSL_SUCCESS) {
           out[i] = 0.;
           CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
                                     << "for x = " << x << " / y = " << y << " in grid with boundaries " << boundaries()
@@ -94,10 +95,10 @@ typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_c
 #endif
     } break;
     case 3: {
-      //--- retrieve the indices of the bin in the set
+      // retrieve the indices of the bin in the set
       coord_t before(D), after(D);
       findIndices(coord, before, after);
-      //--- find boundaries values
+      // find boundaries values
       const grid_point_t &ext_111 = values_raw_.at({before[0], before[1], before[2]}),
                          &ext_112 = values_raw_.at({before[0], before[1], after[2]}),
                          &ext_121 = values_raw_.at({before[0], after[1], before[2]}),
@@ -106,7 +107,7 @@ typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_c
                          &ext_212 = values_raw_.at({after[0], before[1], after[2]}),
                          &ext_221 = values_raw_.at({after[0], after[1], before[2]}),
                          &ext_222 = values_raw_.at({after[0], after[1], after[2]});
-      //--- now that we have the boundaries, we may interpolate
+      // now that we have the boundaries, we may interpolate
       coord_t c_d(D);
       for (size_t i = 0; i < D; ++i)
         c_d[i] = (after[i] != before[i]) ? (coord.at(i) - before[i]) / (after[i] - before[i]) : 0.;
@@ -127,12 +128,12 @@ typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_c
 
 template <size_t D, size_t N>
 void GridHandler<D, N>::insert(const coord_t& coord, values_t value) {
-  auto mod_coord = coord;
+  auto modified_coordinate = coord;
   if (grid_type_ != GridType::linear)
-    for (auto& c : mod_coord)
+    for (auto& c : modified_coordinate)
       switch (grid_type_) {
         case GridType::logarithmic:
-          c = log10(c);
+          c = std::log10(c);
           break;
         case GridType::square:
           c *= c;
@@ -140,10 +141,10 @@ void GridHandler<D, N>::insert(const coord_t& coord, values_t value) {
         default:
           break;
       }
-  if (values_raw_.count(mod_coord) > 0)
+  if (values_raw_.count(modified_coordinate) > 0)
     CG_WARNING("GridHandler") << "Duplicate coordinate detected for x=" << coord << ".";
-  values_raw_[mod_coord] = value;
-  init_ = false;
+  values_raw_[modified_coordinate] = value;
+  initialised_ = false;
 }
 
 template <size_t D, size_t N>
@@ -152,17 +153,17 @@ void GridHandler<D, N>::initialise() {
     throw CG_ERROR("GridHandler") << "Empty grid.";
   gsl_set_error_handler_off();
   //--- start by building grid coordinates from raw values
-  for (auto& c : coords_)
-    c.clear();
+  for (auto& coordinate : coordinates_)
+    coordinate.clear();
   for (const auto& val : values_raw_) {
     unsigned short i = 0;
     for (const auto& c : val.first) {
-      if (std::find(coords_.at(i).begin(), coords_.at(i).end(), c) == coords_.at(i).end())
-        coords_.at(i).emplace_back(c);
+      if (std::find(coordinates_.at(i).begin(), coordinates_.at(i).end(), c) == coordinates_.at(i).end())
+        coordinates_.at(i).emplace_back(c);
       ++i;
     }
   }
-  for (auto& c : coords_)
+  for (auto& c : coordinates_)
     std::sort(c.begin(), c.end());
 #ifdef GRID_HANDLER_DEBUG
   CG_DEBUG("GridHandler").log([&](auto& dbg) {
@@ -208,7 +209,10 @@ void GridHandler<D, N>::initialise() {
       }
       // initialise spline interpolation objects (one for each value)
       for (size_t j = 0; j < splines_1d_.size(); ++j)
-        gsl_spline_init(splines_1d_.at(j).get(), &x_vec[0], values_[j].get(), values_raw_.size());
+        if (const auto res = gsl_spline_init(splines_1d_.at(j).get(), &x_vec[0], values_[j].get(), values_raw_.size());
+            res != GSL_SUCCESS)
+          CG_WARNING("GridHandler:initialisation")
+              << "Failed to initialise spline for dimension " << j << ". GSL error: " << gsl_strerror(res);
     } break;
     case 2: {  //--- (x,y) |-> (f1,...)
 #ifdef GSL_VERSION_ABOVE_2_1
@@ -222,25 +226,30 @@ void GridHandler<D, N>::initialise() {
       const gsl_interp2d_type* type = gsl_interp2d_bilinear;
       splines_2d_.clear();
       for (size_t i = 0; i < N; ++i) {
-        values_[i].reset(new double[coords_.at(0).size() * coords_.at(1).size()]);
-        splines_2d_.emplace_back(gsl_spline2d_alloc(type, coords_.at(0).size(), coords_.at(1).size()),
+        values_[i].reset(new double[coordinates_.at(0).size() * coordinates_.at(1).size()]);
+        splines_2d_.emplace_back(gsl_spline2d_alloc(type, coordinates_.at(0).size(), coordinates_.at(1).size()),
                                  gsl_spline2d_free);
       }
 
       // second loop over all points to populate the grid
-      for (const auto& val : values_raw_) {
-        double val_x = val.first.at(0), val_y = val.first.at(1);
+      for (const auto& [coordinate, value] : values_raw_) {
+        const auto &coord_x = coordinate.at(0), &coord_y = coordinate.at(1);
         // retrieve the index of the bin in the set
-        const unsigned short id_x =
-            std::distance(coords_.at(0).begin(), std::lower_bound(coords_.at(0).begin(), coords_.at(0).end(), val_x));
-        const unsigned short id_y =
-            std::distance(coords_.at(1).begin(), std::lower_bound(coords_.at(1).begin(), coords_.at(1).end(), val_y));
+        const auto id_x =
+                       std::distance(coordinates_.at(0).begin(),
+                                     std::lower_bound(coordinates_.at(0).begin(), coordinates_.at(0).end(), coord_x)),
+                   id_y =
+                       std::distance(coordinates_.at(1).begin(),
+                                     std::lower_bound(coordinates_.at(1).begin(), coordinates_.at(1).end(), coord_y));
         for (size_t i = 0; i < splines_2d_.size(); ++i)
-          gsl_spline2d_set(splines_2d_.at(i).get(), values_[i].get(), id_x, id_y, val.second[i]);
+          if (const auto res = gsl_spline2d_set(splines_2d_.at(i).get(), values_[i].get(), id_x, id_y, value[i]);
+              res != GSL_SUCCESS)
+            CG_WARNING("GridHandler:initialisation")
+                << "Failed to set value " << i << " for spline. GSL error: " << gsl_strerror(res);
       }
 
       // initialise spline interpolation objects (one for each value)
-      const coord_t &x_vec = coords_.at(0), &y_vec = coords_.at(1);
+      const coord_t &x_vec = coordinates_.at(0), &y_vec = coordinates_.at(1);
       for (size_t i = 0; i < splines_2d_.size(); ++i)
         gsl_spline2d_init(splines_2d_.at(i).get(), &x_vec[0], &y_vec[0], values_[i].get(), x_vec.size(), y_vec.size());
 #else
@@ -252,7 +261,7 @@ void GridHandler<D, N>::initialise() {
     default:
       break;
   }
-  init_ = true;
+  initialised_ = true;
   CG_DEBUG("GridHandler").log([&](auto& log) {
     log << "Grid evaluator initialised with boundaries: " << boundaries() << ".";
 #ifdef GRID_HANDLER_DEBUG
@@ -276,9 +285,9 @@ template <size_t D, size_t N>
 std::array<double, D> GridHandler<D, N>::min() const {
   std::array<double, D> out{};
   size_t i = 0;
-  for (const auto& c : coords_) {  // loop over all dimensions
-    const auto& min = std::min_element(c.begin(), c.end());
-    out[i++] = min != c.end() ? *min : std::numeric_limits<double>::infinity();
+  for (const auto& coordinate : coordinates_) {  // loop over all dimensions
+    const auto& min = std::min_element(coordinate.begin(), coordinate.end());
+    out[i++] = min != coordinate.end() ? *min : std::numeric_limits<double>::infinity();
   }
   return out;
 }
@@ -287,9 +296,9 @@ template <size_t D, size_t N>
 std::array<double, D> GridHandler<D, N>::max() const {
   std::array<double, D> out{};
   size_t i = 0;
-  for (const auto& c : coords_) {  // loop over all dimensions
-    const auto& max = std::max_element(c.begin(), c.end());
-    out[i++] = max != c.end() ? *max : std::numeric_limits<double>::infinity();
+  for (const auto& coordinate : coordinates_) {  // loop over all dimensions
+    const auto& max = std::max_element(coordinate.begin(), coordinate.end());
+    out[i++] = max != coordinate.end() ? *max : std::numeric_limits<double>::infinity();
   }
   return out;
 }
@@ -297,19 +306,19 @@ std::array<double, D> GridHandler<D, N>::max() const {
 template <size_t D, size_t N>
 void GridHandler<D, N>::findIndices(const coord_t& coord, coord_t& min, coord_t& max) const {
   for (size_t i = 0; i < D; ++i) {
-    const auto& c_i = coords_.at(i);   // extract all coordinates registered for this dimension
-    if (coord.at(i) < *c_i.begin()) {  // under the range
+    if (const auto& coordinate_i = coordinates_.at(i);  // extract all coordinates registered for this dimension
+        coord.at(i) < *coordinate_i.begin()) {          // under the range
       CG_DEBUG_LOOP("GridHandler:indices") << "Coordinate " << i << " in underflow range "
-                                           << "(" << coord.at(i) << " < " << *c_i.begin() << ").";
-      min[i] = max[i] = *c_i.begin();
-    } else if (coord.at(i) > *c_i.rbegin()) {  // over the range
+                                           << "(" << coord.at(i) << " < " << *coordinate_i.begin() << ").";
+      min[i] = max[i] = *coordinate_i.begin();
+    } else if (coord.at(i) > *coordinate_i.rbegin()) {  // over the range
       CG_DEBUG_LOOP("GridHandler:indices") << "Coordinate " << i << " in overflow range "
-                                           << "(" << coord.at(i) << " > " << *c_i.rbegin() << ").";
-      min[i] = max[i] = *c_i.rbegin();
+                                           << "(" << coord.at(i) << " > " << *coordinate_i.rbegin() << ").";
+      min[i] = max[i] = *coordinate_i.rbegin();
     } else {  // in between two coordinates
-      auto it_coord = std::lower_bound(c_i.begin(), c_i.end(), coord.at(i));
+      auto it_coord = std::lower_bound(coordinate_i.begin(), coordinate_i.end(), coord.at(i));
       max[i] = *it_coord;
-      if (it_coord != c_i.begin())
+      if (it_coord != coordinate_i.begin())
         --it_coord;
       min[i] = *it_coord;
     }
@@ -335,7 +344,7 @@ typename GridHandler<D, N>::grid_point_t GridHandler<D, N>::grid_point_t::operat
   return out;
 }
 
-namespace cepgen {
+namespace cepgen {  // template specialisation for the few cases handled
   template class GridHandler<1, 1>;
   template class GridHandler<1, 2>;
   template class GridHandler<2, 2>;

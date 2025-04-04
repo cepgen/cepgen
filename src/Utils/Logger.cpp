@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>  // for std::cout
+#include <iostream>
 
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/Message.h"
@@ -64,8 +64,8 @@ Logger::StreamHandler& Logger::output() {
 bool Logger::isTTY() const { return output_.get() == &std::cout || output_.get() == &std::cerr; }
 
 namespace cepgen {
-  std::ostream& operator<<(std::ostream& os, const Logger::Level& lvl) {
-    switch (lvl) {
+  std::ostream& operator<<(std::ostream& os, const Logger::Level& level) {
+    switch (level) {
       case Logger::Level::nothing:
         return os << "None";
       case Logger::Level::error:

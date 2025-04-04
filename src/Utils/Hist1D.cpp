@@ -166,19 +166,19 @@ Limits Hist1D::range() const {
 Limits Hist1D::binRange(size_t bin) const {
   CG_ASSERT(hist_);
   Limits range;
-  if (auto ret = gsl_histogram_get_range(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
+  if (const auto ret = gsl_histogram_get_range(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
   return range;
 }
 
 std::vector<double> Hist1D::bins(BinMode mode) const {
   const auto bins = extractBins(mode, nbins(), std::bind(&Hist1D::binRange, this, std::placeholders::_1));
-  return std::vector<double>(bins.begin(), bins.end());
+  return std::vector(bins.begin(), bins.end());
 }
 
 size_t Hist1D::bin(double x) const {
   size_t bin_id;
-  if (auto ret = gsl_histogram_find(hist_.get(), x, &bin_id); ret != GSL_SUCCESS)
+  if (const auto ret = gsl_histogram_find(hist_.get(), x, &bin_id); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist1D:bin") << "Failed to retrieve bin index for value " << x << ": " << gsl_strerror(ret);
   return bin_id;
 }
@@ -199,10 +199,14 @@ Value Hist1D::value(size_t bin) const {
 void Hist1D::setValue(size_t bin, Value val) {
   const auto bin_centre = binRange(bin).x(0.5);
   const auto val_old = value(bin);
-  gsl_histogram_accumulate(hist_.get(), bin_centre, val - val_old);
-  gsl_histogram_accumulate(hist_w2_.get(),
-                           bin_centre,
-                           val.uncertainty() * val.uncertainty() - val_old.uncertainty() * val_old.uncertainty());
+  if (const auto ret = gsl_histogram_accumulate(hist_.get(), bin_centre, val - val_old); ret != GSL_SUCCESS)
+    throw CG_ERROR("Hist2D:setValue") << "Failed to accumulate values histogram. GSL error: " << gsl_strerror(ret);
+  if (const auto ret = gsl_histogram_accumulate(
+          hist_w2_.get(),
+          bin_centre,
+          val.uncertainty() * val.uncertainty() - val_old.uncertainty() * val_old.uncertainty());
+      ret != GSL_SUCCESS)
+    throw CG_ERROR("Hist2D:setValue") << "Failed to accumulate square sum histogram. GSL error: " << gsl_strerror(ret);
 }
 
 double Hist1D::mean() const {

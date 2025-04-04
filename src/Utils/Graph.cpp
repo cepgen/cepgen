@@ -50,24 +50,23 @@ double Graph1D::chi2(const Graph1D& oth) const {
   double chi2 = 0.;
   if (values_.size() != oth.values_.size())
     throw CG_ERROR("Graph1D:chi2") << "Graphs must have the same number of elements to compute chi^2!";
-  for (const auto& kv1 : values_) {
-    if (oth.values_.count(kv1.first) == 0)
-      throw CG_ERROR("Graph1D:chi2") << "Failed to retrieve the value for coordinate=" << kv1.first.value << "!\n"
+  for (const auto& [x_coord, x_value] : values_) {
+    if (oth.values_.count(x_coord) == 0)
+      throw CG_ERROR("Graph1D:chi2") << "Failed to retrieve the value for coordinate=" << x_coord.value << "!\n"
                                      << "Please ensure the two graphs have the same values definition.";
-    const auto& val1 = kv1.second;
-    const auto& val2 = oth.values_.at(kv1.first);
-    double norm = std::pow(val1.uncertainty(), 2) + std::pow(val2.uncertainty(), 2);
+    const auto& val2 = oth.values_.at(x_coord);
+    double norm = std::pow(x_value.uncertainty(), 2) + std::pow(val2.uncertainty(), 2);
     if (norm == 0.)
       norm = 1.;
-    chi2 += std::pow(val1 - val2, 2) / norm;
+    chi2 += std::pow(x_value - val2, 2) / norm;
   }
   return chi2;
 }
 
 std::set<double> Graph1D::xCoords() const {
   std::set<double> coords;
-  for (const auto& val : values_)
-    coords.insert(val.first.value);
+  for (const auto& [x_coord, x_value] : values_)
+    coords.insert(x_coord.value);
   return coords;
 }
 
@@ -93,32 +92,32 @@ Graph2D& Graph2D::addPoint(double x, double y, double z, double ex, double ey, d
 void Graph2D::dumpPoints(std::ostream& os) const {
   os << "Points registered in the 2D graph:";
   size_t np = 0ul;
-  for (const auto& x_axis : values_)
-    for (const auto& yaxis : x_axis.second)
-      os << format("\n%6zu: (%5g, %5g) = %5g", np++, x_axis.first.value, yaxis.first.value, yaxis.second);
+  for (const auto& [x_coord, x_value] : values_)
+    for (const auto& [y_coord, y_value] : x_value)
+      os << format("\n%6zu: (%5g, %5g) = %5g", np++, x_coord.value, y_coord.value, y_value);
 }
 
 std::set<double> Graph2D::xCoords() const {
   std::set<double> coords;
-  for (const auto& x_value : values_)
-    coords.insert(x_value.first.value);
+  for (const auto& [x_coord, x_value] : values_)
+    coords.insert(x_coord.value);
   return coords;
 }
 
 std::set<double> Graph2D::yCoords() const {
   std::set<double> coords;
-  for (const auto& x_value : values_)
-    for (const auto& y_value : x_value.second)
-      coords.insert(y_value.first.value);
+  for (const auto& [x_coord, x_value] : values_)
+    for (const auto& [y_coord, y_value] : x_value)
+      coords.insert(y_coord.value);
   return coords;
 }
 
-const Value& Graph2D::valueAt(double x_value, double y_value) const {
-  for (const auto& xv : values_)
-    if (xv.first.value == x_value)
-      for (const auto& yv : xv.second)
-        if (yv.first.value == y_value)
-          return yv.second;
-  throw CG_ERROR("Graph2D:valueAt") << "Failed to retrieve a point a the coordinate (x=" << x_value << ", y=" << y_value
+const Value& Graph2D::valueAt(double x_index, double y_index) const {
+  for (const auto& [x_coord, x_value] : values_)
+    if (x_coord.value == x_index)
+      for (const auto& [y_coord, y_value] : x_value)
+        if (y_coord.value == y_index)
+          return y_value;
+  throw CG_ERROR("Graph2D:valueAt") << "Failed to retrieve a point a the coordinate (x=" << x_index << ", y=" << y_index
                                     << ").";
 }

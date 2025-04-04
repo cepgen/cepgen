@@ -34,15 +34,15 @@ public:
     gsl_rng_env_setup();
     gsl_rng_type* rng_engine;
     const auto& type = steer<std::string>("type");
-    if (type == "mt19937")
+    if (type == "mt19937"s)
       rng_engine = const_cast<gsl_rng_type*>(gsl_rng_mt19937);
-    else if (type == "taus")
+    else if (type == "taus"s)
       rng_engine = const_cast<gsl_rng_type*>(gsl_rng_taus);
-    else if (type == "taus2")
+    else if (type == "taus2"s)
       rng_engine = const_cast<gsl_rng_type*>(gsl_rng_taus2);
-    else if (type == "gfsr4")
+    else if (type == "gfsr4"s)
       rng_engine = const_cast<gsl_rng_type*>(gsl_rng_gfsr4);
-    else if (type == "ranlxs0")
+    else if (type == "ranlxs0"s)
       rng_engine = const_cast<gsl_rng_type*>(gsl_rng_ranlxs0);
     else
       throw CG_FATAL("GSLRandomGenerator") << "Random number generator engine invalid: '" << type << "'.";
@@ -58,12 +58,12 @@ public:
     auto desc = utils::RandomGenerator::description();
     desc.setDescription("GSL random number generator engine");
     desc.add("type", "mt19937"s)
-        .allow("mt19937", "Mersenne-Twister generator")
-        .allow("taus", "maximally equi-distributed combined Tausworthe generator by L’Ecuyer")
-        .allow("taus2",
-               "maximally equi-distributed combined Tausworthe generator by L’Ecuyer (w/ improved seeding procedure)")
-        .allow("gfsr4", "lagged-fibonacci generator")
-        .allow("ranlxs0", "second-generation version of the RANLUX algorithm of Luscher")
+        .allow("mt19937"s, "Mersenne-Twister generator")
+        .allow("taus"s, "maximally equi-distributed combined Tausworthe generator by L’Écuyer")
+        .allow("taus2"s,
+               "maximally equi-distributed combined Tausworthe generator by L’Écuyer (w/ improved seeding procedure)")
+        .allow("gfsr4"s, "lagged-fibonacci generator")
+        .allow("ranlxs0"s, "second-generation version of the RANLUX algorithm of Luscher")
         .setDescription("random number engine");
     return desc;
   }

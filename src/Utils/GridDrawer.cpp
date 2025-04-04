@@ -37,17 +37,16 @@ void GridDrawer::draw(const GridHandler<1, N>& grid, const Drawer::Mode& mode) {
     plots[i].xAxis().setLabel("x");
     plots[i].yAxis().setLabel(format("var%d", i));
   }
-  for (const auto& val : grid.values()) {
+  for (const auto& [coordinate, value] : grid.values())
     for (size_t i = 0; i < N; ++i)
-      plots[i].addPoint(val.first[0], val.second[i]);
-  }
+      plots[i].addPoint(coordinate.at(0), value[i]);
   for (size_t i = 0; i < N; ++i)
     gd.drawer_->draw(plots[i], mode);
 }
 
 template <size_t N>
 void GridDrawer::draw(const GridHandler<2, N>& grid, const Drawer::Mode& mode) {
-  auto gd = GridDrawer(ParametersList());
+  const auto grid_drawer = GridDrawer(ParametersList());
   // first prepare the array of plots to generate
   std::array<Graph2D, N> plots;
   for (size_t i = 0; i < N; ++i) {
@@ -55,12 +54,11 @@ void GridDrawer::draw(const GridHandler<2, N>& grid, const Drawer::Mode& mode) {
     plots[i].yAxis().setLabel("x1");
     plots[i].zAxis().setLabel(format("var%d", i));
   }
-  for (const auto& val : grid.values()) {
+  for (const auto& [coordinates, value] : grid.values())
     for (size_t i = 0; i < N; ++i)
-      plots[i].addPoint(val.first[0], val.first[1], val.second[i]);
-  }
+      plots[i].addPoint(coordinates.at(0), coordinates.at(1), value[i]);
   for (size_t i = 0; i < N; ++i)
-    gd.drawer_->draw(plots[i], mode);
+    grid_drawer.drawer_->draw(plots[i], mode);
 }
 
 template <size_t N>

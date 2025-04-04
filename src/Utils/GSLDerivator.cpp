@@ -35,10 +35,10 @@ public:
     auto desc = Derivator::description();
     desc.setDescription("GSL numerical differentiation algorithm");
     desc.addAs<int, Mode>("mode", Mode::central)
-        .setDescription("mode used for the adaptive difference algorithm")
         .allow(0, "central")
         .allow(1, "forward")
-        .allow(2, "backward");
+        .allow(2, "backward")
+        .setDescription("mode used for the adaptive difference algorithm");
     return desc;
   }
 

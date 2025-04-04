@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,8 @@ namespace cepgen::utils {
     explicit ProgressBar(size_t total, size_t period = 10);
     ~ProgressBar();
 
-    /// Reset the progress bar to its initial state
-    void reset();
-    /// Enable the timer?
-    inline void setTimer(bool timer_enabled = true) { timer_enabled_ = timer_enabled; }
+    void reset();  ///< Reset the progress bar to its initial state
+    inline void setTimer(bool timer_enabled = true) { timer_enabled_ = timer_enabled; }  ///< Enable the timer?
     /// Broadcast the current progress to the bar
     /// \param[in] iter Current iteration
     void update(size_t iter) const;

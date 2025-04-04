@@ -25,6 +25,7 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, const ParametersList& params)
     : SteeredObject(params), proc_(proc) {
@@ -51,9 +52,9 @@ void ProcessVariablesAnalyser::analyse() const {
 ParametersDescription ProcessVariablesAnalyser::description() {
   auto desc = ParametersDescription();
   ParametersDescription hist_desc;
-  hist_desc.add("xbins", std::vector<double>{}).setDescription("x-axis bins definition");
-  hist_desc.add("nbinsX", 25).setDescription("Bins multiplicity for x-axis");
-  hist_desc.add("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+  hist_desc.add("xbins"s, std::vector<double>{}).setDescription("x-axis bins definition");
+  hist_desc.add("nbinsX"s, 25).setDescription("Bins multiplicity for x-axis");
+  hist_desc.add("xrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
   desc.addParametersDescriptionVector("histVariables", hist_desc, {}).setDescription("Histogram definition");
   desc.add("drawer", DrawerFactory::get().describeParameters("root"));
   return desc;

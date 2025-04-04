@@ -46,19 +46,14 @@ public:
   }
 
 private:
-  /// Placeholder for invalid bin indexing
-  static constexpr int UNASSIGNED_BIN = -999;
+  static constexpr int UNASSIGNED_BIN = -999;  ///< Placeholder for invalid bin indexing
 
-  /// Apply a correction cycle to the grid
-  bool correctionCycle(bool&);
-  /// Prepare the object for event generation
-  void computeGenerationParameters() const;
+  bool correctionCycle(bool&);               ///< Apply a correction cycle to the grid
+  void computeGenerationParameters() const;  ///< Prepare the object for event generation
 
-  /// Set of parameters for the integration/event generation grid
-  std::unique_ptr<GridParameters> grid_;
-  /// Selected bin at which the function will be evaluated
-  int ps_bin_{UNASSIGNED_BIN};  ///< Last bin to be corrected
-  std::vector<double> coords_;  ///< Phase space coordinates being evaluated
+  std::unique_ptr<GridParameters> grid_;  ///< Set of parameters for the integration/event generation grid
+  int ps_bin_{UNASSIGNED_BIN};            ///< Last bin to be corrected
+  std::vector<double> coords_;            ///< Phase space coordinates being evaluated
 };
 
 void GridOptimisedGeneratorWorker::initialise() {
@@ -83,8 +78,7 @@ bool GridOptimisedGeneratorWorker::next() {
 
   CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
-  // apply correction cycles if required from previous event
-  if (ps_bin_ != UNASSIGNED_BIN) {
+  if (ps_bin_ != UNASSIGNED_BIN) {  // apply correction cycles if required from previous event
     bool store = false;
     while (!correctionCycle(store)) {
     }
@@ -92,29 +86,25 @@ bool GridOptimisedGeneratorWorker::next() {
       return storeEvent();
   }
 
-  //--- normal generation cycle
+  // normal generation cycle
 
   double weight;
   while (true) {
     double y;
-    // select a function value and reject if fmax is too small
-    do {
-      // ...
+    do {  // select a function value and reject if fmax is too small
       ps_bin_ = integrator_->uniform({0., static_cast<double>(grid_->size())});
       y = integrator_->uniform({0., grid_->globalMax()});
       grid_->increment(ps_bin_);
     } while (y > grid_->maxValue(ps_bin_));
     // shoot a point x in this bin
     grid_->shoot(integrator_, ps_bin_, coords_);
-    // get weight for selected x value
-    weight = integrator_->eval(*integrand_, coords_);
-    if (weight > y)
+    if (weight = integrator_->eval(*integrand_, coords_);  // get weight for selected x value
+        weight > y)
       break;
   }
 
   if (weight > grid_->maxValue(ps_bin_))
-    // if weight is higher than local or global maximum,
-    // init correction cycle for the next event
+    // if weight is higher than local or global maximum, init correction cycle for the next event
     grid_->initCorrectionCycle(ps_bin_, weight);
   else  // no grid correction needed for this bin
     ps_bin_ = UNASSIGNED_BIN;
@@ -135,14 +125,11 @@ bool GridOptimisedGeneratorWorker::correctionCycle(bool& store) {
 
   if (integrator_->uniform() < grid_->correctionValue()) {
     grid_->setCorrectionValue(-1.);
-    // select x values in phase space bin
-    grid_->shoot(integrator_, ps_bin_, coords_);
+    grid_->shoot(integrator_, ps_bin_, coords_);  // select x values in phase space bin
     const double weight = integrator_->eval(*integrand_, coords_);
-    // parameter for correction of correction
-    grid_->rescale(ps_bin_, weight);
-    // accept event
+    grid_->rescale(ps_bin_, weight);  // parameter for correction of correction
     if (weight >= integrator_->uniform({0., grid_->maxValueDiff()}) + grid_->maxHistValue()) {
-      store = true;
+      store = true;  // accept event
       return true;
     }
     return false;
@@ -176,9 +163,9 @@ void GridOptimisedGeneratorWorker::computeGenerationParameters() const {
   // ...
   double sum = 0., sum2 = 0., sum2p = 0.;
 
-  utils::ProgressBar prog_bar(grid_->size(), 5);
+  utils::ProgressBar progress_bar(grid_->size(), 5);
 
-  //--- main loop
+  // main loop
   for (unsigned int i = 0; i < grid_->size(); ++i) {
     double fsum = 0., fsum2 = 0.;
     for (size_t j = 0; j < run_params_->generation().numPoints(); ++j) {
@@ -204,7 +191,7 @@ void GridOptimisedGeneratorWorker::computeGenerationParameters() const {
           << "fmax = " << grid_->maxValue(i) << "\n\t"
           << "eff  = " << eff;
     });
-    prog_bar.update(i + 1);
+    progress_bar.update(i + 1);
   }  // end of main loop
 
   const double inv_max = 1. / grid_->size();
@@ -227,8 +214,7 @@ void GridOptimisedGeneratorWorker::computeGenerationParameters() const {
                                                   << "Average inefficiency           = " << eff1 << "\n\t"
                                                   << "Overall inefficiency           = " << eff2;
   grid_->setPrepared(true);
-  //--- from now on events will be stored
-  integrand_->setStorage(true);
+  integrand_->setStorage(true);  // from now on events will be stored
 
   CG_INFO("GridOptimisedGeneratorWorker:setGen")
       << "Finished the grid preparation. Now launching the unweighted event production.";

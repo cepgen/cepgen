@@ -166,7 +166,7 @@ void Hist2D::add(Hist2D oth, double scaling) {
 
 void Hist2D::scale(double scaling) {
   CG_ASSERT(hist_);
-  if (auto ret = gsl_histogram2d_scale(hist_.get(), scaling); ret != GSL_SUCCESS)
+  if (const auto ret = gsl_histogram2d_scale(hist_.get(), scaling); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist2D:scale") << gsl_strerror(ret);
   gsl_histogram2d_scale(hist_w2_.get(), scaling * scaling);
 }
@@ -184,14 +184,14 @@ Limits Hist2D::rangeX() const {
 Limits Hist2D::binRangeX(size_t bin) const {
   CG_ASSERT(hist_);
   Limits range;
-  if (auto ret = gsl_histogram2d_get_xrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
+  if (const auto ret = gsl_histogram2d_get_xrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
   return range;
 }
 
 std::vector<double> Hist2D::binsX(BinMode mode) const {
   const auto bins = extractBins(mode, nbinsX(), std::bind(&Hist2D::binRangeX, this, std::placeholders::_1));
-  return std::vector<double>(bins.begin(), bins.end());
+  return std::vector(bins.begin(), bins.end());
 }
 
 size_t Hist2D::nbinsY() const {
@@ -207,19 +207,19 @@ Limits Hist2D::rangeY() const {
 Limits Hist2D::binRangeY(size_t bin) const {
   CG_ASSERT(hist_);
   Limits range;
-  if (auto ret = gsl_histogram2d_get_yrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
+  if (const auto ret = gsl_histogram2d_get_yrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
   return range;
 }
 
 std::vector<double> Hist2D::binsY(BinMode mode) const {
   const auto bins = extractBins(mode, nbinsY(), std::bind(&Hist2D::binRangeY, this, std::placeholders::_1));
-  return std::vector<double>(bins.begin(), bins.end());
+  return std::vector(bins.begin(), bins.end());
 }
 
 std::pair<size_t, size_t> Hist2D::bin(double x, double y) const {
   std::pair<size_t, size_t> bin_ids;
-  if (auto ret = gsl_histogram2d_find(hist_.get(), x, y, &bin_ids.first, &bin_ids.second); ret != GSL_SUCCESS)
+  if (const auto ret = gsl_histogram2d_find(hist_.get(), x, y, &bin_ids.first, &bin_ids.second); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist2D:bin") << "Failed to retrieve bin index for values (" << x << ", " << y
                                  << "): " << gsl_strerror(ret);
   return bin_ids;
@@ -234,11 +234,16 @@ Value Hist2D::value(size_t bin_x, size_t bin_y) const {
 void Hist2D::setValue(size_t bin_x, size_t bin_y, Value val) {
   const auto bin_centre_x = binRangeX(bin_x).x(0.5), bin_centre_y = binRangeY(bin_y).x(0.5);
   const auto val_old = value(bin_x, bin_y);
-  gsl_histogram2d_accumulate(hist_.get(), bin_centre_x, bin_centre_y, val - val_old);
-  gsl_histogram2d_accumulate(hist_w2_.get(),
-                             bin_centre_x,
-                             bin_centre_y,
-                             val.uncertainty() * val.uncertainty() - val_old.uncertainty() * val_old.uncertainty());
+  if (const auto ret = gsl_histogram2d_accumulate(hist_.get(), bin_centre_x, bin_centre_y, val - val_old);
+      ret != GSL_SUCCESS)
+    throw CG_ERROR("Hist2D:setValue") << "Failed to accumulate values histogram. GSL error: " << gsl_strerror(ret);
+  if (const auto ret = gsl_histogram2d_accumulate(
+          hist_w2_.get(),
+          bin_centre_x,
+          bin_centre_y,
+          val.uncertainty() * val.uncertainty() - val_old.uncertainty() * val_old.uncertainty());
+      ret != GSL_SUCCESS)
+    throw CG_ERROR("Hist2D:setValue") << "Failed to accumulate square sum histogram. GSL error: " << gsl_strerror(ret);
 }
 
 double Hist2D::meanX() const {
@@ -281,7 +286,7 @@ double Hist2D::integral(bool include_out_of_range) const {
 
 size_t Hist2D::contents_t::total() const { return std::accumulate(begin(), end(), 0); }
 
-Hist2D::contents_t& Hist2D::contents_t::operator+=(const Hist2D::contents_t& oth) {
+Hist2D::contents_t& Hist2D::contents_t::operator+=(const contents_t& oth) {
   for (size_t i = 0; i < num_content; ++i)
     operator[](i) += oth.at(i);
   return *this;
