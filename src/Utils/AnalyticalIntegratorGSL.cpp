@@ -25,17 +25,19 @@
 #include <gsl/gsl_integration.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/Modules/AnalyticIntegratorFactory.h"
+#include "CepGen/Integration/BaseIntegrator.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Modules/BaseIntegratorFactory.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 using namespace cepgen::utils;
 
-class AnalyticalIntegratorGSL final : public AnalyticIntegrator {
+class AnalyticalIntegratorGSL final : public BaseIntegrator {
 public:
   explicit AnalyticalIntegratorGSL(const ParametersList& params)
-      : AnalyticIntegrator(params),
+      : BaseIntegrator(params),
         mode_(steerAs<int, Mode>("mode")),
         fixed_type_(steerAs<int, FixedType>("fixedType")),
         nodes_(steer<int>("nodes")),
@@ -46,10 +48,10 @@ public:
         epsrel_(steer<double>("epsrel")) {}
 
   static ParametersDescription description() {
-    auto desc = AnalyticIntegrator::description();
+    auto desc = BaseIntegrator::description();
     desc.setDescription("GSL 1D integration algorithms wrapper");
-    desc.addAs<int, Mode>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
-    desc.addAs<int, FixedType>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
+    desc.addAs<int>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
+    desc.addAs<int>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
     desc.add("nodes", 100).setDescription("number of quadrature nodes for the fixed type integration");
     desc.add("alpha", 0.).setDescription("alpha parameter for the fixed type integration");
     desc.add("beta", 0.).setDescription("alpha parameter for the fixed type integration");
@@ -60,10 +62,12 @@ public:
   }
 
 private:
-  double run(const FunctionWrapper& func, void* obj = nullptr, const Limits& lim = {}) const override {
-    if (obj)
-      return eval(GSLFunctionWrapper::build(func, obj).get(), lim);
-    return eval(GSLFunctionWrapper::build(func, integrand_parameters_).get(), lim);
+  Value run(Integrand& integrand, const std::vector<Limits>& range) const override {
+    return eval(
+        GSLFunctionWrapper::build(FunctionWrapper{[&integrand](double x) { return integrand.eval(std::vector{x}); }},
+                                  integrand_parameters_)
+            .get(),
+        range.at(0));
   }
 
   enum struct Mode { Fixed = 0, QNG = 1, QAG = 2, QAGS = 3, QAWC = 4 };
@@ -78,7 +82,84 @@ private:
     Rational = 7,
     Chebyshev2 = 8
   };
-  double eval(const gsl_function*, const Limits&) const;
+  Value eval(const gsl_function* wrp, const Limits& range) const {
+#if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
+    double result{0.}, error{0.};
+    int res = GSL_SUCCESS;
+    if (mode_ == Mode::Fixed) {
+      const gsl_integration_fixed_type* type{nullptr};
+      switch (fixed_type_) {
+        case FixedType::Legendre:
+          type = gsl_integration_fixed_legendre;
+          break;
+        case FixedType::Chebyshev:
+          type = gsl_integration_fixed_chebyshev;
+          break;
+        case FixedType::Gegenbauer:
+          type = gsl_integration_fixed_gegenbauer;
+          break;
+        case FixedType::Jacobi:
+          type = gsl_integration_fixed_jacobi;
+          break;
+        case FixedType::Laguerre:
+          type = gsl_integration_fixed_laguerre;
+          break;
+        case FixedType::Hermite:
+          type = gsl_integration_fixed_hermite;
+          break;
+        case FixedType::Exponential:
+          type = gsl_integration_fixed_exponential;
+          break;
+        case FixedType::Rational:
+          type = gsl_integration_fixed_rational;
+          break;
+        case FixedType::Chebyshev2:
+          type = gsl_integration_fixed_chebyshev2;
+          break;
+        default:
+          throw CG_FATAL("AnalyticalIntegratorGSL")
+              << "Invalid fixed quadrature type: " << static_cast<int>(fixed_type_) << ".";
+      }
+      std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
+          gsl_integration_fixed_alloc(type, nodes_, range.min(), range.max(), alpha_, beta_),
+          gsl_integration_fixed_free);
+      res = gsl_integration_fixed(wrp, &result, workspace.get());
+    } else if (mode_ == Mode::QNG) {
+      size_t neval;
+      res = gsl_integration_qng(wrp, range.min(), range.max(), epsabs_, epsrel_, &result, &error, &neval);
+    } else {
+      std::unique_ptr<gsl_integration_workspace, void (*)(gsl_integration_workspace*)> workspace(
+          gsl_integration_workspace_alloc(limit_), gsl_integration_workspace_free);
+      if (mode_ == Mode::QAG) {
+        int key = GSL_INTEG_GAUSS41;
+        res = gsl_integration_qag(
+            wrp, range.min(), range.max(), epsabs_, epsrel_, limit_, key, workspace.get(), &result, &error);
+      } else if (mode_ == Mode::QAGS)
+        res = gsl_integration_qags(
+            wrp, range.min(), range.max(), epsabs_, epsrel_, limit_, workspace.get(), &result, &error);
+      else if (mode_ == Mode::QAWC)
+        res = gsl_integration_qawc(const_cast<gsl_function*>(wrp),
+                                   range.min(),
+                                   range.max(),
+                                   epsabs_,
+                                   epsrel_,
+                                   0.,
+                                   limit_,
+                                   workspace.get(),
+                                   &result,
+                                   &error);
+    }
+    if (res != GSL_SUCCESS)
+      CG_WARNING("AnalyticalIntegratorGSL")
+          << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
+    return Value{result, error};
+#else
+    (void)range;
+    (void)wrp;
+    CG_WARNING("AnalyticalIntegratorGSL") << "GSL version above 2.1 is required for integration.";
+    return {};
+#endif
+  }
   const Mode mode_;
   const FixedType fixed_type_;
   const int nodes_;
@@ -87,73 +168,5 @@ private:
   const double epsabs_, epsrel_;
 };
 
-double AnalyticalIntegratorGSL::eval(const gsl_function* wrp, const Limits& lim) const {
-  double result{0.};
-#if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
-  const auto x_min = (lim.hasMin() ? lim.min() : range_.min()), x_max = (lim.hasMax() ? lim.max() : range_.max());
-  int res = GSL_SUCCESS;
-  if (mode_ == Mode::Fixed) {
-    const gsl_integration_fixed_type* type{nullptr};
-    switch (fixed_type_) {
-      case FixedType::Legendre:
-        type = gsl_integration_fixed_legendre;
-        break;
-      case FixedType::Chebyshev:
-        type = gsl_integration_fixed_chebyshev;
-        break;
-      case FixedType::Gegenbauer:
-        type = gsl_integration_fixed_gegenbauer;
-        break;
-      case FixedType::Jacobi:
-        type = gsl_integration_fixed_jacobi;
-        break;
-      case FixedType::Laguerre:
-        type = gsl_integration_fixed_laguerre;
-        break;
-      case FixedType::Hermite:
-        type = gsl_integration_fixed_hermite;
-        break;
-      case FixedType::Exponential:
-        type = gsl_integration_fixed_exponential;
-        break;
-      case FixedType::Rational:
-        type = gsl_integration_fixed_rational;
-        break;
-      case FixedType::Chebyshev2:
-        type = gsl_integration_fixed_chebyshev2;
-        break;
-      default:
-        throw CG_FATAL("AnalyticalIntegratorGSL")
-            << "Invalid fixed quadrature type: " << static_cast<int>(fixed_type_) << ".";
-    }
-    std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
-        gsl_integration_fixed_alloc(type, nodes_, x_min, x_max, alpha_, beta_), gsl_integration_fixed_free);
-    res = gsl_integration_fixed(wrp, &result, workspace.get());
-  } else if (mode_ == Mode::QNG) {
-    size_t neval;
-    double error;
-    res = gsl_integration_qng(wrp, x_min, x_max, epsabs_, epsrel_, &result, &error, &neval);
-  } else {
-    double error;
-    std::unique_ptr<gsl_integration_workspace, void (*)(gsl_integration_workspace*)> workspace(
-        gsl_integration_workspace_alloc(limit_), gsl_integration_workspace_free);
-    if (mode_ == Mode::QAG) {
-      int key = GSL_INTEG_GAUSS41;
-      res = gsl_integration_qag(wrp, x_min, x_max, epsabs_, epsrel_, limit_, key, workspace.get(), &result, &error);
-    } else if (mode_ == Mode::QAGS)
-      res = gsl_integration_qags(wrp, x_min, x_max, epsabs_, epsrel_, limit_, workspace.get(), &result, &error);
-    else if (mode_ == Mode::QAWC)
-      res = gsl_integration_qawc(
-          const_cast<gsl_function*>(wrp), x_min, x_max, epsabs_, epsrel_, 0., limit_, workspace.get(), &result, &error);
-  }
-  if (res != GSL_SUCCESS)
-    CG_WARNING("AnalyticalIntegratorGSL") << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
-#else
-  (void)lim;
-  (void)wrp;
-  CG_WARNING("AnalyticalIntegratorGSL") << "GSL version above 2.1 is required for integration.";
-#endif
-  return result;
-}
-REGISTER_ANALYTIC_INTEGRATOR("gsl", AnalyticalIntegratorGSL);
+REGISTER_BASE_INTEGRATOR("gsl", AnalyticalIntegratorGSL);
 #endif

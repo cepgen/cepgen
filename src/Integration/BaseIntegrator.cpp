@@ -16,24 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Integration/BaseIntegrator.h"
+#include "CepGen/Integration/FunctionIntegrand.h"
 #include "CepGen/Utils/FunctionWrapper.h"
 
 using namespace cepgen;
 
-AnalyticIntegrator::AnalyticIntegrator(const ParametersList& params)
+BaseIntegrator::BaseIntegrator(const ParametersList& params)
     : NamedModule(params),
-      range_(steer<Limits>("range")),
       integrand_parameters_(steer<ParametersList>("params")),
       verbosity_(steer<int>("verbosity")) {}
 
-double AnalyticIntegrator::integrate(const std::function<double(double)>& integrand, const Limits& lim) const {
-  return run(utils::FunctionWrapper(integrand), nullptr, lim);
+double BaseIntegrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
+
+Value BaseIntegrator::integrate(const std::function<double(double)>& integrand, const Limits& range_1d) const {
+  auto function_integrand =
+      FunctionIntegrand{1, [&integrand](const std::vector<double>& x) { return integrand(x.at(0)); }};
+  return run(function_integrand, std::vector{range_1d});
 }
 
-ParametersDescription AnalyticIntegrator::description() {
+Value BaseIntegrator::integrate(const std::function<double(const std::vector<double>&)>& integrand,
+                                const std::vector<Limits>& range) const {
+  auto function_integrand = FunctionIntegrand{range.size(), integrand};
+  return run(function_integrand, range);
+}
+
+ParametersDescription BaseIntegrator::description() {
   auto desc = ParametersDescription();
-  desc.add("range", Limits{0., 1.}).setDescription("integration range");
   desc.add("params", ParametersDescription{}).setDescription("parameters for the integrand");
   desc.add("verbosity", 0).setDescription("integrator verbosity");
   return desc;

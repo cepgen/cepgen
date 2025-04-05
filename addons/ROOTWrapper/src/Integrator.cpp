@@ -19,19 +19,20 @@
 #include <Math/Integrator.h>
 #include <Math/IntegratorMultiDim.h>
 
+#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/BaseIntegratorFactory.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace std::string_literals;
 
 namespace cepgen::root {
   /// ROOT general-purpose integration algorithm
-  class Integrator final : public cepgen::Integrator {
+  class Integrator final : public cepgen::BaseIntegrator {
   public:
     explicit Integrator(const ParametersList& params)
-        : cepgen::Integrator(params),
+        : cepgen::BaseIntegrator(params),
           type_(steer<std::string>("type")),
           absolute_tolerance_(steer<double>("absTol")),
           relative_tolerance_(steer<double>("relTol")),
@@ -60,9 +61,9 @@ namespace cepgen::root {
           type = ROOT::Math::IntegratorOneDim::Type::kADAPTIVESINGULAR;
         else if (type_ == "nonAdaptive")
           type = ROOT::Math::IntegratorOneDim::Type::kNONADAPTIVE;
-        integrator_1d_.reset(new ROOT::Math::IntegratorOneDim(type, absolute_tolerance_, relative_tolerance_, size_));
+        integrator_1d_.reset(new ROOT::Math::IntegratorOneDim(
+            type, absolute_tolerance_, relative_tolerance_, size_, steer<int>("rule")));
       }
-      //--- a bit of printout for debugging
       CG_DEBUG("Integrator:build") << "ROOT generic integrator built\n\t"
                                    << "N-dimensional type: " << integrator_->Name() << ",\n\t"
                                    << "1-dimensional type: " << integrator_1d_->Name() << ",\n\t"
@@ -72,35 +73,30 @@ namespace cepgen::root {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::Integrator::description();
+      auto desc = cepgen::BaseIntegrator::description();
       desc.setDescription("ROOT general purpose MC integrator");
-      desc.add("type", "default"s);
-      desc.add("absTol", -1.);
-      desc.add("relTol", -1.);
-      desc.add("size", 0);
+      desc.add("type", "default"s).setDescription("type of integration");
+      desc.add("absTol", -1.).setDescription("desired absolute error limit");
+      desc.add("relTol", -1.).setDescription("desired relative error limit");
+      desc.add("size", 0).setDescription("maximum number of sub-intervals to build");
+      desc.add("rule", 0).setDescription("Gauss-Kronrod integration rule (only for GSL kADAPTIVE type)");
       return desc;
     }
 
-    void setLimits(const std::vector<Limits>& lims) override {
-      cepgen::Integrator::setLimits(lims);
-      x_low_.clear();
-      x_high_.clear();
-      for (const auto& lim : limits_) {
-        x_low_.emplace_back(lim.min());
-        x_high_.emplace_back(lim.max());
-      }
-    }
-    Value integrate(Integrand& integrand) override {
-      checkLimits(integrand);
-
+    Value run(Integrand& integrand, const std::vector<Limits>& range) const override {
       if (integrand.size() == 1) {
         auto funct = [&](double x) -> double { return integrand.eval(std::vector{x}); };
         integrator_1d_->SetFunction(funct);
-        return Value{integrator_1d_->Integral(limits_.at(0).min(), limits_.at(0).max()), integrator_1d_->Error()};
+        return Value{integrator_1d_->Integral(range.at(0).min(), range.at(0).max()), integrator_1d_->Error()};
+      }
+      std::vector<double> x_low, x_high;
+      for (const auto& dim_range : range) {
+        x_low.emplace_back(dim_range.min());
+        x_high.emplace_back(dim_range.max());
       }
       auto funct = [&](const double* x) -> double { return integrand.eval(std::vector(x, x + integrand.size())); };
       integrator_->SetFunction(funct, integrand.size());
-      return Value{integrator_->Integral(x_low_.data(), x_high_.data()), integrator_->Error()};
+      return Value{integrator_->Integral(x_low.data(), x_high.data()), integrator_->Error()};
     }
 
   private:
@@ -109,10 +105,9 @@ namespace cepgen::root {
     const double relative_tolerance_;  ///< desired relative Error
     const unsigned int size_;          ///< maximum number of sub-intervals
 
-    std::vector<double> x_low_, x_high_;
     std::unique_ptr<ROOT::Math::IntegratorMultiDim> integrator_;
     std::unique_ptr<ROOT::Math::IntegratorOneDim> integrator_1d_;
   };
 }  // namespace cepgen::root
 using ROOTIntegrator = cepgen::root::Integrator;
-REGISTER_INTEGRATOR("root", ROOTIntegrator);
+REGISTER_BASE_INTEGRATOR("root", ROOTIntegrator);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
@@ -55,7 +55,7 @@ namespace cepgen {
   template class ModuleFactory<formfac::Parameterisation>;
   template class ModuleFactory<GeneratorWorker>;
   template class ModuleFactory<Integrator>;
-  template class ModuleFactory<AnalyticIntegrator>;
+  template class ModuleFactory<BaseIntegrator>;
   template class ModuleFactory<KTFlux>;
   template class ModuleFactory<PartonsPhaseSpaceGenerator>;
   template class ModuleFactory<PhaseSpaceGenerator>;

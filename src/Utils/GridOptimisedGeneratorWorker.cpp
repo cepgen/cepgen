@@ -23,8 +23,10 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ProgressBar.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
@@ -33,7 +35,9 @@ using namespace cepgen;
 class GridOptimisedGeneratorWorker final : public GeneratorWorker {
 public:
   /// Book the memory slots and structures for the generator
-  explicit GridOptimisedGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {}
+  explicit GridOptimisedGeneratorWorker(const ParametersList& params)
+      : GeneratorWorker(params),
+        random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {}
 
   void initialise() override;
   bool next() override;
@@ -41,6 +45,8 @@ public:
   static ParametersDescription description() {
     auto desc = GeneratorWorker::description();
     desc.setDescription("Grid-optimised worker");
+    desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
+        .setDescription("random number generator engine");
     desc.add("binSize", 3);
     return desc;
   }
@@ -51,6 +57,7 @@ private:
   bool correctionCycle(bool&);               ///< Apply a correction cycle to the grid
   void computeGenerationParameters() const;  ///< Prepare the object for event generation
 
+  const std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< Random number generator for grid population
   std::unique_ptr<GridParameters> grid_;  ///< Set of parameters for the integration/event generation grid
   int ps_bin_{UNASSIGNED_BIN};            ///< Last bin to be corrected
   std::vector<double> coords_;            ///< Phase space coordinates being evaluated
@@ -92,8 +99,8 @@ bool GridOptimisedGeneratorWorker::next() {
   while (true) {
     double y;
     do {  // select a function value and reject if fmax is too small
-      ps_bin_ = integrator_->uniform({0., static_cast<double>(grid_->size())});
-      y = integrator_->uniform({0., grid_->globalMax()});
+      ps_bin_ = random_generator_->uniform(0., static_cast<double>(grid_->size()));
+      y = random_generator_->uniform(0., grid_->globalMax());
       grid_->increment(ps_bin_);
     } while (y > grid_->maxValue(ps_bin_));
     // shoot a point x in this bin
@@ -123,12 +130,12 @@ bool GridOptimisedGeneratorWorker::correctionCycle(bool& store) {
   if (grid_->correctionValue() >= 1.)
     grid_->setCorrectionValue(grid_->correctionValue() - 1.);
 
-  if (integrator_->uniform() < grid_->correctionValue()) {
+  if (random_generator_->uniform() < grid_->correctionValue()) {
     grid_->setCorrectionValue(-1.);
     grid_->shoot(integrator_, ps_bin_, coords_);  // select x values in phase space bin
     const double weight = integrator_->eval(*integrand_, coords_);
     grid_->rescale(ps_bin_, weight);  // parameter for correction of correction
-    if (weight >= integrator_->uniform({0., grid_->maxValueDiff()}) + grid_->maxHistValue()) {
+    if (weight >= random_generator_->uniform(0., grid_->maxValueDiff()) + grid_->maxHistValue()) {
       store = true;  // accept event
       return true;
     }
