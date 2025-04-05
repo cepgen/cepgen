@@ -21,6 +21,7 @@
 #include "CepGen/Utils/String.h"
 
 // list of factories documented
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DocumentationGeneratorFactory.h"
@@ -46,7 +47,7 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
   const auto categories = steer<std::vector<std::string> >("categories"),
              mod_names = steer<std::vector<std::string> >("modules");
   const auto add_category =
-      [&categories, &mod_names, this](
+      [this, &categories, &mod_names](
           const std::string& name, const std::string& title, const std::string& description, auto& factory) -> void {
     if (!categories.empty() && !contains(categories, name))
       return;
@@ -58,9 +59,9 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
       if (mod_names.empty() || contains(mod_names, utils::toString(mod)) ||
           contains(mod_names, utils::toCamelCase(utils::toString(mod)))) {
         cat.modules[mod] = factory.describeParameters(mod).setKey(mod);
-        for (const auto& index_vs_modname : factory.indices())
-          if (index_vs_modname.second == mod)
-            cat.modules_indices[mod] = index_vs_modname.first;
+        for (const auto& [index, module_name] : factory.indices())
+          if (module_name == mod)
+            cat.modules_indices[mod] = index;
       }
     categories_.emplace_back(std::make_pair(name, cat));
   };
@@ -76,6 +77,7 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
   add_category("ktflux", "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
   add_category("alphaem", "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());
   add_category("alphas", "Strong coupling evolution", "", cepgen::AlphaSFactory::get());
+  add_category("anaintegr", "Analytic integrator algorithms", "", cepgen::AnalyticIntegratorFactory::get());
   add_category("integr", "Integrator algorithms", "", cepgen::IntegratorFactory::get());
   add_category("func", "Functional parsers", "", cepgen::FunctionalFactory::get());
   add_category("rndgen", "Random number generators", "", cepgen::RandomGeneratorFactory::get());

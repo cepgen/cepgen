@@ -47,28 +47,28 @@ public:
     const auto separator = std::string(80, '-');
     const auto light = steer<bool>("light"), camel_case = steer<bool>("camelCaseModulesNames");
     std::vector<std::string> modules_names;
-    for (const auto& cat : categories_) {
-      if (cat.second.modules.empty())
+    for (const auto& [name, category] : categories_) {
+      if (category.modules.empty())
         continue;
-      os << colourise("\n" + separator + "\n" + cat.second.title, Colour::green, Modifier::bold);
+      os << colourise("\n" + separator + "\n" + category.title, Colour::green, Modifier::bold);
       if (!light)
         os << "\n";
-      for (const auto& mod : cat.second.modules) {
-        modules_names.emplace_back(camel_case ? toCamelCase(mod.first) : mod.first);
+      for (const auto& [module_name, description] : category.modules) {
+        modules_names.emplace_back(camel_case ? toCamelCase(module_name) : module_name);
         if (light) {
           os << "\n"
-             << (cat.second.modules_indices.count(mod.first) > 0
-                     ? "#"s + std::to_string(cat.second.modules_indices.at(mod.first)) + ": "
+             << (category.modules_indices.count(module_name) > 0
+                     ? "#"s + std::to_string(category.modules_indices.at(module_name)) + ": "
                      : ""s)
-             << colourise(mod.first, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
-             << mod.second.description() << (mod.second.empty() ? " (*)" : "");
+             << colourise(module_name, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
+             << description.description() << (description.empty() ? " (*)" : "");
         } else {
           os << "\n";
-          if (cat.second.modules_indices.count(mod.first) > 0)
-            os << "#" << cat.second.modules_indices.at(mod.first) << ": ";
-          os << mod.second.describe();
+          if (category.modules_indices.count(module_name) > 0)
+            os << "#" << category.modules_indices.at(module_name) << ": ";
+          os << description.describe();
           if (dump_params_)
-            os << "\n\tParametersList object:\n\t\t" << mod.second.parameters();
+            os << "\n\tParametersList object:\n\t\t" << description.parameters();
           os << "\n";
         }
       }
