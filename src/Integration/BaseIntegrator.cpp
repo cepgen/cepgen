@@ -29,14 +29,14 @@ BaseIntegrator::BaseIntegrator(const ParametersList& params)
 
 double BaseIntegrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
-Value BaseIntegrator::integrate(const std::function<double(double)>& integrand, const Limits& range_1d) const {
+Value BaseIntegrator::integrate(const std::function<double(double)>& integrand, const Limits& range_1d) {
   auto function_integrand =
       FunctionIntegrand{1, [&integrand](const std::vector<double>& x) { return integrand(x.at(0)); }};
   return run(function_integrand, std::vector{range_1d});
 }
 
 Value BaseIntegrator::integrate(const std::function<double(const std::vector<double>&)>& integrand,
-                                const std::vector<Limits>& range) const {
+                                const std::vector<Limits>& range) {
   auto function_integrand = FunctionIntegrand{range.size(), integrand};
   return run(function_integrand, range);
 }

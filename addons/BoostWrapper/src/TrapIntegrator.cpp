@@ -43,7 +43,7 @@ namespace cepgen::boost {
     }
 
   private:
-    Value run(Integrand& integrand, const std::vector<Limits>& range) const override {
+    Value run(Integrand& integrand, const std::vector<Limits>& range) override {
       if (integrand.size() != 1)
         throw CG_FATAL("TrapIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
       return Value{

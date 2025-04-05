@@ -83,7 +83,7 @@ namespace cepgen::root {
       return desc;
     }
 
-    Value run(Integrand& integrand, const std::vector<Limits>& range) const override {
+    Value run(Integrand& integrand, const std::vector<Limits>& range) override {
       if (integrand.size() == 1) {
         auto funct = [&](double x) -> double { return integrand.eval(std::vector{x}); };
         integrator_1d_->SetFunction(funct);

@@ -34,9 +34,9 @@
 using namespace cepgen;
 using namespace cepgen::utils;
 
-class AnalyticalIntegratorGSL final : public BaseIntegrator {
+class GSLAnalyticalIntegrator final : public BaseIntegrator {
 public:
-  explicit AnalyticalIntegratorGSL(const ParametersList& params)
+  explicit GSLAnalyticalIntegrator(const ParametersList& params)
       : BaseIntegrator(params),
         mode_(steerAs<int, Mode>("mode")),
         fixed_type_(steerAs<int, FixedType>("fixedType")),
@@ -62,7 +62,7 @@ public:
   }
 
 private:
-  Value run(Integrand& integrand, const std::vector<Limits>& range) const override {
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override {
     return eval(
         GSLFunctionWrapper::build(FunctionWrapper{[&integrand](double x) { return integrand.eval(std::vector{x}); }},
                                   integrand_parameters_)
@@ -117,7 +117,7 @@ private:
           type = gsl_integration_fixed_chebyshev2;
           break;
         default:
-          throw CG_FATAL("AnalyticalIntegratorGSL")
+          throw CG_FATAL("GSLAnalyticalIntegrator")
               << "Invalid fixed quadrature type: " << static_cast<int>(fixed_type_) << ".";
       }
       std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
@@ -150,13 +150,13 @@ private:
                                    &error);
     }
     if (res != GSL_SUCCESS)
-      CG_WARNING("AnalyticalIntegratorGSL")
+      CG_WARNING("GSLAnalyticalIntegrator")
           << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
     return Value{result, error};
 #else
     (void)range;
     (void)wrp;
-    CG_WARNING("AnalyticalIntegratorGSL") << "GSL version above 2.1 is required for integration.";
+    CG_WARNING("GSLAnalyticalIntegrator") << "GSL version above 2.1 is required for integration.";
     return {};
 #endif
   }
@@ -168,5 +168,5 @@ private:
   const double epsabs_, epsrel_;
 };
 
-REGISTER_BASE_INTEGRATOR("gsl", AnalyticalIntegratorGSL);
+REGISTER_BASE_INTEGRATOR("gsl", GSLAnalyticalIntegrator);
 #endif

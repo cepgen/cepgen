@@ -34,7 +34,7 @@ namespace cepgen::boost {
       return desc;
     }
 
-    Value run(Integrand& integrand, const std::vector<Limits>& range) const override {
+    Value run(Integrand& integrand, const std::vector<Limits>& range) override {
       std::vector<std::pair<double, double> > bounds;
       std::transform(range.begin(), range.end(), std::back_inserter(bounds), [](const auto& lim) { return lim.raw(); });
       const auto funct = [&integrand](const std::vector<double>& coord) -> double { return integrand.eval(coord); };

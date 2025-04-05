@@ -45,18 +45,18 @@ namespace cepgen {
     /// Evaluate the integral of a function at a given value
     /// \param[in] integrand function to integrate
     /// \param[in] range_1d integration range
-    Value integrate(const std::function<double(double)>& integrand, const Limits& range_1d) const;
+    Value integrate(const std::function<double(double)>& integrand, const Limits& range_1d = {0., 1.});
     /// Evaluate the integral of a function at a given value
     /// \param[in] integrand function to integrate
     /// \param[in] range integration range
     Value integrate(const std::function<double(const std::vector<double>&)>& integrand,
-                    const std::vector<Limits>& range) const;
+                    const std::vector<Limits>& range);
 
   protected:
     /// Evaluate the integral of a function at a given value
     /// \param[in] integrand function to integrate
     /// \param[in] range (optional) integration range
-    virtual Value run(Integrand& integrand, const std::vector<Limits>& range = {}) const = 0;
+    virtual Value run(Integrand& integrand, const std::vector<Limits>& range = {}) = 0;
 
     const ParametersList integrand_parameters_;
     const int verbosity_;  ///< Integrator verbosity
