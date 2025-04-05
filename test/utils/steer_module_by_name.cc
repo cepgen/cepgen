@@ -7,7 +7,6 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
-
   {
     const string fed = "text<test/of/key:value<width:40";
     auto drawer = cepgen::DrawerFactory::get().build(fed);

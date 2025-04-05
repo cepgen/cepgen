@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,18 +50,18 @@ int main(int argc, char* argv[]) {
 
   const auto prefix = "["s + hadroniser + "] ";
 
-  auto hadr_algo = cepgen::EventModifierFactory::get().build(hadroniser);
-  CG_TEST(hadr_algo, prefix + "algorithm construction");
-  hadr_algo->setCrossSection(cepgen::Value{1.46161e-1, 1.25691e-3});
-  hadr_algo->initialise(gen.runParameters());
+  const auto hadroniser_algo = cepgen::EventModifierFactory::get().build(hadroniser);
+  CG_TEST(hadroniser_algo, prefix + "algorithm construction");
+  hadroniser_algo->setCrossSection(cepgen::Value{1.46161e-1, 1.25691e-3});
+  hadroniser_algo->initialise(gen.runParameters());
   double evt_weight = 1.;
 
   const auto evt_before_particles = evt.particles().size();
-  hadr_algo->run(evt, evt_weight, true);
+  hadroniser_algo->run(evt, evt_weight, true);
   CG_TEST(evt_weight == 1., prefix + "no event weight modification in fast mode");
   CG_TEST(evt.particles().size() == evt_before_particles, prefix + "no event modification in fast mode");
 
-  hadr_algo->run(evt, evt_weight, false);
+  hadroniser_algo->run(evt, evt_weight, false);
 
   CG_DEBUG("main") << "Hadroniser-filtered event:\n" << evt;
 

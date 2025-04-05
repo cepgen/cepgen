@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,13 +40,13 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .parse();
 
-  cepgen::utils::Timer tmr;
+  [[maybe_unused]] cepgen::utils::Timer timer;
   cepgen::Generator gen;
   gen.runParameters().integrator().setName(integrator);
 
-  cepgen::utils::AbortHandler ah;
+  [[maybe_unused]] cepgen::utils::AbortHandler abort_handler;
 
-  auto pkin =
+  auto kinematics_parameters =
       cepgen::ParametersList()
           .set<double>("sqrtS", 13.e3)
           .set<cepgen::ParametersList>(
@@ -60,13 +60,13 @@ int main(int argc, char* argv[]) {
   {
     gen.runParameters().setProcess(
         cepgen::ProcessFactory::get().build(proc_name, cepgen::ParametersList().set<int>("pair", 13)));
-    gen.runParameters().process().kinematics().setParameters(pkin);
+    gen.runParameters().process().kinematics().setParameters(kinematics_parameters);
     cs_ei_no_symm = gen.computeXsection();
   }
   {  // inelastic-elastic
     gen.runParameters().setProcess(cepgen::ProcessFactory::get().build(
         proc_name, cepgen::ParametersList().set<int>("pair", 13).set<bool>("symmetrise", true)));
-    gen.runParameters().process().kinematics().setParameters(pkin);
+    gen.runParameters().process().kinematics().setParameters(kinematics_parameters);
     cs_ei_symm = gen.computeXsection();
   }
   CG_TEST_VALUES(cs_ei_no_symm * 2., cs_ei_symm, num_sigma, "symmetrised SD == 2*non-symmetrised SD");

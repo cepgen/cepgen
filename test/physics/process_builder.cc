@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   cepgen::initialise();
@@ -33,7 +34,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("processes,p", "name of the processes", &processes, cepgen::ProcessFactory::get().modules())
-      .addOptionalArgument("include-madgraph", "include MG5_aMC process?", &include_mg5_proc, true)
+      .addOptionalArgument("include-madgraph"s, "include MG5_aMC process?", &include_mg5_proc, true)
       .parse();
 
   CG_LOG << "Will test process(es): " << processes << ".";
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]) {
       log << "Successfully built the process \"" << proc->name() << "\"!\n"
           << " *) description: " << proc->description().description() << "\n"
           << " *) has event? " << proc->hasEvent() << "\n";
-      if (proc->hasEvent()) {  //--- dump a typical event content
+      if (proc->hasEvent()) {  // dump a typical event content
         log << "    event content (invalid kinematics, only check the parentage):\n";
         proc->event().dump();
       }
@@ -58,14 +59,14 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUAL(proc->hasEvent(), true, "process has event");
     if (!proc->hasEvent())
       continue;
-    if (proc_name == "lpair" || proc_name == "pptoff" || proc_name == "mg5_aMC") {
+    if (proc_name == "lpair"s || proc_name == "pptoff"s || proc_name == "mg5_aMC"s) {
       CG_TEST_EQUAL(proc->event().particles().size(), 9, proc_name + " particles content");
       const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
       CG_TEST_EQUAL(cs.size(), 2, proc_name + " outgoing state");
       CG_TEST_EQUAL(cs.at(0).integerPdgId(), +13, proc_name + " first outgoing particle");
       CG_TEST_EQUAL(cs.at(1).integerPdgId(), -13, proc_name + " second outgoing particle");
     }
-    if (proc_name == "pptoww") {
+    if (proc_name == "pptoww"s) {
       CG_TEST_EQUAL(proc->event().particles().size(), 9, proc_name + " particles content");
       const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
       CG_TEST_EQUAL(cs.size(), 2, proc_name + " outgoing state");

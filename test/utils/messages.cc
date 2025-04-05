@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ int main() {
   //utils::Logger::get().output = new std::ofstream("test.log");
   //utils::Logger::get().output = nullptr;
 
-  //--- try with a bit of unicode too
+  // try with a bit of Unicode too
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
   for (int type = static_cast<int>(LoggedMessage::MessageType::undefined);
        type <= static_cast<int>(LoggedMessage::MessageType::warning);

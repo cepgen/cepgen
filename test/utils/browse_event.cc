@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
       {"m(7,8)", (evt(7).momentum() + evt(8).momentum()).mass()}};
 
   const cepgen::utils::EventBrowser bws;
-  for (const auto& val_pair : values)
-    CG_TEST_EQUIV(bws.get(evt, val_pair.first), val_pair.second, val_pair.first);
+  for (const auto& [variable_name, value] : values)
+    CG_TEST_EQUIV(bws.get(evt, variable_name), value, variable_name);
   CG_TEST_SUMMARY;
 }

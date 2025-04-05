@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   if (quiet)
     CG_LOG_LEVEL(nothing);
 
-  //--- tests definition
+  // tests definition
   struct test_t {
     cepgen::FunctionalIntegrand integrand;
     double result{0.};
@@ -70,9 +70,9 @@ int main(int argc, char* argv[]) {
   for (const auto& integrator_name : integrators) {
     if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
       continue;
-    auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
+    const auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
 
-    //--- integration part
+    // integration part
     size_t i = 0;
     for (auto& test : tests) {
       if (!test.limits.empty())

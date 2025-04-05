@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ int main(int argc, char* argv[]) {
   if (quiet)
     CG_LOG_LEVEL(nothing);
   cepgen::initialise();
-  auto gen = cepgen::DocumentationGeneratorFactory::get().build(
+  auto documentation_generator = cepgen::DocumentationGeneratorFactory::get().build(
       doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
-  const auto documentation = gen->describe();
+  const auto documentation = documentation_generator->describe();
 
   if (output_file.empty()) {
     if (quiet)

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,8 @@ int main(int argc, char* argv[]) {
   CG_TEST_DEBUG(verbose);
   constexpr double epsilon = 1.e-9;  // tolerance
 
-  CG_LOG << "Will test with " << cepgen::utils::s("module", parsers.size(), true) << ": " << parsers;
+  CG_LOG << "Will test with epsilon=" << epsilon << " for " << cepgen::utils::s("module", parsers.size(), true) << ": "
+         << parsers;
 
   for (const auto& func : parsers) {
     CG_LOG << "Testing with \"" << func << "\" functional parser.";

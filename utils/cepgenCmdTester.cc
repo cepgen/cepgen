@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,8 +39,7 @@ int main(int argc, char* argv[]) {
   if (reserialise) {
     const auto serialised = plist.serialise();
     const auto col = serialised == commands ? cepgen::utils::Colour::green : cepgen::utils::Colour::yellow;
-    CG_LOG << "Re-serialised arguments: " << cepgen::utils::colourise(serialised, col, cepgen::utils::Modifier::italic)
-           << ".";
+    CG_LOG << "Re-serialised arguments: " << colourise(serialised, col, cepgen::utils::Modifier::italic) << ".";
   }
 
   return 0;

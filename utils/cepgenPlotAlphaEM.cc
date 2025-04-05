@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,11 +58,11 @@ int main(int argc, char* argv[]) {
   };
   vector<alpha_t> alphaem;
 
-  const auto qvals = q_range.generate(num_points, logx);
+  const auto q_values = q_range.generate(num_points, logx);
   {  // alphaEM(Q) modellings part
     size_t i = 0;
     for (const auto& mod : models) {
-      const auto& algo = cepgen::AlphaEMFactory::get().build(mod);
+      const auto algo = cepgen::AlphaEMFactory::get().build(mod);
       alphaem.emplace_back(alpha_t{
           mod,
           vector<double>(num_points),
@@ -70,10 +70,10 @@ int main(int argc, char* argv[]) {
               mod,
               cepgen::utils::replaceAll(cepgen::AlphaEMFactory::get().describe(mod), "alpha(EM)", "\\alpha_{EM}"))});
       auto& aem = alphaem[i++];
-      for (size_t j = 0; j < qvals.size(); ++j) {
-        const auto val = (*algo)(qvals[j]);
+      for (size_t j = 0; j < q_values.size(); ++j) {
+        const auto val = (*algo)(q_values[j]);
         aem.vals[j] = val;
-        aem.graph.addPoint(q2mode ? qvals[j] * qvals[j] : qvals[j], val);
+        aem.graph.addPoint(q2mode ? q_values[j] * q_values[j] : q_values[j], val);
       }
     }
   }
@@ -83,8 +83,8 @@ int main(int argc, char* argv[]) {
   out << "#";
   for (const auto& smp : alphaem)
     out << "\t" << smp.name;
-  for (size_t i = 0; i < qvals.size(); ++i) {
-    out << "\n" << (q2mode ? qvals[i] * qvals[i] : qvals[i]);
+  for (size_t i = 0; i < q_values.size(); ++i) {
+    out << "\n" << (q2mode ? q_values[i] * q_values[i] : q_values[i]);
     for (const auto& smp : alphaem)
       out << "\t" << smp.vals[i];
   }

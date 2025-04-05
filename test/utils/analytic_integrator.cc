@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,25 +29,25 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   string integrator, plotter;
-  int npoints;
+  int num_points;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("integrator,i", "analytical integrator to use", &integrator, "gsl")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
-      .addOptionalArgument("npoints,n", "number of points to compute", &npoints, 100)
+      .addOptionalArgument("npoints,n", "number of points to compute", &num_points, 100)
       .parse();
   cepgen::initialise();
 
-  auto integ = cepgen::AnalyticIntegratorFactory::get().build(integrator);
+  auto integrator_algo = cepgen::AnalyticIntegratorFactory::get().build(integrator);
 
   // test 1D graph
   cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),
       graph_int_cos("graph_int_cos", "\\int_{0}^{\\pi}(cos(x))"),
       graph_diff("graph_diff", "sin(x)-\\int_{0}^{\\pi}(cos(x))'");
-  for (const auto& x : cepgen::Limits{1.e-4, 2. * M_PI}.generate(npoints)) {
+  for (const auto& x : cepgen::Limits{1.e-4, 2. * M_PI}.generate(num_points)) {
     graph_sin.addPoint(x, sin(x));
     graph_cos.addPoint(x, cos(x));
-    const auto int_cos = integ->integrate([](double x) { return cos(x); }, cepgen::Limits{0., x});
+    const auto int_cos = integrator_algo->integrate([](double x) { return cos(x); }, cepgen::Limits{0., x});
     graph_int_cos.addPoint(x, int_cos);
     graph_diff.addPoint(x, sin(x) - int_cos);
   }

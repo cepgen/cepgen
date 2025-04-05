@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
   if (!args.debugging() && !verbose)
     CG_LOG_LEVEL(warning);
 
-  cepgen::utils::Timer tmr;
+  cepgen::utils::Timer timer;
   cepgen::Generator gen;
 
   CG_TEST_DEBUG(verbose);
@@ -84,8 +84,8 @@ int main(int argc, char* argv[]) {
   }
 
   CG_LOG << "Will run " << cepgen::utils::s("test", tests.size()) << " with " << integrator << " integrator.";
-  CG_LOG << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
-  tmr.reset();
+  CG_LOG << "Initial configuration time: " << timer.elapsed() * 1.e3 << " ms.";
+  timer.reset();
 
   for (const auto& test : tests) {
     const std::string filename = "TestProcesses/" + test.filename + "_cfg.py";
@@ -94,8 +94,8 @@ int main(int argc, char* argv[]) {
       gen.runParameters().integrator() = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
       CG_DEBUG("main") << "Process: " << gen.runParameters().processName() << "\n\t"
                        << "File: " << filename << "\n\t"
-                       << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
-      tmr.reset();
+                       << "Configuration time: " << timer.elapsed() * 1.e3 << " ms.";
+      timer.reset();
 
       const auto new_cs = gen.computeXsection();
       const auto ratio = new_cs / test.ref_cs,
@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
                        << "CepGen = " << new_cs << "\n\t"
                        << "Ratio: " << ratio << "\n\t"
                        << "Pull: " << pull << ".\n\t"
-                       << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
-      tmr.reset();
+                       << "Computation time: " << timer.elapsed() * 1.e3 << " ms.";
+      timer.reset();
 
       CG_DEBUG("main") << cepgen::utils::format(
           "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f", test.filename.c_str(), test.ref_cs, new_cs, ratio, pull);

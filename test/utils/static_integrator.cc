@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("integrator,i", "integration algorithm", &integrator_name, "Vegas")
       .parse();
 
-  auto integrator_parameters = cepgen::ParametersList().setName(integrator_name);
+  const auto integrator_parameters = cepgen::ParametersList().setName(integrator_name);
   {
     constexpr auto alpha = 1.;
     CG_TEST_EQUIV(

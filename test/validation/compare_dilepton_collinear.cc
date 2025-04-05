@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("filename,f", "output base filename", &filename, "validation/comparison_dilepton_coll_")
       .parse();
 
-  struct comparison_t : public cepgen::validation::Comparator {
-    using cepgen::validation::Comparator::Comparator;
+  struct comparison_t final : cepgen::validation::Comparator {
+    using Comparator::Comparator;
     void initialise() override {
       (*this)
           .book("invmass", "$m(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {10., 510.}))
