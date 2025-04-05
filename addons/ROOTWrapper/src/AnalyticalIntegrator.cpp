@@ -45,17 +45,17 @@ namespace cepgen::root {
       desc.addAs<int>("type", ROOT::Math::IntegrationOneDim::Type::kDEFAULT).setDescription("type of integration");
       desc.add("epsabs", -1.).setDescription("desired absolute error limit");
       desc.add("epsrel", -1.).setDescription("desired relative error limit");
-      desc.add("limit", 0).setDescription("maximum number of subintervals to build");
+      desc.add("limit", 0).setDescription("maximum number of sub-intervals to build");
       desc.add("rule", 0).setDescription("Gauss-Kronrod integration rule (only for GSL kADAPTIVE type)");
       return desc;
     }
 
   private:
-    double run(const utils::FunctionWrapper& func, void* params, const Limits& lim) const override {
-      const auto func_local = utils::FunctionWrapper([&func, &params](double x) { return func(x, params); });
-      const double xmin = lim.hasMin() ? lim.min() : range_.min();
-      const double xmax = lim.hasMax() ? lim.max() : range_.max();
-      return integrator_.Integral(func_local, xmin, xmax);
+    double run(const utils::FunctionWrapper& integrand, void* params, const Limits& lim) const override {
+      const auto func_local =
+          utils::FunctionWrapper([&integrand, &params](double x) -> double { return integrand(x, params); });
+      return integrator_.Integral(
+          func_local, lim.hasMin() ? lim.min() : range_.min(), lim.hasMax() ? lim.max() : range_.max());
     }
 
     mutable ROOT::Math::IntegratorOneDim integrator_;

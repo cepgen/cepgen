@@ -27,8 +27,8 @@ AnalyticIntegrator::AnalyticIntegrator(const ParametersList& params)
       integrand_parameters_(steer<ParametersList>("params")),
       verbosity_(steer<int>("verbosity")) {}
 
-double AnalyticIntegrator::integrate(const std::function<double(double)>& func, const Limits& lim) const {
-  return run(utils::FunctionWrapper(func), nullptr, lim);
+double AnalyticIntegrator::integrate(const std::function<double(double)>& integrand, const Limits& lim) const {
+  return run(utils::FunctionWrapper(integrand), nullptr, lim);
 }
 
 ParametersDescription AnalyticIntegrator::description() {

@@ -32,29 +32,31 @@ namespace cepgen {
   /// Analytic (functional) integration algorithm
   class AnalyticIntegrator : public NamedModule<AnalyticIntegrator> {
   public:
-    explicit AnalyticIntegrator(const ParametersList& params);  ///< Integrator algorithm constructor
+    explicit AnalyticIntegrator(const ParametersList&);
 
     static ParametersDescription description();
 
     /// Evaluate the integral of a function at a given value
-    /// \param[in] func function to integrate
+    /// \param[in] integrand function to integrate
     /// \param[in] range (optional) integration range
-    double integrate(const std::function<double(double)>& func, const Limits& range = {}) const;
+    double integrate(const std::function<double(double)>& integrand, const Limits& range = {}) const;
     /// Evaluate the integral of a function at a given value
-    /// \param[in] func function to integrate
-    /// \param[in] obj specific parameters object
+    /// \param[in] integrand function to integrate
+    /// \param[in] parameters specific parameters object
     /// \param[in] range (optional) integration range
     template <typename T>
-    inline double integrate(const utils::FunctionWrapper& func, const T& obj, const Limits& range = {}) const {
-      return run(func, const_cast<void*>(reinterpret_cast<const void*>(&obj)), range);
+    double integrate(const utils::FunctionWrapper& integrand, const T& parameters, const Limits& range = {}) const {
+      return run(integrand, const_cast<void*>(reinterpret_cast<const void*>(&parameters)), range);
     }
 
   protected:
     /// Evaluate the integral of a function at a given value
-    /// \param[in] func function to integrate
-    /// \param[in] obj (optional) parameters object
+    /// \param[in] integrand function to integrate
+    /// \param[in] parameters (optional) parameters object
     /// \param[in] range (optional) integration range
-    virtual double run(const utils::FunctionWrapper& func, void* obj = nullptr, const Limits& range = {}) const = 0;
+    virtual double run(const utils::FunctionWrapper& integrand,
+                       void* parameters = nullptr,
+                       const Limits& range = {}) const = 0;
 
     const Limits range_;
     const ParametersList integrand_parameters_;
