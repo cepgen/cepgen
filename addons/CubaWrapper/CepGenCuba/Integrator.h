@@ -19,7 +19,7 @@
 #ifndef CepGenCuba_CubaIntegrator_h
 #define CepGenCuba_CubaIntegrator_h
 
-#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/BaseIntegrator.h"
 
 namespace cepgen {
   class Integrand;
@@ -28,14 +28,14 @@ namespace cepgen {
 /// Interface objects to Cuba algorithms
 namespace cepgen::cuba {
   /// Cuba integration algorithm
-  class Integrator : public cepgen::Integrator {
+  class Integrator : public cepgen::BaseIntegrator {
   public:
     explicit Integrator(const ParametersList&);
 
     static ParametersDescription description();
     static Integrand* gIntegrand;
 
-    Value integrate(Integrand&) override;
+    Value run(Integrand&, const std::vector<Limits>&) override;
 
   protected:
     virtual Value integrate() = 0;

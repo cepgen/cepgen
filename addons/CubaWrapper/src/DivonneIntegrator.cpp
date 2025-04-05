@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/BaseIntegratorFactory.h"
 #include "CepGenCuba/Integrator.h"
 
 namespace cepgen::cuba {
@@ -84,7 +84,7 @@ namespace cepgen::cuba {
               epsrel_,
               epsabs_,
               verbose_,
-              rnd_gen_->parameters().get<unsigned long long>("seed"),
+              steerAs<unsigned long long, int>("seed"),
               mineval_,
               maxeval_,
               key1_,
@@ -121,4 +121,4 @@ namespace cepgen::cuba {
   };
 }  // namespace cepgen::cuba
 using cepgen::cuba::DivonneIntegrator;
-REGISTER_INTEGRATOR("cuba_divonne", DivonneIntegrator);
+REGISTER_BASE_INTEGRATOR("cuba_divonne", DivonneIntegrator);

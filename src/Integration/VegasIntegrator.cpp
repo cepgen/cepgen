@@ -21,8 +21,9 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/BaseIntegratorFactory.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
@@ -35,9 +36,7 @@ public:
       : GSLIntegrator(params),
         num_function_calls_(steer<int>("numFunctionCalls")),
         chi_square_cut_(steer<double>("chiSqCut")),
-        treat_(steer<bool>("treat")) {
-    verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
-  }
+        treat_(steer<bool>("treat")) {}
 
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
@@ -53,7 +52,7 @@ public:
     return desc;
   }
 
-  Value integrate(Integrand&) override;
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override;
 
   enum class Mode { importance = 1, importanceOnly = 0, stratified = -1 };
   friend std::ostream& operator<<(std::ostream& os, const Mode& mode) {
@@ -112,9 +111,8 @@ private:
   mutable std::vector<double> x_new_;
 };
 
-Value VegasIntegrator::integrate(Integrand& integrand) {
-  setIntegrand(integrand);
-
+Value VegasIntegrator::run(Integrand& integrand, const std::vector<Limits>& range) {
+  prepare(integrand, range);
   // start by preparing the grid/state
   vegas_state_.reset(gsl_monte_vegas_alloc(gsl_function_->dim));
   gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
@@ -154,7 +152,7 @@ Value VegasIntegrator::integrate(Integrand& integrand) {
                                                    &x_high_[0],
                                                    gsl_function_->dim,
                                                    0.2 * num_function_calls_,
-                                                   random_number_generator_->engine<gsl_rng>(),
+                                                   random_generator_->engine<gsl_rng>(),
                                                    vegas_state_.get(),
                                                    &result,
                                                    &absolute_error);
@@ -188,7 +186,7 @@ void VegasIntegrator::warmup(size_t num_calls) {
                                                  &x_high_[0],
                                                  gsl_function_->dim,
                                                  num_calls,
-                                                 random_number_generator_->engine<gsl_rng>(),
+                                                 random_generator_->engine<gsl_rng>(),
                                                  vegas_state_.get(),
                                                  &result,
                                                  &absolute_error);
@@ -199,4 +197,4 @@ void VegasIntegrator::warmup(size_t num_calls) {
 
   CG_INFO("VegasIntegrator:warmup") << "Finished the Vegas warm-up.";
 }
-REGISTER_INTEGRATOR("Vegas", VegasIntegrator);
+REGISTER_BASE_INTEGRATOR("Vegas", VegasIntegrator);

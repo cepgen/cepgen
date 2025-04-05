@@ -19,21 +19,27 @@
 #ifndef CepGen_Integration_GSLIntegrator_h
 #define CepGen_Integration_GSLIntegrator_h
 
-#include "CepGen/Integration/Integrator.h"
+#include <memory>
+
+#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  class GSLIntegrator : public Integrator {
+  class GSLIntegrator : public BaseIntegrator {
   public:
     explicit GSLIntegrator(const ParametersList&);
 
     static ParametersDescription description();
 
-    void setLimits(const std::vector<Limits>&) override;
-
   protected:
-    void setIntegrand(Integrand&);
-    std::function<double(double*, size_t, void*)> function_;  ///< A functor wrapping GSL function footprint
+    void prepare(Integrand&, const std::vector<Limits>&);
+
+    const std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< GSL random number generator
+    std::function<double(double*, size_t, void*)> function_;          ///< A functor wrapping GSL function footprint
     /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
     std::unique_ptr<gsl_monte_function> gsl_function_;
     std::vector<double> x_low_, x_high_;

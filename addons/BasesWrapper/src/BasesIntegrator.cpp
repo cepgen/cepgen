@@ -17,17 +17,17 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/BaseIntegratorFactory.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenBases/BasesCommonBlocks.h"
 
 namespace cepgen {
   /// Bases integration algorithm
-  class BasesIntegrator : public Integrator {
+  class BasesIntegrator : public BaseIntegrator {
   public:
-    explicit BasesIntegrator(const ParametersList& params) : Integrator(params) {
+    explicit BasesIntegrator(const ParametersList& params) : BaseIntegrator(params) {
       bsinit_();
       bparm1_.ncall = steer<int>("numFunctionCalls");
       std::fill(bparm1_.ig.begin(), bparm1_.ig.end(), false);
@@ -36,7 +36,7 @@ namespace cepgen {
     }
 
     static ParametersDescription description() {
-      auto desc = Integrator::description();
+      auto desc = BaseIntegrator::description();
       desc.setDescription("Bases integration algorithm");
       desc.add("numFunctionCalls", 50'000);
       desc.add("intv", 1);
@@ -45,17 +45,12 @@ namespace cepgen {
       return desc;
     }
 
-    void setLimits(const std::vector<Limits>& lims) override {
-      Integrator::setLimits(lims);
-      for (size_t i = 0; i < limits_.size(); ++i) {
-        bparm1_.xl[i] = limits_.at(i).min();
-        bparm1_.xu[i] = limits_.at(i).max();
+    Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+      for (size_t i = 0; i < range.size(); ++i) {
+        bparm1_.xl[i] = range.at(i).min();
+        bparm1_.xu[i] = range.at(i).max();
       }
-    }
-
-    Value integrate(Integrand& integr) override {
-      checkLimits(integr);  // check the integration bounds
-      bparm1_.ndim = integr.size();
+      bparm1_.ndim = integrand.size();
       for (const auto& wc : steer<std::vector<int> >("wildVars")) {
         if (wc < 0 || wc >= bparm1_.ndim)
           throw CG_FATAL("BasesIntegrator:integrate") << "Invalid 'wild' variable coordinate set: " << wc << ".";
@@ -64,9 +59,9 @@ namespace cepgen {
       }
       double res, unc, ctime;
       int it1, it2;
-      if (gIntegrand = &integr; !gIntegrand)
+      if (gIntegrand = &integrand; !gIntegrand)
         throw CG_FATAL("BasesIntegrator") << "Integrand was not specified before integration.";
-      bases_(integrand, res, unc, ctime, it1, it2);
+      bases_(call_integrand, res, unc, ctime, it1, it2);
       CG_DEBUG("BasesIntegrator:integrate")
           << "Integration performed in " << utils::s("second", ctime, true) << ". " << utils::s("iteration", it1, true)
           << " for the grid definition, " << utils::s("iteration", it2, true) << " for the integration.";
@@ -75,8 +70,10 @@ namespace cepgen {
 
   private:
     static Integrand* gIntegrand;
-    static double integrand(double* in) { return gIntegrand->eval(std::vector<double>(in, in + gIntegrand->size())); }
+    static double call_integrand(double* in) {
+      return gIntegrand->eval(std::vector<double>(in, in + gIntegrand->size()));
+    }
   };
   Integrand* BasesIntegrator::gIntegrand = nullptr;
 }  // namespace cepgen
-REGISTER_INTEGRATOR("bases", BasesIntegrator);
+REGISTER_BASE_INTEGRATOR("bases", BasesIntegrator);

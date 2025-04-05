@@ -20,7 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/BaseIntegratorFactory.h"
 #include "CepGenCuba/Integrator.h"
 
 namespace cepgen::cuba {
@@ -59,7 +59,7 @@ namespace cepgen::cuba {
             epsrel_,
             epsabs_,
             verbose_,
-            rnd_gen_->parameters().get<unsigned long long>("seed"),
+            steerAs<unsigned long long, int>("seed"),
             mineval_,
             maxeval_,
             nstart_,
@@ -82,4 +82,4 @@ namespace cepgen::cuba {
   };
 }  // namespace cepgen::cuba
 using VegasIntegratorCuba = cepgen::cuba::VegasIntegrator;
-REGISTER_INTEGRATOR("cuba_vegas", VegasIntegratorCuba);
+REGISTER_BASE_INTEGRATOR("cuba_vegas", VegasIntegratorCuba);

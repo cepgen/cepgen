@@ -24,7 +24,7 @@ namespace cepgen::cuba {
   Integrand* Integrator::gIntegrand = nullptr;
 
   Integrator::Integrator(const ParametersList& params)
-      : cepgen::Integrator(params),
+      : cepgen::BaseIntegrator(params),
         ncomp_(steer<int>("ncomp")),
         nvec_(steer<int>("nvec")),
         epsrel_(steer<double>("epsrel")),
@@ -33,13 +33,13 @@ namespace cepgen::cuba {
         maxeval_(steer<int>("maxeval")),
         verbose_(steer<int>("verbose")) {}
 
-  Value Integrator::integrate(Integrand& integr) {
-    gIntegrand = &integr;
+  Value Integrator::run(Integrand& integrand, const std::vector<Limits>& /*range*/) {
+    gIntegrand = &integrand;
     return integrate();
   }
 
   ParametersDescription Integrator::description() {
-    auto desc = cepgen::Integrator::description();
+    auto desc = cepgen::BaseIntegrator::description();
     desc.setDescription("Cuba generic integration algorithm");
     desc.add("ncomp", 1).setDescription("number of components of the integrand");
     desc.add("nvec", 1).setDescription("number of samples received by the integrand");
