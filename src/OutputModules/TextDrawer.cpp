@@ -162,7 +162,7 @@ const TextDrawer& TextDrawer::draw(const Hist2D& hist, const Mode& mode) const {
   return *this;
 }
 
-const TextDrawer& TextDrawer::draw(const DrawableColl& objs,
+const TextDrawer& TextDrawer::draw(const DrawableColl& objects,
                                    const std::string& name,
                                    const std::string&,
                                    const Mode& mode) const {
@@ -214,9 +214,9 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objs,
     buf.str(out.str());
   };
   std::vector<std::string> plt_names;
-  for (const auto* obj : objs)
-    if (obj->isHist1D()) {
-      if (const auto* hist = dynamic_cast<const Hist1D*>(obj); hist) {
+  for (const auto* object : objects)
+    if (object->isHist1D()) {
+      if (const auto* hist = dynamic_cast<const Hist1D*>(object); hist) {
         if (os_base.str().empty()) {
           drawValues(os_base, *hist, hist->axis(), mode, false);
           add_plot(inside_plot(os_base.str()));
@@ -227,8 +227,8 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objs,
         }
         plt_names.emplace_back(hist->name());
       }
-    } else if (obj->isGraph1D()) {
-      if (const auto* gr = dynamic_cast<const Graph1D*>(obj); gr) {
+    } else if (object->isGraph1D()) {
+      if (const auto* gr = dynamic_cast<const Graph1D*>(object); gr) {
         if (os_base.str().empty()) {
           drawValues(os_base, *gr, gr->points(), mode, false);
           add_plot(inside_plot(os_base.str()));
@@ -239,10 +239,9 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objs,
         }
         plt_names.emplace_back(gr->name());
       }
-    } else {
-      CG_WARNING("TextDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
-      continue;
-    }
+    } else
+      CG_WARNING("TextDrawer:draw") << "Cannot add drawable '" << object->name() << "' to the stack.";
+
   CG_LOG.log([this, &name, &replace_plot, &os_base, &buf, &num_plots, &plt_names](auto& log) {
     if (!name.empty())
       log << "plot of \"" << name << "\"\n";
@@ -258,8 +257,8 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objs,
 void TextDrawer::drawValues(
     std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
   const std::string sep(17, ' ');
-  const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second *
-                         ((mode & Mode::logy) ? 5. : 1.2),
+  const double max_val =
+                   std::max_element(axis.begin(), axis.end(), map_elements())->second * (mode & Mode::logy ? 5. : 1.2),
                min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second;
   const double min_val_log = std::log(std::max(min_val, 1.e-10));
   const double max_val_log = std::log(std::min(max_val, 1.e+10));
@@ -270,9 +269,9 @@ void TextDrawer::drawValues(
       os << std::string(length, ' ');
     os << y_label << "\n";
   }
-  os << sep << format("%-5.2f ", (mode & Mode::logy) ? std::exp(min_val_log) : min_val) << std::setw(width_ - 11)
-     << std::left << ((mode & Mode::logy) ? "logarithmic scale" : "linear scale")
-     << format("%5.2e", (mode & Mode::logy) ? std::exp(max_val_log) : max_val) << "\n"
+  os << sep << format("%-5.2f ", mode & Mode::logy ? std::exp(min_val_log) : min_val) << std::setw(width_ - 11)
+     << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
+     << format("%5.2e", mode & Mode::logy ? std::exp(max_val_log) : max_val) << "\n"
      << sep << std::string(width_ + 2, '.');  // abscissa axis
   size_t idx = 0;
   for (const auto& coord_set : axis) {
@@ -388,7 +387,7 @@ void TextDrawer::drawValues(
           size_t col_id = 1 + val_norm * (kColours.size() - 2);
           os << (effects ? colourise(std::string(1, VALUES_CHAR.at(ch_id)),
                                      kColours.at(col_id),
-                                     (val_norm > 0.75 ? Modifier::bold : Modifier::reset))
+                                     val_norm > 0.75 ? Modifier::bold : Modifier::reset)
                          : std::string(1, VALUES_CHAR.at(ch_id)));
         }
       }
