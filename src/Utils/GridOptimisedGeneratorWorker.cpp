@@ -104,7 +104,7 @@ bool GridOptimisedGeneratorWorker::next() {
       grid_->increment(ps_bin_);
     } while (y > grid_->maxValue(ps_bin_));
     // shoot a point x in this bin
-    grid_->shoot(integrator_, ps_bin_, coords_);
+    grid_->shoot(random_generator_.get(), ps_bin_, coords_);
     if (weight = integrator_->eval(*integrand_, coords_);  // get weight for selected x value
         weight > y)
       break;
@@ -132,7 +132,7 @@ bool GridOptimisedGeneratorWorker::correctionCycle(bool& store) {
 
   if (random_generator_->uniform() < grid_->correctionValue()) {
     grid_->setCorrectionValue(-1.);
-    grid_->shoot(integrator_, ps_bin_, coords_);  // select x values in phase space bin
+    grid_->shoot(random_generator_.get(), ps_bin_, coords_);  // select x values in phase space bin
     const double weight = integrator_->eval(*integrand_, coords_);
     grid_->rescale(ps_bin_, weight);  // parameter for correction of correction
     if (weight >= random_generator_->uniform(0., grid_->maxValueDiff()) + grid_->maxHistValue()) {
@@ -176,7 +176,7 @@ void GridOptimisedGeneratorWorker::computeGenerationParameters() const {
   for (unsigned int i = 0; i < grid_->size(); ++i) {
     double fsum = 0., fsum2 = 0.;
     for (size_t j = 0; j < run_params_->generation().numPoints(); ++j) {
-      grid_->shoot(integrator_, i, point_coord);
+      grid_->shoot(random_generator_.get(), i, point_coord);
       const double weight = integrator_->eval(*integrand_, point_coord);
       grid_->setValue(i, weight);
       fsum += weight;

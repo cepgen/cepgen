@@ -20,7 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGenCuba/Integrator.h"
 
 namespace cepgen::cuba {
@@ -79,4 +79,4 @@ namespace cepgen::cuba {
   };
 }  // namespace cepgen::cuba
 using CuhreIntegratorCuba = cepgen::cuba::CuhreIntegrator;
-REGISTER_BASE_INTEGRATOR("cuba_cuhre", CuhreIntegratorCuba);
+REGISTER_INTEGRATOR("cuba_cuhre", CuhreIntegratorCuba);

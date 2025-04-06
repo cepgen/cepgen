@@ -21,7 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
@@ -48,7 +48,7 @@ public:
     desc.add("alpha", 1.25);
     desc.addAs<int, Mode>("mode", Mode::stratified);
     desc.add("loggingOutput", "cerr"s);
-    desc.add("verbose", -1);
+    desc.add("verbosity", -1);
     return desc;
   }
 
@@ -197,4 +197,4 @@ void VegasIntegrator::warmup(size_t num_calls) {
 
   CG_INFO("VegasIntegrator:warmup") << "Finished the Vegas warm-up.";
 }
-REGISTER_BASE_INTEGRATOR("Vegas", VegasIntegrator);
+REGISTER_INTEGRATOR("Vegas", VegasIntegrator);

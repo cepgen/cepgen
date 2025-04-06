@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,20 +21,20 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic integration algorithm definition to the runtime list
-#define REGISTER_INTEGRATOR(name, obj)                                         \
-  namespace cepgen {                                                           \
-    struct BUILDERNM(obj) {                                                    \
-      BUILDERNM(obj)() { IntegratorFactory::get().registerModule<obj>(name); } \
-    };                                                                         \
-    static const BUILDERNM(obj) gIntegr##obj;                                  \
-  }                                                                            \
+/// Add a generic integrator object builder definition
+#define REGISTER_INTEGRATOR(name, obj)                                                 \
+  namespace cepgen {                                                                   \
+    struct BUILDERNM(obj) {                                                            \
+      BUILDERNM(obj)() { cepgen::IntegratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                 \
+    static const BUILDERNM(obj) gAnaInteg##obj;                                        \
+  }                                                                                    \
   static_assert(true, "")
 
 namespace cepgen {
   class Integrator;
-  /// An integration algorithms factory
-  DEFINE_FACTORY(IntegratorFactory, Integrator, "Integrator factory");
+  /// An integrator objects factory
+  DEFINE_FACTORY(IntegratorFactory, Integrator, "Integrators factory");
 }  // namespace cepgen
 
 #endif

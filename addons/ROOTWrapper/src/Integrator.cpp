@@ -19,9 +19,9 @@
 #include <Math/Integrator.h>
 #include <Math/IntegratorMultiDim.h>
 
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
@@ -29,10 +29,10 @@ using namespace std::string_literals;
 
 namespace cepgen::root {
   /// ROOT general-purpose integration algorithm
-  class Integrator final : public cepgen::BaseIntegrator {
+  class Integrator final : public cepgen::Integrator {
   public:
     explicit Integrator(const ParametersList& params)
-        : cepgen::BaseIntegrator(params),
+        : cepgen::Integrator(params),
           type_(steer<std::string>("type")),
           absolute_tolerance_(steer<double>("absTol")),
           relative_tolerance_(steer<double>("relTol")),
@@ -73,7 +73,7 @@ namespace cepgen::root {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::BaseIntegrator::description();
+      auto desc = cepgen::Integrator::description();
       desc.setDescription("ROOT general purpose MC integrator");
       desc.add("type", "default"s).setDescription("type of integration");
       desc.add("absTol", -1.).setDescription("desired absolute error limit");
@@ -110,4 +110,4 @@ namespace cepgen::root {
   };
 }  // namespace cepgen::root
 using ROOTIntegrator = cepgen::root::Integrator;
-REGISTER_BASE_INTEGRATOR("root", ROOTIntegrator);
+REGISTER_INTEGRATOR("root", ROOTIntegrator);

@@ -21,7 +21,7 @@
 
 #include <memory>
 
-#include "CepGen/Integration/BaseIntegrator.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 
 namespace cepgen::utils {
@@ -29,7 +29,7 @@ namespace cepgen::utils {
 }  // namespace cepgen::utils
 
 namespace cepgen {
-  class GSLIntegrator : public BaseIntegrator {
+  class GSLIntegrator : public Integrator {
   public:
     explicit GSLIntegrator(const ParametersList&);
 

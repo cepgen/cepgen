@@ -20,7 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
@@ -85,4 +85,4 @@ private:
   const int num_function_calls_;
   gsl_monte_miser_params miser_params_{};
 };
-REGISTER_BASE_INTEGRATOR("MISER", MISERIntegrator);
+REGISTER_INTEGRATOR("MISER", MISERIntegrator);

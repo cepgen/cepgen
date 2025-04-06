@@ -17,17 +17,17 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenBases/BasesCommonBlocks.h"
 
 namespace cepgen {
   /// Bases integration algorithm
-  class BasesIntegrator : public BaseIntegrator {
+  class BasesIntegrator : public Integrator {
   public:
-    explicit BasesIntegrator(const ParametersList& params) : BaseIntegrator(params) {
+    explicit BasesIntegrator(const ParametersList& params) : Integrator(params) {
       bsinit_();
       bparm1_.ncall = steer<int>("numFunctionCalls");
       std::fill(bparm1_.ig.begin(), bparm1_.ig.end(), false);
@@ -36,7 +36,7 @@ namespace cepgen {
     }
 
     static ParametersDescription description() {
-      auto desc = BaseIntegrator::description();
+      auto desc = Integrator::description();
       desc.setDescription("Bases integration algorithm");
       desc.add("numFunctionCalls", 50'000);
       desc.add("intv", 1);
@@ -76,4 +76,4 @@ namespace cepgen {
   };
   Integrand* BasesIntegrator::gIntegrand = nullptr;
 }  // namespace cepgen
-REGISTER_BASE_INTEGRATOR("bases", BasesIntegrator);
+REGISTER_INTEGRATOR("bases", BasesIntegrator);

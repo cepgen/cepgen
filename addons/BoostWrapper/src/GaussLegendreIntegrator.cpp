@@ -19,30 +19,31 @@
 #include <boost/math/quadrature/gauss.hpp>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/FunctionWrapper.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen::boost {
   /// Gauss-Legendre integration algorithm
   template <size_t N>
-  class GaussLegendreIntegrator final : public BaseIntegrator {
+  class GaussLegendreIntegrator final : public Integrator {
   public:
-    explicit GaussLegendreIntegrator(const ParametersList& params) : BaseIntegrator(params) {}
+    explicit GaussLegendreIntegrator(const ParametersList& params) : Integrator(params) {}
 
     static ParametersDescription description() {
-      auto desc = BaseIntegrator::description();
+      auto desc = Integrator::description();
       desc.setDescription("Boost Gauss-Legendre integration algorithm");
       return desc;
     }
 
   private:
     Value run(Integrand& integrand, const std::vector<Limits>& range = {}) override {
-      if (integrand.size() != 1)
-        throw CG_FATAL("GaussLegendreIntegrator")
-            << "This integration algorithm only runs on 1-dimensional integrands.";
+      if (integrand.size() != 1) {
+        CG_ERROR("GaussLegendreIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
+        return Value{};
+      }
       return Value{::boost::math::quadrature::gauss<double, N>::integrate(
           [&integrand](double x) { return integrand.eval(std::vector{x}); }, range.at(0).min(), range.at(0).max())};
     }
@@ -53,8 +54,8 @@ using BGLIntegrator15 = cepgen::boost::GaussLegendreIntegrator<15>;
 using BGLIntegrator20 = cepgen::boost::GaussLegendreIntegrator<20>;
 using BGLIntegrator25 = cepgen::boost::GaussLegendreIntegrator<25>;
 using BGLIntegrator30 = cepgen::boost::GaussLegendreIntegrator<30>;
-REGISTER_BASE_INTEGRATOR("boost_gl7", BGLIntegrator7);
-REGISTER_BASE_INTEGRATOR("boost_gl15", BGLIntegrator15);
-REGISTER_BASE_INTEGRATOR("boost_gl20", BGLIntegrator20);
-REGISTER_BASE_INTEGRATOR("boost_gl25", BGLIntegrator25);
-REGISTER_BASE_INTEGRATOR("boost_gl30", BGLIntegrator30);
+REGISTER_INTEGRATOR("boost_gl7", BGLIntegrator7);
+REGISTER_INTEGRATOR("boost_gl15", BGLIntegrator15);
+REGISTER_INTEGRATOR("boost_gl20", BGLIntegrator20);
+REGISTER_INTEGRATOR("boost_gl25", BGLIntegrator25);
+REGISTER_INTEGRATOR("boost_gl30", BGLIntegrator30);

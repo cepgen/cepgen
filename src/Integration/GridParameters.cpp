@@ -21,7 +21,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GridParameters.h"
-#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
@@ -43,11 +43,13 @@ void GridParameters::setValue(size_t coordinate, float value) {
   f_max_global_ = std::max(f_max_global_, value);
 }
 
-void GridParameters::shoot(const Integrator* integrator, size_t coordinate, std::vector<double>& out) const {
-  CG_ASSERT(integrator != nullptr);
+void GridParameters::shoot(utils::RandomGenerator* random_generator,
+                           size_t coordinate,
+                           std::vector<double>& out) const {
+  CG_ASSERT(random_generator != nullptr);
   const auto& nv = coords_.at(coordinate);
   for (size_t i = 0; i < nv.size(); ++i)
-    out[i] = (integrator->uniform() + nv.at(i)) * inv_mbin_;
+    out[i] = (random_generator->uniform() + nv.at(i)) * inv_mbin_;
 }
 
 void GridParameters::dump() const {

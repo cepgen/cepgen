@@ -18,18 +18,18 @@
 
 #include <boost/math/quadrature/naive_monte_carlo.hpp>
 
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 
 namespace cepgen::boost {
   /// Boost's Naive integration algorithm
-  class NaiveIntegrator final : public BaseIntegrator {
+  class NaiveIntegrator final : public Integrator {
   public:
-    explicit NaiveIntegrator(const ParametersList& params) : BaseIntegrator(params) {}
+    explicit NaiveIntegrator(const ParametersList& params) : Integrator(params) {}
 
     static ParametersDescription description() {
-      auto desc = BaseIntegrator::description();
+      auto desc = Integrator::description();
       desc.setDescription("'Naive' Boost integrator");
       return desc;
     }
@@ -45,4 +45,4 @@ namespace cepgen::boost {
   };
 }  // namespace cepgen::boost
 using cepgen::boost::NaiveIntegrator;
-REGISTER_BASE_INTEGRATOR("Naive", NaiveIntegrator);
+REGISTER_INTEGRATOR("Naive", NaiveIntegrator);

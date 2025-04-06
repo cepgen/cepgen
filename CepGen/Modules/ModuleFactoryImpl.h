@@ -26,7 +26,6 @@
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
@@ -55,7 +54,6 @@ namespace cepgen {
   template class ModuleFactory<formfac::Parameterisation>;
   template class ModuleFactory<GeneratorWorker>;
   template class ModuleFactory<Integrator>;
-  template class ModuleFactory<BaseIntegrator>;
   template class ModuleFactory<KTFlux>;
   template class ModuleFactory<PartonsPhaseSpaceGenerator>;
   template class ModuleFactory<PhaseSpaceGenerator>;

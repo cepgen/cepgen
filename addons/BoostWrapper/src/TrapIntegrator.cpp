@@ -19,23 +19,21 @@
 #include <boost/math/quadrature/trapezoidal.hpp>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/FunctionWrapper.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen::boost {
   /// Trapezoidal integration algorithm
-  class TrapIntegrator final : public BaseIntegrator {
+  class TrapIntegrator final : public Integrator {
   public:
     explicit TrapIntegrator(const ParametersList& params)
-        : BaseIntegrator(params),
-          max_refinements_(steerAs<int, size_t>("limit")),
-          tolerance_(steer<double>("tolerance")) {}
+        : Integrator(params), max_refinements_(steerAs<int, size_t>("limit")), tolerance_(steer<double>("tolerance")) {}
 
     static ParametersDescription description() {
-      auto desc = BaseIntegrator::description();
+      auto desc = Integrator::description();
       desc.setDescription("Boost trapezoidal integration algorithm");
       desc.add("limit", 1000).setDescription("maximum number of sub-intervals to build");
       desc.add("tolerance", 1.e-6).setDescription("maximal tolerance");
@@ -44,8 +42,10 @@ namespace cepgen::boost {
 
   private:
     Value run(Integrand& integrand, const std::vector<Limits>& range) override {
-      if (integrand.size() != 1)
-        throw CG_FATAL("TrapIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
+      if (integrand.size() != 1) {
+        CG_ERROR("TrapIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
+        return Value{};
+      }
       return Value{
           ::boost::math::quadrature::trapezoidal([&integrand](double x) { return integrand.eval(std::vector{x}); },
                                                  range.at(0).min(),
@@ -58,4 +58,4 @@ namespace cepgen::boost {
   };
 }  // namespace cepgen::boost
 using cepgen::boost::TrapIntegrator;
-REGISTER_BASE_INTEGRATOR("boost", TrapIntegrator);
+REGISTER_INTEGRATOR("boost", TrapIntegrator);

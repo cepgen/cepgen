@@ -19,8 +19,8 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/BaseIntegrator.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
@@ -34,7 +34,7 @@ class KTIntegratedFlux : public CollinearFlux {
 public:
   explicit KTIntegratedFlux(const ParametersList& params)
       : CollinearFlux(params),
-        integrator_(BaseIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
+        integrator_(IntegratorFactory::get().build(steer<ParametersList>("integrator"))),
         flux_(KTFluxFactory::get().build(steer<ParametersList>("ktFlux"))),
         kt2_range_(steer<Limits>("kt2range")) {
     if (!flux_->ktFactorised())
@@ -53,7 +53,7 @@ public:
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("kt-integrated coll.flux");
-    desc.add("integrator", BaseIntegratorFactory::get().describeParameters("gsl"))
+    desc.add("integrator", IntegratorFactory::get().describeParameters("gsl"))
         .setDescription("Steering parameters for the analytical integrator");
     desc.add("ktFlux", PartonFluxFactory::get().describeParameters("BudnevElastic"))
         .setDescription("Type of unintegrated kT-dependent parton flux");
@@ -77,7 +77,7 @@ public:
   }
 
 private:
-  const std::unique_ptr<BaseIntegrator> integrator_;
+  const std::unique_ptr<Integrator> integrator_;
   const std::unique_ptr<KTFlux> flux_;
   const Limits kt2_range_;
 };

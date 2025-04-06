@@ -20,7 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGenCuba/Integrator.h"
 
 namespace cepgen::cuba {
@@ -82,4 +82,4 @@ namespace cepgen::cuba {
   };
 }  // namespace cepgen::cuba
 using VegasIntegratorCuba = cepgen::cuba::VegasIntegrator;
-REGISTER_BASE_INTEGRATOR("cuba_vegas", VegasIntegratorCuba);
+REGISTER_INTEGRATOR("cuba_vegas", VegasIntegratorCuba);

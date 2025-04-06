@@ -20,9 +20,9 @@
 #include <TFoamIntegrand.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/BaseIntegrator.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
@@ -32,14 +32,14 @@ using namespace cepgen;
 
 /// Foam general-purpose integration algorithm
 /// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
-class FoamIntegrator final : public BaseIntegrator, public TFoamIntegrand {
+class FoamIntegrator final : public Integrator, public TFoamIntegrand {
 public:
   explicit FoamIntegrator(const ParametersList& params)
-      : BaseIntegrator(params),
+      : Integrator(params),
         random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {}
 
   static ParametersDescription description() {
-    auto desc = BaseIntegrator::description();
+    auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
     desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("root"));
     desc.add("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
@@ -119,4 +119,4 @@ private:
   Integrand* integrand_{nullptr};
   std::vector<Limits> range_;
 };
-REGISTER_BASE_INTEGRATOR("Foam", FoamIntegrator);
+REGISTER_INTEGRATOR("Foam", FoamIntegrator);

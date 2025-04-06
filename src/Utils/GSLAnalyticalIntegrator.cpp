@@ -25,19 +25,19 @@
 #include <gsl/gsl_integration.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/BaseIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/BaseIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 using namespace cepgen::utils;
 
-class GSLAnalyticalIntegrator final : public BaseIntegrator {
+class GSLAnalyticalIntegrator final : public Integrator {
 public:
   explicit GSLAnalyticalIntegrator(const ParametersList& params)
-      : BaseIntegrator(params),
+      : Integrator(params),
         mode_(steerAs<int, Mode>("mode")),
         fixed_type_(steerAs<int, FixedType>("fixedType")),
         nodes_(steer<int>("nodes")),
@@ -48,7 +48,7 @@ public:
         epsrel_(steer<double>("epsrel")) {}
 
   static ParametersDescription description() {
-    auto desc = BaseIntegrator::description();
+    auto desc = Integrator::description();
     desc.setDescription("GSL 1D integration algorithms wrapper");
     desc.addAs<int>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
     desc.addAs<int>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
@@ -63,6 +63,10 @@ public:
 
 private:
   Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+    if (integrand.size() != 1) {
+      CG_ERROR("GSLAnalyticalIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
+      return Value{};
+    }
     return eval(
         GSLFunctionWrapper::build(FunctionWrapper{[&integrand](double x) { return integrand.eval(std::vector{x}); }},
                                   integrand_parameters_)
@@ -168,5 +172,5 @@ private:
   const double epsabs_, epsrel_;
 };
 
-REGISTER_BASE_INTEGRATOR("gsl", GSLAnalyticalIntegrator);
+REGISTER_INTEGRATOR("gsl", GSLAnalyticalIntegrator);
 #endif
