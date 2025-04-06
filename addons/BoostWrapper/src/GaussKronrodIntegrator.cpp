@@ -31,12 +31,12 @@ namespace cepgen::boost {
   class GaussKronrodIntegrator final : public Integrator {
   public:
     explicit GaussKronrodIntegrator(const ParametersList& params)
-        : Integrator(params), max_refinements_(steerAs<int, size_t>("limit")), tol_(steer<double>("tolerance")) {}
+        : Integrator(params), max_depth_(steerAs<int, size_t>("maxDepth")), tol_(steer<double>("tolerance")) {}
 
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Boost Gauss-Kronrod integration algorithm");
-      desc.add("limit", 1000).setDescription("maximum number of sub-intervals to build");
+      desc.add("maxDepth", 100).setDescription("maximum number of sub-intervals to build");
       desc.add("tolerance", std::numeric_limits<double>::infinity()).setDescription("maximal tolerance");
       return desc;
     }
@@ -47,14 +47,17 @@ namespace cepgen::boost {
         CG_ERROR("GaussKronrodIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
         return Value{};
       }
-      return Value{::boost::math::quadrature::gauss_kronrod<double, N>::integrate(
+      double uncertainty;
+      const auto value = ::boost::math::quadrature::gauss_kronrod<double, N>::integrate(
           [&integrand](double x) { return integrand.eval(std::vector{x}); },
           range.at(0).min(),
           range.at(0).max(),
+          max_depth_,
           tol_,
-          max_refinements_)};
+          &uncertainty);
+      return Value{value, uncertainty};
     }
-    const size_t max_refinements_;
+    const size_t max_depth_;
     const double tol_;
   };
 }  // namespace cepgen::boost

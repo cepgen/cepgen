@@ -46,12 +46,15 @@ namespace cepgen::boost {
         CG_ERROR("TrapIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
         return Value{};
       }
-      return Value{
+      double uncertainty;
+      const auto value =
           ::boost::math::quadrature::trapezoidal([&integrand](double x) { return integrand.eval(std::vector{x}); },
                                                  range.at(0).min(),
                                                  range.at(0).max(),
                                                  tolerance_,
-                                                 max_refinements_)};
+                                                 max_refinements_,
+                                                 &uncertainty);
+      return Value{value, uncertainty};
     }
     const size_t max_refinements_;
     const double tolerance_;
