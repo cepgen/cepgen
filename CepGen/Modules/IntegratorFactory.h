@@ -27,7 +27,7 @@
     struct BUILDERNM(obj) {                                                            \
       BUILDERNM(obj)() { cepgen::IntegratorFactory::get().registerModule<obj>(name); } \
     };                                                                                 \
-    static const BUILDERNM(obj) gAnaInteg##obj;                                        \
+    static const BUILDERNM(obj) gIntegr##obj;                                          \
   }                                                                                    \
   static_assert(true, "")
 
