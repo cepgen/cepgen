@@ -81,7 +81,7 @@ private:
       r_boxes_ = static_cast<size_t>(std::pow(vegas_state_->bins, integrand.size()));
       x_new_.resize(integrand.size());
     }
-    auto weight = r_boxes_;
+    double weight = r_boxes_;
     for (size_t j = 0; j < integrand.size(); ++j) {
       // find surrounding coordinates and interpolate
       const double z = x.at(j) * vegas_state_->bins;
