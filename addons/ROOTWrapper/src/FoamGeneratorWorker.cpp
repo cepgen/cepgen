@@ -64,7 +64,7 @@ public:
     desc.add("nSampl", 200);
     desc.add("nBin", 8);
     desc.add("EvPerBin", 25);
-    desc.add("verbose", 0).setDescription("Verbosity level");
+    desc.add("verbosity", 0).setDescription("Verbosity level");
     desc.add("seed", 42ull);
     return desc;
   }
@@ -76,7 +76,7 @@ public:
     foam_->SetnSampl(steer<int>("nSampl"));
     foam_->SetnBin(steer<int>("nBin"));
     foam_->SetEvPerBin(steer<int>("EvPerBin"));
-    foam_->SetChat(std::max(steer<int>("verbose"), 0));
+    foam_->SetChat(std::max(steer<int>("verbosity"), 0));
     foam_->SetRho(this);
     foam_->SetkDim(integrand_->size());
     foam_->Initialize();
