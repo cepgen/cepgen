@@ -17,9 +17,9 @@
  */
 
 #include "CepGen/Generator.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/Modules/AnalyticIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
       .parse();
   cepgen::initialise();
 
-  auto integrator_algo = cepgen::AnalyticIntegratorFactory::get().build(integrator);
+  auto integrator_algo = cepgen::IntegratorFactory::get().build(integrator);
 
   // test 1D graph
   cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),

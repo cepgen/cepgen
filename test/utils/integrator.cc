@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
       test_t{cepgen::FunctionalIntegrand(
                  "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", {"x", "y", "z"}, func_mod),
              1.3932039296856768591842462603255});
-  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("sin(x)", {"x"}, func_mod), 2., {cepgen::Limits{0., M_PI}}});
+  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("sin(x)", {"x"}, func_mod), 2., {{0., M_PI}}});
 
   CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
@@ -75,9 +75,7 @@ int main(int argc, char* argv[]) {
     // integration part
     size_t i = 0;
     for (auto& test : tests) {
-      if (!test.limits.empty())
-        integrator->setLimits(test.limits);
-      const auto res = integrator->integrate(test.integrand);
+      const auto res = integrator->integrate(test.integrand, test.limits);
       const auto test_name = integrator_name + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
       CG_TEST_VALUES(test.result, res, num_sigma, test_name + " rel. unc. control");

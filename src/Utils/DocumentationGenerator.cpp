@@ -21,7 +21,6 @@
 #include "CepGen/Utils/String.h"
 
 // list of factories documented
-#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DocumentationGeneratorFactory.h"
@@ -77,7 +76,6 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
   add_category("ktflux", "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
   add_category("alphaem", "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());
   add_category("alphas", "Strong coupling evolution", "", cepgen::AlphaSFactory::get());
-  add_category("anaintegr", "Analytic integrator algorithms", "", cepgen::AnalyticIntegratorFactory::get());
   add_category("integr", "Integrator algorithms", "", cepgen::IntegratorFactory::get());
   add_category("func", "Functional parsers", "", cepgen::FunctionalFactory::get());
   add_category("rndgen", "Random number generators", "", cepgen::RandomGeneratorFactory::get());

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,50 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_GSLFunctionsWrappers_h
-#define CepGen_Utils_GSLFunctionsWrappers_h
+#ifndef CepGen_Utils_GSLMonteFunctionWrapper_h
+#define CepGen_Utils_GSLMonteFunctionWrapper_h
 
-#include <gsl/gsl_math.h>
 #include <gsl/gsl_monte.h>
 
 #include <memory>
 
-#include "CepGen/Utils/FunctionWrapper.h"
-
 namespace cepgen::utils {
-  /// GSL wrapper to define a functor as a GSL-digestible functional
-  class GSLFunctionWrapper : public gsl_function {
-  public:
-    /// Utility to build a gsl_function pointer from a functional
-    static std::unique_ptr<gsl_function> build(const FunctionWrapper& func, void* obj) {
-      return std::unique_ptr<gsl_function>(new GSLFunctionWrapper(func, ParametersList(), obj));
-    }
-    /// Utility to build a gsl_function pointer from a functional
-    static std::unique_ptr<gsl_function> build(const FunctionWrapper& func,
-                                               const ParametersList& params = ParametersList()) {
-      return std::unique_ptr<gsl_function>(new GSLFunctionWrapper(func, params, nullptr));
-    }
-
-  private:
-    explicit GSLFunctionWrapper(const FunctionWrapper& func, const ParametersList& plist, void* obj = nullptr)
-        : func_(func), params_(plist), obj_(obj) {
-      function = &GSLFunctionWrapper::eval;
-      params = this;
-    }
-    /// Static integrable functional
-    static double eval(double x, void* params) {
-      auto* wrp = static_cast<GSLFunctionWrapper*>(params);
-      if (wrp->obj_)
-        return wrp->func_(x, wrp->obj_);
-      if (!wrp->params_.empty())
-        return wrp->func_(x, wrp->params_);
-      return wrp->func_(x);
-    }
-    const FunctionWrapper func_;
-    const ParametersList& params_;
-    void* obj_{nullptr};
-  };
-
   /// GSL wrapper to define a functor as an integrable functional
   /// \tparam F functor member signature
   template <typename F>
@@ -80,8 +44,7 @@ namespace cepgen::utils {
     static double eval(double* x, size_t num_dimensions, void* params) {
       return static_cast<GSLMonteFunctionWrapper*>(params)->func_(x, num_dimensions, params);
     }
-    /// Reference to the functor
-    const F& func_;
+    const F& func_;  ///< Reference to the functor
   };
 }  // namespace cepgen::utils
 

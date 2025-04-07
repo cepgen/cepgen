@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 
@@ -42,8 +43,8 @@ public:
     return desc;
   }
 
-  Value integrate(Integrand& integrand) override {
-    setIntegrand(integrand);
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+    prepare(integrand, range);
     const std::unique_ptr<gsl_monte_miser_state, decltype(&gsl_monte_miser_free)> miser_state(
         gsl_monte_miser_alloc(gsl_function_->dim), gsl_monte_miser_free);
     miser_state->verbose = verbosity_;
@@ -69,7 +70,7 @@ public:
                                                    &x_high_[0],
                                                    gsl_function_->dim,
                                                    num_function_calls_,
-                                                   random_number_generator_->engine<gsl_rng>(),
+                                                   random_generator_->engine<gsl_rng>(),
                                                    miser_state.get(),
                                                    &result,
                                                    &absolute_error);

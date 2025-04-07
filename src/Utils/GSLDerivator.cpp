@@ -21,7 +21,7 @@
 
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Utils/Derivator.h"
-#include "CepGen/Utils/GSLFunctionsWrappers.h"
+#include "CepGen/Utils/GSLFunctionWrapper.h"
 #include "CepGen/Utils/Message.h"
 
 using namespace cepgen;

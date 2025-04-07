@@ -38,9 +38,8 @@ namespace cepgen::python {
         throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
     }
 
-    void setLimits(const std::vector<Limits>& limits) override { lims_ = ObjectPtr::make(limits); }
-
-    Value integrate(Integrand& integrand) override {
+    Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+      lims_ = ObjectPtr::make(range);
       gIntegrand = &integrand;
       const auto iterations = steer<int>("iterations");
       const auto evals = steer<int>("evals");

@@ -19,9 +19,9 @@
 #include <cmath>
 
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/Modules/AnalyticIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -33,7 +33,7 @@ namespace cepgen::formfac {
     explicit InelasticNucleon(const ParametersList& params)
         : Parameterisation(params),
           sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
-          integrator_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
+          integrator_(IntegratorFactory::get().build(steer<ParametersList>("integrator"))),
           compute_fm_(steer<bool>("computeFM")),
           mx_range_(steer<Limits>("mxRange")),
           mx2_range_{mx_range_.min() * mx_range_.min(), mx_range_.max() * mx_range_.max()},
@@ -58,7 +58,7 @@ namespace cepgen::formfac {
       desc.setDescription("Proton inelastic (SF)");
       desc.add("structureFunctions", StructureFunctionsFactory::get().describeParameters("LUXLike"))
           .setDescription("type of structure functions parameterisation for the dissociative emission");
-      desc.add("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
+      desc.add("integrator", IntegratorFactory::get().describeParameters("gsl"))
           .setDescription("type of numerical integrator algorithm to use");
       desc.add("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
       desc.add("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.}).setDescription("diffractive mass range (in GeV/c^2)");
@@ -76,7 +76,7 @@ namespace cepgen::formfac {
 
   private:
     const std::unique_ptr<strfun::Parameterisation> sf_;
-    const std::unique_ptr<AnalyticIntegrator> integrator_;
+    const std::unique_ptr<Integrator> integrator_;
     const double compute_fm_;
     const Limits mx_range_, mx2_range_, dm2_range_;
     const std::function<double(double)> eval_fe_, eval_fm_;

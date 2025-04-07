@@ -19,8 +19,8 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/Modules/AnalyticIntegratorFactory.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
@@ -34,22 +34,14 @@ class KTIntegratedFlux : public CollinearFlux {
 public:
   explicit KTIntegratedFlux(const ParametersList& params)
       : CollinearFlux(params),
-        analytic_integrator_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
+        integrator_(IntegratorFactory::get().build(steer<ParametersList>("integrator"))),
         flux_(KTFluxFactory::get().build(steer<ParametersList>("ktFlux"))),
-        kt2_range_(steer<Limits>("kt2range")),
-        func_q2_([this](double kt2, void* pars) {
-          const auto& args = *static_cast<std::pair<double, double>*>(pars);
-          return flux_->fluxQ2(args.first, kt2, args.second);
-        }),
-        func_mx2_([this](double kt2, void* pars) {
-          const auto& args = *static_cast<std::pair<double, double>*>(pars);
-          return flux_->fluxMX2(args.first, kt2, args.second);
-        }) {
+        kt2_range_(steer<Limits>("kt2range")) {
     if (!flux_->ktFactorised())
       throw CG_FATAL("GammaIntegrated") << "Input flux has to be unintegrated.";
     // initialise the functions to integrate
     CG_INFO("KTIntegratedFlux") << "kt flux-integrated collinear flux evaluator initialised.\n\t"
-                                << "Analytical integrator: " << analytic_integrator_->name() << "\n\t"
+                                << "Integrator: " << integrator_->name() << "\n\t"
                                 << "Q^2 integration range: " << kt2_range_ << " GeV^2\n\t"
                                 << "Unintegrated flux: " << flux_->name() << ".";
   }
@@ -61,7 +53,7 @@ public:
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("kt-integrated coll.flux");
-    desc.add("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
+    desc.add("integrator", IntegratorFactory::get().describeParameters("gsl"))
         .setDescription("Steering parameters for the analytical integrator");
     desc.add("ktFlux", PartonFluxFactory::get().describeParameters("BudnevElastic"))
         .setDescription("Type of unintegrated kT-dependent parton flux");
@@ -73,19 +65,20 @@ public:
   double fluxQ2(double x, double q2) const override {
     if (!x_range_.contains(x, true))
       return 0.;
-    return 2. * M_PI * analytic_integrator_->integrate(func_q2_, std::make_pair(x, q2), kt2_range_);
+    return 2. * M_PI *
+           integrator_->integrate([this, &x, &q2](double kt2) { return flux_->fluxQ2(x, kt2, q2); }, kt2_range_);
   }
 
   double fluxMX2(double x, double mx2) const override {
     if (!x_range_.contains(x, true))
       return 0.;
-    return 2. * M_PI * analytic_integrator_->integrate(func_mx2_, std::make_pair(x, mx2), kt2_range_);
+    return 2. * M_PI *
+           integrator_->integrate([this, &x, &mx2](double kt2) { return flux_->fluxMX2(x, kt2, mx2); }, kt2_range_);
   }
 
 private:
-  const std::unique_ptr<AnalyticIntegrator> analytic_integrator_;
+  const std::unique_ptr<Integrator> integrator_;
   const std::unique_ptr<KTFlux> flux_;
   const Limits kt2_range_;
-  const utils::FunctionWrapper func_q2_, func_mx2_;
 };
 REGISTER_COLLINEAR_FLUX("KTIntegrated", KTIntegratedFlux);

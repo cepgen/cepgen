@@ -27,7 +27,7 @@ namespace cepgen {
   class Integrand {
   public:
     Integrand() = default;
-    virtual ~Integrand() {}
+    virtual ~Integrand() = default;
 
     virtual double eval(const std::vector<double>&) = 0;  ///< Compute the integrand for a given coordinates set
     virtual size_t size() const = 0;                      ///< Phase space dimension

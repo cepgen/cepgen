@@ -5,13 +5,13 @@ endif()
 
 set(sources src/BoostTreeHandler.cpp
             src/BoostTreeUtils.cpp
-            src/BoostTrapAnalyticalIntegrator.cpp
-            src/BoostGaussKronrodAnalyticalIntegrator.cpp
-            src/BoostGaussLegendreAnalyticalIntegrator.cpp
-            src/FiniteDifferenceDerivator.cpp)
+            src/FiniteDifferenceDerivator.cpp
+            src/TrapIntegrator.cpp
+            src/GaussKronrodIntegrator.cpp
+            src/GaussLegendreIntegrator.cpp)
 file(GLOB boost_int_include ${Boost_INCLUDE_DIRS}/boost/math/quadrature/naive_monte_carlo.hpp)
 if(boost_int_include)
-  list(APPEND sources src/IntegratorNaive.cpp)
+  list(APPEND sources src/NaiveIntegrator.cpp)
 endif()
 
 #----- build the object

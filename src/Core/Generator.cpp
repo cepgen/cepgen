@@ -96,7 +96,7 @@ double Generator::computePoint(const std::vector<double>& coord) {
   if (coord.size() != ndim)
     throw CG_FATAL("Generator:computePoint")
         << "Invalid phase space dimension (ndim=" << ndim << ", given=" << coord.size() << ").";
-  double res = worker_->integrand().eval(coord);
+  const auto res = worker_->integrand().eval(coord);
   CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
   return res;
 }

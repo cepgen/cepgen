@@ -26,6 +26,7 @@
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 
@@ -33,7 +34,9 @@ using namespace cepgen;
 /// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
 class FoamIntegrator final : public Integrator, public TFoamIntegrand {
 public:
-  explicit FoamIntegrator(const ParametersList& params) : Integrator(params) {}
+  explicit FoamIntegrator(const ParametersList& params)
+      : Integrator(params),
+        random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {}
 
   static ParametersDescription description() {
     auto desc = Integrator::description();
@@ -44,16 +47,16 @@ public:
     desc.add("nSampl", 200);
     desc.add("nBin", 8);
     desc.add("EvPerBin", 25);
-    desc.add("verbose", 0).setDescription("Verbosity level");
     return desc;
   }
 
-  Value integrate(Integrand& integrand) override {
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override {
     integrand_ = &integrand;
+    range_ = range;
     std::unique_ptr<TFoam> foam(new TFoam("Foam"));
     CG_DEBUG("Integrator:integrate") << "FOAM integrator built\n\t"
                                      << "Version: " << foam->GetVersion() << ".";
-    foam->SetPseRan(random_number_generator_->engine<TRandom>());
+    foam->SetPseRan(random_generator_->engine<TRandom>());
     foam->SetnCells(steer<int>("nCells"));
     foam->SetnSampl(steer<int>("nSampl"));
     foam->SetnBin(steer<int>("nBin"));
@@ -61,8 +64,6 @@ public:
     foam->SetChat(std::max(verbosity_, 0));
     foam->SetRho(this);
     foam->SetkDim(integrand_->size());
-    Integrator::checkLimits(*integrand_);
-    coordinates_.resize(integrand_->size());
     foam->Initialize();
     std::unique_ptr<utils::ProcessVariablesAnalyser> analyser;
     if (integrand.hasProcess())
@@ -82,7 +83,7 @@ public:
 
     double result, abs_error;
     foam->GetIntegMC(result, abs_error);
-    for (const auto& lim : limits_) {
+    for (const auto& lim : range) {
       result *= lim.range();
       abs_error *= lim.range();
     }
@@ -106,13 +107,15 @@ public:
   inline double Density(int num_dimensions, double* x) override {
     if (!integrand_)
       throw CG_FATAL("FoamDensity") << "Integrand object not yet initialised!";
+    std::vector<double> coordinates;
     for (int i = 0; i < num_dimensions; ++i)
-      coordinates_[i] = limits_.at(i).x(x[i]);
-    return integrand_->eval(coordinates_);
+      coordinates.emplace_back(range_.at(i).x(x[i]));
+    return integrand_->eval(coordinates);
   }
 
 private:
+  const std::unique_ptr<utils::RandomGenerator> random_generator_;
   Integrand* integrand_{nullptr};
-  std::vector<double> coordinates_;
+  std::vector<Limits> range_;
 };
 REGISTER_INTEGRATOR("Foam", FoamIntegrator);

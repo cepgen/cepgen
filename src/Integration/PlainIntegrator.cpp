@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 
@@ -37,10 +38,9 @@ public:
     return desc;
   }
 
-  Value integrate(Integrand& integrand) override {
-    setIntegrand(integrand);
-
-    //--- launch integration
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+    prepare(integrand, range);
+    // launch integration
     const std::unique_ptr<gsl_monte_plain_state, decltype(&gsl_monte_plain_free)> plain_state(
         gsl_monte_plain_alloc(gsl_function_->dim), gsl_monte_plain_free);
     double result, absolute_error;
@@ -49,14 +49,13 @@ public:
                                                    &x_high_[0],
                                                    gsl_function_->dim,
                                                    num_function_calls_,
-                                                   random_number_generator_->engine<gsl_rng>(),
+                                                   random_generator_->engine<gsl_rng>(),
                                                    plain_state.get(),
                                                    &result,
                                                    &absolute_error);
         res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                              << "GSL error: " << gsl_strerror(res) << ".";
-
     return Value{result, absolute_error};
   }
 

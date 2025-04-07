@@ -23,37 +23,37 @@
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 
-GSLIntegrator::GSLIntegrator(const ParametersList& params) : Integrator(params) {
-  CG_DEBUG("Integrator:build") << "Random numbers generator: "
-                               << gsl_rng_name(random_number_generator_->engine<gsl_rng>()) << ".";
+GSLIntegrator::GSLIntegrator(const ParametersList& params)
+    : Integrator(params),
+      random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {
+  CG_DEBUG("GSLIntegrator") << "Random numbers generator: " << gsl_rng_name(random_generator_->engine<gsl_rng>())
+                            << ".";
 }
 
-void GSLIntegrator::setIntegrand(Integrand& integrand) {
+void GSLIntegrator::prepare(Integrand& integrand, const std::vector<Limits>& range) {
   // specify the integrand through the GSL wrapper
   function_ = [&integrand](double* x, size_t num_dimensions, void*) -> double {
     return integrand.eval(std::vector(x, x + num_dimensions));
   };
   if (gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());
       !gsl_function_)
-    throw CG_FATAL("GSLIntegrator:setIntegrand") << "Integrand was not properly set.";
+    throw CG_FATAL("GSLIntegrator:prepare") << "Integrand was not properly set.";
   if (gsl_function_->dim <= 0)
-    throw CG_FATAL("GSLIntegrator:setIntegrand") << "Invalid phase space dimension: " << gsl_function_->dim << ".";
+    throw CG_FATAL("GSLIntegrator:prepare") << "Invalid phase space dimension: " << gsl_function_->dim << ".";
+  CG_DEBUG("GSLIntegrator:prepare") << "Number of integration dimensions: " << gsl_function_->dim << ".";
 
-  CG_DEBUG("GSLIntegrator:setIntegrand") << "Number of integration dimensions: " << gsl_function_->dim << ".";
-
-  checkLimits(integrand);  // check the integration bounds
-}
-
-void GSLIntegrator::setLimits(const std::vector<Limits>& limits) {
-  Integrator::setLimits(limits);
-  x_low_.clear();
-  x_high_.clear();
-  for (const auto& lim : limits_) {
-    x_low_.emplace_back(lim.min());
-    x_high_.emplace_back(lim.max());
+  if (const auto ndim = integrand.size(); ndim > 0) {  // set the integration range
+    if (range.size() < ndim)
+      throw CG_FATAL("GSLIntegrator:prepare")
+          << "Insufficiant number of limits (" << range << ") provided for dim-" << ndim << " integrand.";
+    x_low_.resize(ndim);
+    x_high_.resize(ndim);
+    for (size_t i = 0; i < ndim; ++i)
+      x_low_[i] = range.at(i).min(), x_high_[i] = range.at(i).max();
   }
 }
 
