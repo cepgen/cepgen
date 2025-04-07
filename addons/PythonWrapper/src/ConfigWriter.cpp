@@ -45,6 +45,12 @@ namespace cepgen::python {
       const auto lim = params.get<Limits>(key);
       return "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")";
     }
+    if (params.has<double>(key)) {
+      if (const auto value = params.get<double>(key);
+          value == std::numeric_limits<double>::infinity())  // check for infinity
+        return "float('inf')"s;
+      return params.getString(key, true);
+    }
     if (params.has<std::vector<Limits> >(key)) {
       std::string out{"["}, sep;
       for (const auto& lim : params.get<std::vector<Limits> >(key))
@@ -144,10 +150,14 @@ ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
           os << write(w_pdesc.get(pkey), pkey, offset_num + 1);
           break;
         case ParametersDescription::Type::ParametersVector: {
-          os << offset(offset_num + 1) << pkey << " = [\n";
-          for (const auto& it : params.get<std::vector<ParametersList> >(pkey))
-            os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
-          os << offset(offset_num + 1) << "]";
+          os << offset(offset_num + 1) << pkey << " = [";
+          if (const auto& it = params.get<std::vector<ParametersList> >(pkey); !it.empty()) {
+            os << "\n";
+            for (const auto& it : params.get<std::vector<ParametersList> >(pkey))
+              os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
+            os << offset(offset_num + 1) << "]";
+          } else
+            os << "]";
         } break;
         case ParametersDescription::Type::Value: {
           if (params.has<ParametersList>(pkey))
