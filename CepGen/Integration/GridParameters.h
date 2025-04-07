@@ -49,7 +49,7 @@ namespace cepgen {
 
     void setValue(size_t, float);  ///< Set the function value for a given grid coordinate
     /// Shoot a phase space point for a grid coordinate
-    void shoot(utils::RandomGenerator* random_generator, size_t coordinate, std::vector<double>& out) const;
+    void shoot(utils::RandomGenerator& random_generator, size_t coordinate, std::vector<double>& out) const;
     /// Number of points already shot for a given grid coordinate
     inline size_t numPoints(size_t coordinate) const { return num_points_.at(coordinate); }
     /// Specify a new trial has been attempted for bin

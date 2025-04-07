@@ -28,7 +28,7 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Utils/GSLFunctionsWrappers.h"
+#include "CepGen/Utils/GSLFunctionWrapper.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;

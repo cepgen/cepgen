@@ -43,13 +43,13 @@ void GridParameters::setValue(size_t coordinate, float value) {
   f_max_global_ = std::max(f_max_global_, value);
 }
 
-void GridParameters::shoot(utils::RandomGenerator* random_generator,
+void GridParameters::shoot(utils::RandomGenerator& random_generator,
                            size_t coordinate,
                            std::vector<double>& out) const {
-  CG_ASSERT(random_generator != nullptr);
   const auto& nv = coords_.at(coordinate);
+  out.resize(nv.size());
   for (size_t i = 0; i < nv.size(); ++i)
-    out[i] = (random_generator->uniform() + nv.at(i)) * inv_mbin_;
+    out[i] = (random_generator.uniform() + nv.at(i)) * inv_mbin_;
 }
 
 void GridParameters::dump() const {

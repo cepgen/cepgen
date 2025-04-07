@@ -18,6 +18,8 @@
 
 #include <gsl/gsl_monte_vegas.h>
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
@@ -148,32 +150,31 @@ private:
         res != GSL_SUCCESS)
       throw CG_ERROR("VegasIntegrator:warmup") << "Failed to warm-up the Vegas grid.\n\t"
                                                << "GSL error: " << gsl_strerror(res) << ".";
-
     CG_INFO("VegasIntegrator:warmup") << "Finished the Vegas warm-up.";
   }
 
   double COORD(size_t i, size_t j) const { return vegas_state_->xi[i * vegas_state_->dim + j]; }
 
-  double eval(Integrand& integrand, const std::vector<double>& x) const override {
+  double eval(Integrand& integrand, const std::vector<double>& coordinates) const override {
     if (!treat_)  // by default, no grid treatment
-      return integrand.eval(x);
+      return integrand.eval(coordinates);
     // treatment of the integration grid
     if (r_boxes_ == 0) {
       r_boxes_ = static_cast<size_t>(std::pow(vegas_state_->bins, integrand.size()));
-      x_new_.resize(integrand.size());
+      treated_coordinates_.resize(integrand.size());
     }
     double weight = r_boxes_;
     for (size_t j = 0; j < integrand.size(); ++j) {
       // find surrounding coordinates and interpolate
-      const double z = x.at(j) * vegas_state_->bins;
+      const double z = coordinates.at(j) * vegas_state_->bins;
       const auto id = static_cast<size_t>(z);  // coordinate of point before
       const double rel_pos = z - id;           // position between coordinates (norm.)
       const double bin_width = id == 0 ? COORD(1, j) : COORD(id + 1, j) - COORD(id, j);
       // build new coordinate from linear interpolation
-      x_new_[j] = COORD(id + 1, j) - bin_width * (1. - rel_pos);
+      treated_coordinates_[j] = COORD(id + 1, j) - bin_width * (1. - rel_pos);
       weight *= bin_width;
     }
-    return weight * integrand.eval(x_new_);
+    return weight * integrand.eval(treated_coordinates_);
   }
 
   const int num_function_calls_;
@@ -189,6 +190,6 @@ private:
   /// A Vegas integrator state for integration (optional) and/or "treated" event generation
   std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_;
   mutable unsigned long long r_boxes_{0ull};
-  mutable std::vector<double> x_new_;
+  mutable std::vector<double> treated_coordinates_;
 };
 REGISTER_INTEGRATOR("Vegas", VegasIntegrator);
