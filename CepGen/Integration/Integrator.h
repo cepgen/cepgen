@@ -28,9 +28,6 @@
 namespace cepgen {
   class Integrand;
 }  // namespace cepgen
-namespace cepgen::utils {
-  class FunctionWrapper;
-}  // namespace cepgen::utils
 
 namespace cepgen {
   /// Integration algorithm
@@ -57,10 +54,9 @@ namespace cepgen {
   protected:
     /// Evaluate the integral of a function for a given range
     /// \param[in] integrand function to integrate
-    /// \param[in] range (optional) integration range
-    virtual Value run(Integrand& integrand, const std::vector<Limits>& range = {}) = 0;
+    /// \param[in] range integration range
+    virtual Value run(Integrand& integrand, const std::vector<Limits>& range) = 0;
 
-    const ParametersList integrand_parameters_;
     const int verbosity_;  ///< Integrator verbosity
   };
 }  // namespace cepgen

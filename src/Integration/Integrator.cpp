@@ -22,10 +22,7 @@
 
 using namespace cepgen;
 
-Integrator::Integrator(const ParametersList& params)
-    : NamedModule(params),
-      integrand_parameters_(steer<ParametersList>("integrandParameters")),
-      verbosity_(steer<int>("verbosity")) {}
+Integrator::Integrator(const ParametersList& params) : NamedModule(params), verbosity_(steer<int>("verbosity")) {}
 
 double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
@@ -53,7 +50,6 @@ Value Integrator::integrate(const std::function<double(const std::vector<double>
 
 ParametersDescription Integrator::description() {
   auto desc = ParametersDescription();
-  desc.add("integrandParameters", ParametersDescription{}).setDescription("parameters for the integrand");
   desc.add("verbosity", 0).setDescription("integrator verbosity");
   return desc;
 }

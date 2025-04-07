@@ -34,10 +34,11 @@
 using namespace cepgen;
 using namespace cepgen::utils;
 
-class GSLAnalyticalIntegrator final : public Integrator {
+class GSL1DIntegrator final : public Integrator {
 public:
-  explicit GSLAnalyticalIntegrator(const ParametersList& params)
+  explicit GSL1DIntegrator(const ParametersList& params)
       : Integrator(params),
+        integrand_parameters_(steer<ParametersList>("integrandParameters")),
         mode_(steerAs<int, Mode>("mode")),
         fixed_type_(steerAs<int, FixedType>("fixedType")),
         nodes_(steer<int>("nodes")),
@@ -50,6 +51,7 @@ public:
   static ParametersDescription description() {
     auto desc = Integrator::description();
     desc.setDescription("GSL 1D integration algorithms wrapper");
+    desc.add("integrandParameters", ParametersDescription{}).setDescription("parameters for the integrand");
     desc.addAs<int>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
     desc.addAs<int>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
     desc.add("nodes", 100).setDescription("number of quadrature nodes for the fixed type integration");
@@ -64,7 +66,7 @@ public:
 private:
   Value run(Integrand& integrand, const std::vector<Limits>& range) override {
     if (integrand.size() != 1) {
-      CG_ERROR("GSLAnalyticalIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
+      CG_ERROR("GSL1DIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
       return Value{};
     }
     return eval(
@@ -121,7 +123,7 @@ private:
           type = gsl_integration_fixed_chebyshev2;
           break;
         default:
-          throw CG_FATAL("GSLAnalyticalIntegrator")
+          throw CG_FATAL("GSL1DIntegrator")
               << "Invalid fixed quadrature type: " << static_cast<int>(fixed_type_) << ".";
       }
       std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
@@ -154,16 +156,16 @@ private:
                                    &error);
     }
     if (res != GSL_SUCCESS)
-      CG_WARNING("GSLAnalyticalIntegrator")
-          << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
+      CG_WARNING("GSL1DIntegrator") << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
     return Value{result, error};
 #else
     (void)range;
     (void)wrp;
-    CG_WARNING("GSLAnalyticalIntegrator") << "GSL version above 2.1 is required for integration.";
+    CG_WARNING("GSL1DIntegrator") << "GSL version above 2.1 is required for integration.";
     return {};
 #endif
   }
+  const ParametersList integrand_parameters_;
   const Mode mode_;
   const FixedType fixed_type_;
   const int nodes_;
@@ -172,5 +174,5 @@ private:
   const double epsabs_, epsrel_;
 };
 
-REGISTER_INTEGRATOR("gsl", GSLAnalyticalIntegrator);
+REGISTER_INTEGRATOR("gsl", GSL1DIntegrator);
 #endif
