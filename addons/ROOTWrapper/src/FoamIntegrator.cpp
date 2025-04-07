@@ -43,10 +43,17 @@ public:
     desc.setDescription("FOAM general purpose MC integrator");
     desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("root"));
     desc.add("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
-    desc.add("nCells", 1000);
-    desc.add("nSampl", 200);
-    desc.add("nBin", 8);
-    desc.add("EvPerBin", 25);
+    desc.add("nCells", 1000).setDescription("number of allocated number of cells");
+    desc.add("nSampl", 200).setDescription("number of MC events in the cell MC exploration");
+    desc.add("nBin", 8).setDescription("number of bins in edge-histogram in cell exploration");
+    desc.add("OptRej", 1)
+        .allow(0, "weighted events")
+        .allow(1, "unweighted events")
+        .setDescription("MC events weight determination type");
+    desc.add("OptDrive", 2).setDescription("maximum weight reduction (1 for variance reduction)");
+    desc.add("MaxWtRej", 1.1).setDescription("maximum weight used to get unweighted MC events");
+    desc.add("EvPerBin", 25)
+        .setDescription("maximum number of the effective wt=1 events/bin (0 deactivates this option)");
     return desc;
   }
 
@@ -60,6 +67,9 @@ public:
     foam->SetnCells(steer<int>("nCells"));
     foam->SetnSampl(steer<int>("nSampl"));
     foam->SetnBin(steer<int>("nBin"));
+    foam->SetOptRej(steer<int>("OptRej"));
+    foam->SetOptDrive(steer<int>("OptDrive"));
+    foam->SetMaxWtRej(steer<double>("MaxWtRej"));
     foam->SetEvPerBin(steer<int>("EvPerBin"));
     foam->SetChat(std::max(verbosity_, 0));
     foam->SetRho(this);
