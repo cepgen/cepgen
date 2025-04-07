@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,13 @@ Integrator::Integrator(const ParametersList& params)
 double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
 Value Integrator::integrate(Integrand& integrand, const std::vector<Limits>& range) {
-  auto normalised_range = range;
-  if (normalised_range.empty())
-    normalised_range = std::vector(integrand.size(), Limits{0., 1.});
-  else if (normalised_range.size() < integrand.size())
-    if (const auto booked_size = range.size(); booked_size < integrand.size())
-      for (size_t i = 0; i < integrand.size() - booked_size; ++i)
-        normalised_range.emplace_back(0., 1.);
-  return run(integrand, normalised_range);
+  if (range.size() < integrand.size()) {
+    auto normalised_range = range;
+    for (size_t i = 0; i < integrand.size() - range.size(); ++i)
+      normalised_range.emplace_back(0., 1.);
+    return run(integrand, normalised_range);
+  }
+  return run(integrand, range);
 }
 
 Value Integrator::integrate(const std::function<double(double)>& integrand, const Limits& range_1d) {
