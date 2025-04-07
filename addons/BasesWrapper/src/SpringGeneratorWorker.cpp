@@ -32,7 +32,7 @@ namespace cepgen {
   public:
     explicit SpringGeneratorWorker(const ParametersList& params)
         : GeneratorWorker(params), max_trials_(steer<int>("maxTrials")) {
-      bscntl_.ipnt = steer<int>("verbose");
+      bscntl_.ipnt = steer<int>("verbosity");
     }
     virtual ~SpringGeneratorWorker() {
       int lu = 6;
@@ -64,7 +64,7 @@ namespace cepgen {
       auto desc = GeneratorWorker::description();
       desc.setDescription("Spring/Bases worker");
       desc.add("maxTrials", 50).setDescription("maximum number of trials per generation");
-      desc.add("verbose", 0);
+      desc.add("verbosity", 0);
       return desc;
     }
 

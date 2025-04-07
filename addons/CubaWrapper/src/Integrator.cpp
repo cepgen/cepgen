@@ -30,8 +30,7 @@ namespace cepgen::cuba {
         epsrel_(steer<double>("epsrel")),
         epsabs_(steer<double>("epsabs")),
         mineval_(steer<int>("mineval")),
-        maxeval_(steer<int>("maxeval")),
-        verbose_(steer<int>("verbose")) {}
+        maxeval_(steer<int>("maxeval")) {}
 
   Value Integrator::run(Integrand& integrand, const std::vector<Limits>& /*range*/) {
     gIntegrand = &integrand;
@@ -47,7 +46,6 @@ namespace cepgen::cuba {
     desc.add("epsabs", 1.e-12).setDescription("requested absolute accuracy");
     desc.add("mineval", 0).setDescription("minimum number of integrand evaluations required");
     desc.add("maxeval", 50'000).setDescription("(approximate) maximum number of integrand evaluations allowed");
-    desc.add("verbose", 0);
     return desc;
   }
 

@@ -83,7 +83,7 @@ namespace cepgen::cuba {
               nvec_,
               epsrel_,
               epsabs_,
-              verbose_,
+              verbosity_,
               steerAs<unsigned long long, int>("seed"),
               mineval_,
               maxeval_,

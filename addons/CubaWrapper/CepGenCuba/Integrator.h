@@ -43,7 +43,6 @@ namespace cepgen::cuba {
     int ncomp_, nvec_;
     double epsrel_, epsabs_;
     int mineval_, maxeval_;
-    int verbose_;
   };
 
   int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/);

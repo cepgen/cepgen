@@ -32,7 +32,7 @@ namespace cepgen {
       bparm1_.ncall = steer<int>("numFunctionCalls");
       std::fill(bparm1_.ig.begin(), bparm1_.ig.end(), false);
       bscntl_.intv = steer<int>("intv");
-      bscntl_.ipnt = steer<int>("verbosity");
+      bscntl_.ipnt = verbosity_;
     }
 
     static ParametersDescription description() {
@@ -40,7 +40,6 @@ namespace cepgen {
       desc.setDescription("Bases integration algorithm");
       desc.add("numFunctionCalls", 50'000);
       desc.add("intv", 1);
-      desc.add("verbosity", 0);
       desc.add("wildVars", std::vector<int>{}).setDescription("list of 'wild' variables");
       return desc;
     }

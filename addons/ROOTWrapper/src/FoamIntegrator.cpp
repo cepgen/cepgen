@@ -47,7 +47,6 @@ public:
     desc.add("nSampl", 200);
     desc.add("nBin", 8);
     desc.add("EvPerBin", 25);
-    desc.add("verbosity", 0).setDescription("Verbosity level");
     return desc;
   }
 

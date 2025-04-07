@@ -54,7 +54,7 @@ namespace cepgen::cuba {
             nvec_,
             epsrel_,
             epsabs_,
-            verbose_,
+            verbosity_,
             mineval_,
             maxeval_,
             key_,
