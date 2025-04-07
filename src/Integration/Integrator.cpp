@@ -42,13 +42,13 @@ Value Integrator::integrate(Integrand& integrand, const std::vector<Limits>& ran
 Value Integrator::integrate(const std::function<double(double)>& integrand, const Limits& range_1d) {
   auto function_integrand =
       FunctionIntegrand{1, [&integrand](const std::vector<double>& x) { return integrand(x.at(0)); }};
-  return run(function_integrand, std::vector{range_1d});
+  return integrate(function_integrand, std::vector{range_1d});
 }
 
 Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& integrand,
                             const std::vector<Limits>& range) {
   auto function_integrand = FunctionIntegrand{range.size(), integrand};
-  return run(function_integrand, range);
+  return integrate(function_integrand, range);
 }
 
 ParametersDescription Integrator::description() {
