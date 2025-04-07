@@ -34,7 +34,7 @@ public:
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
     desc.setDescription("Plain (trial/error) integrator");
-    desc.add("numFunctionCalls", 50'000);
+    desc.add("numFunctionCalls", 50'000).setDescription("number of function calls per phase space point evaluation");
     return desc;
   }
 
@@ -45,8 +45,8 @@ public:
         gsl_monte_plain_alloc(gsl_function_->dim), gsl_monte_plain_free);
     double result, absolute_error;
     if (const auto res = gsl_monte_plain_integrate(gsl_function_.get(),
-                                                   &x_low_[0],
-                                                   &x_high_[0],
+                                                   x_low_.data(),
+                                                   x_high_.data(),
                                                    gsl_function_->dim,
                                                    num_function_calls_,
                                                    random_generator_->engine<gsl_rng>(),
