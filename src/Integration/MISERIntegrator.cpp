@@ -34,12 +34,22 @@ public:
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
     desc.setDescription("MISER adaptive importance sampling integrator");
-    desc.add("numFunctionCalls", 50'000).setDescription("Number of function calls per phase space point evaluation");
-    desc.add("estimateFraction", 0.1);
-    desc.add("minCalls", 16 * 10);
-    desc.add("minCallsPerBisection", 32 * 16 * 10);
-    desc.add("alpha", 2.);
-    desc.add("dither", 0.1);
+    desc.add("numFunctionCalls", 50'000).setDescription("number of function calls per phase space point evaluation");
+    desc.add("estimateFraction", 0.1)
+        .setDescription(
+            "fraction of the currently available number of function calls allocated to estimating the variance at each "
+            "recursive step");
+    desc.add("minCalls", 16 * 10)
+        .setDescription("minimum number of function calls required for each estimate of the variance");
+    desc.add("minCallsPerBisection", 32 * 16 * 10)
+        .setDescription("minimum number of function calls required to proceed with a bisection step");
+    desc.add("alpha", 2.)
+        .setDescription(
+            "how the estimated variances for the two sub-regions of a bisection are combined when allocating points");
+    desc.add("dither", 0.1)
+        .setDescription(
+            "size of the random fractional variation into each bisection, which can be used to break the symmetry of "
+            "integrands which are concentrated near the exact center of the hypercubic integration region");
     return desc;
   }
 
@@ -66,8 +76,8 @@ public:
     // launch the full integration
     double result, absolute_error;
     if (const auto res = gsl_monte_miser_integrate(gsl_function_.get(),
-                                                   &x_low_[0],
-                                                   &x_high_[0],
+                                                   x_low_.data(),
+                                                   x_high_.data(),
                                                    gsl_function_->dim,
                                                    num_function_calls_,
                                                    random_generator_->engine<gsl_rng>(),

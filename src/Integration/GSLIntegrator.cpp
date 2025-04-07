@@ -59,6 +59,7 @@ void GSLIntegrator::prepare(Integrand& integrand, const std::vector<Limits>& ran
 
 ParametersDescription GSLIntegrator::description() {
   auto desc = Integrator::description();
-  desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("gsl"));
+  desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("gsl"))
+      .setDescription("type of random number generator to use for integration");
   return desc;
 }

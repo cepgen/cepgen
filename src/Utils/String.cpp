@@ -39,6 +39,8 @@
 #include <memory>
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen::utils {
   std::regex kFloatRegex("[+-]?[0-9]*\\.?[0-9]+([eEdD][+-]?[0-9]+)?", std::regex_constants::extended);
 
@@ -113,7 +115,7 @@ namespace cepgen::utils {
     auto tm = *std::localtime(&now);
     char out_str[50];
     strftime(out_str, 50, fmt.c_str(), &tm);
-    return std::string(out_str);
+    return {out_str};
   }
 
   size_t replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -177,6 +179,8 @@ namespace cepgen::utils {
 
   template <>
   std::string toString(const double& val) {
+    if (val == std::numeric_limits<double>::infinity())  // check for infinity
+      return "inf"s;
     auto out = format("%.16g", val);
     if (out.find('.') == std::string::npos && out.find('e') == std::string::npos && out.find('E') == std::string::npos)
       out += ".0";
@@ -250,9 +254,9 @@ namespace cepgen::utils {
   template <typename T>
   std::string merge(const std::vector<T>& vec, const std::string& delim) {
     if (vec.empty())
-      return std::string();
+      return {};
     std::ostringstream oss;
-    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = ""s](const auto& val) mutable {
       oss << sep << val;
       sep = delim;
     });
@@ -270,9 +274,9 @@ namespace cepgen::utils {
   template <typename T>
   std::string merge(const std::vector<std::vector<T> >& vec, const std::string& delim) {
     if (vec.empty())
-      return std::string();
+      return {};
     std::ostringstream oss;
-    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = ""s](const auto& val) mutable {
       const auto mrg = merge(val, delim);
       oss << sep << mrg;
       sep = delim;

@@ -43,14 +43,21 @@ public:
   static ParametersDescription description() {
     auto desc = GSLIntegrator::description();
     desc.setDescription("Vegas stratified sampling integrator");
-    desc.add("numFunctionCalls", 100'000);
-    desc.add("chiSqCut", 1.5);
-    desc.add("treat", true).setDescription("Phase space treatment");
-    desc.add("iterations", 10);
-    desc.add("alpha", 1.25);
-    desc.addAs<int, Mode>("mode", Mode::stratified);
-    desc.add("loggingOutput", "cerr"s);
-    desc.add("verbosity", -1);
+    desc.add("numFunctionCalls", 100'000).setDescription("number of function calls per phase space point evaluation");
+    desc.add("chiSqCut", 1.5).setDescription("maximum (normalised) chi^2 to reach before stopping iterations");
+    desc.add("treat", true).setDescription("phase space treatment");
+    desc.add("iterations", 10).setDescription("number of iterations to perform for each call to the routine");
+    desc.add("alpha", 1.25).setDescription("stiffness of the rebinning algorithm");
+    desc.addAs<int, Mode>("mode", Mode::stratified)
+        .setDescription(
+            "determines whether to use importance sampling or stratified sampling, or whether to pick on its own");
+    desc.add("loggingOutput", "cerr"s).setDescription("output stream for logging (cerr, cout, or file name)");
+    desc.add("verbosity", -1)
+        .allow(-1, "turn off all output")
+        .allow(0, "print summary information about the weighted average and final result")
+        .allow(1, "also display the grid coordinates")
+        .allow(2, "print information from the rebinning procedure for each iteration")
+        .setDescription("level of information printed by VEGAS");
     return desc;
   }
 
@@ -90,8 +97,8 @@ public:
     double result, absolute_error;
     do {
       if (const auto res = gsl_monte_vegas_integrate(gsl_function_.get(),
-                                                     &x_low_[0],
-                                                     &x_high_[0],
+                                                     x_low_.data(),
+                                                     x_high_.data(),
                                                      gsl_function_->dim,
                                                      0.2 * num_function_calls_,
                                                      random_generator_->engine<gsl_rng>(),
@@ -138,8 +145,8 @@ private:
     // perform a first integration to warm up the grid
     double result = 0., absolute_error = 0.;
     if (const auto res = gsl_monte_vegas_integrate(gsl_function_.get(),
-                                                   &x_low_[0],
-                                                   &x_high_[0],
+                                                   x_low_.data(),
+                                                   x_high_.data(),
                                                    gsl_function_->dim,
                                                    num_calls,
                                                    random_generator_->engine<gsl_rng>(),
@@ -188,7 +195,7 @@ private:
   };
 
   /// A Vegas integrator state for integration (optional) and/or "treated" event generation
-  std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_;
+  std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_{nullptr};
   mutable unsigned long long r_boxes_{0ull};
   mutable std::vector<double> treated_coordinates_;
 };
