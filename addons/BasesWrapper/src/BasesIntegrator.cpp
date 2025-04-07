@@ -32,7 +32,7 @@ namespace cepgen {
       bparm1_.ncall = steer<int>("numFunctionCalls");
       std::fill(bparm1_.ig.begin(), bparm1_.ig.end(), false);
       bscntl_.intv = steer<int>("intv");
-      bscntl_.ipnt = steer<int>("verbose");
+      bscntl_.ipnt = steer<int>("verbosity");
     }
 
     static ParametersDescription description() {
@@ -40,7 +40,7 @@ namespace cepgen {
       desc.setDescription("Bases integration algorithm");
       desc.add("numFunctionCalls", 50'000);
       desc.add("intv", 1);
-      desc.add("verbose", 0);
+      desc.add("verbosity", 0);
       desc.add("wildVars", std::vector<int>{}).setDescription("list of 'wild' variables");
       return desc;
     }
@@ -59,8 +59,7 @@ namespace cepgen {
       }
       double res, unc, ctime;
       int it1, it2;
-      if (gIntegrand = &integrand; !gIntegrand)
-        throw CG_FATAL("BasesIntegrator") << "Integrand was not specified before integration.";
+      gIntegrand = &integrand;  // always true
       bases_(call_integrand, res, unc, ctime, it1, it2);
       CG_DEBUG("BasesIntegrator:integrate")
           << "Integration performed in " << utils::s("second", ctime, true) << ". " << utils::s("iteration", it1, true)
