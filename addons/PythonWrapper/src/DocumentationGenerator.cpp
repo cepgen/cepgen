@@ -35,18 +35,15 @@ namespace cepgen::python {
       auto desc = utils::DocumentationGenerator::description();
       desc.setDescription("Python modules documentation generator");
       desc += ConfigWriter::description();
-      desc.add("filename", "output.py"s).setDescription("Python output filename");
+      desc.add("filename", ""s).setDescription("Python output filename");
       desc.add("camelCaseModuleNames", true);
       return desc;
     }
 
     std::string describe() override {
-      for (const auto& cat : categories_) {
-        if (cat.second.modules.empty())
-          continue;
-        for (const auto& mod : cat.second.modules)
-          writer_ << mod.second;
-      }
+      for (const auto& [name, category] : categories_)
+        for (const auto& [module_name, description] : category.modules)
+          writer_ << description;
       return writer_();
     }
 

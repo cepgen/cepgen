@@ -41,20 +41,21 @@ int main(int argc, char* argv[]) {
   if (quiet)
     CG_LOG_LEVEL(nothing);
   cepgen::initialise();
-  auto documentation_generator = cepgen::DocumentationGeneratorFactory::get().build(
-      doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
-  const auto documentation = documentation_generator->describe();
 
-  if (output_file.empty()) {
-    if (quiet)
-      CG_LOG_LEVEL(information);
-    CG_LOG << documentation;
-  } else {
-    ofstream of(output_file);
-    of << documentation;
-    of.close();
-    CG_INFO("main") << "Documentation written in '" << output_file << "'.";
+  if (const auto documentation_generator = cepgen::DocumentationGeneratorFactory::get().build(
+          doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
+      documentation_generator) {
+    if (output_file.empty()) {
+      if (quiet)
+        CG_LOG_LEVEL(information);
+      CG_LOG << documentation_generator->describe();
+    } else {
+      ofstream of(output_file);
+      of << documentation_generator->describe();
+      of.close();
+      CG_INFO("main") << "Documentation written in '" << output_file << "'.";
+    }
+    return 0;
   }
-
-  return 0;
+  return -1;
 }

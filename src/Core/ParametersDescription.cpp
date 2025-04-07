@@ -116,8 +116,6 @@ std::string ParametersDescription::describe(size_t offset) const {
   os << ":";
   // write list of parameters (if it has some)
   for (const auto& key : keys) {
-    if (!ParametersList::has<ParametersList>(key))
-      continue;
     os << "\n" << sep(offset + 1) << colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
     if (obj_descr_.count(key) == 0)
       continue;
