@@ -39,7 +39,7 @@ namespace cepgen::root {
     /// \param[in] function function to derive
     /// \param[in] x_coordinate coordinate
     /// \param[in] step_size (optional) step size ; if not provided, will use default algorithm value
-    double derivate(const utils::FunctionWrapper& function, double x_coordinate, double step_size) const override {
+    Value derivate(const utils::FunctionWrapper& function, double x_coordinate, double step_size) const override {
       const auto root_function = TF1(
           "cepgen_functional",
           [&function](double vars[1], double* pars) { return function(vars[0], static_cast<void*>(pars)); },
@@ -47,16 +47,21 @@ namespace cepgen::root {
           1.,
           0);
       const auto epsilon = step_size < 0. ? h_ : step_size;
+      double value;
       switch (order_) {
         case 1:
-          return root_function.Derivative(x_coordinate, nullptr, epsilon);
+          value = root_function.Derivative(x_coordinate, nullptr, epsilon);
+          break;
         case 2:
-          return root_function.Derivative2(x_coordinate, nullptr, epsilon);
+          value = root_function.Derivative2(x_coordinate, nullptr, epsilon);
+          break;
         case 3:
-          return root_function.Derivative3(x_coordinate, nullptr, epsilon);
+          value = root_function.Derivative3(x_coordinate, nullptr, epsilon);
+          break;
         default:
           throw CG_FATAL("root:Derivator") << "Invalid derivation order requested: " << order_ << ".";
       }
+      return Value{value, root_function.DerivativeError()};
     }
 
   private:

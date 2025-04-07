@@ -40,10 +40,11 @@ namespace cepgen::boost {
     /// \param[in] function function to derive
     /// \param[in] x_coordinate coordinate
     /// \param[in] step_size (optional) step size ; if not provided, will use default algorithm value
-    double derivate(const utils::FunctionWrapper& function, double x_coordinate, double /*step_size*/) const override {
+    Value derivate(const utils::FunctionWrapper& function, double x_coordinate, double /*step_size*/) const override {
       double uncertainty;
-      return ::boost::math::differentiation::finite_difference_derivative<decltype(function), double, N>(
+      const auto value = ::boost::math::differentiation::finite_difference_derivative<decltype(function), double, N>(
           function, x_coordinate, &uncertainty);
+      return Value{value, uncertainty};
     }
   };
 }  // namespace cepgen::boost

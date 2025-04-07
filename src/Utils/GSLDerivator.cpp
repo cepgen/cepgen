@@ -46,7 +46,7 @@ public:
   /// \param[in] func function to derive
   /// \param[in] x coordinate
   /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-  double derivate(const FunctionWrapper& func, double x, double h = -1.) const override {
+  Value derivate(const FunctionWrapper& func, double x, double h = -1.) const override {
     int res{GSL_SUCCESS};
     double val, val_unc;
     const double step_size = h > 0. ? h : h_;
@@ -64,7 +64,7 @@ public:
     }
     if (res != GSL_SUCCESS)
       CG_WARNING("GSLDerivator") << "Failed to evaluate the derivative. GSL error: " << gsl_strerror(res) << ".";
-    return val;
+    return Value{val, val_unc};
   }
 
   enum struct Mode {

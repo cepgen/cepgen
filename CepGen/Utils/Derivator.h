@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/FunctionWrapper.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen::utils {
   class Derivator : public NamedModule<Derivator> {
@@ -37,14 +38,14 @@ namespace cepgen::utils {
     /// \param[in] func function to derive
     /// \param[in] x coordinate
     /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-    inline double derivate(const std::function<double(double)>& func, double x, double h = -1.) const {
+    inline Value derivate(const std::function<double(double)>& func, double x, double h = -1.) const {
       return derivate(FunctionWrapper(func), x, h);
     }
     /// Evaluate the derivative of a function at a given value
     /// \param[in] func function to derive
     /// \param[in] x coordinate
     /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-    virtual double derivate(const FunctionWrapper& func, double x, double h = -1.) const = 0;
+    virtual Value derivate(const FunctionWrapper& func, double x, double h = -1.) const = 0;
 
   protected:
     const double h_;
