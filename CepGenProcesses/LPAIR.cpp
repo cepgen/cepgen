@@ -164,8 +164,8 @@ public:
                                                                      : Particle::Status::Unfragmented);
 
     // central system
-    const auto ransign = rnd_gen_->uniformInt(0, 1) == 1;
     if (randomise_charge_) {  // randomise the charge of outgoing system
+      const auto ransign = rnd_gen_->uniformInt(0, 1) == 1;
       event()[Particle::Role::CentralSystem][0].get().setAntiparticle(ransign);
       event()[Particle::Role::CentralSystem][1].get().setAntiparticle(!ransign);
     }
