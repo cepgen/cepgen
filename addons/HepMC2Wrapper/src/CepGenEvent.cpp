@@ -29,7 +29,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenHepMC2/HepMC2EventInterface.h"
+#include "CepGenHepMC2/CepGenEvent.h"
 
 using namespace HepMC;
 

@@ -28,7 +28,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/Modules/EventImporterFactory.h"
-#include "CepGenHepMC3/HepMC3EventInterface.h"
+#include "CepGenHepMC3/CepGenEvent.h"
 
 using namespace cepgen;
 using namespace std::string_literals;

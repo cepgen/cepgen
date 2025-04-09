@@ -30,7 +30,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Collections.h"
-#include "CepGenHepMC3/HepMC3EventInterface.h"
+#include "CepGenHepMC3/CepGenEvent.h"
 
 using namespace HepMC3;
 
@@ -74,26 +74,21 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
         v2->add_particle_out(part);
         vcm->add_particle_in(part);
         break;
-      case cepgen::Particle::Role::Intermediate:
-        // skip the two-parton system and propagate the parentage
+      case cepgen::Particle::Role::Intermediate:  // skip the two-parton system and propagate the parentage
         cm_id = idx;
         continue;
       case cepgen::Particle::Role::CentralSystem:
       default: {
         const auto& moth = part_orig.mothers();
         if (moth.empty())
-          // skip disconnected lines
-          continue;
-        // get mother(s) id(s)
-        const short m1 = *moth.begin();
-        const short m2 = moth.size() > 1 ? *moth.rbegin() : -1;
+          continue;  // skip disconnected lines
         // check if particle is connected to the two-parton system
-        if (m1 == cm_id || (m2 >= 0 && (m1 < cm_id && cm_id <= m2)))  // also supports range
+        if (const short m1 = *moth.begin(), m2 = moth.size() > 1 ? *moth.rbegin() : -1;  // get mother(s) id(s)
+            m1 == cm_id || (m2 >= 0 && (m1 < cm_id && cm_id <= m2)))                     // also supports range
           vcm->add_particle_out(part);
-        // if part of the decay chain of central system, find parents
-        else if (assoc_map_.count(m1) != 0) {
+        else if (assoc_map_.count(m1) != 0) {  // if part of the decay chain of central system, find parents
           auto production_vertex = assoc_map_.at(m1)->end_vertex();
-          std::list<short> ids{m1};  // list of mother particles
+          std::list ids{m1};  // list of mother particles
           if (assoc_map_.count(m2) != 0 && m2 > m1) {
             ids.resize(m2 - m1 + 1);
             std::iota(ids.begin(), ids.end(), m1);
@@ -125,7 +120,7 @@ CepGenEvent::operator cepgen::Event() const {
       return cepgen::Momentum::fromPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.e());
     };
     auto cg_part = cepgen::Particle(role, 0, static_cast<cepgen::Particle::Status>(part.status()));
-    cg_part.setPdgId((long)part.pdg_id());
+    cg_part.setPdgId(part.pdg_id());
     cg_part.setMomentum(convert_momentum(part.momentum()));
     return cg_part;
   };
@@ -224,7 +219,7 @@ void CepGenEvent::merge(cepgen::Event& evt) const {
     return;
   }
   auto cs = evt[cepgen::Particle::Role::CentralSystem];
-  if (cs.size() != (size_t)vcm->particles_out().size()) {
+  if (cs.size() != vcm->particles_out().size()) {
     CG_ERROR("HepMC3:CepGenEvent:merge")
         << "Central system particles multiplicities differ between CepGen and HepMC3 event records.";
     return;
@@ -240,7 +235,7 @@ void CepGenEvent::merge(cepgen::Event& evt) const {
         cp.get().setStatus(cepgen::Particle::Status::Propagator);
         for (const auto& h_child : hp->children()) {
           cepgen::Particle cg_child(cp.get().role(), 0);
-          cg_child.setPdgId((long)h_child->pdg_id());
+          cg_child.setPdgId(h_child->pdg_id());
           const auto& c_mom = h_child->momentum();
           cg_child.setStatus(cepgen::Particle::Status::FinalState);
           cg_child.setMomentum(cepgen::Momentum::fromPxPyPzE(c_mom.x(), c_mom.y(), c_mom.z(), c_mom.t()));
@@ -254,8 +249,7 @@ void CepGenEvent::merge(cepgen::Event& evt) const {
     for (const auto& h_cp : vcm->particles_out()) {  // loop over the central system particles
       if (fabs(cg_cp_mom3 - h_cp->momentum().length()) > 1.e-10)
         continue;
-      // found the association between the HepMC and CepGen particles kinematics
-      browse_children(h_cp, cs[icg]);
+      browse_children(h_cp, cs[icg]);  // found the association between the HepMC and CepGen particles kinematics
       break;
     }
   }
@@ -270,7 +264,7 @@ void CepGenEvent::dump() const {
     log << " Vertices:";
     for (const auto& vtxPtr : vertices()) {
       FourVector in_sys, out_sys;
-      log << "\n  * vertex#" << (-vtxPtr->id()) << " (status: " << vtxPtr->status() << ")"
+      log << "\n  * vertex#" << -vtxPtr->id() << " (status: " << vtxPtr->status() << ")"
           << "\n     in: ";
       for (const auto& ipPtr : vtxPtr->particles_in())
         log << "\n      * " << ipPtr->pdg_id() << " (status: " << ipPtr->status() << "): " << ipPtr->momentum(),

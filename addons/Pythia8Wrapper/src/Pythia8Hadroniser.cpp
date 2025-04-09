@@ -26,7 +26,7 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Value.h"
-#include "CepGenPythia8/PythiaEventInterface.h"
+#include "CepGenPythia8/CepGenEvent.h"
 
 using namespace cepgen;
 using namespace std::string_literals;

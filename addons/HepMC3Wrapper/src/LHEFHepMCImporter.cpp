@@ -27,7 +27,7 @@
 #include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenHepMC3/HepMC3EventInterface.h"
+#include "CepGenHepMC3/CepGenEvent.h"
 
 using namespace cepgen;
 using namespace std::string_literals;
@@ -70,7 +70,7 @@ public:
     for (int i = 0; i < hepeup.NUP; ++i) {
       Particle part;
       part.setRole(Particle::Role::CentralSystem);
-      part.setPdgId((long)hepeup.IDUP.at(i));
+      part.setPdgId(hepeup.IDUP.at(i));
       const auto& hepeup_mom = hepeup.PUP.at(i);
       part.setMomentum(Momentum::fromPxPyPzE(hepeup_mom.at(0), hepeup_mom.at(1), hepeup_mom.at(2), hepeup_mom.at(3)),
                        false);

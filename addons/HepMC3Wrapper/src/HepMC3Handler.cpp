@@ -26,7 +26,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/Value.h"
-#include "CepGenHepMC3/HepMC3EventInterface.h"
+#include "CepGenHepMC3/CepGenEvent.h"
 
 using namespace cepgen;
 using namespace HepMC3;

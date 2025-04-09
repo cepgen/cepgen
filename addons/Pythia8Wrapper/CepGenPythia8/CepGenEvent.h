@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenPythia8_PythiaEventInterface_h
-#define CepGenPythia8_PythiaEventInterface_h
+#ifndef CepGenPythia8_CepGenEvent_h
+#define CepGenPythia8_CepGenEvent_h
 
 #include <Pythia8/Pythia.h>
 

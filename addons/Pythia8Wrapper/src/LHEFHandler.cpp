@@ -26,7 +26,7 @@
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Value.h"
-#include "CepGenPythia8/PythiaEventInterface.h"
+#include "CepGenPythia8/CepGenEvent.h"
 
 using namespace std::string_literals;
 

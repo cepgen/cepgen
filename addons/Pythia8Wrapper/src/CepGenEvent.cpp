@@ -21,7 +21,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGenPythia8/PythiaEventInterface.h"
+#include "CepGenPythia8/CepGenEvent.h"
 
 using namespace Pythia8;
 
