@@ -76,14 +76,15 @@ namespace cepgen::hepmc2 {
     const std::shared_ptr<GenCrossSection> cross_section_;  ///< generator cross-section and error
   };
 }  // namespace cepgen::hepmc2
-using cepgen::hepmc2::EventExporter;
+template <typename T>
+using HepMC2EventExporter = cepgen::hepmc2::EventExporter<T>;
 //----------------------------------------------------------------------
 // Defining the various templated plugins made available by this
 // specific version of HepMC (v2 and below)
 //----------------------------------------------------------------------
 #include "HepMC/IO_AsciiParticles.h"
 #include "HepMC/IO_GenEvent.h"
-using HepMC2GenEventHandler = EventExporter<IO_GenEvent>;
-using HepMC2AsciiHandler = EventExporter<IO_AsciiParticles>;
+using HepMC2GenEventHandler = HepMC2EventExporter<IO_GenEvent>;
+using HepMC2AsciiHandler = HepMC2EventExporter<IO_AsciiParticles>;
 REGISTER_EXPORTER("hepmc2", HepMC2GenEventHandler);
 REGISTER_EXPORTER("hepmc2_ascii", HepMC2AsciiHandler);

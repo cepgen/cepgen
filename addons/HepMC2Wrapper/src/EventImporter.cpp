@@ -73,5 +73,5 @@ namespace cepgen::hepmc2 {
     bool cross_section_retrieved_{false};
   };
 }  // namespace cepgen::hepmc2
-using cepgen::hepmc2::EventImporter;
-REGISTER_EVENT_IMPORTER("hepmc2", EventImporter);
+using HepMC2EventImporter = cepgen::hepmc2::EventImporter;
+REGISTER_EVENT_IMPORTER("hepmc2", HepMC2EventImporter);

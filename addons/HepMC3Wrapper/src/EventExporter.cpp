@@ -46,8 +46,8 @@ namespace cepgen::hepmc3 {
           run_info_(new GenRunInfo) {
       output_->set_run_info(run_info_);
       run_info_->set_weight_names({"Default"});
-      CG_INFO("HepMC") << "Interfacing module initialised "
-                       << "for HepMC version " << HEPMC3_VERSION << ".";
+      CG_INFO("hepmc3:EventExporter") << "Interfacing module initialised "
+                                      << "for HepMC version " << HEPMC3_VERSION << ".";
     }
     ~EventExporter() override { output_->close(); }
 
@@ -78,30 +78,31 @@ namespace cepgen::hepmc3 {
     const std::shared_ptr<GenRunInfo> run_info_;  ///< auxiliary information on run
   };
 }  // namespace cepgen::hepmc3
-using HepMC3Handler = cepgen::hepmc3::EventExporter;
+template <typename T>
+using HepMC3EventExporter = cepgen::hepmc3::EventExporter<T>;
 //----------------------------------------------------------------------
 // Defining the various templated plugins made available by this
 // specific version of HepMC
 //----------------------------------------------------------------------
 #include <HepMC3/WriterAscii.h>
 #include <HepMC3/WriterHEPEVT.h>
-using HepMC3AsciiHandler = HepMC3Handler<WriterAscii>;
-using HepMC3HEPEVTHandler = HepMC3Handler<WriterHEPEVT>;
+using HepMC3AsciiHandler = HepMC3EventExporter<WriterAscii>;
+using HepMC3HEPEVTHandler = HepMC3EventExporter<WriterHEPEVT>;
 REGISTER_EXPORTER("hepmc", HepMC3AsciiHandler);
 REGISTER_EXPORTER("hepevt", HepMC3HEPEVTHandler);
 
 #if HEPMC3_VERSION_CODE >= 3001000
 #include <HepMC3/WriterAsciiHepMC2.h>
-using HepMC3HepMC2Handler = HepMC3Handler<WriterAsciiHepMC2>;
+using HepMC3HepMC2Handler = HepMC3EventExporter<WriterAsciiHepMC2>;
 REGISTER_EXPORTER("hepmc3_hepmc2", HepMC3HepMC2Handler);
 #if HEPMC3_VERSION_CODE >= 3002005 && HEPMC3_USE_COMPRESSION
 #include <HepMC3/WriterGZ.h>
-using HepMC3AsciiZHandler = HepMC3Handler<WriterGZ<WriterAscii> >;
-using HepMC3HEPEVTZHandler = HepMC3Handler<WriterGZ<WriterHEPEVT> >;
-using HepMC3AsciiLZMAHandler = HepMC3Handler<WriterGZ<WriterAscii, Compression::lzma> >;
-using HepMC3HEPEVTLZMAHandler = HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::lzma> >;
-using HepMC3AsciiBZ2Handler = HepMC3Handler<WriterGZ<WriterAscii, Compression::bz2> >;
-using HepMC3HEPEVTBZ2Handler = HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::bz2> >;
+using HepMC3AsciiZHandler = HepMC3EventExporter<WriterGZ<WriterAscii> >;
+using HepMC3HEPEVTZHandler = HepMC3EventExporter<WriterGZ<WriterHEPEVT> >;
+using HepMC3AsciiLZMAHandler = HepMC3EventExporter<WriterGZ<WriterAscii, Compression::lzma> >;
+using HepMC3HEPEVTLZMAHandler = HepMC3EventExporter<WriterGZ<WriterHEPEVT, Compression::lzma> >;
+using HepMC3AsciiBZ2Handler = HepMC3EventExporter<WriterGZ<WriterAscii, Compression::bz2> >;
+using HepMC3HEPEVTBZ2Handler = HepMC3EventExporter<WriterGZ<WriterHEPEVT, Compression::bz2> >;
 REGISTER_EXPORTER("hepmc_z", HepMC3AsciiZHandler);
 REGISTER_EXPORTER("hepevt_z", HepMC3HEPEVTZHandler);
 REGISTER_EXPORTER("hepmc_lzma", HepMC3AsciiLZMAHandler);
@@ -114,8 +115,8 @@ REGISTER_EXPORTER("hepevt_bz2", HepMC3HEPEVTBZ2Handler);
 #ifdef HEPMC3_ROOTIO
 #include <HepMC3/WriterRoot.h>
 #include <HepMC3/WriterRootTree.h>
-using HepMC3RootHandler = HepMC3Handler<WriterRoot>;
-using HepMC3RootTreeHandler = HepMC3Handler<WriterRootTree>;
+using HepMC3RootHandler = HepMC3EventExporter<WriterRoot>;
+using HepMC3RootTreeHandler = HepMC3EventExporter<WriterRootTree>;
 REGISTER_EXPORTER("hepmc_root", HepMC3RootHandler);
 REGISTER_EXPORTER("hepmc_root_tree", HepMC3RootTreeHandler);
 #endif
@@ -123,8 +124,8 @@ REGISTER_EXPORTER("hepmc_root_tree", HepMC3RootTreeHandler);
 #ifdef HEPMC3_EXTRA_PLUGINS
 #include <ConvertExample/include/WriterDOT.h>
 #include <ConvertExample/include/WriterRootTreeOPAL.h>
-using HepMC3DOTHandler = HepMC3Handler<WriterDOT>;
-using HepMC3RootTreeOPALHandler = HepMC3Handler<WriterRootTreeOPAL>;
+using HepMC3DOTHandler = HepMC3EventExporter<WriterDOT>;
+using HepMC3RootTreeOPALHandler = HepMC3EventExporter<WriterRootTreeOPAL>;
 REGISTER_EXPORTER("hepmc_dot", HepMC3DOTHandler);
 REGISTER_EXPORTER("hepmc_root_tree_opal", HepMC3RootTreeOPALHandler);
 #endif
