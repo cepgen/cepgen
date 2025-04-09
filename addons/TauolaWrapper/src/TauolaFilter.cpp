@@ -87,11 +87,10 @@ namespace cepgen::tauola {
     }
     bool run(Event& event, double& weight, bool /*fast*/) override {
       weight = 1.;
-
       HepMC3::CepGenEvent hepmc_event(event);
-      TauolaHepMC3Event evt(&hepmc_event);
-      evt.decayTaus();
-      //hepmc_event.dump();
+      TauolaHepMC3Event tauola_event(&hepmc_event);
+      tauola_event.decayTaus();
+      hepmc_event.dump();
       hepmc_event.merge(event);
       return true;
     }

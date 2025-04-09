@@ -26,13 +26,14 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenHepMC3/CepGenEvent.h"
 
 using namespace Photospp;
 
-namespace cepgen::hadr {
+namespace cepgen::photos {
   /// Interface to the Photos decay routine
   class PhotosFilter : public EventModifier {
   public:
@@ -72,16 +73,14 @@ namespace cepgen::hadr {
     Photos::initialize();
   }
 
-  bool PhotosFilter::run(Event& ev, double& weight, bool) {
+  bool PhotosFilter::run(Event& event, double& weight, bool) {
     weight = 1.;
-
-    HepMC3::CepGenEvent hepmc_evt(ev);
-    PhotosHepMC3Event evt(&hepmc_evt);
-    //evt.dump();
-    evt.process();
-    hepmc_evt.merge(ev);
-    ev.dump();
-
+    HepMC3::CepGenEvent hepmc_event(event);
+    PhotosHepMC3Event photos_event(&hepmc_event);
+    //event.dump();
+    photos_event.process();
+    hepmc_event.merge(event);
+    event.dump();
     return true;
   }
 
@@ -109,8 +108,8 @@ namespace cepgen::hadr {
         .setDescription("set photon emission in top pair production in quark (gluon) pair annihilation");
     return desc;
   }
-}  // namespace cepgen::hadr
+}  // namespace cepgen::photos
 
 // register event modifier
-typedef cepgen::hadr::PhotosFilter PhotosFilter;
+using cepgen::photos::PhotosFilter;
 REGISTER_MODIFIER("photos", PhotosFilter);
