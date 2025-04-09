@@ -34,9 +34,9 @@
 
 using namespace HepMC3;
 
-CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units::MM) {
-  add_attribute("AlphaQCD", make_shared<DoubleAttribute>(evt.metadata("alphaS")));
-  add_attribute("AlphaEM", make_shared<DoubleAttribute>(evt.metadata("alphaEM")));
+CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Units::MM) {
+  add_attribute("AlphaQCD", make_shared<DoubleAttribute>(event.metadata("alphaS")));
+  add_attribute("AlphaEM", make_shared<DoubleAttribute>(event.metadata("alphaEM")));
 
   weights().push_back(1.);  // unweighted events
 
@@ -46,7 +46,7 @@ CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units:
 
   auto v1 = make_shared<GenVertex>(origin), v2 = make_shared<GenVertex>(origin), vcm = make_shared<GenVertex>(origin);
   unsigned short idx = 0;
-  for (const auto& part_orig : evt.particles()) {
+  for (const auto& part_orig : event.particles()) {
     const auto& mom_orig = part_orig.momentum();
     FourVector momentum(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
     auto part = make_shared<GenParticle>(momentum, part_orig.integerPdgId(), static_cast<int>(part_orig.status()));
@@ -218,7 +218,7 @@ void CepGenEvent::merge(cepgen::Event& evt) const {
     CG_ERROR("HepMC3:CepGenEvent:merge") << "Invalid second incoming beam particle kinematics.";
     return;
   }
-  auto cs = evt[cepgen::Particle::Role::CentralSystem];
+  const auto cs = evt[cepgen::Particle::Role::CentralSystem];
   if (cs.size() != vcm->particles_out().size()) {
     CG_ERROR("HepMC3:CepGenEvent:merge")
         << "Central system particles multiplicities differ between CepGen and HepMC3 event records.";
@@ -247,7 +247,7 @@ void CepGenEvent::merge(cepgen::Event& evt) const {
   for (size_t icg = 0; icg < cs_size; ++icg) {  // try to find the associated CepGen event particle
     const auto cg_cp_mom3 = cs[icg].get().momentum().p();
     for (const auto& h_cp : vcm->particles_out()) {  // loop over the central system particles
-      if (fabs(cg_cp_mom3 - h_cp->momentum().length()) > 1.e-10)
+      if (std::fabs(cg_cp_mom3 - h_cp->momentum().length()) > 1.e-10)
         continue;
       browse_children(h_cp, cs[icg]);  // found the association between the HepMC and CepGen particles kinematics
       break;
