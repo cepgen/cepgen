@@ -172,6 +172,7 @@ CepGenEvent::operator cepgen::Event() const {
   cepgen_intermediate.setMomentum(parton1.momentum() + parton2.momentum(), true);
   parton1.addChild(cepgen_intermediate);
   parton2.addChild(cepgen_intermediate);
+  event.addParticle(cepgen_intermediate);
 
   for (const auto& vtx : vertices()) {
     if (cepgen::utils::contains(beam_vtx_ids, vtx->id()))
