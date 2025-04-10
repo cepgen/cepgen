@@ -26,80 +26,79 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenHepMC3/CepGenEvent.h"
 
 using namespace Tauolapp;
 
 namespace cepgen::tauola {
+  std::unique_ptr<utils::RandomGenerator> gRandomGenerator;  ///< CepGen-specific random number generator to use
+
   /// Interface to the Tauola decay routine
   class TauolaFilter final : public EventModifier {
   public:
-    explicit TauolaFilter(const ParametersList& params)
-        : EventModifier(params),
-          pol_states_(steer<ParametersList>("polarisations")),
-          rad_states_(steer<ParametersList>("radiations")) {
+    explicit TauolaFilter(const ParametersList& params) : EventModifier(params) {
+      if (const auto& random_generator = steer<ParametersList>("randomGenerator"); !random_generator.empty()) {
+        gRandomGenerator = RandomGeneratorFactory::get().build(random_generator);
+        Tauola::setRandomGenerator([]() -> double { return gRandomGenerator->uniform(); });
+      }
       if (steer<bool>("debug"))
         Log::LogAll(true);
-    }
-    ~TauolaFilter() override { Log::SummaryAtExit(); }
-
-    void initialise() override {
       Tauola::setUnits(Tauola::GEV, Tauola::MM);
       Tauola::initialize();
       Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
-      Tauola::momentum_conservation_threshold = 1.e-6;
+      Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
       if (!Tauola::getIsTauolaIni())
-        throw CG_FATAL("TauolaFilter:init") << "Tauola was not properly initialised!";
-
-      //--- spin correlations
-      if (pol_states_.has<bool>("full"))
-        Tauola::spin_correlation.setAll(pol_states_.get<bool>("full"));
-      pol_states_.fill<bool>("GAMMA", Tauola::spin_correlation.GAMMA);
-      pol_states_.fill<bool>("Z0", Tauola::spin_correlation.Z0);
-      pol_states_.fill<bool>("HIGGS", Tauola::spin_correlation.HIGGS);
-      pol_states_.fill<bool>("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
-      pol_states_.fill<bool>("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
-      pol_states_.fill<bool>("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
-      pol_states_.fill<bool>("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
-      pol_states_.fill<bool>("W_PLUS", Tauola::spin_correlation.W_PLUS);
-      pol_states_.fill<bool>("W_MINUS", Tauola::spin_correlation.W_MINUS);
-
-      //--- radiation states
-      if (rad_states_.has<bool>("enable"))
-        Tauola::setRadiation(rad_states_.get<bool>("enable"));
-      const auto rad_cutoff = rad_states_.get<double>("cutoff", 0.01);
-      if (rad_cutoff > 0.)
-        Tauola::setRadiationCutOff(rad_cutoff);  // default energy is 0.01 (in units of half the decaying particle mass)
-
+        throw CG_FATAL("TauolaFilter") << "Tauola was not properly initialised!";
+      if (const auto& pol_states = steer<ParametersList>("polarisations"); !pol_states.empty()) {  // spin correlations
+        if (pol_states.has<bool>("full"))
+          Tauola::spin_correlation.setAll(pol_states.get<bool>("full"));
+        pol_states.fill("GAMMA", Tauola::spin_correlation.GAMMA);
+        pol_states.fill("Z0", Tauola::spin_correlation.Z0);
+        pol_states.fill("HIGGS", Tauola::spin_correlation.HIGGS);
+        pol_states.fill("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
+        pol_states.fill("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
+        pol_states.fill("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
+        pol_states.fill("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
+        pol_states.fill("W_PLUS", Tauola::spin_correlation.W_PLUS);
+        pol_states.fill("W_MINUS", Tauola::spin_correlation.W_MINUS);
+      }
+      if (const auto& rad_states = steer<ParametersList>("radiations"); !rad_states.empty()) {  // radiation states
+        if (rad_states.has<bool>("enable"))
+          Tauola::setRadiation(rad_states.get<bool>("enable"));
+        if (const auto rad_cutoff = rad_states.get<double>("cutoff", 0.01); rad_cutoff > 0.)
+          Tauola::setRadiationCutOff(
+              rad_cutoff);  // default energy is 0.01 (in units of half the decaying particle mass)
+      }
       //--- default parameters
+      Tauola::setDecayingParticle(steer<int>("decayingParticle"));
       Tauola::setSameParticleDecayMode(steer<int>("sameParticleDecayMode"));
       Tauola::setOppositeParticleDecayMode(steer<int>("oppositeParticleDecayMode"));
-
       //--- list of tau decay branching fractions
       for (const auto& br_per_mode : steer<std::vector<ParametersList> >("branchingRatios")) {
         const auto mode = br_per_mode.get<int>("mode");
         const auto br = br_per_mode.get<double>("branchingRatio");
         Tauola::setTauBr(mode, br);
-        CG_DEBUG("TauolaFilter:init") << "Branching ratio for mode " << mode << " set to " << br << ".";
+        CG_DEBUG("TauolaFilter") << "Branching ratio for mode " << mode << " set to " << br << ".";
       }
     }
-    bool run(Event& event, double& weight, bool /*fast*/) override {
-      weight = 1.;
-      HepMC3::CepGenEvent hepmc_event(event);
-      TauolaHepMC3Event tauola_event(&hepmc_event);
-      tauola_event.decayTaus();
-      hepmc_event.dump();
-      hepmc_event.merge(event);
-      return true;
-    }
+    ~TauolaFilter() override { Log::SummaryAtExit(); }
 
     static ParametersDescription description() {
       auto desc = EventModifier::description();
       desc.setDescription("Tauola interface");
       desc.add("debug", false).setDescription("debugging mode");
-
+      desc.add("decayingParticle", 15).setDescription("pdg id of the particle to decay (+-15 typically)");
+      desc.add("sameParticleDecayMode", -1)
+          .setDescription("uniformise the decay mode of all particle with the one given in 'decayingParticle'");
+      desc.add("oppositeParticleDecayMode", -1)
+          .setDescription(
+              "uniformise the decay mode of all particle with opposite charge to the one given in 'decayingParticle'");
+      desc.add("momentumConservationThreshold", 1.e-6)
+          .setDescription("numerical limit to ensure momentum conservation");
       auto pol_desc = ParametersDescription();
       pol_desc.add("full", true);
       pol_desc.add("GAMMA", Tauola::spin_correlation.GAMMA);
@@ -112,24 +111,28 @@ namespace cepgen::tauola {
       pol_desc.add("W_PLUS", Tauola::spin_correlation.W_PLUS);
       pol_desc.add("W_MINUS", Tauola::spin_correlation.W_MINUS);
       desc.add("polarisations", pol_desc);
-
       auto rad_desc = ParametersDescription();
-      rad_desc.add("enable", false);
-      rad_desc.add("cutoff", -1.);
-      desc.add("radiations", rad_desc);
-
-      desc.add("sameParticleDecayMode", -1);
-      desc.add("oppositeParticleDecayMode", -1);
-
+      rad_desc.add("enable", false).setDescription("switch on/off bremsstrahlung in leptonic tau decays?");
+      rad_desc.add("cutoff", -1.).setDescription("radiation energy cut-off above which photon is explicitly generated");
+      desc.add("radiations", rad_desc).setDescription("Bremsstrahlung parameters block");
       auto br_desc = ParametersDescription();
       br_desc.add("mode", -1).setDescription("decay mode");
       br_desc.add("branchingRatio", 0.).setDescription("branching fraction");
-      desc.addParametersDescriptionVector("branchingRatios", br_desc, {});
+      desc.addParametersDescriptionVector("branchingRatios", br_desc, {})
+          .setDescription("List of decay-specific branching fractions");
+      desc.add("randomGenerator", ParametersDescription{}).setDescription("overridden random generator algorithm");
       return desc;
     }
 
-  private:
-    const ParametersList pol_states_, rad_states_;
+    bool run(Event& event, double& weight, bool /*fast*/) override {
+      weight = 1.;
+      CepGenEvent hepmc_event(event);  // conversion to a HepMC3 format
+      TauolaHepMC3Event tauola_event(&hepmc_event);
+      tauola_event.decayTaus();
+      hepmc_event.dump();
+      hepmc_event.merge(event);  // merge everything back into the original event
+      return true;
+    }
   };
 }  // namespace cepgen::tauola
 using cepgen::tauola::TauolaFilter;

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/EventUtils.h"
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
@@ -46,27 +47,24 @@ int main(int argc, char* argv[]) {
   }
   tauola->initialise(cepgen::RunParameters());
 
-  const auto tau1_momentum = cepgen::Momentum::fromPxPyPzM(0., 0., +100., cepgen::PDG::get().mass(cepgen::PDG::tau)),
-             tau2_momentum = cepgen::Momentum::fromPxPyPzM(0., 0., -100., cepgen::PDG::get().mass(cepgen::PDG::tau));
-
-  cepgen::Event ev;
-  cepgen::Particle pho(cepgen::Particle::Role::CentralSystem, cepgen::PDG::photon, cepgen::Particle::Status::Resonance);
-  pho.setMomentum(tau1_momentum + tau2_momentum);
-  ev.addParticle(pho);
-  cepgen::Particle tau1(
-      cepgen::Particle::Role::CentralSystem, +(cepgen::spdgid_t)cepgen::PDG::tau, cepgen::Particle::Status::FinalState);
-  tau1.setMomentum(tau1_momentum);
-  tau1.addMother(pho);
-  ev.addParticle(tau1);
-  cepgen::Particle tau2(
-      cepgen::Particle::Role::CentralSystem, -(cepgen::spdgid_t)cepgen::PDG::tau, cepgen::Particle::Status::FinalState);
-  tau2.setMomentum(tau2_momentum);
-  tau2.addMother(pho);
-  ev.addParticle(tau2);
-  CG_LOG << ev;
+  auto event = cepgen::utils::generateLPAIREvent();
+  // modify two-lepton system kinematics to generate taus
+  auto oc = event[cepgen::Particle::Role::CentralSystem];
+  oc[0].get().setPdgId(cepgen::PDG::tau, -1);
+  oc[0].get().setMomentum(
+      cepgen::Momentum::fromPxPyPzM(2.193109e1, -6.725967e1, -4.248568e1, cepgen::PDG::get().mass(cepgen::PDG::tau)),
+      false);
+  oc[1].get().setPdgId(cepgen::PDG::tau, +1);
+  oc[1].get().setMomentum(
+      cepgen::Momentum::fromPxPyPzM(-1.402852e1, 5.906575e1, 6.430959e1, cepgen::PDG::get().mass(cepgen::PDG::tau)),
+      false);
 
   double weight = 1.;
-  tauola->run(ev, weight);
+  const auto event_size_before_decay = event.size();
+  tauola->run(event, weight);
+  CG_LOG << event;
+
+  CG_TEST(event.size() != event_size_before_decay, "decay was performed");
 
   CG_TEST_SUMMARY;
 }
