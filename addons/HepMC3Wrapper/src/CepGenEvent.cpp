@@ -128,7 +128,6 @@ CepGenEvent::operator cepgen::Event() const {
   };
 
   auto incoming_beam1 = beams().at(0), incoming_beam2 = beams().at(1);
-  std::unordered_map<size_t, size_t> hepmc_to_cepgen;
   std::vector<int> beam_vtx_ids;
   for (const auto& vertex : vertices()) {
     if (vertex->particles_in().size() == 1) {  // single particle decay
@@ -145,10 +144,9 @@ CepGenEvent::operator cepgen::Event() const {
           intermediate_role = cepgen::Particle::Role::Parton2;
           outgoing_role = cepgen::Particle::Role::OutgoingBeam2;
         }
-        auto cepgen_particle = convert_particle(*hepmc_particle, incoming_role);
-        cepgen_particle.setStatus(cepgen::Particle::Status::PrimordialIncoming);
+        auto cepgen_particle =
+            convert_particle(*hepmc_particle, incoming_role).setStatus(cepgen::Particle::Status::PrimordialIncoming);
         event.addParticle(cepgen_particle);
-        hepmc_to_cepgen[hepmc_particle->id()] = cepgen_particle.id();
         id_beam_in = cepgen_particle.id();
       }
       if (vertex->particles_out_size() >= 2) {  //FIXME handle cases with multiple partons?
@@ -158,9 +156,8 @@ CepGenEvent::operator cepgen::Event() const {
               convert_particle(*outgoing_particle, num_outgoing_particles == 0 ? intermediate_role : outgoing_role);
           cepgen_particle.setStatus(num_outgoing_particles == 0 ? cepgen::Particle::Status::Incoming
                                                                 : cepgen::Particle::Status::Unfragmented);
-          cepgen_particle.addMother(event[id_beam_in]);
-          event.addParticle(cepgen_particle);
-          hepmc_to_cepgen[outgoing_particle->id()] = cepgen_particle.id();  // bookkeeping of the two IDs
+          auto added_particle = event.addParticle(cepgen_particle);
+          event[id_beam_in].addChild(added_particle);
           ++num_outgoing_particles;
         }
       }
@@ -173,18 +170,16 @@ CepGenEvent::operator cepgen::Event() const {
   auto &parton1 = event.oneWithRole(cepgen::Particle::Role::Parton1),
        &parton2 = event.oneWithRole(cepgen::Particle::Role::Parton2);
   cepgen_intermediate.setMomentum(parton1.momentum() + parton2.momentum(), true);
-  cepgen_intermediate.addMother(parton1);
-  cepgen_intermediate.addMother(parton2);
-  event.addParticle(cepgen_intermediate);
+  parton1.addChild(cepgen_intermediate);
+  parton2.addChild(cepgen_intermediate);
 
   for (const auto& vtx : vertices()) {
     if (cepgen::utils::contains(beam_vtx_ids, vtx->id()))
       continue;
     for (auto outgoing_particles : vtx->particles_out()) {
       auto cepgen_particle = convert_particle(*outgoing_particles, cepgen::Particle::Role::CentralSystem);
-      cepgen_particle.addMother(event.oneWithRole(cepgen::Particle::Role::Intermediate));
-      event.addParticle(cepgen_particle);
-      hepmc_to_cepgen[outgoing_particles->id()] = cepgen_particle.id();
+      auto added_particle = event.addParticle(cepgen_particle);
+      event.oneWithRole(cepgen::Particle::Role::Intermediate).addChild(added_particle);
     }
   }
   return event;
@@ -242,19 +237,20 @@ void CepGenEvent::merge(cepgen::Event& event) const {
   // helper function to browse particles decay products and store them into the CepGen event content
   std::function<void(const ConstGenParticlePtr&, cepgen::ParticleRef)> browse_children =
       [&](const ConstGenParticlePtr& hepmc_particle, cepgen::Particle& cepgen_mother) {
+        const auto mother_id = cepgen_mother.id();
         if (hepmc_particle->children().empty())
           return;
-        cepgen_mother.setStatus(cepgen::Particle::Status::Propagator);
         for (const auto& hepmc_child : hepmc_particle->children()) {
           auto cepgen_child = event.addParticle(
               cepgen::Particle(cepgen_mother.role(), hepmc_child->pdg_id(), cepgen::Particle::Status::FinalState)
                   .setMomentum(cepgen::Momentum::fromPxPyPzE(hepmc_child->momentum().x(),
                                                              hepmc_child->momentum().y(),
                                                              hepmc_child->momentum().z(),
-                                                             hepmc_child->momentum().t()))
-                  .addMother(cepgen_mother));
+                                                             hepmc_child->momentum().t())));
+          event[mother_id].addChild(cepgen_child);
           browse_children(hepmc_child, cepgen_child.get());  // launch recursion
         }
+        event[mother_id].setStatus(cepgen::Particle::Status::Propagator);
       };
 
   for (size_t icg = 0; icg < cs_size; ++icg) {  // try to find the associated CepGen event particle
