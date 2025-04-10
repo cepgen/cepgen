@@ -29,6 +29,7 @@
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/RandomGenerator.h"
+#include "CepGen/Utils/StreamCollector.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenHepMC3/CepGenEvent.h"
 
@@ -45,12 +46,16 @@ namespace cepgen::tauola {
         gRandomGenerator = RandomGeneratorFactory::get().build(random_generator);
         Tauola::setRandomGenerator([]() -> double { return gRandomGenerator->uniform(); });
       }
-      if (steer<bool>("debug"))
-        Log::LogAll(true);
-      Tauola::setUnits(Tauola::GEV, Tauola::MM);
-      Tauola::initialize();
-      Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
-      Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
+      Log::LogAll(steer<bool>("debug"));
+      std::string buf;
+      {
+        Tauola::setUnits(Tauola::GEV, Tauola::MM);
+        auto sc = utils::StreamCollector(buf);
+        Tauola::initialize();
+        Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
+        Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
+      }
+      CG_INFO("TauolaFilter") << "Tauola initialised. Output:\n" << std::string(80, '-') << buf << std::string(80, '-');
       if (!Tauola::getIsTauolaIni())
         throw CG_FATAL("TauolaFilter") << "Tauola was not properly initialised!";
       if (const auto& pol_states = steer<ParametersList>("polarisations"); !pol_states.empty()) {  // spin correlations
@@ -70,8 +75,7 @@ namespace cepgen::tauola {
         if (rad_states.has<bool>("enable"))
           Tauola::setRadiation(rad_states.get<bool>("enable"));
         if (const auto rad_cutoff = rad_states.get<double>("cutoff", 0.01); rad_cutoff > 0.)
-          Tauola::setRadiationCutOff(
-              rad_cutoff);  // default energy is 0.01 (in units of half the decaying particle mass)
+          Tauola::setRadiationCutOff(rad_cutoff);
       }
       //--- default parameters
       Tauola::setDecayingParticle(steer<int>("decayingParticle"));
@@ -80,9 +84,10 @@ namespace cepgen::tauola {
       //--- list of tau decay branching fractions
       for (const auto& br_per_mode : steer<std::vector<ParametersList> >("branchingRatios")) {
         const auto mode = br_per_mode.get<int>("mode");
-        const auto br = br_per_mode.get<double>("branchingRatio");
-        Tauola::setTauBr(mode, br);
-        CG_DEBUG("TauolaFilter") << "Branching ratio for mode " << mode << " set to " << br << ".";
+        if (const auto br = br_per_mode.get<double>("branchingRatio"); br > 0.) {
+          Tauola::setTauBr(mode, br);
+          CG_DEBUG("TauolaFilter") << "Branching ratio for mode " << mode << " set to " << br << ".";
+        }
       }
     }
     ~TauolaFilter() override { Log::SummaryAtExit(); }
@@ -113,7 +118,10 @@ namespace cepgen::tauola {
       desc.add("polarisations", pol_desc);
       auto rad_desc = ParametersDescription();
       rad_desc.add("enable", false).setDescription("switch on/off bremsstrahlung in leptonic tau decays?");
-      rad_desc.add("cutoff", -1.).setDescription("radiation energy cut-off above which photon is explicitly generated");
+      rad_desc.add("cutoff", -1.)
+          .setDescription(
+              "radiation energy cut-off above which photon is explicitly generated (in units of half the decaying "
+              "particle mass)");
       desc.add("radiations", rad_desc).setDescription("Bremsstrahlung parameters block");
       auto br_desc = ParametersDescription();
       br_desc.add("mode", -1).setDescription("decay mode");
@@ -129,7 +137,6 @@ namespace cepgen::tauola {
       CepGenEvent hepmc_event(event);  // conversion to a HepMC3 format
       TauolaHepMC3Event tauola_event(&hepmc_event);
       tauola_event.decayTaus();
-      hepmc_event.dump();
       hepmc_event.merge(event);  // merge everything back into the original event
       return true;
     }
