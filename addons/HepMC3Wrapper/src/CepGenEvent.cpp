@@ -131,29 +131,31 @@ CepGenEvent::operator cepgen::Event() const {
   std::unordered_map<size_t, size_t> hepmc_to_cepgen;
   std::vector<int> beam_vtx_ids;
   for (const auto& vertex : vertices()) {
-    if (vertex->particles_in().size() == 1) {
-      auto role1 = cepgen::Particle::Role::UnknownRole, role2 = role1, role3 = role1;
+    if (vertex->particles_in().size() == 1) {  // single particle decay
+      auto incoming_role = cepgen::Particle::Role::UnknownRole, intermediate_role = cepgen::Particle::Role::UnknownRole,
+           outgoing_role = cepgen::Particle::Role::UnknownRole;
       size_t id_beam_in = 0;
-      if (auto& hepmc_particle = vertex->particles_in().at(0); hepmc_particle) {
-        if (hepmc_particle->id() == incoming_beam1->id()) {  // first branch: positive-z system
-          role1 = cepgen::Particle::Role::IncomingBeam1;
-          role2 = cepgen::Particle::Role::Parton1;
-          role3 = cepgen::Particle::Role::OutgoingBeam1;
-        } else if (hepmc_particle->id() == incoming_beam2->id()) {  // second branch: negative-z system
-          role1 = cepgen::Particle::Role::IncomingBeam2;
-          role2 = cepgen::Particle::Role::Parton2;
-          role3 = cepgen::Particle::Role::OutgoingBeam2;
+      if (auto& hepmc_particle = vertex->particles_in().at(0); hepmc_particle) {  // retrieve the origin particle
+        if (hepmc_particle->id() == incoming_beam1->id()) {                       // positive-z beam
+          incoming_role = cepgen::Particle::Role::IncomingBeam1;
+          intermediate_role = cepgen::Particle::Role::Parton1;
+          outgoing_role = cepgen::Particle::Role::OutgoingBeam1;
+        } else if (hepmc_particle->id() == incoming_beam2->id()) {  // negative-z system
+          incoming_role = cepgen::Particle::Role::IncomingBeam2;
+          intermediate_role = cepgen::Particle::Role::Parton2;
+          outgoing_role = cepgen::Particle::Role::OutgoingBeam2;
         }
-        auto cepgen_particle = convert_particle(*hepmc_particle, role1);
+        auto cepgen_particle = convert_particle(*hepmc_particle, incoming_role);
         cepgen_particle.setStatus(cepgen::Particle::Status::PrimordialIncoming);
         event.addParticle(cepgen_particle);
         hepmc_to_cepgen[hepmc_particle->id()] = cepgen_particle.id();
         id_beam_in = cepgen_particle.id();
       }
-      if (vertex->particles_out_size() == 2) {  //FIXME handle cases with multiple partons?
+      if (vertex->particles_out_size() >= 2) {  //FIXME handle cases with multiple partons?
         size_t num_outgoing_particles = 0;
         for (auto outgoing_particle : vertex->particles_out()) {
-          auto cepgen_particle = convert_particle(*outgoing_particle, num_outgoing_particles == 0 ? role2 : role3);
+          auto cepgen_particle =
+              convert_particle(*outgoing_particle, num_outgoing_particles == 0 ? intermediate_role : outgoing_role);
           cepgen_particle.setStatus(num_outgoing_particles == 0 ? cepgen::Particle::Status::Incoming
                                                                 : cepgen::Particle::Status::Unfragmented);
           cepgen_particle.addMother(event[id_beam_in]);
@@ -189,16 +191,18 @@ CepGenEvent::operator cepgen::Event() const {
 }
 
 void CepGenEvent::merge(cepgen::Event& event) const {
-  // set of sanity checks to perform on the HepMC event content
+  // set of sanity checks to ensure the compatibility between the HepMC and CepGen event records
   if (vertices().size() < 3) {
     CG_ERROR("HepMC3:CepGenEvent:merge") << "Failed to retrieve the three primordial vertices in event.";
     return;
   }
-  if (const auto vertex_incoming_beam1 = vertices().at(0); vertex_incoming_beam1->particles_in().size() != 1) {
+  if (const auto vertex_incoming_beam1 = vertices().at(0);
+      !vertex_incoming_beam1 || vertex_incoming_beam1->particles_in().size() != 1) {
     CG_ERROR("HepMC3:CepGenEvent:merge") << "Invalid first incoming beam particles multiplicity: found "
-                                         << vertex_incoming_beam1->particles_in().size() << ", expecting one.";
+                                         << vertex_incoming_beam1->particles_in().size()
+                                         << ", expecting one single beam particle.";
     return;
-  } else {  // set of sanity checks to ensure the compatibility between the HepMC and CepGen event records
+  } else {
     const auto incoming_beam1 = vertex_incoming_beam1->particles_in().at(0);
     if (const auto& cepgen_incoming_beam1 = event.oneWithRole(cepgen::Particle::Role::IncomingBeam1);
         std::fabs(incoming_beam1->momentum().x() - cepgen_incoming_beam1.momentum().px()) > kTolerance ||
@@ -209,9 +213,11 @@ void CepGenEvent::merge(cepgen::Event& event) const {
       return;
     }
   }
-  if (const auto vertex_incoming_beam2 = vertices().at(1); vertex_incoming_beam2->particles_in().size() != 1) {
+  if (const auto vertex_incoming_beam2 = vertices().at(1);
+      !vertex_incoming_beam2 || vertex_incoming_beam2->particles_in().size() != 1) {
     CG_ERROR("HepMC3:CepGenEvent:merge") << "Invalid second incoming beam particles multiplicity: found "
-                                         << vertex_incoming_beam2->particles_in().size() << ", expecting one.";
+                                         << vertex_incoming_beam2->particles_in().size()
+                                         << ", expecting one single beam particle.";
     return;
   } else {
     const auto incoming_beam2 = vertex_incoming_beam2->particles_in().at(0);
@@ -226,12 +232,12 @@ void CepGenEvent::merge(cepgen::Event& event) const {
   }
   const auto vertex_central_system = vertices().at(2);
   const auto central_system = event[cepgen::Particle::Role::CentralSystem];
-  if (central_system.size() != vertex_central_system->particles_out().size()) {
+  const auto cs_size = central_system.size();  // freeze the "primordial" central system size
+  if (cs_size != vertex_central_system->particles_out().size()) {
     CG_ERROR("HepMC3:CepGenEvent:merge")
         << "Central system particles multiplicities differ between CepGen and HepMC3 event records.";
     return;
   }
-  const auto cs_size = central_system.size();  // freeze the "primordial" central system size
 
   // helper function to browse particles decay products and store them into the CepGen event content
   std::function<void(const ConstGenParticlePtr&, cepgen::ParticleRef)> browse_children =

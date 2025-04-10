@@ -134,7 +134,7 @@ CepGenEvent::operator cepgen::Event() const {
     auto cepgen_particle =
         cepgen::Particle(cepgen_role, 0, static_cast<cepgen::Particle::Status>(hepmc_particle.status()));
     cepgen_particle.setPdgId(hepmc_particle.pdg_id());
-    cepgen_particle.setMomentum(convert_momentum(hepmc_particle));
+    cepgen_particle.setMomentum(convert_momentum(hepmc_particle.momentum()));
     return cepgen_particle;
   };
 
@@ -143,31 +143,33 @@ CepGenEvent::operator cepgen::Event() const {
   std::vector<int> beam_vtx_barcodes;
   for (auto it_vertices = vertices_begin(); it_vertices != vertices_end(); ++it_vertices) {
     if (const auto* vertex = *it_vertices; vertex->particles_in_size() == 1) {
-      auto role1 = cepgen::Particle::Role::UnknownRole, role2 = role1, role3 = role1;
+      auto incoming_role = cepgen::Particle::Role::UnknownRole, intermediate_role = cepgen::Particle::Role::UnknownRole,
+           outgoing_role = cepgen::Particle::Role::UnknownRole;
       size_t id_beam_in = 0;
       if (const auto* hepmc_particle = *vertex->particles_in_const_begin(); hepmc_particle) {
         if (hepmc_particle->barcode() == incoming_beam1->barcode()) {  // first branch: positive-z system
-          role1 = cepgen::Particle::Role::IncomingBeam1;
-          role2 = cepgen::Particle::Role::Parton1;
-          role3 = cepgen::Particle::Role::OutgoingBeam1;
+          incoming_role = cepgen::Particle::Role::IncomingBeam1;
+          intermediate_role = cepgen::Particle::Role::Parton1;
+          outgoing_role = cepgen::Particle::Role::OutgoingBeam1;
         } else if (hepmc_particle->barcode() == incoming_beam2->barcode()) {  // second branch: negative-z system
-          role1 = cepgen::Particle::Role::IncomingBeam2;
-          role2 = cepgen::Particle::Role::Parton2;
-          role3 = cepgen::Particle::Role::OutgoingBeam2;
+          incoming_role = cepgen::Particle::Role::IncomingBeam2;
+          intermediate_role = cepgen::Particle::Role::Parton2;
+          outgoing_role = cepgen::Particle::Role::OutgoingBeam2;
         }
-        auto cepgen_particle = convert_particle(*hepmc_particle, role1);
+        auto cepgen_particle = convert_particle(*hepmc_particle, incoming_role);
         cepgen_particle.setStatus(cepgen::Particle::Status::PrimordialIncoming);
         event.addParticle(cepgen_particle);
         hepmc_to_cepgen[hepmc_particle->barcode()] = cepgen_particle.id();
         id_beam_in = cepgen_particle.id();
       }
-      if (vertex->particles_out_size() == 2) {  //FIXME handle cases with multiple partons?
+      if (vertex->particles_out_size() >= 2) {  //FIXME handle cases with multiple partons?
         size_t num_outgoing_particles = 0;
         for (auto it_outgoing_particles = vertex->particles_out_const_begin();
              it_outgoing_particles != vertex->particles_out_const_end();
              ++it_outgoing_particles, ++num_outgoing_particles) {
           const auto* outgoing_particle = *it_outgoing_particles;
-          auto cepgen_particle = convert_particle(*outgoing_particle, num_outgoing_particles == 0 ? role2 : role3);
+          auto cepgen_particle =
+              convert_particle(*outgoing_particle, num_outgoing_particles == 0 ? intermediate_role : outgoing_role);
           cepgen_particle.setStatus(num_outgoing_particles == 0 ? cepgen::Particle::Status::Incoming
                                                                 : cepgen::Particle::Status::Unfragmented);
           cepgen_particle.addMother(event[id_beam_in]);

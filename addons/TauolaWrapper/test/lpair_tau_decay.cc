@@ -51,13 +51,9 @@ int main(int argc, char* argv[]) {
   // modify two-lepton system kinematics to generate taus
   auto oc = event[cepgen::Particle::Role::CentralSystem];
   oc[0].get().setPdgId(cepgen::PDG::tau, -1);
-  oc[0].get().setMomentum(
-      cepgen::Momentum::fromPxPyPzM(2.193109e1, -6.725967e1, -4.248568e1, cepgen::PDG::get().mass(cepgen::PDG::tau)),
-      false);
+  oc[0].get().momentum().setMass(cepgen::PDG::get().mass(cepgen::PDG::tau));
   oc[1].get().setPdgId(cepgen::PDG::tau, +1);
-  oc[1].get().setMomentum(
-      cepgen::Momentum::fromPxPyPzM(-1.402852e1, 5.906575e1, 6.430959e1, cepgen::PDG::get().mass(cepgen::PDG::tau)),
-      false);
+  oc[1].get().momentum().setMass(cepgen::PDG::get().mass(cepgen::PDG::tau));
 
   double weight = 1.;
   const auto event_size_before_decay = event.size();
