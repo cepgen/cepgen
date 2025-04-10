@@ -157,8 +157,8 @@ namespace cepgen {
     float helicity_{0.};                               ///< Helicity
     Role role_{Role::UnknownRole};                     ///< Role in the process
     int status_{static_cast<int>(Status::Undefined)};  ///< Decay/stability status
-    ParticlesIds mothers_;                             ///< List of mother particles
-    ParticlesIds children_;                            ///< List of child particles
+    ParticlesIds mothers_{};                           ///< List of mother particles
+    ParticlesIds children_{};                          ///< List of child particles
     pdgid_t pdg_id_{0};                                ///< PDG id
   };
 
