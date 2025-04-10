@@ -97,8 +97,6 @@ public:
   }
 
 private:
-  void initialise() override {}
-
   const std::unique_ptr<TFile> file_;
   std::vector<std::pair<std::string, TH1*> > hists1d_;
   std::vector<std::pair<std::vector<std::string>, TH2*> > hists2d_;

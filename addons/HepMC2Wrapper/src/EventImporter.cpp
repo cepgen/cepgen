@@ -68,7 +68,6 @@ namespace cepgen::hepmc2 {
     }
 
   private:
-    void initialise() override {}
     const std::unique_ptr<HepMC::IO_GenEvent> reader_;
     bool cross_section_retrieved_{false};
   };

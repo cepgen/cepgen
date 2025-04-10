@@ -63,8 +63,6 @@ namespace cepgen {
     bool operator<<(const Event&) override;
 
   private:
-    void initialise() override {}
-
     std::ofstream file_;
     std::vector<std::pair<std::string, YODA::Histo1D> > hists1d_;
     std::vector<std::pair<std::vector<std::string>, YODA::Histo2D> > hists2d_;

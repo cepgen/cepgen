@@ -44,7 +44,7 @@ namespace cepgen {
     }
 
   protected:
-    virtual void initialise() = 0;
+    virtual void initialise() {};
     virtual void* enginePtr();  ///< Engine object
 
   private:

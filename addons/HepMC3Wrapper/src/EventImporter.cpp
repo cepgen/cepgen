@@ -71,7 +71,6 @@ namespace cepgen::hepmc3 {
     }
 
   private:
-    void initialise() override {}
     const std::unique_ptr<T> reader_;
     bool cross_section_retrieved_{false};
   };

@@ -70,8 +70,6 @@ namespace cepgen::hepmc2 {
     }
 
   private:
-    void initialise() override {}
-
     const std::unique_ptr<T> output_;                       ///< writer object
     const std::shared_ptr<GenCrossSection> cross_section_;  ///< generator cross-section and error
   };
