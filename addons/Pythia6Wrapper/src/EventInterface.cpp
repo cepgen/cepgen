@@ -60,30 +60,29 @@ void EventInterface::prepareHadronisation() {
       CG_WARNING("EventInterface:prepareHadronisation") << "Invalid remnants kinematics for " << role << ".";
       continue;
     }
-    auto& beam_remnant = cepgen_event_[part.id()];
+    const auto particle_id = part.id();
 
     // build 4-vectors and boost decay particles
     const double px = std::sqrt(px2);
     auto pdq = Momentum::fromPThetaPhiE(px, theta, phi, std::hypot(px, mdq)),
          pq = Momentum(-pdq).setEnergy(std::hypot(px, mq));
 
-    // singlet
-    cepgen_event_.addParticle(role)
+    cepgen_event_
+        .addParticle(role)  // singlet
         .get()
-        .addMother(beam_remnant)
         .setPdgId(parton1, +1)
         .setStatus(Particle::Status::Unfragmented)
-        .setMomentum(pq.lorentzBoost(beam_remnant.momentum()));
-
-    // quark doublet
-    cepgen_event_.addParticle(role)
+        .setMomentum(pq.lorentzBoost(cepgen_event_[particle_id].momentum()))
+        .addMother(cepgen_event_[particle_id]);
+    cepgen_event_
+        .addParticle(role)  // quark doublet
         .get()
-        .addMother(beam_remnant)
         .setPdgId(parton2, +1)
         .setStatus(Particle::Status::Unfragmented)
-        .setMomentum(pdq.lorentzBoost(beam_remnant.momentum()));
+        .setMomentum(pdq.lorentzBoost(cepgen_event_[particle_id].momentum()))
+        .addMother(cepgen_event_[particle_id]);
 
-    beam_remnant.setStatus(Particle::Status::Fragmented);
+    cepgen_event_[particle_id].setStatus(Particle::Status::Fragmented);
   }
 }
 
@@ -140,9 +139,9 @@ void EventInterface::fillEventBlock() {
       dbg << "Joining " << utils::s("particle", evt_string.size()) << " with " << cepgen_event_[evt_string[0]].role()
           << " role"
           << " in a same string";
-      for (const auto& part_id : evt_string) {
-        if (part_id != -1)
-          dbg << utils::format("\n\t * %2d (pdgId=%4d)", part_id, pyjets_.k[1][part_id - 1]);
+      for (const auto& particle_id : evt_string) {
+        if (particle_id != -1)
+          dbg << utils::format("\n\t * %2d (pdgId=%4d)", particle_id, pyjets_.k[1][particle_id - 1]);
       }
     });
     pyjoin(evt_string);
