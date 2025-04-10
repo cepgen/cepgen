@@ -101,9 +101,9 @@ public:
       part->add_mass(inGeV(par.momentum().mass()));
       part->add_barcode(0);
       //--- parentage
-      const auto &daughter = par.daughters(), &moth = par.mothers();
-      part->add_daughter1(daughter.empty() ? 0 : *daughter.begin() + 1);
-      part->add_daughter2(daughter.size() > 1 ? *daughter.rbegin() + 1 : 0);
+      const auto &children = par.children(), &moth = par.mothers();
+      part->add_daughter1(children.empty() ? 0 : *children.begin() + 1);
+      part->add_daughter2(children.size() > 1 ? *children.rbegin() + 1 : 0);
       part->add_mother1(moth.empty() ? 0 : *moth.begin() + 1);
       part->add_mother2(moth.size() > 1 ? *moth.rbegin() + 1 : 0);
       //--- vertex

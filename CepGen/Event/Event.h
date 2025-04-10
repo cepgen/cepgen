@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -111,16 +111,16 @@ namespace cepgen {
     void clearMothers(Particle& part);
     /// List of all the daughters from a particle
     /// \param[in] part The particle for which the daughter particles have to be retrieved
-    Particles daughters(const Particle& part) const;
+    Particles children(const Particle& part) const;
     /// List of all the daughters from a particle
     /// \param[in] part The particle for which the daughter particles have to be retrieved
-    ParticlesRefs daughters(const Particle& part);
+    ParticlesRefs children(const Particle& part);
     /// List all the stable daughters of a particle in this event
-    Particles stableDaughters(const Particle& part, bool recursive = false) const;
+    Particles stableChildren(const Particle& part, bool recursive = false) const;
     /// List all the stable daughters of a particle in this event
-    ParticlesRefs stableDaughters(const Particle& part, bool recursive = false);
+    ParticlesRefs stableChildren(const Particle& particle, bool recursive = false);
     /// Remove all daughters from a given particle (also affects the daughters' parentage)
-    void clearDaughters(Particle& part);
+    void clearChildren(Particle& particle);
     /// List of roles defined for the given event (really process-dependant for the central system)
     ParticleRoles roles() const;
 

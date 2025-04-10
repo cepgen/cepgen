@@ -129,8 +129,8 @@ namespace cepgen {
     /// \param[in] px Momentum along the \f$x\f$-axis, in GeV/c
     /// \param[in] py Momentum along the \f$y\f$-axis, in GeV/c
     /// \param[in] pz Momentum along the \f$z\f$-axis, in GeV/c
-    /// \param[in] e Energy, in GeV
-    Particle& setMomentum(double px, double py, double pz, double e = -1.);
+    /// \param[in] energy Energy, in GeV
+    Particle& setMomentum(double px, double py, double pz, double energy = -1.);
     /// Set the 4-momentum associated to the particle
     /// \param[in] p 4-momentum
     inline Particle& setMomentum(double p[4]) { return setMomentum(p[0], p[1], p[2], p[3]); }
@@ -138,13 +138,13 @@ namespace cepgen {
 
     // --- particle relations
 
-    inline bool primary() const { return mothers_.empty(); }      ///< Is this particle a primary particle?
-    Particle& addMother(Particle& part);                          ///< Set the mother particle
-    inline ParticlesIds mothers() const { return mothers_; }      ///< Identifier to the mother particles
-    inline ParticlesIds& mothers() { return mothers_; }           ///< Identifier to the mother particles
-    Particle& addDaughter(Particle& part);                        ///< Add a decay product
-    inline ParticlesIds daughters() const { return daughters_; }  ///< Identifiers list of all daughter particles
-    inline ParticlesIds& daughters() { return daughters_; }       ///< Identifiers list of all daughter particles
+    inline bool primary() const { return mothers_.empty(); }    ///< Is this particle a primary particle?
+    Particle& addMother(Particle& mother_particle);             ///< Set the mother particle
+    inline ParticlesIds mothers() const { return mothers_; }    ///< Identifier to the mother particles
+    inline ParticlesIds& mothers() { return mothers_; }         ///< Identifier to the mother particles
+    Particle& addChild(Particle& child_particle);               ///< Add a decay product
+    inline ParticlesIds children() const { return children_; }  ///< Identifiers list of all child particles
+    inline ParticlesIds& children() { return children_; }       ///< Identifiers list of all child particles
 
     // --- global particle information extraction
 
@@ -158,7 +158,7 @@ namespace cepgen {
     Role role_{Role::UnknownRole};                     ///< Role in the process
     int status_{static_cast<int>(Status::Undefined)};  ///< Decay/stability status
     ParticlesIds mothers_;                             ///< List of mother particles
-    ParticlesIds daughters_;                           ///< List of daughter particles
+    ParticlesIds children_;                            ///< List of child particles
     pdgid_t pdg_id_{0};                                ///< PDG id
   };
 

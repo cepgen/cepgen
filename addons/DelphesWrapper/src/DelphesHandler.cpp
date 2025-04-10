@@ -133,8 +133,8 @@ namespace cepgen {
       //--- parentage part
       cand->M1 = part.primary() ? 0 : *part.mothers().begin();
       cand->M2 = part.mothers().size() < 2 ? 0 : *part.mothers().rbegin();
-      cand->D1 = part.daughters().empty() ? -1 : *part.daughters().begin();
-      cand->D2 = part.daughters().size() < 2 ? -1 : *part.daughters().rbegin();
+      cand->D1 = part.children().empty() ? -1 : *part.children().begin();
+      cand->D2 = part.children().size() < 2 ? -1 : *part.children().rbegin();
       //--- add to the proper collection(s)
       out_all_parts_->Add(cand);
       if (cand->Status == 1)

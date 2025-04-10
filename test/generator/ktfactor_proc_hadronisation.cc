@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
   CG_TEST(evt(cepgen::Particle::Role::OutgoingBeam1).size() > 1, prefix + "decayed diffractive beam system");
   CG_TEST(evt(cepgen::Particle::Role::OutgoingBeam2).size() == 1, prefix + "undecayed elastic beam system");
   cepgen::Momentum daughters_total_momentum;
-  for (const auto& daughter : evt.stableDaughters(evt(cepgen::Particle::Role::OutgoingBeam1)[0], true))
+  for (const auto& daughter : evt.stableChildren(evt(cepgen::Particle::Role::OutgoingBeam1)[0], true))
     daughters_total_momentum += daughter.get().momentum();
   CG_TEST_EQUIV((daughters_total_momentum - evt(cepgen::Particle::Role::OutgoingBeam1)[0].momentum()).p(),
                 0.,

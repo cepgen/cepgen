@@ -27,6 +27,7 @@
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 Event::Event(bool compressed) : compressed_(compressed) {}
 
@@ -119,14 +120,13 @@ Event Event::compress() const {
     return *this;
   Event out(/*compressed=*/true);
   int i = 0;
-  //--- add all necessary particles
   for (const auto& role : {Particle::Role::IncomingBeam1,
                            Particle::Role::IncomingBeam2,
                            Particle::Role::OutgoingBeam1,
                            Particle::Role::OutgoingBeam2,
                            Particle::Role::Parton1,
                            Particle::Role::Parton2,
-                           Particle::Role::CentralSystem}) {
+                           Particle::Role::CentralSystem}) {  // add all necessary particles
     if (particles_.count(role) == 0)
       continue;
     for (const auto& old_part : operator()(role)) {
@@ -136,7 +136,7 @@ Event Event::compress() const {
       new_part.mothers().clear();
     }
   }
-  //--- fix parentage for outgoing beam particles
+  // fix parentage for outgoing beam particles
   if (out[Particle::Role::OutgoingBeam1].size() > 1 || out[Particle::Role::OutgoingBeam2].size() > 1)
     CG_WARNING("Event:compress") << "Event compression not designed for already fragmented beam remnants!\n\t"
                                  << "Particles parentage is not guaranteed to be conserved.";
@@ -146,14 +146,16 @@ Event Event::compress() const {
   if (particles_.count(Particle::Role::OutgoingBeam2) > 0)
     for (auto& part : out[Particle::Role::OutgoingBeam2])
       part.get().addMother(out[Particle::Role::IncomingBeam2][0].get());
-  //--- fix parentage for incoming partons
+
+  // fix parentage for incoming partons
   for (auto& part : out[Particle::Role::Parton1])
     if (particles_.count(Particle::Role::IncomingBeam1) > 0)
       part.get().addMother(out[Particle::Role::IncomingBeam1][0].get());
   if (particles_.count(Particle::Role::IncomingBeam2) > 0)
     for (auto& part : out[Particle::Role::Parton2])
       part.get().addMother(out[Particle::Role::IncomingBeam2][0].get());
-  //--- fix parentage for central system
+
+  // fix parentage for central system
   if (particles_.count(Particle::Role::Parton1) > 0 && particles_.count(Particle::Role::Parton2) > 0)
     for (auto& part : out[Particle::Role::CentralSystem]) {
       part.get().addMother(out[Particle::Role::Parton1][0]);
@@ -164,7 +166,6 @@ Event Event::compress() const {
 
 ParticlesRefs Event::operator[](Particle::Role role) {
   ParticlesRefs out;
-  //--- retrieve all particles with a given role
   for (auto& part : particles_[role])
     out.emplace_back(std::ref(part));
   return out;
@@ -173,24 +174,19 @@ ParticlesRefs Event::operator[](Particle::Role role) {
 const Particles& Event::operator()(Particle::Role role) const {
   if (particles_.count(role) == 0)
     throw CG_FATAL("Event") << "Failed to retrieve a particle with " << role << " role.";
-  //--- retrieve all particles with a given role
   return particles_.at(role);
 }
 
 ParticlesIds Event::ids(Particle::Role role) const {
   ParticlesIds out;
-  //--- retrieve all particles ids with a given role
   if (particles_.count(role) == 0)
     return out;
-
   for (const auto& part : particles_.at(role))
     out.insert(part.id());
-
   return out;
 }
 
 Particle& Event::oneWithRole(Particle::Role role) {
-  //--- retrieve the first particle of a given role
   auto parts_by_role = operator[](role);
   if (parts_by_role.empty())
     throw CG_FATAL("Event") << "No particle retrieved with " << role << " role.";
@@ -201,7 +197,6 @@ Particle& Event::oneWithRole(Particle::Role role) {
 }
 
 const Particle& Event::oneWithRole(Particle::Role role) const {
-  //--- retrieve the first particle of a given role
   const Particles& parts_by_role = operator()(role);
   if (parts_by_role.empty())
     throw CG_FATAL("Event") << "No particle retrieved with " << role << " role.";
@@ -212,19 +207,17 @@ const Particle& Event::oneWithRole(Particle::Role role) const {
 }
 
 Particle& Event::operator[](int id) {
-  for (auto& role_part : particles_)
-    for (auto& part : role_part.second)
+  for (auto& [role, particles] : particles_)
+    for (auto& part : particles)
       if (part.id() == id)
         return part;
-
   throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
 }
 
 const Particle& Event::operator()(int id) const {
-  for (const auto& role_part : particles_) {
-    if (auto it = std::find_if(
-            role_part.second.begin(), role_part.second.end(), [&id](const auto& part) { return part.id() == id; });
-        it != role_part.second.end())
+  for (const auto& [role, particles] : particles_) {
+    if (auto it = std::find_if(particles.begin(), particles.end(), [&id](const auto& part) { return part.id() == id; });
+        it != particles.end())
       return *it;
   }
   throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
@@ -251,24 +244,24 @@ ParticlesRefs Event::mothers(const Particle& part) { return operator[](part.moth
 
 void Event::clearMothers(Particle& part) {
   for (const auto& mid : part.mothers())
-    operator[](mid).daughters().erase(part.id());
+    operator[](mid).children().erase(part.id());
   part.mothers().clear();
 }
 
-Particles Event::daughters(const Particle& part) const { return operator()(part.daughters()); }
+Particles Event::children(const Particle& part) const { return operator()(part.children()); }
 
-ParticlesRefs Event::daughters(const Particle& part) { return operator[](part.daughters()); }
+ParticlesRefs Event::children(const Particle& part) { return operator[](part.children()); }
 
-Particles Event::stableDaughters(const Particle& part, bool recursive) const {
+Particles Event::stableChildren(const Particle& part, bool recursive) const {
   Particles parts;
-  for (const auto& daughter : operator()(part.daughters())) {
-    if (daughter.status() == Particle::Status::FinalState)
-      parts.emplace_back(daughter);
+  for (const auto& child : operator()(part.children())) {
+    if (child.status() == Particle::Status::FinalState)
+      parts.emplace_back(child);
     else if (recursive) {
-      const auto stable_daughters = stableDaughters(daughter, recursive);
+      const auto stable_children = stableChildren(child, recursive);
       parts.insert(parts.end(),
-                   std::make_move_iterator(stable_daughters.begin()),
-                   std::make_move_iterator(stable_daughters.end()));
+                   std::make_move_iterator(stable_children.begin()),
+                   std::make_move_iterator(stable_children.end()));
     }
   }
   std::sort(parts.begin(), parts.end());
@@ -276,16 +269,16 @@ Particles Event::stableDaughters(const Particle& part, bool recursive) const {
   return parts;
 }
 
-ParticlesRefs Event::stableDaughters(const Particle& part, bool recursive) {
+ParticlesRefs Event::stableChildren(const Particle& particle, bool recursive) {
   ParticlesRefs parts;
-  for (const auto& daughter : operator[](part.daughters())) {
-    if (daughter.get().status() == Particle::Status::FinalState)
-      parts.emplace_back(daughter);
+  for (const auto& child : operator[](particle.children())) {
+    if (child.get().status() == Particle::Status::FinalState)
+      parts.emplace_back(child);
     else if (recursive) {
-      const auto stable_daughters = stableDaughters(daughter, recursive);
+      const auto stable_children = stableChildren(child, recursive);
       parts.insert(parts.end(),
-                   std::make_move_iterator(stable_daughters.begin()),
-                   std::make_move_iterator(stable_daughters.end()));
+                   std::make_move_iterator(stable_children.begin()),
+                   std::make_move_iterator(stable_children.end()));
     }
   }
   std::sort(
@@ -296,10 +289,10 @@ ParticlesRefs Event::stableDaughters(const Particle& part, bool recursive) {
   return parts;
 }
 
-void Event::clearDaughters(Particle& part) {
-  for (const auto& did : part.daughters())
-    operator[](did).mothers().erase(part.id());
-  part.daughters().clear();
+void Event::clearChildren(Particle& particle) {
+  for (const auto& did : particle.children())
+    operator[](did).mothers().erase(particle.id());
+  particle.children().clear();
 }
 
 ParticleRoles Event::roles() const {
@@ -310,9 +303,9 @@ ParticleRoles Event::roles() const {
 }
 
 void Event::updateRoles() {
-  for (auto& parts_vs_role : particles_)  // 1st loop to copy particles to correct role container
-    for (const auto& part : parts_vs_role.second)
-      if (part.role() != parts_vs_role.first)
+  for (auto& [role, particles] : particles_)  // 1st loop to copy particles to correct role container
+    for (const auto& part : particles)
+      if (part.role() != role)
         particles_[part.role()].emplace_back(part);
   for (auto& parts_vs_role : particles_)  // 2nd loop to remove wrongly-assigned particles
     parts_vs_role.second.erase(
@@ -340,8 +333,8 @@ ParticleRef Event::addParticle(Particle& part, bool replace) {
 }
 
 ParticleRef Event::addParticle(Particle::Role role, bool replace) {
-  Particle np(role, PDG::invalid);
-  return addParticle(np, replace);
+  Particle new_particle(role, PDG::invalid);
+  return addParticle(new_particle, replace);
 }
 
 size_t Event::size() const {
@@ -356,7 +349,6 @@ Particles Event::particles() const {
   Particles out;
   for (const auto& role_part : particles_)
     out.insert(out.end(), role_part.second.begin(), role_part.second.end());
-
   std::sort(out.begin(), out.end());
   return out;
 }
@@ -367,7 +359,6 @@ Particles Event::stableParticles() const {
     std::copy_if(role_part.second.begin(), role_part.second.end(), std::back_inserter(out), [](const auto& part) {
       return static_cast<short>(part.status()) > 0;
     });
-
   std::sort(out.begin(), out.end());
   return out;
 }
@@ -385,40 +376,35 @@ Particles Event::stableParticlesWithRole(Particle::Role role) const {
 
 Momentum Event::missingMomentum() const {
   Momentum missing_momentum;
-  for (const auto& cp : operator()(Particle::Role::CentralSystem))
-    if (cp.status() == Particle::Status::FinalState) {
-      const auto pdg = cp.integerPdgId();
+  for (const auto& central_particle : operator()(Particle::Role::CentralSystem))
+    if (central_particle.status() == Particle::Status::FinalState) {
+      const auto pdg = central_particle.integerPdgId();
       if (pdg == 12 || pdg == 14 || pdg == 16)  // neutrinos
-        missing_momentum += cp.momentum();
+        missing_momentum += central_particle.momentum();
       if (pdg == 1000022 || pdg == 1000023 || pdg == 1000025 || pdg == 1000035)  // neutralinos
-        missing_momentum += cp.momentum();
+        missing_momentum += central_particle.momentum();
     }
   return missing_momentum;
 }
 
 void Event::checkKinematics() const {
-  // check the kinematics through parentage
-  for (const auto& part : particles()) {
-    ParticlesIds daughters = part.daughters();
-    if (daughters.empty())
+  for (const auto& particle : particles()) {  // check the kinematics through parentage
+    const auto children = particle.children();
+    if (children.empty())
       continue;
     Momentum total_momentum;
-    for (const auto& daughter : daughters) {
-      const auto& d = operator()(daughter);
-      const auto mothers = d.mothers();
+    for (const auto& child : children) {
+      const auto& d = operator()(child);
       total_momentum += d.momentum();
-      if (mothers.size() < 2)
-        continue;
-      for (const auto& moth : mothers)
-        if (moth != part.id())
-          total_momentum -= operator()(moth).momentum();
+      if (const auto mothers = d.mothers(); mothers.size() >= 2)
+        for (const auto& moth : mothers)
+          if (moth != particle.id())
+            total_momentum -= operator()(moth).momentum();
     }
-    const double mass_diff = (total_momentum - part.momentum()).mass();
-    if (fabs(mass_diff) > MIN_PRECISION) {
-      dump();
-      throw CG_FATAL("Event") << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff
-                              << ".";
-    }
+    if (const auto mass_diff = (total_momentum - particle.momentum()).mass(); std::fabs(mass_diff) > MIN_PRECISION)
+      throw CG_FATAL("Event") << "Error in momentum balance for particle " << particle.id()
+                              << ": mass difference=" << mass_diff << " GeV. Event dump:\n"
+                              << *this;
   }
 }
 
@@ -430,30 +416,26 @@ double Event::cmEnergy() const {
 }
 
 namespace cepgen {
-  std::ostream& operator<<(std::ostream& out, const Event& ev) {
-    const auto parts = ev.particles();
+  std::ostream& operator<<(std::ostream& out, const Event& event) {
     std::ostringstream os;
-
     Momentum p_total;
-    for (const auto& part : parts) {
+    for (const auto& part : event.particles()) {
       const ParticlesIds mothers = part.mothers();
       {
         std::ostringstream oss_pdg;
-        if (part.pdgId() == PDG::invalid && !mothers.empty()) {
-          //--- if particles compound
+        if (part.pdgId() == PDG::invalid && !mothers.empty()) {  // particles compound
           std::string delim;
           for (size_t i = 0; i < mothers.size(); ++i)
             try {
-              oss_pdg << delim << static_cast<PDG::Id>(ev(*std::next(mothers.begin(), i)).pdgId()), delim = "/";
+              oss_pdg << delim << static_cast<PDG::Id>(event(*std::next(mothers.begin(), i)).pdgId()), delim = "/";
             } catch (const Exception&) {
-              oss_pdg << delim << ev(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
+              oss_pdg << delim << event(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
             }
           os << utils::format("\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str());
         } else {
-          //--- if single particle/HI
           if (HeavyIon::isHI(part.pdgId()))
             oss_pdg << HeavyIon::fromPdgId(part.pdgId());
-          else
+          else  // single particle
             try {
               oss_pdg << static_cast<PDG::Id>(part.pdgId());
             } catch (const Exception&) {
@@ -463,56 +445,42 @@ namespace cepgen {
         }
       }
       os << "\t";
-      if (part.charge() != static_cast<int>(part.charge())) {
-        if (part.charge() * 2 == static_cast<int>(part.charge() * 2))
-          os << utils::format("%-d/2", static_cast<int>(part.charge() * 2));
-        else if (part.charge() * 3 == static_cast<int>(part.charge() * 3))
-          os << utils::format("%-d/3", static_cast<int>(part.charge() * 3));
-        else
-          os << utils::format("%-.2f", part.charge());
-      } else
+      if (part.charge() == static_cast<int>(part.charge()))  // integer charge
         os << utils::format("%-g", part.charge());
+      else if (part.charge() * 2 == static_cast<int>(part.charge() * 2))  // n/2 charge
+        os << utils::format("%-d/2", static_cast<int>(part.charge() * 2));
+      else if (part.charge() * 3 == static_cast<int>(part.charge() * 3))  // n/3 charge
+        os << utils::format("%-d/3", static_cast<int>(part.charge() * 3));
+      else
+        os << utils::format("%-.2f", part.charge());
       os << "\t";
       {
         std::ostringstream oss;
         oss << part.role();
         os << utils::format("%-8s %6d\t", oss.str().c_str(), part.status());
       }
-      if (!mothers.empty()) {
-        std::ostringstream oss;
-        unsigned short i = 0;
-        for (const auto& moth : mothers) {
-          oss << (i > 0 ? "+" : "") << moth;
-          ++i;
-        }
-        os << utils::format("%6s ", oss.str().c_str());
-      } else
-        os << "       ";
       const auto& mom = part.momentum();
-      os << utils::format(
-          "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), mom.energy(), mom.mass());
-
-      // discard non-primary, decayed particles
-      if (part.status() >= Particle::Status::Undefined) {
-        const int sign = (part.status() == Particle::Status::Undefined) ? -1 : +1;
-        p_total += sign * mom;
-      }
+      os << utils::format("%6s % 9.6e % 9.6e % 9.6e % 9.6e % 12.5f",
+                          (!mothers.empty() ? utils::repr(mothers, "+"s) : ""s).data(),
+                          mom.px(),
+                          mom.py(),
+                          mom.pz(),
+                          mom.energy(),
+                          mom.mass());
+      if (part.status() >= Particle::Status::Undefined)  // discard non-primary, decayed particles
+        p_total += (part.status() == Particle::Status::Undefined ? -1 : +1) * mom;
     }
-    //--- set a threshold to the computation precision
-    p_total.truncate();
+    p_total.truncate();  // set a threshold to the computation precision
     return out << utils::format(
                "Event content:\n"
-               " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E   "
-               "  "
+               " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E     "
                " \t M         \n"
                " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  "
-               "----GeV/c---\t --GeV/c²--"
-               "%s\n"
-               " ----------------------------------------------------------------------------------------------------"
-               "--"
-               "----------------------------\n"
+               "----GeV/c---\t --GeV/c²--%s\n"
+               " %s\n"
                "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e",
                os.str().c_str(),
+               std::string(130, '-').data(),
                p_total.px(),
                p_total.py(),
                p_total.pz(),
@@ -521,8 +489,8 @@ namespace cepgen {
 }  // namespace cepgen
 
 Event::EventMetadata::EventMetadata()
-    : std::unordered_map<std::string, float>{{"time:generation", -1.f},
-                                             {"time:total", -1.f},
-                                             {"weight", 1.f},
-                                             {"alphaEM", static_cast<float>(constants::ALPHA_EM)},
-                                             {"alphaS", static_cast<float>(constants::ALPHA_QCD)}} {}
+    : std::unordered_map<std::string, float>{{"time:generation"s, -1.f},
+                                             {"time:total"s, -1.f},
+                                             {"weight"s, 1.f},
+                                             {"alphaEM"s, constants::ALPHA_EM},
+                                             {"alphaS"s, constants::ALPHA_QCD}} {}

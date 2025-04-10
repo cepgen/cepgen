@@ -44,8 +44,8 @@ namespace cepgen::pythia6 {
   private:
     void fillEventBlock();
 
-    Event& evt_;                   // NOT owning
-    utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
+    Event& cepgen_event_;                       // NOT owning
+    utils::RandomGenerator* random_generator_;  ///< Random number generator engine (not owning)
     std::vector<Particle::Role> roles_;
 
     std::pair<short, short> pickPartonsContent() const;

@@ -235,19 +235,19 @@ void CepGenEvent::merge(cepgen::Event& event) const {
 
   // helper function to browse particles decay products and store them into the CepGen event content
   std::function<void(const ConstGenParticlePtr&, cepgen::ParticleRef)> browse_children =
-      [&](const ConstGenParticlePtr& hepmc_particle, cepgen::ParticleRef cepgen_particle) {
+      [&](const ConstGenParticlePtr& hepmc_particle, cepgen::Particle& cepgen_mother) {
         if (hepmc_particle->children().empty())
           return;
-        cepgen_particle.get().setStatus(cepgen::Particle::Status::Propagator);
+        cepgen_mother.setStatus(cepgen::Particle::Status::Propagator);
         for (const auto& hepmc_child : hepmc_particle->children()) {
-          cepgen::Particle cepgen_child(cepgen_particle.get().role(), 0);
-          cepgen_child.setPdgId(hepmc_child->pdg_id());
-          const auto& hepmc_child_momentum = hepmc_child->momentum();
-          cepgen_child.setStatus(cepgen::Particle::Status::FinalState);
-          cepgen_child.setMomentum(cepgen::Momentum::fromPxPyPzE(
-              hepmc_child_momentum.x(), hepmc_child_momentum.y(), hepmc_child_momentum.z(), hepmc_child_momentum.t()));
-          cepgen_child.addMother(cepgen_particle);
-          browse_children(hepmc_child, event.addParticle(cepgen_child));  // launch recursion
+          auto cepgen_child = event.addParticle(
+              cepgen::Particle(cepgen_mother.role(), hepmc_child->pdg_id(), cepgen::Particle::Status::FinalState)
+                  .setMomentum(cepgen::Momentum::fromPxPyPzE(hepmc_child->momentum().x(),
+                                                             hepmc_child->momentum().y(),
+                                                             hepmc_child->momentum().z(),
+                                                             hepmc_child->momentum().t()))
+                  .addMother(cepgen_mother));
+          browse_children(hepmc_child, cepgen_child.get());  // launch recursion
         }
       };
 
@@ -257,7 +257,7 @@ void CepGenEvent::merge(cepgen::Event& event) const {
          vertex_central_system->particles_out()) {  // loop over the central system particles
       if (std::fabs(central_particle_momentum - central_particle->momentum().length()) > kTolerance)
         continue;
-      browse_children(central_particle, central_system[icg]);
+      browse_children(central_particle, central_system[icg].get());
       break;  // found the association between the HepMC and CepGen particles kinematics
     }
   }

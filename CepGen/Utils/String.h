@@ -169,6 +169,11 @@ namespace cepgen::utils {
   inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
     return repr<T>(vec, [](const T& xv) { return toString(xv); }, sep);
   }
+  /// Helper to print a set of values
+  template <class T>
+  inline std::string repr(const std::set<T>& vec, const std::string& sep = ",") {
+    return repr<T>(std::vector(vec.begin(), vec.end()), sep);
+  }
   std::string randomString(size_t size);      ///< Generate a random string of a given size
   std::string ltrim(const std::string& str);  ///< Trim leading spaces
   std::string rtrim(const std::string& str);  ///< Trim trailing spaces

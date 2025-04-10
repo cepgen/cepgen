@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ extern "C" {
 extern struct {
   int n;  ///< Number of particles in the event
   int npad;
-  int k[5][4000];     ///< Particles' general information (status, PDG id, mother, daughter 1, daughter 2)
+  int k[5][4000];     ///< Particles' general information (status, PDG id, mother, first child, last child)
   double p[5][4000];  ///< Particles' kinematics, in GeV (px, py, pz, E, M)
   double v[5][4000];  ///< Primary vertex location for the particles
 } pyjets_;

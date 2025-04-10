@@ -241,7 +241,7 @@ Momentum Momentum::transverse() const {
 
 double Momentum::eta() const {
   const auto pt_value = pt();
-  return (utils::positive(pt_value) ? std::log((p() + fabs(pz())) / pt_value) : 9999.) * utils::sign(pz());
+  return (utils::positive(pt_value) ? std::log((p() + std::fabs(pz())) / pt_value) : 9999.) * utils::sign(pz());
 }
 
 double Momentum::rapidity() const {
@@ -249,13 +249,13 @@ double Momentum::rapidity() const {
                                    : std::numeric_limits<double>::infinity() * utils::sign(pz());
 }
 
-double Momentum::deltaEta(const Momentum& oth) const { return fabs(eta() - oth.eta()); }
+double Momentum::deltaEta(const Momentum& oth) const { return std::fabs(eta() - oth.eta()); }
 
 double Momentum::deltaPhi(const Momentum& oth) const {
   return normalisePhi(phi() - oth.phi(), {-M_PI, M_PI});  // has to be contained in [-M_PI, M_PI]
 }
 
-double Momentum::deltaPt(const Momentum& oth) const { return fabs(pt() - oth.pt()); }
+double Momentum::deltaPt(const Momentum& oth) const { return std::fabs(pt() - oth.pt()); }
 
 double Momentum::deltaR(const Momentum& oth) const {
   return utils::fastHypot(rapidity() - oth.rapidity(), deltaPhi(oth));
@@ -277,19 +277,19 @@ double Momentum::beta() const {
 }
 
 double Momentum::gamma2() const {
-  const auto mom2 = p2(), ene2 = energy2();
-  if (ene2 == 0.) {
-    if (mom2 == 0.)
+  const auto squared_momentum = p2(), squared_energy = energy2();
+  if (squared_energy == 0.) {
+    if (squared_momentum == 0.)
       return 1.;
     CG_WARNING("Momentum:gamma") << "gamma computed for t=0 momentum.";
   }
-  if (ene2 < mom2) {
+  if (squared_energy < squared_momentum) {
     CG_WARNING("Momentum:gamma") << "gamma computed for an invalid space-like momentum.";
     return 0.;
   }
-  if (ene2 == mom2)
+  if (squared_energy == squared_momentum)
     CG_WARNING("Momentum:gamma") << "gamma computed for a light-like momentum.";
-  return ene2 / (ene2 - mom2);
+  return squared_energy / (squared_energy - squared_momentum);
 }
 
 double Momentum::gamma() const { return std::sqrt(gamma2()); }
@@ -348,8 +348,8 @@ Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
 }
 
 namespace cepgen {
-  Momentum operator*(double c, const Momentum& mom) {
-    return Momentum(c * mom.px(), c * mom.py(), c * mom.pz(), c * mom.energy());
+  Momentum operator*(double scalar, const Momentum& mom) {
+    return Momentum(scalar * mom.px(), scalar * mom.py(), scalar * mom.pz(), scalar * mom.energy());
   }
 
   std::ostream& operator<<(std::ostream& os, const Momentum& mom) {
