@@ -40,17 +40,16 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
 
   weights().push_back(1.);  // unweighted events
 
-  // filling the particles content
   const FourVector origin(0., 0., 0., 0.);
   int central_system_id = 0;
-
   auto vertex_beam1 = make_shared<GenVertex>(origin), vertex_beam2 = make_shared<GenVertex>(origin),
        vertex_central_system = make_shared<GenVertex>(origin);
   size_t idx = 0;
-  for (const auto& cepgen_particle : event.particles()) {
-    const auto& mom_orig = cepgen_particle.momentum();
-    FourVector momentum(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
-    auto hepmc_particle =
+  for (const auto& cepgen_particle : event.particles()) {  // filling the particles content
+    const auto& cepgen_momentum = cepgen_particle.momentum();
+    const auto momentum =
+        FourVector(cepgen_momentum.px(), cepgen_momentum.py(), cepgen_momentum.pz(), cepgen_momentum.energy());
+    const auto hepmc_particle =
         make_shared<GenParticle>(momentum, cepgen_particle.integerPdgId(), static_cast<int>(cepgen_particle.status()));
     hepmc_particle->set_generated_mass(cepgen::PDG::get().mass(cepgen_particle.pdgId()));
     cepgen_id_vs_hepmc_particle_[idx] = hepmc_particle;
@@ -81,11 +80,11 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
         continue;
       case cepgen::Particle::Role::CentralSystem:
       default: {
-        const auto& mother = cepgen_particle.mothers();
-        if (mother.empty())
+        const auto& mothers = cepgen_particle.mothers();
+        if (mothers.empty())
           continue;  // skip disconnected lines
         // check if particle is connected to the two-parton system
-        if (const short m1 = *mother.begin(), m2 = mother.size() > 1 ? *mother.rbegin() : -1;  // get mother(s) id(s)
+        if (const auto m1 = *mothers.begin(), m2 = mothers.size() > 1 ? *mothers.rbegin() : -1;  // get mother(s) id(s)
             m1 == central_system_id ||
             (m2 >= 0 && (m1 < central_system_id && central_system_id <= m2)))  // also supports range
           vertex_central_system->add_particle_out(hepmc_particle);
@@ -117,11 +116,9 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
 
 CepGenEvent::operator cepgen::Event() const {
   cepgen::Event event;
-  auto convert_particle = [](const GenParticle& hepmc_particle,
-                             const cepgen::Particle::Role& cepgen_role =
-                                 cepgen::Particle::Role::UnknownRole) -> cepgen::Particle {
-    auto convert_momentum = [](const FourVector& mom) -> cepgen::Momentum {
-      return cepgen::Momentum::fromPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.e());
+  const auto convert_particle = [](const GenParticle& hepmc_particle, const cepgen::Particle::Role cepgen_role) {
+    const auto convert_momentum = [](const FourVector& momentum) -> cepgen::Momentum {
+      return cepgen::Momentum::fromPxPyPzE(momentum.px(), momentum.py(), momentum.pz(), momentum.e());
     };
     auto cepgen_particle =
         cepgen::Particle(cepgen_role, 0, static_cast<cepgen::Particle::Status>(hepmc_particle.status()));
@@ -130,27 +127,27 @@ CepGenEvent::operator cepgen::Event() const {
     return cepgen_particle;
   };
 
-  auto ip1 = beams().at(0), ip2 = beams().at(1);
+  auto incoming_beam1 = beams().at(0), incoming_beam2 = beams().at(1);
   std::unordered_map<size_t, size_t> hepmc_to_cepgen;
   std::vector<int> beam_vtx_ids;
   for (const auto& vertex : vertices()) {
     if (vertex->particles_in().size() == 1) {
       auto role1 = cepgen::Particle::Role::UnknownRole, role2 = role1, role3 = role1;
       size_t id_beam_in = 0;
-      if (auto& part = vertex->particles_in().at(0); part) {
-        if (part->id() == ip1->id()) {  // first branch: positive-z system
+      if (auto& hepmc_particle = vertex->particles_in().at(0); hepmc_particle) {
+        if (hepmc_particle->id() == incoming_beam1->id()) {  // first branch: positive-z system
           role1 = cepgen::Particle::Role::IncomingBeam1;
           role2 = cepgen::Particle::Role::Parton1;
           role3 = cepgen::Particle::Role::OutgoingBeam1;
-        } else if (part->id() == ip2->id()) {  // second branch: negative-z system
+        } else if (hepmc_particle->id() == incoming_beam2->id()) {  // second branch: negative-z system
           role1 = cepgen::Particle::Role::IncomingBeam2;
           role2 = cepgen::Particle::Role::Parton2;
           role3 = cepgen::Particle::Role::OutgoingBeam2;
         }
-        auto cepgen_particle = convert_particle(*part, role1);
+        auto cepgen_particle = convert_particle(*hepmc_particle, role1);
         cepgen_particle.setStatus(cepgen::Particle::Status::PrimordialIncoming);
         event.addParticle(cepgen_particle);
-        hepmc_to_cepgen[part->id()] = cepgen_particle.id();
+        hepmc_to_cepgen[hepmc_particle->id()] = cepgen_particle.id();
         id_beam_in = cepgen_particle.id();
       }
       if (vertex->particles_out_size() == 2) {  //FIXME handle cases with multiple partons?
@@ -169,23 +166,23 @@ CepGenEvent::operator cepgen::Event() const {
     }
   }
 
-  auto cg_intermediate =
+  auto cepgen_intermediate =
       cepgen::Particle(cepgen::Particle::Role::Intermediate, 0, cepgen::Particle::Status::Propagator);
-  auto &part1 = event.oneWithRole(cepgen::Particle::Role::Parton1),
-       &part2 = event.oneWithRole(cepgen::Particle::Role::Parton2);
-  cg_intermediate.setMomentum(part1.momentum() + part2.momentum(), true);
-  cg_intermediate.addMother(part1);
-  cg_intermediate.addMother(part2);
-  event.addParticle(cg_intermediate);
+  auto &parton1 = event.oneWithRole(cepgen::Particle::Role::Parton1),
+       &parton2 = event.oneWithRole(cepgen::Particle::Role::Parton2);
+  cepgen_intermediate.setMomentum(parton1.momentum() + parton2.momentum(), true);
+  cepgen_intermediate.addMother(parton1);
+  cepgen_intermediate.addMother(parton2);
+  event.addParticle(cepgen_intermediate);
 
   for (const auto& vtx : vertices()) {
     if (cepgen::utils::contains(beam_vtx_ids, vtx->id()))
       continue;
-    for (auto op : vtx->particles_out()) {
-      auto cg_part = convert_particle(*op, cepgen::Particle::Role::CentralSystem);
-      cg_part.addMother(event.oneWithRole(cepgen::Particle::Role::Intermediate));
-      event.addParticle(cg_part);
-      hepmc_to_cepgen[op->id()] = cg_part.id();
+    for (auto outgoing_particles : vtx->particles_out()) {
+      auto cepgen_particle = convert_particle(*outgoing_particles, cepgen::Particle::Role::CentralSystem);
+      cepgen_particle.addMother(event.oneWithRole(cepgen::Particle::Role::Intermediate));
+      event.addParticle(cepgen_particle);
+      hepmc_to_cepgen[outgoing_particles->id()] = cepgen_particle.id();
     }
   }
   return event;
@@ -234,8 +231,7 @@ void CepGenEvent::merge(cepgen::Event& event) const {
         << "Central system particles multiplicities differ between CepGen and HepMC3 event records.";
     return;
   }
-  // freeze the "primordial" central system size
-  const auto cs_size = central_system.size();
+  const auto cs_size = central_system.size();  // freeze the "primordial" central system size
 
   // helper function to browse particles decay products and store them into the CepGen event content
   std::function<void(const ConstGenParticlePtr&, cepgen::ParticleRef)> browse_children =
@@ -257,8 +253,8 @@ void CepGenEvent::merge(cepgen::Event& event) const {
 
   for (size_t icg = 0; icg < cs_size; ++icg) {  // try to find the associated CepGen event particle
     const auto central_particle_momentum = central_system.at(icg).get().momentum().p();
-    // loop over the central system particles
-    for (const auto& central_particle : vertex_central_system->particles_out()) {
+    for (const auto& central_particle :
+         vertex_central_system->particles_out()) {  // loop over the central system particles
       if (std::fabs(central_particle_momentum - central_particle->momentum().length()) > kTolerance)
         continue;
       browse_children(central_particle, central_system[icg]);
@@ -271,22 +267,24 @@ void CepGenEvent::dump() const {
   CG_LOG.log([&](auto& log) {
     log << "HepMC3::CepGenEvent\n"
         << " Attributes:\n";
-    for (const auto& attr : {"AlphaEM", "AlphaQCD"})
-      log << " * " << attr << " = " << attribute_as_string(attr) << "\n";
+    for (const auto& [name, _] : attributes())
+      log << " * " << name << " = " << attribute_as_string(name) << "\n";
     log << " Vertices:";
-    for (const auto& vtxPtr : vertices()) {
-      FourVector in_sys, out_sys;
-      log << "\n  * vertex#" << -vtxPtr->id() << " (status: " << vtxPtr->status() << ")"
+    for (const auto& vertex : vertices()) {
+      FourVector incoming_momentum, outgoing_momentum;
+      log << "\n  * vertex#" << -vertex->id() << " (status: " << vertex->status() << ")"
           << "\n     in: ";
-      for (const auto& ipPtr : vtxPtr->particles_in())
-        log << "\n      * " << ipPtr->pdg_id() << " (status: " << ipPtr->status() << "): " << ipPtr->momentum(),
-            in_sys += ipPtr->momentum();
-      log << "\n     total: " << in_sys << "\n     out:";
-      for (const auto& opPtr : vtxPtr->particles_out())
-        log << "\n      * " << opPtr->pdg_id() << " (status: " << opPtr->status() << "): " << opPtr->momentum(),
-            out_sys += opPtr->momentum();
-      const auto momentum_imbalance = in_sys - out_sys;
-      log << "\n     total: " << out_sys << "\n    (im)balance: " << momentum_imbalance
+      for (const auto& incoming_particle : vertex->particles_in())
+        log << "\n      * " << incoming_particle->pdg_id() << " (status: " << incoming_particle->status()
+            << "): " << incoming_particle->momentum(),
+            incoming_momentum += incoming_particle->momentum();
+      log << "\n     total: " << incoming_momentum << "\n     out:";
+      for (const auto& outgoing_particle : vertex->particles_out())
+        log << "\n      * " << outgoing_particle->pdg_id() << " (status: " << outgoing_particle->status()
+            << "): " << outgoing_particle->momentum(),
+            outgoing_momentum += outgoing_particle->momentum();
+      const auto momentum_imbalance = incoming_momentum - outgoing_momentum;
+      log << "\n     total: " << outgoing_momentum << "\n    (im)balance: " << momentum_imbalance
           << " (norm: " << momentum_imbalance.length() << ").";
     }
     log << "\n" << std::string(70, '-');

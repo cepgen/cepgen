@@ -33,11 +33,11 @@ namespace HepMC {
   /// \date Jul 2019
   class CepGenEvent final : public GenEvent {
   public:
-    explicit CepGenEvent(const cepgen::Event& ev);  ///< Construct an event interface from a CepGen Event object
-    explicit operator cepgen::Event() const;        ///< Extract a CepGen Event object from a HepMC2 GenEvent object
+    explicit CepGenEvent(const cepgen::Event&);  ///< Construct an event interface from a CepGen Event object
+    explicit operator cepgen::Event() const;     ///< Extract a CepGen Event object from a HepMC2 GenEvent object
 
   private:
-    std::unordered_map<unsigned short, GenParticle*> assoc_map_;
+    std::unordered_map<unsigned short, GenParticle*> cepgen_id_vs_hepmc_particle_;
   };
 }  // namespace HepMC
 #endif

@@ -84,7 +84,7 @@ using HepMC2EventExporter = cepgen::hepmc2::EventExporter<T>;
 //----------------------------------------------------------------------
 #include "HepMC/IO_AsciiParticles.h"
 #include "HepMC/IO_GenEvent.h"
-using HepMC2GenEventHandler = HepMC2EventExporter<IO_GenEvent>;
-using HepMC2AsciiHandler = HepMC2EventExporter<IO_AsciiParticles>;
-REGISTER_EXPORTER("hepmc2", HepMC2GenEventHandler);
-REGISTER_EXPORTER("hepmc2_ascii", HepMC2AsciiHandler);
+using HepMC2GenEventExporter = HepMC2EventExporter<IO_GenEvent>;
+using HepMC2AsciiExporter = HepMC2EventExporter<IO_AsciiParticles>;
+REGISTER_EXPORTER("hepmc2", HepMC2GenEventExporter);
+REGISTER_EXPORTER("hepmc2_ascii", HepMC2AsciiExporter);
