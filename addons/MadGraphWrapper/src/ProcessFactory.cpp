@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,16 +18,16 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/ModuleFactory.h"
-#include "CepGenMadGraph/MadGraphProcess.h"
+#include "CepGenMadGraph/Process.h"
 
 namespace cepgen {
-  template class ModuleFactory<MadGraphProcess>;
+  template class ModuleFactory<mg5amc::Process>;
 
   template <>
-  ModuleFactory<MadGraphProcess>::ModuleFactory(const std::string& desc) : description_(desc) {}
+  ModuleFactory<mg5amc::Process>::ModuleFactory(const std::string& desc) : description_(desc) {}
 
   template <>
-  std::vector<std::string> ModuleFactory<MadGraphProcess>::modules() const {
+  std::vector<std::string> ModuleFactory<mg5amc::Process>::modules() const {
     std::vector<std::string> out;
     std::transform(map_.begin(), map_.end(), std::back_inserter(out), [](const auto& val) { return val.first; });
     std::sort(out.begin(), out.end());
@@ -35,19 +35,20 @@ namespace cepgen {
   }
 
   template <>
-  std::unique_ptr<MadGraphProcess> ModuleFactory<MadGraphProcess>::build(const std::string& mod_name,
+  std::unique_ptr<mg5amc::Process> ModuleFactory<mg5amc::Process>::build(const std::string& mod_name,
                                                                          const ParametersList& params) const {
     if (map_.count(mod_name) == 0)
-      throw CG_FATAL("ModuleFactory") << "Failed to build a mg5_aMC process with name '" << mod_name << "'.\n"
-                                      << "Registered modules: " << modules() << ".";
+      throw CG_FATAL("mg5amc:ModuleFactory") << "Failed to build a mg5_aMC process with name '" << mod_name << "'.\n"
+                                             << "Registered modules: " << modules() << ".";
     return map_.at(mod_name)(params_map_.at(mod_name).validate(params));
   }
 
   template <>
-  std::unique_ptr<MadGraphProcess> ModuleFactory<MadGraphProcess>::build(const ParametersList& params) const {
+  std::unique_ptr<mg5amc::Process> ModuleFactory<mg5amc::Process>::build(const ParametersList& params) const {
     const auto mod_name = params.name();
     if (mod_name.empty())
-      throw CG_FATAL("ModuleFactory") << "Failed to retrieve a process name for the mg5_aMC constructors lookup table.";
+      throw CG_FATAL("mg5amc:ModuleFactory")
+          << "Failed to retrieve a process name for the mg5_aMC constructors lookup table.";
     return build(mod_name, params);
   }
 }  // namespace cepgen

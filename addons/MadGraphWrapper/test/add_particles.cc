@@ -23,7 +23,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenMadGraph/MadGraphProcess.h"
+#include "CepGenMadGraph/Process.h"
 
 using namespace std;
 using namespace std::string_literals;

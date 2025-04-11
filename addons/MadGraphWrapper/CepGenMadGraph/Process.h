@@ -16,18 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenMadGraph_MadGraphProcess_h
-#define CepGenMadGraph_MadGraphProcess_h
+#ifndef CepGenMadGraph_Process_h
+#define CepGenMadGraph_Process_h
 
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   class Momentum;
+}  // namespace cepgen
+
+namespace cepgen::mg5amc {
   /// Wrapper around a generic MadGraph process definition
-  class MadGraphProcess : public NamedModule<MadGraphProcess> {
+  class Process : public NamedModule<Process> {
   public:
-    explicit MadGraphProcess(const ParametersList&);
-    virtual ~MadGraphProcess() = default;
+    explicit Process(const ParametersList&);
+    virtual ~Process() = default;
 
     static ParametersDescription description();
 
@@ -38,12 +41,12 @@ namespace cepgen {
     virtual double eval() = 0;
     virtual const std::vector<Momentum>& momenta() = 0;
 
-    MadGraphProcess& setMomentum(size_t i, const Momentum& mom);
+    Process& setMomentum(size_t i, const Momentum& mom);
 
   protected:
     const std::vector<int> incoming_pdgids_, central_pdgids_;
     std::vector<double*> mom_;
   };
-}  // namespace cepgen
+}  // namespace cepgen::mg5amc
 
 #endif

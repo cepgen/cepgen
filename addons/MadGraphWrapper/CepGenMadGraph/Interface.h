@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,16 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenMadGraph_MadGraphInterface_h
-#define CepGenMadGraph_MadGraphInterface_h
+#ifndef CepGenMadGraph_Interface_h
+#define CepGenMadGraph_Interface_h
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/Filesystem.h"
 
-namespace cepgen {
-  class MadGraphInterface : public SteeredObject<MadGraphInterface> {
+namespace cepgen::mg5amc {
+  class Interface : public SteeredObject<Interface> {
   public:
-    explicit MadGraphInterface(const ParametersList&);
+    explicit Interface(const ParametersList&);
 
     static ParametersDescription description();
 
@@ -55,6 +55,6 @@ namespace cepgen {
 
     std::string extra_part_definitions_;
   };
-}  // namespace cepgen
+}  // namespace cepgen::mg5amc
 
 #endif

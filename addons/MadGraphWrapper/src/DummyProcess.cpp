@@ -21,13 +21,13 @@
 // Include it in your source file prior to any linking with libCepGenMadGraph.
 
 #include "CepGen/Physics/Momentum.h"
-#include "CepGenMadGraph/MadGraphProcess.h"
-#include "CepGenMadGraph/MadGraphProcessFactory.h"
+#include "CepGenMadGraph/Process.h"
+#include "CepGenMadGraph/ProcessFactory.h"
 
-namespace cepgen {
-  class MadGraphDummyProcess : public MadGraphProcess {
+namespace cepgen::mg5amc {
+  class DummyProcess : public Process {
   public:
-    using MadGraphProcess::MadGraphProcess;
+    using Process::Process;
 
     double eval() override { return 0.; }
     void initialise(const std::string&) override {}
@@ -36,5 +36,5 @@ namespace cepgen {
   private:
     std::vector<Momentum> momenta_;
   };
-}  // namespace cepgen
-REGISTER_MG5AMC_PROCESS("dummy", MadGraphDummyProcess);
+}  // namespace cepgen::mg5amc
+REGISTER_MG5AMC_PROCESS("dummy", DummyProcess);
