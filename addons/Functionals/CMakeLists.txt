@@ -36,3 +36,14 @@ if(LIBMATHEVAL)
       INCLUDES ${LIBMATHEVAL_INCLUDE}
       COMPONENT libmatheval)
 endif()
+
+#--- searching for fparser
+find_path(FunctionParser_INCLUDE NAMES fparser.hh HINTS $ENV{FunctionParser_DIR} PATH_SUFFIXES include)
+find_path(FunctionParser_SOURCES NAMES fparser.cc HINTS $ENV{FunctionParser_DIR} PATH_SUFFIXES include)
+if(FunctionParser_INCLUDE AND FunctionParser_SOURCES)
+  file(GLOB fparser_SRC ${FunctionParser_SOURCES}/*.cc)
+  cepgen_build(CepGenFunctionParser
+      SOURCES src/FunctionalFunctionParser.cpp ${fparser_SRC}
+      INCLUDES ${FunctionParser_INCLUDE}
+      COMPONENT fparser)
+endif()
