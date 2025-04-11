@@ -36,3 +36,12 @@ if(LIBMATHEVAL)
       INCLUDES ${LIBMATHEVAL_INCLUDE}
       COMPONENT libmatheval)
 endif()
+
+#--- searching for ATMSP
+find_path(ATMSP_INCLUDE NAMES atmsp.h HINTS $ENV{ATMSP_DIR} PATH_SUFFIXES include)
+if(ATMSP_INCLUDE)
+  cepgen_build(CepGenATMSP
+      SOURCES src/FunctionalATMSP.cpp
+      INCLUDES ${ATMSP_INCLUDE}
+      COMPONENT atmsp)
+endif()
