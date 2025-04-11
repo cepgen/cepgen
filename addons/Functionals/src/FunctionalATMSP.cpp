@@ -26,17 +26,17 @@
 namespace cepgen::atmsp {
   class Functional final : public cepgen::utils::Functional {
   public:
-    explicit Functional(const ParametersList& params) : cepgen::utils::Functional(params) {
-      // parsing/bytecode generation with error check
-      ATMSP<double> parser;
-      if (const auto err = parser.parse(byte_code_, expression_, utils::merge(vars_, ", ")); err)
+    explicit Functional(const ParametersList& params)
+        : cepgen::utils::Functional(params), byte_code_(new ATMSB<double>) {
+      ATMSP<double> parser;  // parsing/bytecode generation with error check
+      if (const auto err = parser.parse(*byte_code_, expression_, utils::merge(vars_, ", ")); err)
         throw CG_ERROR("atmsp:Functional") << "Evaluator was not properly initialised. ATMSP error:\n"
                                            << parser.errMessage(err);
     }
     double eval() const override {
       for (size_t i = 0; i < values_.size(); ++i)  // set variable values
-        byte_code_.var[i] = values_.at(i);
-      return byte_code_.run();
+        byte_code_->var[i] = values_.at(i);
+      return byte_code_->run();
     }
 
     static ParametersDescription description() {
@@ -46,7 +46,7 @@ namespace cepgen::atmsp {
     }
 
   private:
-    mutable ATMSB<double> byte_code_;  ///< Bytecode instance with SAME basic type as the parser
+    const std::unique_ptr<ATMSB<double> > byte_code_;  ///< Bytecode instance with SAME basic type as the parser
   };
 }  // namespace cepgen::atmsp
 using ATMSPFunctional = cepgen::atmsp::Functional;
