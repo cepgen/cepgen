@@ -1,5 +1,5 @@
 #--- searching for gammaUPC
-set(GAMMAUPC_DIRS $ENV{GAMMAUPC_PATH} $ENV{GAMMAUPC_DIR} ${GAMMAUPC_DIR})
+set(GAMMAUPC_DIRS $ENV{GAMMAUPC_PATH} $ENV{gammaUPC_DIR} ${GAMMAUPC_DIR})
 find_path(gammaUPC NAMES ElasticPhotonPhotonFlux.f90 HINTS ${GAMMAUPC_DIRS} PATH_SUFFIXES src)
 if (NOT gammaUPC)
     return()
