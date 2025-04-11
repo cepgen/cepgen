@@ -23,13 +23,17 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::fparser {
   class Functional final : public cepgen::utils::Functional {
   public:
     explicit Functional(const ParametersList& params)
         : cepgen::utils::Functional(params), function_parser_(new FunctionParser) {
-      function_parser_->Parse(expression_, utils::merge(vars_, ","));
-      //throw CG_ERROR("atmsp:Functional") << "Evaluator was not properly initialised. ATMSP error:\n" << parser.errMessage(err);
+      if (const auto res = function_parser_->Parse(expression_, utils::merge(vars_, ",")); res != -1)
+        throw CG_ERROR("fparser:Functional")
+            << "Failed to define the function (FunctionParser error: " << function_parser_->ErrorMsg() << ")\n\t"
+            << expression_ << "\n\t" << (res == 0 ? ""s : std::string(res - 1, '-')) << "^";
     }
     double eval() const override { return function_parser_->Eval(values_.data()); }
 
