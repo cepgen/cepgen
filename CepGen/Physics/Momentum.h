@@ -72,9 +72,11 @@ namespace cepgen {
     double operator*(const Momentum&) const;             ///< Scalar product of two 3-momenta
     Momentum operator%(const Momentum&) const;           ///< Vector product of two 3-momenta
     double operator*=(const Momentum&);                  ///< Scalar product of the 3-momentum with another 3-momentum
-    Momentum operator*(double c) const;                  ///< Multiply all components of a 4-momentum by a scalar
-    Momentum& operator*=(double c);                      ///< Multiply all 4-momentum coordinates by a scalar
+    Momentum operator*(double) const;                    ///< Multiply all components of a 4-momentum by a scalar
+    Momentum& operator*=(double);                        ///< Multiply all 4-momentum coordinates by a scalar
     friend Momentum operator*(double, const Momentum&);  ///< Left-multiply all 4-momentum coordinates by a scalar
+    Momentum operator/(double) const;                    ///< Divide all components of a 4-momentum by a scalar
+    Momentum& operator/=(double);                        ///< Divide all 4-momentum coordinates by a scalar
 
     friend std::ostream& operator<<(std::ostream&, const Momentum&);  ///< Human-readable printout of a momentum
 

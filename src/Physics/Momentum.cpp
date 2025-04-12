@@ -136,6 +136,13 @@ Momentum& Momentum::operator*=(double c) {
   return computeP();
 }
 
+Momentum Momentum::operator/(double c) const { return Momentum(px() / c, py() / c, pz() / c, energy() / c); }
+
+Momentum& Momentum::operator/=(double c) {
+  *this = *this / c;
+  return computeP();
+}
+
 double Momentum::threeProduct(const Momentum& mom) const {
   CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t"
                             << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ")\n\t"
