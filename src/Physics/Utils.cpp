@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace cepgen::utils {
   double xBj(double q2, double mp2, double mx2) {
     if (!positive(q2))
       return 0.;
-    return q2 / (q2 + mx2 - mp2);
+    return x_limits.trim(q2 / (q2 + mx2 - mp2));
   }
 
   double energyFromW(double w, double mp2, double m2) {
