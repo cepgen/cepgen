@@ -27,13 +27,16 @@ namespace cepgen::pythia8 {
   class AlphaSUN final : public Coupling {
   public:
     explicit AlphaSUN(const ParametersList& params) : Coupling(params), alpha_s_(new Pythia8::AlphaSUN) {
-      const auto nCHV = steer<int>("Ngauge"), alphaHVorder = nCHV > 1 ? steer<int>("alphaOrder") : 0;
+      const auto num_gauge = steer<int>("Ngauge"), alpha_hv_order = num_gauge > 1 ? steer<int>("alphaOrder") : 0;
       if (steer<bool>("setLambda")) {
         lambda_ = steer<double>("Lambda");
-        alpha_s_->initLambda(nCHV, steer<int>("nFlav"), alphaHVorder, lambda_);
+        alpha_s_->initLambda(num_gauge, steer<int>("nFlav"), alpha_hv_order, lambda_);
       } else {
-        alpha_s_->initAlpha(
-            nCHV, steer<int>("nFlav"), alphaHVorder, steer<double>("alphaFSR"), steer<double>("alphaFSRrefScale"));
+        alpha_s_->initAlpha(num_gauge,
+                            steer<int>("nFlav"),
+                            alpha_hv_order,
+                            steer<double>("alphaFSR"),
+                            steer<double>("alphaFSRrefScale"));
         lambda_ = alpha_s_->Lambda();
       }
     }

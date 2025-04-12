@@ -34,9 +34,9 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(S) running");
-      desc.add("alphaSvalue", 0.13);
-      desc.add("alphaSorder", 1);
-      desc.add("alphaSnfmax", 6);
+      desc.add("alphaSvalue", 0.13).setDescription("value of alpha(s) at Z boson mass");
+      desc.add("alphaSorder", 1).setDescription("evolution order");
+      desc.add("alphaSnfmax", 6).setDescription("maximum number of flavours to consider for evolution");
       desc.add("useCMW", false);
       return desc;
     }

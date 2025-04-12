@@ -34,12 +34,12 @@ namespace cepgen::pythia8 {
   /// Pythia8 handler for the LHE file output
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Sep 2016
-  class LHEFHandler final : public EventExporter {
+  class LHEFEventExporter final : public EventExporter {
   public:
-    explicit LHEFHandler(const ParametersList& params)
+    explicit LHEFEventExporter(const ParametersList& params)
         : EventExporter(params),
           pythia_(new Pythia8::Pythia),
-          lhaevt_(new Pythia8::CepGenEvent),
+          cepgen_event_(new Pythia8::CepGenEvent),
           compress_event_(steer<bool>("compress")),
           filename_(steer<std::string>("filename")) {
       if (utils::fileExtension(filename_) == ".gz") {
@@ -53,11 +53,11 @@ namespace cepgen::pythia8 {
       }
       if (auto file_tmp = std::ofstream(filename_); !file_tmp.is_open())
         throw CG_FATAL("pythia8:LHEFHandler") << "Failed to open output filename '" << filename_ << "' for writing.";
-      lhaevt_->openLHEF(filename_);
+      cepgen_event_->openLHEF(filename_);
     }
-    ~LHEFHandler() override {
-      if (lhaevt_)
-        lhaevt_->closeLHEF(false);  // we do not want to rewrite the init block
+    ~LHEFEventExporter() override {
+      if (cepgen_event_)
+        cepgen_event_->closeLHEF(false);  // we do not want to rewrite the init block
       if (gzip_)
 #ifdef GZIP_BIN
         utils::Caller::call({GZIP_BIN, "-f", filename_});
@@ -77,12 +77,12 @@ namespace cepgen::pythia8 {
       oss_init << "<!--\n" << banner() << "\n-->";
       oss_init << std::endl;  // LHEF is usually not as beautifully parsed as a standard XML...
                               // we're physicists, what do you expect?
-      lhaevt_->addComments(oss_init.str());
-      lhaevt_->initialise(runParameters());
+      cepgen_event_->addComments(oss_init.str());
+      cepgen_event_->initialise(runParameters());
 #if PYTHIA_VERSION_INTEGER < 8300
-      pythia_->setLHAupPtr(lhaevt_.get());
+      pythia_->setLHAupPtr(cepgen_event_.get());
 #else
-      pythia_->setLHAupPtr(lhaevt_);
+      pythia_->setLHAupPtr(cepgen_event_);
 #endif
       pythia_->settings.flag("ProcessLevel:all", false);  // we do not want Pythia to interfere...
       pythia_->settings.flag("PartonLevel:all", false);   // we do not want Pythia to interfere...
@@ -90,26 +90,27 @@ namespace cepgen::pythia8 {
       pythia_->settings.mode("Beams:frameType", 5);       // LHEF event readout
       pythia_->settings.mode("Next:numberCount", 0);      // remove some of the Pythia output
       pythia_->init();
-      lhaevt_->initLHEF();
+      cepgen_event_->initLHEF();
     }
 
     bool operator<<(const Event& ev) override {
-      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
+      cepgen_event_->feedEvent(compress_event_ ? ev : ev.compress(),
+                               Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
       pythia_->next();
-      lhaevt_->eventLHEF();
+      cepgen_event_->eventLHEF();
       return true;
     }
     void setCrossSection(const Value& cross_section) override {
-      lhaevt_->setCrossSection(0, cross_section, cross_section.uncertainty());
+      cepgen_event_->setCrossSection(0, cross_section, cross_section.uncertainty());
     }
 
   private:
     const std::unique_ptr<Pythia8::Pythia> pythia_;
-    const std::shared_ptr<Pythia8::CepGenEvent> lhaevt_;
+    const std::shared_ptr<Pythia8::CepGenEvent> cepgen_event_;
     const bool compress_event_;
     std::string filename_;
     bool gzip_{false};
   };
 }  // namespace cepgen::pythia8
-using cepgen::pythia8::LHEFHandler;
-REGISTER_EXPORTER("lhef", LHEFHandler);
+using Pythia8LHEFEventExporter = cepgen::pythia8::LHEFEventExporter;
+REGISTER_EXPORTER("lhef", Pythia8LHEFEventExporter);

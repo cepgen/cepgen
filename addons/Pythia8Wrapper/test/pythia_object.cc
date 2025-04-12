@@ -15,7 +15,7 @@ int main() {
   const auto cg_pythia = cepgen::EventModifierFactory::get().build("pythia8");
   cg_pythia->readString("Random:seed = " + to_string(seed1));
 
-  auto pythia = cg_pythia->engine<Pythia8::Pythia>();
+  const auto pythia = cg_pythia->engine<Pythia8::Pythia>();
   CG_TEST_EQUAL(pythia->checkVersion(), true, "Pythia 8 object version");
   CG_TEST_EQUAL(pythia->mode("Random:seed"), seed1, "Parameter set on wrapper");
 
