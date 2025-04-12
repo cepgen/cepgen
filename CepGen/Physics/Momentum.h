@@ -94,12 +94,12 @@ namespace cepgen {
     inline double pz() const { return (*this)[Z]; }             ///< Longitudinal momentum (in GeV)
     double pt() const;                                          ///< Transverse momentum (in GeV)
     double pt2() const;                                         ///< Squared transverse momentum (in GeV\f$^2\f$)
-    Momentum transverse() const;                                ///< Transverse coordinates of a momentum
-    std::array<double, 5> pVector() const;                      ///< 5-vector of double precision floats (in GeV)
-    inline double p() const { return p_; }                      ///< 3-momentum norm (in GeV)
-    inline double p2() const { return p_ * p_; }                ///< Squared 3-momentum norm (in GeV\f$^2\f$)
-    Momentum& setEnergy(double);                                ///< Set the energy (in GeV)
-    inline double energy() const { return (*this)[E]; }         ///< Energy (in GeV)
+
+    std::array<double, 5> pVector() const;                             ///< 5-vector of double precision floats (in GeV)
+    inline double p() const { return p_; }                             ///< 3-momentum norm (in GeV)
+    inline double p2() const { return p_ * p_; }                       ///< Squared 3-momentum norm (in GeV\f$^2\f$)
+    Momentum& setEnergy(double);                                       ///< Set the energy (in GeV)
+    inline double energy() const { return (*this)[E]; }                ///< Energy (in GeV)
     inline double energy2() const { return (*this)[E] * (*this)[E]; }  ///< Squared energy (in GeV\f$^2\f$)
     double energyT() const;                                            ///< Transverse energy component (in GeV)
     double energyT2() const;     ///< Squared transverse energy component (in GeV\f$^2\f$)
@@ -115,6 +115,11 @@ namespace cepgen {
     double phi() const;       ///< Azimuthal angle (angle in the transverse plane)
     double eta() const;       ///< Pseudo-rapidity
     double rapidity() const;  ///< Rapidity
+
+    enum coord_t { X = 0, Y = 1, Z = 2, E = 3 };  ///< Coordinates names
+    Momentum transverse(coord_t = Z) const;       ///< Transverse coordinates of a momentum
+    Momentum longitudinal(coord_t = Z) const;     ///< Longitudinal component of a momentum
+
     Momentum& betaGammaBoost(double gamma, double beta_gamma);  ///< Forward \f$\beta-\gamma\f$ boost
     Momentum& lorentzBoost(const Momentum& p);                  ///< Forward Lorentz boost
 
@@ -155,9 +160,8 @@ namespace cepgen {
     }
 
   private:
-    enum coord_t { X = 0, Y = 1, Z = 2, E = 3 };  ///< Coordinates names
-    Momentum& computeP();                         ///< Compute the 3-momentum's norm
-    double p_{0.};                                ///< 3-momentum's norm (in GeV/c)
+    Momentum& computeP();  ///< Compute the 3-momentum's norm
+    double p_{0.};         ///< 3-momentum's norm (in GeV/c)
   };
 }  // namespace cepgen
 

@@ -34,6 +34,8 @@ namespace cepgen::utils {
   double fastHypot(double, double, double);
   /// Compute the square root of the squared difference (sqrt(a^2-b^2))
   double fastSqrtSqDiff(double, double);
+  /// Compute the square root of the squared difference (sqrt(a^2-b^2-c^2))
+  double fastSqrtSqDiff(double, double, double);
 }  // namespace cepgen::utils
 
 #endif

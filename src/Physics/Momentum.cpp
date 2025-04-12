@@ -242,8 +242,33 @@ double Momentum::pt() const { return utils::fastHypot(px(), py()); }
 
 double Momentum::pt2() const { return px() * px() + py() * py(); }
 
-Momentum Momentum::transverse() const {
-  return Momentum::fromPxPyPzE(px(), py(), 0., utils::fastSqrtSqDiff(energy(), pz()));
+Momentum Momentum::transverse(coord_t direction) const {
+  switch (direction) {
+    case X:
+      return Momentum::fromPxPyPzE(0., py(), pz(), utils::fastSqrtSqDiff(energy(), px()));
+    case Y:
+      return Momentum::fromPxPyPzE(px(), 0., pz(), utils::fastSqrtSqDiff(energy(), py()));
+    case Z:
+      return Momentum::fromPxPyPzE(px(), py(), 0., utils::fastSqrtSqDiff(energy(), pz()));
+    default:
+      throw CG_FATAL("Momentum:transverse")
+          << "Invalid direction of interest for the transverse component computation: " << static_cast<int>(direction)
+          << ".";
+  }
+}
+
+Momentum Momentum::longitudinal(coord_t direction) const {
+  switch (direction) {
+    case X:
+      return Momentum::fromPxPyPzE(px(), 0., 0., utils::fastSqrtSqDiff(energy(), py(), pz()));
+    case Y:
+      return Momentum::fromPxPyPzE(0., py(), 0., utils::fastSqrtSqDiff(energy(), px(), pz()));
+    case Z:
+      return Momentum::fromPxPyPzE(0., 0., pz(), utils::fastSqrtSqDiff(energy(), px(), py()));
+    default:
+      throw CG_FATAL("Momentum:longitudinal")
+          << "Invalid longitudinal direction: " << static_cast<int>(direction) << ".";
+  }
 }
 
 double Momentum::eta() const {
