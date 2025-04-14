@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,10 +32,12 @@ namespace cepgen::utils {
   double fastHypot(double, double);
   /// Compute the square root of the squared sum (sqrt(a^2+b^2+c^2))
   double fastHypot(double, double, double);
+
+  enum struct Normalise { no = 0, yes = 1 };
   /// Compute the square root of the squared difference (sqrt(a^2-b^2))
-  double fastSqrtSqDiff(double, double);
+  double fastSqrtSqDiff(double, double, Normalise normalise = Normalise::no);
   /// Compute the square root of the squared difference (sqrt(a^2-b^2-c^2))
-  double fastSqrtSqDiff(double, double, double);
+  double fastSqrtSqDiff(double, double, double, Normalise normalise = Normalise::no);
 }  // namespace cepgen::utils
 
 #endif

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -172,7 +172,7 @@ double PPtoFF::offShellME() const {
 
     const auto kp = 1. / (phi_p.pt2() + eps2), km = 1. / (phi_m.pt2() + eps2);
     const auto phi = Momentum(kp * phi_p - km * phi_m).setEnergy(kp - km);
-    const auto dot = phi.threeProduct(vec_pho), cross = phi.crossProduct(vec_pho);
+    const auto dot = phi.threeProduct(vec_pho), cross = phi.crossProduct(vec_pho, Momentum::Z);
 
     const auto phi_0 = phi.energy(), phi2_0 = phi_0 * phi_0, phi_t = phi.p(), phi2_t = phi_t * phi_t;
 

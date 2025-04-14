@@ -102,32 +102,13 @@ Momentum Momentum::fromPtYPhiM(double pt, double rap, double phi, double m) {
 
 //--- arithmetic operators
 
-Momentum Momentum::operator+(const Momentum& mom) const {
-  return Momentum(px() + mom.px(), py() + mom.py(), pz() + mom.pz(), energy() + mom.energy());
-}
+// unary operators
 
-Momentum& Momentum::operator+=(const Momentum& mom) {
-  *this = *this + mom;
-  return computeP();
-}
+Momentum Momentum::operator+() const { return Momentum(*this); }
 
 Momentum Momentum::operator-() const { return Momentum(-px(), -py(), -pz(), energy()); }
 
-Momentum Momentum::operator-(const Momentum& mom) const {
-  return Momentum(px() - mom.px(), py() - mom.py(), pz() - mom.pz(), energy() - mom.energy());
-}
-
-Momentum& Momentum::operator-=(const Momentum& mom) {
-  *this = *this - mom;
-  return computeP();
-}
-
-Momentum Momentum::operator%(const Momentum& mom) const {
-  return Momentum(
-      py() * mom.pz() - pz() * mom.py(), pz() * mom.px() - px() * mom.pz(), px() * mom.py() - py() * mom.px());
-}
-
-double Momentum::operator*(const Momentum& mom) const { return threeProduct(mom); }
+// operators with scalars
 
 Momentum Momentum::operator*(double c) const { return Momentum(c * px(), c * py(), c * pz(), c * energy()); }
 
@@ -140,6 +121,26 @@ Momentum Momentum::operator/(double c) const { return Momentum(px() / c, py() / 
 
 Momentum& Momentum::operator/=(double c) {
   *this = *this / c;
+  return computeP();
+}
+
+// operators with other momenta
+
+Momentum Momentum::operator+(const Momentum& mom) const {
+  return Momentum(px() + mom.px(), py() + mom.py(), pz() + mom.pz(), energy() + mom.energy());
+}
+
+Momentum& Momentum::operator+=(const Momentum& mom) {
+  *this = *this + mom;
+  return computeP();
+}
+
+Momentum Momentum::operator-(const Momentum& mom) const {
+  return Momentum(px() - mom.px(), py() - mom.py(), pz() - mom.pz(), energy() - mom.energy());
+}
+
+Momentum& Momentum::operator-=(const Momentum& mom) {
+  *this = *this - mom;
   return computeP();
 }
 
@@ -158,7 +159,26 @@ double Momentum::fourProduct(const Momentum& mom) const {
   return energy() * mom.energy() - threeProduct(mom);
 }
 
-double Momentum::crossProduct(const Momentum& mom) const { return px() * mom.py() - py() * mom.px(); }
+double Momentum::crossProduct(const Momentum& mom, coord_t direction) const {
+  switch (direction) {
+    case X:
+      return py() * mom.pz() - pz() * mom.py();
+    case Y:
+      return px() * mom.pz() - pz() * mom.px();
+    case Z:
+      return px() * mom.py() - py() * mom.px();
+    case E:
+    default:
+      throw CG_FATAL("Momentum:crossProduct")
+          << "Unhandled coordinate for the cross-product: only (x, y, z) spatial coordinates are supported.";
+  }
+}
+
+double Momentum::operator*(const Momentum& mom) const { return threeProduct(mom); }
+
+Momentum Momentum::operator%(const Momentum& mom) const {
+  return Momentum(crossProduct(mom, X), crossProduct(mom, Y), crossProduct(mom, Z));
+}
 
 //--- various setters
 
@@ -245,11 +265,11 @@ double Momentum::pt2() const { return px() * px() + py() * py(); }
 Momentum Momentum::transverse(coord_t direction) const {
   switch (direction) {
     case X:
-      return Momentum::fromPxPyPzE(0., py(), pz(), utils::fastSqrtSqDiff(energy(), px()));
+      return Momentum::fromPxPyPzE(0., py(), pz(), utils::fastSqrtSqDiff(energy(), px(), utils::Normalise::yes));
     case Y:
-      return Momentum::fromPxPyPzE(px(), 0., pz(), utils::fastSqrtSqDiff(energy(), py()));
+      return Momentum::fromPxPyPzE(px(), 0., pz(), utils::fastSqrtSqDiff(energy(), py(), utils::Normalise::yes));
     case Z:
-      return Momentum::fromPxPyPzE(px(), py(), 0., utils::fastSqrtSqDiff(energy(), pz()));
+      return Momentum::fromPxPyPzE(px(), py(), 0., utils::fastSqrtSqDiff(energy(), pz(), utils::Normalise::yes));
     default:
       throw CG_FATAL("Momentum:transverse")
           << "Invalid direction of interest for the transverse component computation: " << static_cast<int>(direction)
@@ -260,11 +280,11 @@ Momentum Momentum::transverse(coord_t direction) const {
 Momentum Momentum::longitudinal(coord_t direction) const {
   switch (direction) {
     case X:
-      return Momentum::fromPxPyPzE(px(), 0., 0., utils::fastSqrtSqDiff(energy(), py(), pz()));
+      return Momentum::fromPxPyPzE(px(), 0., 0., utils::fastSqrtSqDiff(energy(), py(), pz(), utils::Normalise::yes));
     case Y:
-      return Momentum::fromPxPyPzE(0., py(), 0., utils::fastSqrtSqDiff(energy(), px(), pz()));
+      return Momentum::fromPxPyPzE(0., py(), 0., utils::fastSqrtSqDiff(energy(), px(), pz(), utils::Normalise::yes));
     case Z:
-      return Momentum::fromPxPyPzE(0., 0., pz(), utils::fastSqrtSqDiff(energy(), px(), py()));
+      return Momentum::fromPxPyPzE(0., 0., pz(), utils::fastSqrtSqDiff(energy(), px(), py(), utils::Normalise::yes));
     default:
       throw CG_FATAL("Momentum:longitudinal")
           << "Invalid longitudinal direction: " << static_cast<int>(direction) << ".";
