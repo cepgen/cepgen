@@ -39,7 +39,6 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Suri-Yennie");
-      desc.add("hasW1W2", true);
       desc.add("C1", 0.86926);
       desc.add("C2", 2.23422);
       desc.add("D1", 0.12549);
@@ -48,6 +47,7 @@ namespace cepgen::strfun {
       desc.add("Bp", 0.63);
       return desc;
     }
+    bool hasW1W2() const override { return true; }
 
     inline void eval() override {
       const auto mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), dm2 = mx2 - mp2_, en = args_.q2 + dm2;  // [GeV^2]

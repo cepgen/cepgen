@@ -36,6 +36,7 @@ namespace cepgen::strfun {
     /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
     friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
 
+    virtual bool hasW1W2() const { return false; }  ///< provides modelling for W_1/W_2?
     /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
     inline const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
@@ -98,7 +99,6 @@ namespace cepgen::strfun {
     double nu(double xbj, double q2) const;
 
   private:
-    bool has_w1_w2_;
     /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
     const std::unique_ptr<sigrat::Parameterisation> r_ratio_;
 

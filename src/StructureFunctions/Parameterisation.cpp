@@ -28,7 +28,6 @@ using namespace cepgen::strfun;
 
 Parameterisation::Parameterisation(const ParametersList& params)
     : NamedModule(params),
-      has_w1_w2_(steer<bool>("hasW1W2")),
       r_ratio_(SigmaRatiosFactory::get().build(steer<ParametersList>("sigmaRatio"))),
       mp_(PDG::get().mass(PDG::proton)),
       mp2_(mp_ * mp_),
@@ -67,7 +66,7 @@ double Parameterisation::FL(double xbj, double q2) {
 }
 
 double Parameterisation::W1(double xbj, double q2) {
-  if (has_w1_w2_)
+  if (hasW1W2())
     return operator()(xbj, q2).vals_.w1;
   double r_error;
   const auto r_ratio = (*r_ratio_)(xbj, q2, r_error), nu_value = nu(xbj, q2);
@@ -75,7 +74,7 @@ double Parameterisation::W1(double xbj, double q2) {
 }
 
 double Parameterisation::W2(double xbj, double q2) {
-  if (has_w1_w2_)
+  if (hasW1W2())
     return operator()(xbj, q2).vals_.w2;
   return operator()(xbj, q2).vals_.f2 / nu(xbj, q2);
 }
