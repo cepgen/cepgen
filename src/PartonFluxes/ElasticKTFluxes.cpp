@@ -84,12 +84,11 @@ struct BudnevElasticNucleonKTFlux : ElasticNucleonKTFlux {
 class BudnevElasticLeptonKTFlux final : public BudnevElasticNucleonKTFlux {
 public:
   explicit BudnevElasticLeptonKTFlux(const ParametersList& params)
-      : BudnevElasticNucleonKTFlux(params), ml2_(std::pow(steer<ParticleProperties>("pdgId").mass, 2)) {}
+      : BudnevElasticNucleonKTFlux(params), ml2_(std::pow(PDG::get().mass(form_factors_->pdgId()), 2)) {}
   static ParametersDescription description() {
     auto desc = BudnevElasticNucleonKTFlux::description();
     desc.setDescription("Lepton el. photon emission (Budnev flux)");
     desc.add("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
-    desc.addAs<pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
     return desc;
   }
   double mass2() const override { return ml2_; }
@@ -103,7 +102,7 @@ class ElasticHeavyIonKTFlux final : public ElasticNucleonKTFlux {
 public:
   explicit ElasticHeavyIonKTFlux(const ParametersList& params)
       : ElasticNucleonKTFlux(params),
-        hi_(HeavyIon::fromPdgId(steer<pdgid_t>("heavyIon"))),
+        hi_(HeavyIon::fromPdgId(form_factors_->pdgId())),
         mass2_(hi_.mass() * hi_.mass()) {
     CG_DEBUG("ElasticHeavyIonKTFlux") << "KT-factorised elastic photon-from-HI flux evaluator built for HI=" << hi_
                                       << ", (mass=" << hi_.mass()
@@ -113,7 +112,6 @@ public:
   static ParametersDescription description() {
     auto desc = ElasticNucleonKTFlux::description();
     desc.setDescription("HI el. photon emission");
-    desc.addAs<pdgid_t>("heavyIon", HeavyIon::Pb());
     desc.add("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
     return desc;
   }

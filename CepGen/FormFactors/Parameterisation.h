@@ -37,6 +37,7 @@ namespace cepgen::formfac {
 
     virtual const FormFactors& operator()(double /*q2*/);      ///< Compute all form factors for a given \f$Q^2\f$ value
     inline virtual bool fragmenting() const { return false; }  ///< Is the nucleon surviving the exchange?
+    pdgid_t pdgId() const { return pdg_id_; }                  ///< Incoming particle's PDG identifier
 
   protected:
     static constexpr double MU = 2.792847337;  ///< Proton magnetic moment

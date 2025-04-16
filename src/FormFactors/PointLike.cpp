@@ -18,6 +18,7 @@
 
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace cepgen::formfac {
   class PointLike : public Parameterisation {
@@ -44,6 +45,7 @@ namespace cepgen::formfac {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Point-like fermion");
+      desc.addAs<pdgid_t>("pdgId", PDG::electron);
       return desc;
     }
   };
