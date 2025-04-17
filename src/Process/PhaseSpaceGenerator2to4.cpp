@@ -145,9 +145,6 @@ private:
       proc_->pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, phi1, PDG::get().mass(particles_.at(0)));
       proc_->pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, phi2, PDG::get().mass(particles_.at(1)));
     }
-    if (!proc_->validatedBeamKinematics())
-      return 0.;
-
     if (randomise_charge_) {  // randomise the charge of outgoing system
       const auto sign = proc_->randomGenerator().uniformInt(0, 1) == 1;
       proc_->event()[Particle::Role::CentralSystem][0].get().setAntiparticle(sign);

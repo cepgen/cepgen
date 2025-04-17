@@ -100,24 +100,22 @@ void FactorisedProcess::fillKinematics() {
     pY().setMass2(mY2());
 
   // parton systems
-  auto& part1 = event().oneWithRole(Particle::Role::Parton1);
-  auto& part2 = event().oneWithRole(Particle::Role::Parton2);
-  part1.setMomentum(pA() - pX(), true);
-  part2.setMomentum(pB() - pY(), true);
+  auto& parton1 = event().oneWithRole(Particle::Role::Parton1);
+  auto& parton2 = event().oneWithRole(Particle::Role::Parton2);
+  parton1.setMomentum(pA() - pX(), true);
+  parton2.setMomentum(pB() - pY(), true);
 
   if (symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) {  // symmetrise the el-in and in-el cases
     std::swap(pX(), pY());
     std::swap(q1(), q2());
     std::swap(pc(0), pc(1));
-    for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
-      mom->mirrorZ();
+    for (auto* momentum : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
+      momentum->mirrorZ();
   }
-
-  // add couplings to metadata
-  if (store_alphas_) {
-    const auto two_part_mass = (part1.momentum() + part2.momentum()).mass();
-    event().metadata["alphaEM"] = alphaEM(two_part_mass);
-    event().metadata["alphaS"] = alphaS(two_part_mass);
+  if (store_alphas_) {  // add couplings to metadata
+    const auto two_parton_mass = (parton1.momentum() + parton2.momentum()).mass();
+    event().metadata["alphaEM"] = alphaEM(two_parton_mass);
+    event().metadata["alphaS"] = alphaS(two_parton_mass);
   }
 }
 
@@ -128,10 +126,7 @@ double FactorisedProcess::that() const { return phase_space_generator_->that(); 
 double FactorisedProcess::uhat() const { return phase_space_generator_->uhat(); }
 
 bool FactorisedProcess::validatedBeamKinematics() {
-  // define a window in central system invariant mass
   const auto invariant_mass = (q1() + q2()).mass();
-  if (!kinematics().cuts().central.mass_sum.contains(invariant_mass))
-    return false;
 
   // compute and sanitise the momentum losses
   x1() = x2() = 0.;
@@ -170,25 +165,10 @@ bool FactorisedProcess::validatedBeamKinematics() {
         << "Invalid Y system squared mass: " << pY().mass2() << "/" << mY2() << ".";
     return false;
   }
-
-  // compute the four-momenta of the intermediate partons
-  const double norm = 1. / wCM() / wCM() * inverseS(), prefactor = 0.5 / std::sqrt(norm);
-  {  // positive-z incoming parton collinear kinematics
-    const double tau1 = norm * q1().p2() / x1();
-    q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
-  }
-  {  // negative-z incoming parton collinear kinematics
-    const double tau2 = norm * q2().p2() / x2();
-    q2().setPz(-prefactor * (x2() - tau2)).setEnergy(+prefactor * (x2() + tau2));
-  }
-
   CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
-      << "Squared c.m. energy = " << s() << " GeV^2\n\t"
-      << "- positive-z parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1() << ", p = " << q1().p()
-      << "\n\t"
-      << "- negative-z parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2() << ", p = " << q2().p()
-      << ".";
-
+      << "Squared c.m. energy = " << s() << " GeV^2\n"
+      << "\tpos-z parton: " << q1() << ", m^2=" << q1().mass2() << "GeV, x1=" << x1() << ", p=" << q1().p() << "GeV\n"
+      << "\tneg-z parton: " << q2() << ", m^2=" << q2().mass2() << "GeV, x2=" << x2() << ", p=" << q2().p() << "GeV.";
   return true;
 }
 
