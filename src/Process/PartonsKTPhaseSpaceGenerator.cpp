@@ -22,6 +22,7 @@
 #include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
@@ -72,6 +73,7 @@ void PartonsKTPhaseSpaceGenerator::initialise() {
   // pick a parton flux parameterisation for each beam
   auto set_flux_properties = [](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
     auto params = beam.partonFluxParameters();
+    static const auto params_e_el = KTFluxFactory::get().describeParameters("BudnevElasticLepton");
     static const auto params_p_el = KTFluxFactory::get().describeParameters("BudnevElastic");
     static const auto params_p_inel = KTFluxFactory::get().describeParameters("BudnevInelastic");
     static const auto params_hi_el = KTFluxFactory::get().describeParameters("ElasticHeavyIon");
@@ -79,14 +81,16 @@ void PartonsKTPhaseSpaceGenerator::initialise() {
       if (beam.elastic()) {
         if (HeavyIon::isHI(beam.integerPdgId()))
           params = params_hi_el.validate(params);
+        else if (const auto pdg_id = std::abs(beam.integerPdgId());
+                 pdg_id == PDG::electron || pdg_id == PDG::muon || pdg_id == PDG::tau)
+          params = params_e_el.validate(params);
         else
           params = params_p_el.validate(params);
       } else
         params = params_p_inel.validate(params);
       //TODO: fermions/pions
     }
-    flux = KTFluxFactory::get().build(params);
-    if (!flux)
+    if (flux = KTFluxFactory::get().build(params); !flux)
       throw CG_FATAL("PartonsKTPhaseSpaceGenerator:init")
           << "Failed to initiate a parton flux object with properties: " << params << ".";
     if (!flux->ktFactorised())

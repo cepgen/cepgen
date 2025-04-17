@@ -22,6 +22,7 @@
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
@@ -69,6 +70,11 @@ void PartonsCollinearPhaseSpaceGenerator::initialise() {
   // pick a parton flux parameterisation for each beam
   auto set_flux_properties = [&kin](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
     auto params = beam.partonFluxParameters();
+    const auto params_e_el = CollinearFluxFactory::get().describeParameters(
+        "EPAFlux",
+        ParametersList().set(
+            "formFactors",
+            ParametersList().setName("PointLikeFermion").set<pdgid_t>("pdgId", std::abs(beam.integerPdgId()))));
     const auto params_p_el = CollinearFluxFactory::get().describeParameters(
         "EPAFlux", ParametersList().set("formFactors", beam.formFactors()));
     const auto params_p_inel = CollinearFluxFactory::get().describeParameters(
@@ -83,14 +89,16 @@ void PartonsCollinearPhaseSpaceGenerator::initialise() {
       if (beam.elastic()) {
         if (HeavyIon::isHI(beam.integerPdgId()))
           params = params_hi_el.validate(params);
+        else if (const auto pdg_id = std::abs(beam.integerPdgId());
+                 pdg_id == PDG::electron || pdg_id == PDG::muon || pdg_id == PDG::tau)
+          params = params_e_el.validate(params);
         else
           params = params_p_el.validate(params);
       } else
         params = params_p_inel.validate(params);
       //TODO: fermions/pions
     }
-    flux = CollinearFluxFactory::get().build(params);
-    if (!flux)
+    if (flux = CollinearFluxFactory::get().build(params); !flux)
       throw CG_FATAL("PartonsCollinearPhaseSpaceGenerator:init")
           << "Failed to initiate a parton flux object with properties: " << params << ".";
     if (flux->ktFactorised())
