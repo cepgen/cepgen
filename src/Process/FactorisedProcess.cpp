@@ -127,22 +127,6 @@ double FactorisedProcess::that() const { return phase_space_generator_->that(); 
 
 double FactorisedProcess::uhat() const { return phase_space_generator_->uhat(); }
 
-ParametersDescription FactorisedProcess::description() {
-  auto desc = Process::description();
-  desc.setDescription("Unnamed factorised process");
-  desc.add("kinematics",
-           Kinematics::description()
-               .addParametersDescriptionVector(
-                   "partonFluxes",
-                   PartonFluxFactory::get().describeParameters("BudnevElastic"),
-                   std::vector(2, PartonFluxFactory::get().describeParameters("BudnevElastic").parameters()))
-               .setDescription("Parton fluxes modelling"));
-  desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4"));
-  desc.add("symmetrise", false).setDescription("Symmetrise along z the central system?");
-  desc.add("storeAlphas", false).setDescription("store electromagnetic & strong coupling constants in event content?");
-  return desc;
-}
-
 bool FactorisedProcess::validatedBeamKinematics() {
   // define a window in central system invariant mass
   const auto invariant_mass = (q1() + q2()).mass();
@@ -206,4 +190,20 @@ bool FactorisedProcess::validatedBeamKinematics() {
       << ".";
 
   return true;
+}
+
+ParametersDescription FactorisedProcess::description() {
+  auto desc = Process::description();
+  desc.setDescription("Unnamed factorised process");
+  desc.add("kinematics",
+           Kinematics::description()
+               .addParametersDescriptionVector(
+                   "partonFluxes",
+                   PartonFluxFactory::get().describeParameters("BudnevElastic"),
+                   std::vector(2, PartonFluxFactory::get().describeParameters("BudnevElastic").parameters()))
+               .setDescription("Parton fluxes modelling"));
+  desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4"));
+  desc.add("symmetrise", false).setDescription("Symmetrise along z the central system?");
+  desc.add("storeAlphas", false).setDescription("store electromagnetic & strong coupling constants in event content?");
+  return desc;
 }
