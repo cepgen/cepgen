@@ -43,17 +43,16 @@ void MCDFileParser::parse(const std::string& path) {
       while (ss >> buf)  // split for each PDG id
         pdg_ids.emplace_back(std::stoi(buf));
     }
-    {                                              // mass + error(s)
-      double mass_err_low{0.}, mass_err_high{0.};  // unused
-      const auto mass_substr = cepgen::utils::trim(line.substr(MASS_BEG, MASS_END));
-      if (!mass_substr.empty()) {
+    {  // mass + error(s)
+      if (const auto mass_substr = cepgen::utils::trim(line.substr(MASS_BEG, MASS_END)); !mass_substr.empty()) {
+        double mass_err_low{0.}, mass_err_high{0.};
         std::istringstream oss(mass_substr);
         oss >> mass >> mass_err_low >> mass_err_high;
       }
     }
-    {                                                // width + error(s)
-      double width_err_low{0.}, width_err_high{0.};  // unused
+    {  // width + error(s)
       if (const auto width_substr = cepgen::utils::trim(line.substr(WIDTH_BEG, WIDTH_END)); !width_substr.empty()) {
+        double width_err_low{0.}, width_err_high{0.};
         std::istringstream oss(width_substr);
         oss >> width >> width_err_low >> width_err_high;
       }

@@ -43,9 +43,6 @@ Generator::Generator(bool safe_mode) : parameters_(new RunParameters) {
     init = true;
     CG_DEBUG("Generator:init") << "Generator initialised";
   }
-  //--- random number initialization
-  std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
-  srandom(time.time_since_epoch().count());
 }
 
 Generator::Generator(RunParameters* ip) : parameters_(ip) {}
@@ -64,7 +61,7 @@ void Generator::clearRun() {
 
   worker_->setRunParameters(parameters_.get());
   worker_->setIntegrator(integrator_.get());
-  cross_section_ = Value{-1., -1.};
+  cross_section_ = Value{};
   parameters_->prepareRun();
   initialised_ = false;
 }

@@ -84,8 +84,7 @@ int StreamCollector::secure_dup(int src) {
   bool fd_blocked = false;
   do {
     ret = ::dup(src);
-    fd_blocked = (errno == EINTR || errno == EBUSY);
-    if (fd_blocked)
+    if (fd_blocked = (errno == EINTR || errno == EBUSY); fd_blocked)
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
   } while (ret < 0);
   return ret;

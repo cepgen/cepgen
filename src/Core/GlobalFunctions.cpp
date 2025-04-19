@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,9 +43,9 @@ namespace cepgen {
     if (utils::contains(loaded_libraries, path))
       return true;
 #ifdef _WIN32
-    const auto fullpath = match ? path + ".dll" : path;
+    const auto full_path = match ? path + ".dll" : path;
 #elif defined(__APPLE__)
-    const auto fullpath = match ? "lib" + path + ".dylib" : path;
+    const auto full_path = match ? "lib" + path + ".dylib" : path;
 #else
     const auto full_path = match ? "lib" + path + ".so" : path;
 #endif
