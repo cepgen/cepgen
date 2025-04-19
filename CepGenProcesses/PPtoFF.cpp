@@ -28,8 +28,11 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
-auto make_pdgids_pair = [](pdgid_t pair) { return spdgids_t{(spdgid_t)pair, -(spdgid_t)pair}; };
+auto make_pdgids_pair = [](pdgid_t pair) {
+  return spdgids_t{static_cast<spdgid_t>(pair), -static_cast<spdgid_t>(pair)};
+};
 
 /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
 class PPtoFF final : public cepgen::proc::FactorisedProcess {
@@ -83,7 +86,7 @@ private:
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
                                << "Produced particles: " << phase_space_generator_->central() << ".\n\t"
-                               << "ME computation method: " << (int)method_ << ".";
+                               << "ME computation method: " << static_cast<int>(method_) << ".";
 
     // constrain central particles cuts
     if (!kinematics().cuts().central.pt_diff.valid())
@@ -96,7 +99,7 @@ private:
       case Mode::offShell:
         return offShellME();
       default:
-        throw CG_FATAL("PPtoFF") << "Invalid ME calculation method (" << (int)method_ << ")!";
+        throw CG_FATAL("PPtoFF") << "Invalid ME calculation method (" << static_cast<int>(method_) << ")!";
     }
   }
   double onShellME() const;
@@ -108,22 +111,22 @@ private:
   struct OffShellParameters : SteeredObject<OffShellParameters> {
     explicit OffShellParameters(const ParametersList& params) : SteeredObject(params) {
       (*this)
-          .add("mat1", mat1)
-          .add("mat2", mat2)
-          .add("termLL", term_ll)
-          .add("termLT", term_lt)
-          .add("termTT", term_tt1)
-          .add("termtt", term_tt2);
+          .add("mat1"s, mat1)
+          .add("mat2"s, mat2)
+          .add("termLL"s, term_ll)
+          .add("termLT"s, term_lt)
+          .add("termTT"s, term_tt1)
+          .add("termtt"s, term_tt2);
     }
 
     static ParametersDescription description() {
       auto desc = ParametersDescription();
-      desc.add("mat1", 1).setDescription("symmetry factor for the first incoming photon");
-      desc.add("mat2", 1).setDescription("symmetry factor for the second incoming photon");
-      desc.add("termLL", 1).setDescription("fully longitudinal relative weight");
-      desc.add("termLT", 1).setDescription("cross-polarisation relative weight");
-      desc.add("termTT", 1).setDescription("fully transverse relative weight");
-      desc.add("termtt", 1).setDescription("fully transverse relative weight");
+      desc.add("mat1"s, 1).setDescription("symmetry factor for the first incoming photon");
+      desc.add("mat2"s, 1).setDescription("symmetry factor for the second incoming photon");
+      desc.add("termLL"s, 1).setDescription("fully longitudinal relative weight");
+      desc.add("termLT"s, 1).setDescription("cross-polarisation relative weight");
+      desc.add("termTT"s, 1).setDescription("fully transverse relative weight");
+      desc.add("termtt"s, 1).setDescription("fully transverse relative weight");
       return desc;
     }
 
@@ -143,8 +146,8 @@ double PPtoFF::onShellME() const {
   if (t_hat == mf2_ || u_hat == mf2_)
     return 0.;
   const auto q = std::sqrt(t_hat);
-  const auto prefac = g_part1_(q) * g_part2_(q);
-  if (!utils::positive(prefac))
+  const auto prefactor = g_part1_(q) * g_part2_(q);
+  if (!utils::positive(prefactor))
     return 0.;
 
   const auto mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;
@@ -152,7 +155,7 @@ double PPtoFF::onShellME() const {
                    (1. * mf2_ * t_hat * t_hat * t_hat) + (7. * mf2_ * t_hat * t_hat * u_hat) +
                    (7. * mf2_ * t_hat * u_hat * u_hat) + (1. * mf2_ * u_hat * u_hat * u_hat) +
                    (-1. * t_hat * t_hat * t_hat * u_hat) + (-1. * t_hat * u_hat * u_hat * u_hat);
-  return -2. * prefac * out * std::pow((mf2_ - t_hat) * (mf2_ - u_hat) * s_hat, -2);
+  return -2. * prefactor * out * std::pow((mf2_ - t_hat) * (mf2_ - u_hat) * s_hat, -2);
 }
 
 double PPtoFF::offShellME() const {
@@ -199,10 +202,9 @@ double PPtoFF::offShellME() const {
     return 0.;
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
-  const auto prefac = g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
-  if (!utils::positive(prefac))
-    return 0.;
-  return prefac * amat2;
+  if (const auto prefactor = g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
+      utils::positive(prefactor))
+    return prefactor * amat2;
+  return 0.;
 }
-// register process
 REGISTER_PROCESS("pptoff", PPtoFF);

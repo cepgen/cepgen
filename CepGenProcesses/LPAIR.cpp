@@ -47,14 +47,14 @@ public:
   proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
 
   void addEventContent() override {
-    setEventContent(
-        {{Particle::Role::IncomingBeam1, {PDG::proton}},
-         {Particle::Role::IncomingBeam2, {PDG::proton}},
-         {Particle::Role::Parton1, {PDG::photon}},
-         {Particle::Role::Parton2, {PDG::photon}},
-         {Particle::Role::OutgoingBeam1, {PDG::proton}},
-         {Particle::Role::OutgoingBeam2, {PDG::proton}},
-         {Particle::Role::CentralSystem, {+static_cast<spdgid_t>(pair_.pdgid), -static_cast<spdgid_t>(pair_.pdgid)}}});
+    const auto signed_pair = static_cast<spdgid_t>(pair_.pdgid);
+    setEventContent({{Particle::Role::IncomingBeam1, {PDG::proton}},
+                     {Particle::Role::IncomingBeam2, {PDG::proton}},
+                     {Particle::Role::Parton1, {PDG::photon}},
+                     {Particle::Role::Parton2, {PDG::photon}},
+                     {Particle::Role::OutgoingBeam1, {PDG::proton}},
+                     {Particle::Role::OutgoingBeam2, {PDG::proton}},
+                     {Particle::Role::CentralSystem, {+signed_pair, -signed_pair}}});
   }
 
   double computeWeight() override;
@@ -101,7 +101,7 @@ public:
                               .central.mass_sum.compute([](double ext) { return std::pow(ext, 2); })
                               .truncate(Limits{4. * ml2_, s()});
     CG_DEBUG_LOOP("LPAIR:prepareKinematics") << "w limits = " << w_limits << "\n\t"
-                                             << "wmax/wmin = " << w_limits.max() / w_limits.min();
+                                             << "w(max)/w(min) = " << w_limits.max() / w_limits.min();
 
     //--- variables mapping
     defineVariable(m_u_t1_, Mapping::linear, {0., 1.}, "u_t1");
@@ -144,10 +144,10 @@ public:
     q2() = pB() - pY();
 
     // randomly rotate all particles
-    const short rany = random_generator_->uniformInt(0, 1) == 1 ? 1 : -1;
-    const double ranphi = random_generator_->uniform(0., 2. * M_PI);
+    const short random_y = random_generator_->uniformInt(0, 1) == 1 ? 1 : -1;
+    const double random_phi = random_generator_->uniform(0., 2. * M_PI);
     for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
-      mom->rotatePhi(ranphi, rany);
+      mom->rotatePhi(random_phi, random_y);
     if ((symmetrise_ && random_generator_->uniformInt(0, 1) == 1) ||
         beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
       std::swap(pX(), pY());
@@ -169,9 +169,9 @@ public:
 
     // central system
     if (randomise_charge_) {  // randomise the charge of outgoing system
-      const auto ransign = random_generator_->uniformInt(0, 1) == 1;
-      event()[Particle::Role::CentralSystem][0].get().setAntiparticle(ransign);
-      event()[Particle::Role::CentralSystem][1].get().setAntiparticle(!ransign);
+      const auto random_sign = random_generator_->uniformInt(0, 1) == 1;
+      event()[Particle::Role::CentralSystem][0].get().setAntiparticle(random_sign);
+      event()[Particle::Role::CentralSystem][1].get().setAntiparticle(!random_sign);
     }
     event()[Particle::Role::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
     event()[Particle::Role::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
@@ -189,7 +189,7 @@ public:
   }
 
 private:
-  static constexpr double constb_ = 0.5 * M_1_PI * M_1_PI * M_1_PI;
+  static constexpr double prefactor_ = 0.5 * M_1_PI * M_1_PI * M_1_PI;
   /// Calculate energies and momenta of full event content, in the CM system
   bool orient();
   /// Compute the squared matrix element squared for the \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$ process
@@ -281,7 +281,7 @@ private:
   // yy4 = \f$\cos\left(\pi x_3\right)\f$
   double m_w4_{0.};       ///< \f$w_4\f$, squared invariant mass of the two-parton system
   double m_theta4_{0.};   ///< polar angle of the two-photon system
-  double m_phi6_cm_{0.};  ///< \f$\phi_6^{\rm CM}\f$, azimutal angle of the first outgoing lepton
+  double m_phi6_cm_{0.};  ///< \f$\phi_6^{\rm CM}\f$, azimuthal angle of the first outgoing lepton
   /// xx6 = \f$\frac{1}{2}\left(1-\cos\theta^{\rm CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system).
   /// \note If the \a nm_ optimisation flag is set this angle coefficient value becomes
   ///     \f[\frac{1}{2}\left(\frac{a_{\rm map}}{b_{\rm map}}\frac{\beta-1}{\beta+1}+1\right)\f] with
@@ -310,7 +310,7 @@ private:
   double bb_{0.};
   double gram_{0.};
   double dd5_{0.};
-  std::array<double, 2> deltas1_, deltas2_;
+  std::array<double, 2> deltas1_{}, deltas2_{};
   /// Invariant used to tame divergences in the matrix element computation
   /// \note Defined as \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
   ///   with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
@@ -366,7 +366,7 @@ double LPAIR::pickin() {
 
   const auto d4 = m_w4_ - t1();
   const auto w52 = mY2() - mB2();
-  // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
+  // t2(max), t2(min) definitions from eq. (A.12) and (A.13) in [1]
   auto t2_max = mB2() + mY2() - 0.5 * (r1 * r2 + std::sqrt(rl4)) / s2_,
        t2_min = (w52 * d4 + (d4 - w52) * (d4 * mB2() - w52 * t1()) / s2_) / t2_max;
   t2_max = std::max(t2_max, -kinematics().cuts().initial.q2.at(1).max());
@@ -410,9 +410,8 @@ double LPAIR::pickin() {
       }
       return out;
     };
-    double var_pm = 0., var_max = 0.;
     if (mi2_1 == 0.) {
-      var_max =
+      const auto var_max =
           (s() * (t_1 * (s() + del1 - mf2_1) - mi2_2 * mf2_1) + mi2_2 * mf2_1 * (mf2_1 - del1)) / ((s() + w12_) * del2);
       deltas[0] = -0.25 * (var_max - var) * ss_ * del2;
     } else {
@@ -421,7 +420,7 @@ double LPAIR::pickin() {
                  sd = sl1_ * std::sqrt(-sa_1) * inv_w1,
                  se = (s() * (t_1 * (s() + del2 - mi2_2) - mi2_2 * m2diff) + mf2_1 * (mi2_2 * mf2_1 + w12_ * del1)) *
                       inv_w1;
-      std::tie(var_pm, var_max) = compute_boundaries(sb, sd, se);
+      const auto [var_pm, var_max] = compute_boundaries(sb, sd, se);
       deltas[0] = -0.25 * (var_max - var) * (var_pm - var) * mi2_1;
     }
     {
@@ -429,8 +428,7 @@ double LPAIR::pickin() {
       const auto sb = mi2_2 + t_1 - 0.5 * (m_w4_ - t_1 - t_2) * (mf2_2 - mi2_2 - t_2) * inv_t,
                  sd = 2. * sign * std::sqrt(sa_2 * gamma4_) * inv_t,
                  se = del3 * del1 + (del3 - del1) * (del3 * mi2_2 - del1 * mf2_2) * inv_t;
-      double var_mp, var_min;
-      std::tie(var_mp, var_min) = compute_boundaries(sb, sd, se);
+      const auto [var_mp, var_min] = compute_boundaries(sb, sd, se);
       deltas[1] = -0.25 * (var_min - var) * (var_mp - var) * t_2;
     }
     return std::make_tuple(sa_1, 0.5 * (var - t_1 - mi2_2));
@@ -621,19 +619,20 @@ double LPAIR::computeWeight() {
   const auto cos_phi_gam = pg.px() / pt_gam, sin_phi_gam = pg.py() / pt_gam, sin_theta_gam = pt_gam / p_gam;
   const auto cos_theta_gam = utils::sign(pg.pz()) * std::sqrt(1. - sin_theta_gam * sin_theta_gam);
 
-  const double amap = 0.5 * (m_w4_ - t1() - t2()),
-               bmap = 0.5 * std::sqrt((std::pow(m_w4_ - t1() - t2(), 2) - 4. * t1() * t2()) * (1. - 4. * ml2_ / m_w4_)),
-               ymap = (amap + bmap) / (amap - bmap), beta = std::pow(ymap, m_x6_);
+  const double a_map = 0.5 * (m_w4_ - t1() - t2()),
+               b_map =
+                   0.5 * std::sqrt((std::pow(m_w4_ - t1() - t2(), 2) - 4. * t1() * t2()) * (1. - 4. * ml2_ / m_w4_)),
+               y_map = (a_map + b_map) / (a_map - b_map), beta = std::pow(y_map, m_x6_);
 
   // 3D rotation of the first outgoing lepton wrt the CM system
-  const auto cos_theta6cm = Limits{-1., 1.}.trim(amap / bmap * (beta - 1.) / (beta + 1.)),
+  const auto cos_theta6cm = Limits{-1., 1.}.trim(a_map / b_map * (beta - 1.) / (beta + 1.)),
              cos2_theta6cm = cos_theta6cm * cos_theta6cm, sin2_theta6cm = 1. - cos2_theta6cm,
              theta6cm = M_PI - std::acos(cos_theta6cm);
 
   // match the Jacobian
-  jacobian *= (amap + bmap * cos_theta6cm);
-  jacobian *= (amap - bmap * cos_theta6cm);
-  jacobian *= 0.5 * std::log(ymap) / amap / bmap;
+  jacobian *= (a_map + b_map * cos_theta6cm);
+  jacobian *= (a_map - b_map * cos_theta6cm);
+  jacobian *= 0.5 * std::log(y_map) / a_map / b_map;
   if (symmetrise_ &&
       (beams_mode_ == mode::Kinematics::ElasticInelastic || beams_mode_ == mode::Kinematics::InelasticElastic))
     jacobian *= 1.;
@@ -676,7 +675,7 @@ double LPAIR::computeWeight() {
     return 0.;
 
   {  // preparation for the periPP call
-    const auto compute_coeffs =
+    const auto compute_coefficients =
         [&qve](double e_in, double m_in, const Momentum& pout, double ene_pho, double pcm, double& gamma)
         -> std::tuple<double, double, double, double, double, double, double> {
       const auto phi_out = pout.phi(), cos_phi_out = std::cos(phi_out), sin_phi_out = std::sin(phi_out);
@@ -690,8 +689,10 @@ double LPAIR::computeWeight() {
       gamma = m2_in * c1 * c1 + r2 * r2 + r3 * r3;
       return std::make_tuple(cos_phi_out, sin_phi_out, c1, c2, c3, r2, r3);
     };
-    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] = compute_coeffs(ep1_, mA(), pX(), eph1_, +p_cm_, gamma5_);
-    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] = compute_coeffs(ep2_, mB(), pY(), eph2_, -p_cm_, gamma6_);
+    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] =
+        compute_coefficients(ep1_, mA(), pX(), eph1_, +p_cm_, gamma5_);
+    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] =
+        compute_coefficients(ep2_, mB(), pY(), eph2_, -p_cm_, gamma6_);
     const auto pt3 = pX().pt(), pt5 = pY().pt();
     alpha5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
               (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
@@ -706,7 +707,7 @@ double LPAIR::computeWeight() {
     return 0.;
 
   const auto alpha_prod = alphaEM(std::sqrt(-t1())) * alphaEM(std::sqrt(-t2()));
-  jacobian *= constb_ * charge_factor_ * alpha_prod * alpha_prod * inverseS();
+  jacobian *= prefactor_ * charge_factor_ * alpha_prod * alpha_prod * inverseS();
 
   CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian << ", str.fun. factor: " << peripp << ".";
   return jacobian * peripp;  // compute the event weight using the Jacobian

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -32,30 +32,31 @@
 
 using namespace cepgen;
 using namespace std::complex_literals;
+using namespace std::string_literals;
 
 /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
 /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
-class PPtoWW final : public cepgen::proc::FactorisedProcess {
+class PPtoWW final : public proc::FactorisedProcess {
 public:
   explicit PPtoWW(const ParametersList& params)
-      : FactorisedProcess(params, {+(spdgid_t)PDG::W, -(spdgid_t)PDG::W}),
+      : FactorisedProcess(params, {+static_cast<spdgid_t>(PDG::W), -static_cast<spdgid_t>(PDG::W)}),
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),
-        ampl_(params_),
-        pol_(steer<ParametersList>("polarisationStates")) {
+        amplitudes_(params_),
+        polarisation_(steer<ParametersList>("polarisationStates")) {
     CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
                        << "polarisation states: "
-                       << "W1=" << pol_.polarisations().first << ", "
-                       << "W2=" << pol_.polarisations().second << ".";
+                       << "W1=" << polarisation_.polarisations().first << ", "
+                       << "W2=" << polarisation_.polarisations().second << ".";
 
     if (method_ == 1) {
-      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << ampl_.mode() << ") initialised.";
-      if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
-        if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
+      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_.mode() << ") initialised.";
+      if (amplitudes_.mode() != NachtmannAmplitudes::Mode::SM) {
+        if (amplitudes_.mode() != NachtmannAmplitudes::Mode::W && amplitudes_.mode() != NachtmannAmplitudes::Mode::Wbar)
           throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
-                                   << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
-                                   << ".";
+                                   << "Only supported extensions are W and Wbar. Specified model: "s
+                                   << amplitudes_.mode() << ".";
         CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
       }
     }
@@ -66,12 +67,12 @@ public:
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();
     desc.setDescription("γγ → W⁺W¯");
-    desc.add<bool>("ktFactorised", true);
-    desc.add<int>("method", 1)
+    desc.add("ktFactorised", true);
+    desc.add("method", 1)
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
         .allow(1, "off-shell by Nachtmann et al.");
-    desc.add<ParametersDescription>("polarisationStates", PolarisationState::description());
+    desc.add("polarisationStates"s, PolarisationState::description());
     desc += NachtmannAmplitudes::description();
     return desc;
   }
@@ -116,11 +117,11 @@ private:
 
     double hel_mat_elem{0.};
     // compute ME for each W helicity
-    for (const auto& lam3 : pol_.polarisations().first)
-      for (const auto& lam4 : pol_.polarisations().second) {
+    for (const auto& lam3 : polarisation_.polarisations().first)
+      for (const auto& lam4 : polarisation_.polarisations().second) {
         // compute all photon helicity amplitudes
-        const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
-                   pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
+        const auto pp = amplitudes_(kin, +1, +1, lam3, lam4), mm = amplitudes_(kin, -1, -1, lam3, lam4),
+                   pm = amplitudes_(kin, +1, -1, lam3, lam4), mp = amplitudes_(kin, -1, +1, lam3, lam4);
         // add ME for this W helicity to total ME
         hel_mat_elem += std::norm(p1 * (pp + mm) - 1i * p2 * (pp - mm) - p3 * (pm + mp) - 1i * p4 * (pm - mp));
       }
@@ -129,8 +130,7 @@ private:
 
   const double mW_, mW2_;
   const int method_;
-  const NachtmannAmplitudes ampl_;
-  const PolarisationState pol_;
+  const NachtmannAmplitudes amplitudes_;
+  const PolarisationState polarisation_;
 };
-// register process
 REGISTER_PROCESS("pptoww", PPtoWW);
