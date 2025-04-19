@@ -22,6 +22,7 @@
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Utils/String.h"
 
 using namespace cepgen;
 using namespace std::string_literals;
@@ -35,15 +36,7 @@ public:
       : EventExporter(params),
         file_(steer<std::string>("filename")),
         variables_(steer<std::vector<std::string> >("variables")),
-        save_banner_(steer<bool>("saveBanner")),
-        save_variables_(steer<bool>("saveVariables")),
-        separator_(steer<std::string>("separator")) {
-    //--- extract list of variables to store in output file
-    oss_vars_.clear();
-    std::string sep;
-    for (const auto& var : variables_)
-      oss_vars_ << sep << var, sep = separator_;
-  }
+        separator_(steer<std::string>("separator")) {}
 
   static ParametersDescription description() {
     auto desc = EventExporter::description();
@@ -68,20 +61,16 @@ public:
 
 private:
   void initialise() override {
-    if (save_banner_)
+    if (steer<bool>("saveBanner"))
       file_ << banner("#") << "\n";
-    if (save_variables_)
-      file_ << "# " << oss_vars_.str() << "\n";
+    if (steer<bool>("saveVariables"))
+      file_ << "# " << utils::merge(variables_, separator_) << "\n";  // list of variables to store in output file
   }
 
   std::ofstream file_;
-  //--- variables definition
-  const std::vector<std::string> variables_;
-  const bool save_banner_, save_variables_;
+  const std::vector<std::string> variables_;  ///< Variables definition
   const std::string separator_;
 
   const utils::EventBrowser browser_;
-
-  std::ostringstream oss_vars_;
 };
 REGISTER_EXPORTER("vars", TextVariablesHandler);

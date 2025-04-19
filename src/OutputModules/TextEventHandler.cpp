@@ -17,7 +17,7 @@
  */
 
 #include <fstream>
-#include <iostream>  // for std::cout
+#include <iostream>
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"

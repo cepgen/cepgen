@@ -142,22 +142,18 @@ const TextDrawer& TextDrawer::draw(const Hist2D& hist, const Mode& mode) const {
       }
     }
     drawValues(log.stream(), hist, axes, mode, colourise_);
-    const auto &x_range = hist.rangeX(), &y_range = hist.rangeY();
-    const double bin_width_x = x_range.range() / hist.nbinsX(), bin_width_y = y_range.range() / hist.nbinsY();
     log << "\t"
         << " x-axis: "
-        << "bin width=" << s("unit", bin_width_x, true) << ", "
+        << "bin width=" << s("unit", hist.rangeX().range() / hist.nbinsX(), true) << ", "
         << "mean=" << hist.meanX() << ","
         << "st.dev.=" << hist.rmsX() << "\n\t"
         << " y-axis: "
-        << "bin width=" << s("unit", bin_width_y, true) << ", "
+        << "bin width=" << s("unit", hist.rangeY().range() / hist.nbinsY(), true) << ", "
         << "mean=" << hist.meanY() << ","
         << "st.dev.=" << hist.rmsY() << ",\n\t"
         << " integral=" << hist.integral();
-    const auto& cnt = hist.outOfRange();
-    if (cnt.total() > 0) {
-      log << ", outside range (in/overflow):\n" << cnt;
-    }
+    if (const auto& content = hist.outOfRange(); content.total() > 0)
+      log << ", outside range (in/overflow):\n" << content;
   });
   return *this;
 }
@@ -170,20 +166,19 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objects,
   auto inside_plot = [](const std::string& str) -> std::string {
     std::istringstream ss(str);
     std::ostringstream out;
-    for (std::string line; std::getline(ss, line);) {
+    for (std::string line; std::getline(ss, line);)
       if (const auto tok = split(line, ':'); tok.size() == 3)
         out << tok.at(1) << "\n";
-    }
     return out.str();
   };
   auto replace_plot = [](const std::string& orig, const std::string& new_plot) -> std::string {
     std::istringstream ss(orig), ss_new(new_plot);
     std::ostringstream out;
     for (std::string line; std::getline(ss, line);) {
-      if (auto tok = split(line, ':'); tok.size() == 3) {
-        std::getline(ss_new, tok[1]);
-        tok[2].clear();
-        out << merge(tok, ":") << "\n";
+      if (auto token = split(line, ':'); token.size() == 3) {
+        std::getline(ss_new, token[1]);
+        token[2].clear();
+        out << merge(token, ":") << "\n";
       } else
         out << line << "\n";
     }
@@ -191,11 +186,11 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objects,
   };
   std::stringstream buf, os_base;
   size_t num_plots = 0;
-  auto add_plot = [this, &buf, &num_plots](const std::string& plt) {
+  auto add_plot = [this, &buf, &num_plots](const std::string& plot) {
     ++num_plots;
-    if (plt.empty())
+    if (plot.empty())
       return;
-    std::istringstream ss(plt);
+    std::istringstream ss(plot);
     std::ostringstream out;
     for (std::string line; std::getline(ss, line);) {
       auto base = line.empty() ? ""s : std::string(line.size(), ' ');
@@ -257,11 +252,11 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objects,
 void TextDrawer::drawValues(
     std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
   const std::string sep(17, ' ');
-  const double max_val =
+  const double max_value =
                    std::max_element(axis.begin(), axis.end(), map_elements())->second * (mode & Mode::logy ? 5. : 1.2),
-               min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second;
-  const double min_val_log = std::log(std::max(min_val, 1.e-10));
-  const double max_val_log = std::log(std::min(max_val, 1.e+10));
+               min_value = std::min_element(axis.begin(), axis.end(), map_elements())->second;
+  const double log_min_value = std::log(std::max(min_value, 1.e-10)),
+               log_max_value = std::log(std::min(max_value, 1.e+10));
   if (!dr.yAxis().label().empty()) {
     const auto y_label = delatexify(dr.yAxis().label());
     os << sep;
@@ -269,15 +264,14 @@ void TextDrawer::drawValues(
       os << std::string(length, ' ');
     os << y_label << "\n";
   }
-  os << sep << format("%-5.2f ", mode & Mode::logy ? std::exp(min_val_log) : min_val) << std::setw(width_ - 11)
+  os << sep << format("%-5.2f ", mode & Mode::logy ? std::exp(log_min_value) : min_value) << std::setw(width_ - 11)
      << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
-     << format("%5.2e", mode & Mode::logy ? std::exp(max_val_log) : max_val) << "\n"
+     << format("%5.2e", mode & Mode::logy ? std::exp(log_max_value) : max_value) << "\n"
      << sep << std::string(width_ + 2, '.');  // abscissa axis
   size_t idx = 0;
-  for (const auto& coord_set : axis) {
-    const auto left_label =
-        coord_set.first.label.empty() ? format("%17g", coord_set.first.value) : coord_set.first.label;
-    if (min_val == max_val) {
+  for (const auto& [coordinates, value] : axis) {
+    const auto left_label = coordinates.label.empty() ? format("%17g", coordinates.value) : coordinates.label;
+    if (min_value == max_value) {
       os << "\n" << left_label << ":";
       if (idx == axis.size() / 2) {
         std::string padding;
@@ -288,20 +282,20 @@ void TextDrawer::drawValues(
         os << std::string(width_, ' ');
       os << ":";
     } else {
-      const auto& val = coord_set.second;
       size_t i_value = 0ull, i_uncertainty = 0ull;
       {
         double val_dbl = width_, unc_dbl = width_;
         if (mode & Mode::logy) {
-          val_dbl *= (val > 0. && max_val > 0.)
-                         ? std::max((std::log(val) - min_val_log) / (max_val_log - min_val_log), 0.)
+          val_dbl *= (value > 0. && max_value > 0.)
+                         ? std::max((std::log(value) - log_min_value) / (log_max_value - log_min_value), 0.)
                          : 0.;
-          unc_dbl *= (val > 0. && max_val > 0.)
-                         ? std::max((std::log(val.uncertainty()) - min_val_log) / (max_val_log - min_val_log), 0.)
-                         : 0.;
-        } else if (max_val > 0.) {
-          val_dbl *= (val - min_val) / (max_val - min_val);
-          unc_dbl *= val.uncertainty() / (max_val - min_val);
+          unc_dbl *=
+              (value > 0. && max_value > 0.)
+                  ? std::max((std::log(value.uncertainty()) - log_min_value) / (log_max_value - log_min_value), 0.)
+                  : 0.;
+        } else if (max_value > 0.) {
+          val_dbl *= (value - min_value) / (max_value - min_value);
+          unc_dbl *= value.uncertainty() / (max_value - min_value);
         }
         i_value = std::ceil(val_dbl);
         i_uncertainty = std::ceil(unc_dbl);
@@ -314,7 +308,7 @@ void TextDrawer::drawValues(
         os << std::string(std::min(padding, i_uncertainty), ERR_CHAR);
       if (const auto padding = width_ - i_value - i_uncertainty - 1; padding > 0)
         os << std::string(padding, ' ');
-      os << ": " << format("%6.2e +/- %6.2e", val, val.uncertainty());
+      os << ": " << format("%6.2e +/- %6.2e", value, value.uncertainty());
     }
     ++idx;
   }
@@ -336,17 +330,15 @@ void TextDrawer::drawValues(
   // find the maximum element of the graph
   double min_val = -Limits::INVALID, max_val = Limits::INVALID;
   double min_log_value = -3.;
-  for (const auto& x_value : axes) {
-    min_val = std::min(
-        min_val,
-        static_cast<double>(std::min_element(x_value.second.begin(), x_value.second.end(), map_elements())->second));
-    max_val = std::max(
-        max_val,
-        static_cast<double>(std::max_element(x_value.second.begin(), x_value.second.end(), map_elements())->second));
+  for (const auto& [x_coordinate, y_values] : axes) {
+    min_val = std::min(min_val,
+                       static_cast<double>(std::min_element(y_values.begin(), y_values.end(), map_elements())->second));
+    max_val = std::max(max_val,
+                       static_cast<double>(std::max_element(y_values.begin(), y_values.end(), map_elements())->second));
     if (mode & Mode::logz)
-      for (const auto& y_value : x_value.second)
-        if (y_value.second > 0.)
-          min_log_value = std::min(min_log_value, std::log(y_value.second / max_val));
+      for (const auto& [y_coordinate, y_value] : y_values)
+        if (y_value > 0.)
+          min_log_value = std::min(min_log_value, std::log(y_value / max_val));
   }
   const auto& y_axis = axes.begin()->second;
   os << sep << format("%-5.2f", y_axis.begin()->first.value);
@@ -356,8 +348,8 @@ void TextDrawer::drawValues(
      << format("%17s", delatexify(dr.xAxis().label()).c_str())
      << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
   size_t idx = 0;
-  for (const auto& x_value : axes) {
-    os << "\n" << (x_value.first.label.empty() ? format("%16g ", x_value.first.value) : x_value.first.label) << ":";
+  for (const auto& [x_coordinate, y_values] : axes) {
+    os << "\n" << (x_coordinate.label.empty() ? format("%16g ", x_coordinate.value) : x_coordinate.label) << ":";
     if (min_val == max_val) {
       if (idx == axes.size() / 2) {
         std::string padding;
@@ -367,13 +359,14 @@ void TextDrawer::drawValues(
       } else
         os << std::string(width_, ' ');
     } else {
-      for (const auto& y_value : x_value.second) {
-        const double val = y_value.second;
+      for (const auto& [y_coordinate, y_value] : y_values) {
         double val_norm = 0.;
         if (mode & Mode::logz)
-          val_norm = positive(val) ? std::max(0., (std::log(val / max_val) - min_log_value) / fabs(min_log_value)) : 0.;
+          val_norm = positive(static_cast<double>(y_value))
+                         ? std::max(0., (std::log(y_value / max_val) - min_log_value) / fabs(min_log_value))
+                         : 0.;
         else
-          val_norm = val / max_val;
+          val_norm = y_value / max_val;
         if (std::isnan(val_norm)) {
           os << (effects ? colourise("!", kColours.at(0)) : "!");
           continue;
@@ -383,7 +376,7 @@ void TextDrawer::drawValues(
         if (sign == -1)
           os << (effects ? colourise(std::string(1, NEG_CHAR), kColours.at(0)) : std::string(1, NEG_CHAR));
         else {
-          size_t ch_id = ceil(val_norm * (VALUES_CHAR.size() - 1));
+          size_t ch_id = std::ceil(val_norm * (VALUES_CHAR.size() - 1));
           size_t col_id = 1 + val_norm * (kColours.size() - 2);
           os << (effects ? colourise(std::string(1, VALUES_CHAR.at(ch_id)),
                                      kColours.at(col_id),
