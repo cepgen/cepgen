@@ -25,7 +25,7 @@
 #include "CepGenMadGraph/ProcessFactory.h"
 
 namespace cepgen::mg5amc {
-  class DummyProcess : public Process {
+  class DummyProcess final : public Process {
   public:
     using Process::Process;
 

@@ -44,7 +44,7 @@ namespace cepgen::mg5amc {
       CG_DEBUG("mg5amc:ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
                                         << ProcessFactory::get().modules() << ".";
       // once MadGraph process library is loaded into runtime environment, can define its wrapper object
-      mg5_proc_ = ProcessFactory::get().build(mg5amc::normalise(steer<std::string>("process")));
+      mg5_proc_ = ProcessFactory::get().build(normalise(steer<std::string>("process")));
       if (mg5_proc_->centralSystem().empty())
         throw CG_FATAL("mg5amc:ProcessBuilder")
             << "Failed to retrieve produced particles system from MadGraph process:\n"
@@ -52,16 +52,15 @@ namespace cepgen::mg5amc {
       phase_space_generator_->setCentral(mg5_proc_->centralSystem());
     }
 
-    proc::ProcessPtr clone() const override { return proc::ProcessPtr(new ProcessBuilder(parameters(), false)); }
+    proc::ProcessPtr clone() const override { return std::make_unique<ProcessBuilder>(parameters(), false); }
 
     void addEventContent() override {
       const auto mg5_proc_cent = mg5_proc_->centralSystem();
-      Process::setEventContent(
-          {{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-           {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-           {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-           {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-           {Particle::Role::CentralSystem, spdgids_t(mg5_proc_cent.begin(), mg5_proc_cent.end())}});
+      setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                       {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                       {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                       {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                       {Particle::Role::CentralSystem, spdgids_t(mg5_proc_cent.begin(), mg5_proc_cent.end())}});
     }
 
     static ParametersDescription description() {
@@ -119,14 +118,14 @@ namespace cepgen::mg5amc {
     }
 
   private:
-    void loadMG5Library() {
+    void loadMG5Library() const {
       utils::AbortHandler();
       try {
-        if (const auto& lib_file = steer<std::string>("lib"); !lib_file.empty())
+        if (const auto& lib_file = steer<std::string>("lib"); !lib_file.empty())  // user-provided library file
           loadLibrary(lib_file);
-        else {
-          const Interface interf(params_);
-          loadLibrary(interf.run());
+        else {  // library has to be generated from mg5_aMC directives
+          const Interface interface(params_);
+          loadLibrary(interface.run());
         }
       } catch (const utils::RunAbortedException&) {
         CG_FATAL("mg5amc:ProcessBuilder") << "MadGraph_aMC process generation aborted.";
@@ -136,5 +135,5 @@ namespace cepgen::mg5amc {
     std::unique_ptr<mg5amc::Process> mg5_proc_;
   };
 }  // namespace cepgen::mg5amc
-using MadGraphProcessBuilder = cepgen::mg5amc::ProcessBuilder;
+using MadGraphProcessBuilder = mg5amc::ProcessBuilder;
 REGISTER_PROCESS("mg5_aMC", MadGraphProcessBuilder);

@@ -20,10 +20,11 @@
 #define CepGenMadGraph_Interface_h
 
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Filesystem.h"
 
 namespace cepgen::mg5amc {
-  class Interface : public SteeredObject<Interface> {
+  class Interface final : public SteeredObject<Interface> {
   public:
     explicit Interface(const ParametersList&);
 
@@ -40,7 +41,8 @@ namespace cepgen::mg5amc {
     static constexpr size_t cmd_buffer_size_ = 256;
     static std::unordered_map<std::string, spdgid_t> mg5_parts_;
 
-    void generateLibrary(const fs::path&, const fs::path&, const fs::path&) const;
+    static void generateLibrary(const fs::path&, const fs::path&, const fs::path&);
+
     void parseExtraParticles();
     void linkCards() const;
     std::string prepareMadGraphProcess() const;

@@ -35,12 +35,12 @@ namespace cepgen {
   }
 
   template <>
-  std::unique_ptr<mg5amc::Process> ModuleFactory<mg5amc::Process>::build(const std::string& mod_name,
+  std::unique_ptr<mg5amc::Process> ModuleFactory<mg5amc::Process>::build(const std::string& name,
                                                                          const ParametersList& params) const {
-    if (map_.count(mod_name) == 0)
-      throw CG_FATAL("mg5amc:ModuleFactory") << "Failed to build a mg5_aMC process with name '" << mod_name << "'.\n"
+    if (map_.count(name) == 0)
+      throw CG_FATAL("mg5amc:ModuleFactory") << "Failed to build a mg5_aMC process with name '" << name << "'.\n"
                                              << "Registered modules: " << modules() << ".";
-    return map_.at(mod_name)(params_map_.at(mod_name).validate(params));
+    return map_.at(name)(params_map_.at(name).validate(params));
   }
 
   template <>

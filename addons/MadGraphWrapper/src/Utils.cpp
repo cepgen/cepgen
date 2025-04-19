@@ -103,7 +103,7 @@ namespace cepgen::mg5amc {
               << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '" << model
               << ". Python output:\n"
               << py_output;
-      } catch (const Exception& exc) {
+      } catch (const Exception&) {
         switch (part_name[part_name.size() - 1]) {
           case '+':
           case '-':
@@ -114,8 +114,7 @@ namespace cepgen::mg5amc {
       }
     }
     // recast all the properties retrieved from the MG output into CepGen-specific particle properties
-    const auto pdg_id = plist_part.get<int>("pdg_code", 0);
-    if (pdg_id == 0)
+    if (const auto pdg_id = plist_part.get<int>("pdg_code", 0); pdg_id == 0)
       throw CG_FATAL("MadGraphInterface:describeParticle")
           << "Failed to retrieve a 'pdg_code' key to the unpacked particle properties: " << plist_part << ".";
     CG_DEBUG("MadGraphInterface:describeParticle") << "List of parameters retrieved from MadGraph on particle '"
@@ -129,14 +128,14 @@ namespace cepgen::mg5amc {
       props.human_name = name;
     }
     props.pdgid = plist_part.get<int>("pdg_code");
-    plist_part.fill<int>("color", props.colours);  //FIXME might not be correct
-    props.mass = plist_part.has<double>("mass") ? plist_part.get<double>("mass") : PDG::get().mass(props.pdgid);
-    props.width = plist_part.has<double>("width") ? plist_part.get<double>("width") : PDG::get().width(props.pdgid);
-    if (plist_part.has<double>("charge")) {
-      const auto ch = std::floor(plist_part.get<double>("charge") * 3.);
+    plist_part.fill<int>("color"s, props.colours);  //FIXME might not be correct
+    props.mass = plist_part.has<double>("mass"s) ? plist_part.get<double>("mass"s) : PDG::get().mass(props.pdgid);
+    props.width = plist_part.has<double>("width"s) ? plist_part.get<double>("width"s) : PDG::get().width(props.pdgid);
+    if (plist_part.has<double>("charge"s)) {
+      const auto ch = std::floor(plist_part.get<double>("charge"s) * 3.);
       if (ch != 0) {
         props.charges.emplace_back(ch);
-        if (!plist_part.get<bool>("self_antipart"))
+        if (!plist_part.get<bool>("self_antipart"s))
           props.charges.emplace_back(-ch);
       }
     }
