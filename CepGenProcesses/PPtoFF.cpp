@@ -25,6 +25,7 @@
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 

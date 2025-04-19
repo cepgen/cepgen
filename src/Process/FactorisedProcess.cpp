@@ -20,11 +20,13 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 using namespace cepgen::proc;
@@ -47,15 +49,15 @@ FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
 void FactorisedProcess::addEventContent() {
   CG_ASSERT(phase_space_generator_);
   const auto central_pdg_ids = phase_space_generator_->central();
-  Process::setEventContent(
-      {{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-       {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-       {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-       {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-       {Particle::Role::CentralSystem, spdgids_t(central_pdg_ids.begin(), central_pdg_ids.end())}});
+  setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                   {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                   {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                   {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                   {Particle::Role::CentralSystem, spdgids_t(central_pdg_ids.begin(), central_pdg_ids.end())}});
 }
 
 void FactorisedProcess::prepareKinematics() {
+  random_generator_ = RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"));
   if (!phase_space_generator_)
     throw CG_FATAL("FactorisedProcess:prepareKinematics")
         << "Phase space generator not set. Please check your process initialisation procedure, as you might "
@@ -99,16 +101,6 @@ double FactorisedProcess::computeWeight() {
       return 0.;
   }
   computeBeamKinematics();
-  // compute the four-momenta of the intermediate partons
-  const double norm = wCM() * wCM() * s(), inv_norm = 1. / norm, prefactor = 0.5 * std::sqrt(norm);
-  {  // positive-z incoming parton collinear kinematics
-    const double tau1 = q1().p2() / x1() * inv_norm;
-    q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
-  }
-  {  // negative-z incoming parton collinear kinematics
-    const double tau2 = q2().p2() / x2() * inv_norm;
-    q2().setPz(-prefactor * (x2() - tau2)).setEnergy(+prefactor * (x2() + tau2));
-  }
   if (!validatedBeamKinematics())
     return 0.;
   if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
@@ -117,19 +109,11 @@ double FactorisedProcess::computeWeight() {
 }
 
 void FactorisedProcess::fillKinematics() {
-  // beam systems
-  if (!kinematics().incomingBeams().positive().elastic())
-    pX().setMass2(mX2());
-  if (!kinematics().incomingBeams().negative().elastic())
-    pY().setMass2(mY2());
-
   // parton systems
-  auto& parton1 = event().oneWithRole(Particle::Role::Parton1);
-  auto& parton2 = event().oneWithRole(Particle::Role::Parton2);
-  parton1.setMomentum(pA() - pX(), true);
-  parton2.setMomentum(pB() - pY(), true);
+  event().oneWithRole(Particle::Role::Parton1).setMomentum(pA() - pX(), true);
+  event().oneWithRole(Particle::Role::Parton2).setMomentum(pB() - pY(), true);
 
-  if (symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) {  // symmetrise the el-in and in-el cases
+  if (symmetrise_ && random_generator_->uniformInt(0, 1) == 1) {  // symmetrise the el-in and in-el cases
     std::swap(pX(), pY());
     std::swap(q1(), q2());
     std::swap(pc(0), pc(1));
@@ -137,18 +121,31 @@ void FactorisedProcess::fillKinematics() {
       momentum->mirrorZ();
   }
   if (store_alphas_) {  // add couplings to metadata
-    const auto two_parton_mass = (parton1.momentum() + parton2.momentum()).mass();
+    const auto two_parton_mass = (q1() + q2()).mass();
     event().metadata["alphaEM"] = alphaEM(two_parton_mass);
     event().metadata["alphaS"] = alphaS(two_parton_mass);
   }
 }
 
-void FactorisedProcess::computeBeamKinematics() {
-  // compute the four-momenta of the outgoing protons (or remnants)
-  const auto px_p = (1. - x1()) * pA().p() * M_SQRT2, px_m = (mX2() + q1().p2()) * 0.5 / px_p;
-  pX() = -Momentum(q1()).setPz((px_p - px_m) * M_SQRT1_2).setEnergy((px_p + px_m) * M_SQRT1_2);
-  const auto py_m = (1. - x2()) * pB().p() * M_SQRT2, py_p = (mY2() + q2().p2()) * 0.5 / py_m;
-  pY() = -Momentum(q2()).setPz((py_p - py_m) * M_SQRT1_2).setEnergy((py_p + py_m) * M_SQRT1_2);
+void FactorisedProcess::computeBeamKinematics() {  // compute the four-momenta of the outgoing protons (or remnants)
+  const double norm = wCM() * wCM() * s(), inv_norm = 1. / norm, prefactor = 0.5 * std::sqrt(norm);
+
+  // positive-z outgoing beam system
+  const auto px_p = (1. - x1()) * pA().p(), px_m = (mX2() + q1().p2()) * 0.25 / px_p;
+  pX() = (-q1()).setPz(px_p - px_m).setEnergy(px_p + px_m);
+  if (!kinematics().incomingBeams().positive().elastic())
+    pX().setMass2(mX2());
+  const double tau1 = q1().p2() / x1() * inv_norm;
+  q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
+
+  // negative-z outgoing beam system
+  const auto py_m = (1. - x2()) * pB().p(), py_p = (mY2() + q2().p2()) * 0.25 / py_m;
+  pY() = (-q2()).setPz(py_p - py_m).setEnergy(py_p + py_m);
+  if (!kinematics().incomingBeams().negative().elastic())
+    pY().setMass2(mY2());
+  const double tau2 = q2().p2() / x2() * inv_norm;
+  q2().setPz(-prefactor * (x2() - tau2)).setEnergy(+prefactor * (x2() + tau2));
+
   CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
       << "px+ = " << px_p << " / px- = " << px_m << ", py+ = " << py_p << " / py- = " << py_m << ". Remnants:\n\t"
       << "- X (positive-z): pX = " << pX() << ", mX = " << pX().mass() << "\n\t"
@@ -156,6 +153,12 @@ void FactorisedProcess::computeBeamKinematics() {
 }
 
 //----- utilities
+
+utils::RandomGenerator& FactorisedProcess::randomGenerator() const {
+  if (!random_generator_)
+    throw CG_FATAL("FactorisedProcess:randomGenerator") << "Process-local random generator was not yet initialised.";
+  return *random_generator_;
+}
 
 double FactorisedProcess::that() const { return phase_space_generator_->that(); }
 
@@ -185,9 +188,9 @@ bool FactorisedProcess::validatedBeamKinematics() {
     return false;
   }
   CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
-      << "Squared c.m. energy = " << s() << " GeV^2\n"
-      << "\tpos-z parton: " << q1() << ", m^2=" << q1().mass2() << "GeV, x1=" << x1() << ", p=" << q1().p() << "GeV\n"
-      << "\tneg-z parton: " << q2() << ", m^2=" << q2().mass2() << "GeV, x2=" << x2() << ", p=" << q2().p() << "GeV.";
+      << "Squared c.m. energy = " << s() << " GeV^2\n\t"
+      << "pos-z parton: " << q1() << ", m^2=" << q1().mass2() << " GeV, x1=" << x1() << ", p=" << q1().p() << "GeV\n\t"
+      << "neg-z parton: " << q2() << ", m^2=" << q2().mass2() << " GeV, x2=" << x2() << ", p=" << q2().p() << "GeV.";
   return true;
 }
 
@@ -204,5 +207,7 @@ ParametersDescription FactorisedProcess::description() {
   desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4"));
   desc.add("symmetrise", false).setDescription("Symmetrise along z the central system?");
   desc.add("storeAlphas", false).setDescription("store electromagnetic & strong coupling constants in event content?");
+  desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
+      .setDescription("random number generator engine");
   return desc;
 }

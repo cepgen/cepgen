@@ -25,7 +25,6 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
-#include "CepGen/Utils/RandomGenerator.h"
 
 /// Location for all physics processes to be generated
 namespace cepgen::proc {
@@ -110,8 +109,6 @@ namespace cepgen::proc {
     inline double inverseS() const { return inv_s_; }        ///< Inverse two-beam squared centre of mass energy
     inline double inverseSqrtS() const { return inv_sqs_; }  ///< Inverse two-beam centre of mass energy
 
-    utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
-
   protected:
     virtual void addEventContent() = 0;         ///< Set the incoming and outgoing state to be expected in the process
     inline virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
@@ -158,8 +155,6 @@ namespace cepgen::proc {
 
     double alphaEM(double q) const;  ///< Compute the electromagnetic running coupling algorithm at a given scale
     double alphaS(double q) const;   ///< Compute the strong coupling algorithm at a given scale
-
-    std::unique_ptr<utils::RandomGenerator> rnd_gen_;  ///< Process-local random number generator engine
 
     inline const std::vector<double>& lastCoordinates() const { return point_coord_; }  ///< Last coordinates fed
 

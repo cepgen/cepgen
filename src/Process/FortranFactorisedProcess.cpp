@@ -25,6 +25,7 @@
 #include "CepGen/Process/Fortran/KTStructures.h"
 #include "CepGen/Process/FortranFactorisedProcess.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 using namespace cepgen::proc;

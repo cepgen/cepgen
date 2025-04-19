@@ -26,6 +26,7 @@
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGenMadGraph/Interface.h"
 #include "CepGenMadGraph/Process.h"
 #include "CepGenMadGraph/ProcessFactory.h"
@@ -35,7 +36,7 @@ using namespace cepgen;
 using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
-  class ProcessBuilder : public proc::FactorisedProcess {
+  class ProcessBuilder final : public proc::FactorisedProcess {
   public:
     explicit ProcessBuilder(const ParametersList& params, bool load_library = true) : FactorisedProcess(params, {}) {
       if (load_library)

@@ -46,10 +46,7 @@ auto compute_value = [](double in, const Process::Mapping& type) -> double {
 };
 
 Process::Process(const ParametersList& params)
-    : NamedModule(params),
-      mp_(PDG::get().mass(PDG::proton)),
-      mp2_(mp_ * mp_),
-      rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {
+    : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {
   if (const auto& kin = steer<ParametersList>("kinematics"); !kin.empty())
     kin_.setParameters(kin);
   if (steer<bool>("hasEvent"))
@@ -341,12 +338,6 @@ void Process::initialise() {
   }
 }
 
-utils::RandomGenerator& Process::randomGenerator() const {
-  if (!rnd_gen_)
-    throw CG_FATAL("Process:randomGenerator") << "Process-local random generator was not yet initialised.";
-  return *rnd_gen_;
-}
-
 double Process::alphaEM(double q) const {
   if (!alpha_em_)
     throw CG_FATAL("Process:alphaEM")
@@ -409,8 +400,6 @@ ParametersDescription Process::description() {
   desc.add("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
       .setDescription("strong coupling evolution algorithm");
   desc.add("hasEvent", true).setDescription("does the process carry an event definition");
-  desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
-      .setDescription("random number generator engine");
   desc.add("kinematics", Kinematics::description());
   return desc;
 }

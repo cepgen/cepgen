@@ -29,6 +29,7 @@
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 using namespace std::string_literals;

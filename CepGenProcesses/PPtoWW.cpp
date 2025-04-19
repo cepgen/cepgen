@@ -28,6 +28,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/PolarisationState.h"
 #include "CepGen/Process/FactorisedProcess.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 using namespace std::complex_literals;

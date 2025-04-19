@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
@@ -28,30 +29,32 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Algebra.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
 
 /// Matrix element for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process as defined in \cite Vermaseren:1982cz
-class LPAIR final : public cepgen::proc::Process {
+class LPAIR final : public proc::Process {
 public:
   explicit LPAIR(const ParametersList& params)
-      : proc::Process(params),
+      : Process(params),
         pair_(steer<ParticleProperties>("pair")),
         symmetrise_(steer<bool>("symmetrise")),
         randomise_charge_(steer<bool>("randomiseCharge")) {}
   LPAIR(const LPAIR& oth)
-      : proc::Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_), randomise_charge_(oth.randomise_charge_) {}
+      : Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_), randomise_charge_(oth.randomise_charge_) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
 
   void addEventContent() override {
-    proc::Process::setEventContent({{Particle::Role::IncomingBeam1, {PDG::proton}},
-                                    {Particle::Role::IncomingBeam2, {PDG::proton}},
-                                    {Particle::Role::Parton1, {PDG::photon}},
-                                    {Particle::Role::Parton2, {PDG::photon}},
-                                    {Particle::Role::OutgoingBeam1, {PDG::proton}},
-                                    {Particle::Role::OutgoingBeam2, {PDG::proton}},
-                                    {Particle::Role::CentralSystem, {+(spdgid_t)pair_.pdgid, -(spdgid_t)pair_.pdgid}}});
+    setEventContent(
+        {{Particle::Role::IncomingBeam1, {PDG::proton}},
+         {Particle::Role::IncomingBeam2, {PDG::proton}},
+         {Particle::Role::Parton1, {PDG::photon}},
+         {Particle::Role::Parton2, {PDG::photon}},
+         {Particle::Role::OutgoingBeam1, {PDG::proton}},
+         {Particle::Role::OutgoingBeam2, {PDG::proton}},
+         {Particle::Role::CentralSystem, {+static_cast<spdgid_t>(pair_.pdgid), -static_cast<spdgid_t>(pair_.pdgid)}}});
   }
 
   double computeWeight() override;
@@ -86,6 +89,7 @@ public:
           << "gamma=" << gamma_cm_ << ", beta*gamma=" << beta_gamma_cm_;
     }
 
+    random_generator_ = RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"));
     formfac1_ = FormFactorsFactory::get().build(kinematics().incomingBeams().positive().formFactors());
     formfac2_ = FormFactorsFactory::get().build(kinematics().incomingBeams().negative().formFactors());
     strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
@@ -140,11 +144,11 @@ public:
     q2() = pB() - pY();
 
     // randomly rotate all particles
-    const short rany = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
-    const double ranphi = rnd_gen_->uniform(0., 2. * M_PI);
+    const short rany = random_generator_->uniformInt(0, 1) == 1 ? 1 : -1;
+    const double ranphi = random_generator_->uniform(0., 2. * M_PI);
     for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
       mom->rotatePhi(ranphi, rany);
-    if ((symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) ||
+    if ((symmetrise_ && random_generator_->uniformInt(0, 1) == 1) ||
         beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
       std::swap(pX(), pY());
       std::swap(q1(), q2());
@@ -165,7 +169,7 @@ public:
 
     // central system
     if (randomise_charge_) {  // randomise the charge of outgoing system
-      const auto ransign = rnd_gen_->uniformInt(0, 1) == 1;
+      const auto ransign = random_generator_->uniformInt(0, 1) == 1;
       event()[Particle::Role::CentralSystem][0].get().setAntiparticle(ransign);
       event()[Particle::Role::CentralSystem][1].get().setAntiparticle(!ransign);
     }
@@ -179,6 +183,8 @@ public:
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("Lepton pair considered");
     desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
     desc.add<bool>("randomiseCharge", true).setDescription("randomise the charges of the two central fermions?");
+    desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
+        .setDescription("random number generator engine");
     return desc;
   }
 
@@ -242,6 +248,7 @@ private:
   /// \return Value of the Jacobian after the operation
   double pickin();
 
+  std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< Process-local random number generator engine
   const ParticleProperties pair_;
   const bool symmetrise_;
   const bool randomise_charge_;

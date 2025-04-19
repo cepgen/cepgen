@@ -22,6 +22,10 @@
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
 namespace cepgen::proc {
   /// Generic parton emission-factorised process
   /// \note 0 to 2 dimensions may be used for the scattered diffractive system('s) invariant mass definition.
@@ -41,6 +45,7 @@ namespace cepgen::proc {
     static ParametersDescription description();
 
     bool validatedBeamKinematics();
+    utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
 
   protected:
     void addEventContent() override;
@@ -48,7 +53,7 @@ namespace cepgen::proc {
 
     virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
-    virtual void computeBeamKinematics();                 ///< Compute the outgoing beam kinematics
+    virtual void computeBeamKinematics();                 ///< Compute the outgoing protons (or remnants) kinematics
 
     //--- Mandelstam variables
     double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
@@ -61,6 +66,8 @@ namespace cepgen::proc {
 
   private:
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
+    std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< Process-local random number generator engine
+
     const Limits x_validity_range_{0., 1.};
     double kin_prefactor_{1.};
   };
