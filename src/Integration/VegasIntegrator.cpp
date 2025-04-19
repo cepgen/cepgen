@@ -51,7 +51,7 @@ public:
     desc.addAs<int, Mode>("mode", Mode::stratified)
         .setDescription(
             "determines whether to use importance sampling or stratified sampling, or whether to pick on its own");
-    desc.add("loggingOutput", "cerr"s).setDescription("output stream for logging (cerr, cout, or file name)");
+    desc.add("loggingOutput", "cerr"s).setDescription("output stream for logging (cerr, cout, or file name)"s);
     desc.add("verbosity", -1)
         .allow(-1, "turn off all output")
         .allow(0, "print summary information about the weighted average and final result")
@@ -187,7 +187,7 @@ private:
   const int num_function_calls_;
   const double chi_square_cut_;
   const bool treat_;  ///< Is the integrand to be smoothed for events generation?
-  gsl_monte_vegas_params vegas_params_;
+  gsl_monte_vegas_params vegas_params_{};
 
   /// Trivial deleter for the Vegas integrator state
   struct gsl_monte_vegas_deleter {

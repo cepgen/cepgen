@@ -49,7 +49,7 @@ void GSLIntegrator::prepare(Integrand& integrand, const std::vector<Limits>& ran
   if (const auto ndim = integrand.size(); ndim > 0) {  // set the integration range
     if (range.size() < ndim)
       throw CG_FATAL("GSLIntegrator:prepare")
-          << "Insufficiant number of limits (" << range << ") provided for dim-" << ndim << " integrand.";
+          << "Insufficient number of limits (" << range << ") provided for dim-" << ndim << " integrand.";
     x_low_.resize(ndim);
     x_high_.resize(ndim);
     for (size_t i = 0; i < ndim; ++i)
