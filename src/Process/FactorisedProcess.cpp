@@ -87,6 +87,30 @@ void FactorisedProcess::prepareKinematics() {
 double FactorisedProcess::computeWeight() {
   if (!phase_space_generator_->generate())
     return 0.;
+  {  // compute and sanitise the momentum losses
+    x1() = x2() = 0.;
+    for (size_t i = 0; i < phase_space_generator_->central().size(); ++i) {
+      const auto energy = pc(i).energy(), pz = pc(i).pz();
+      x1() += std::fabs(energy + pz);
+      x2() += std::fabs(energy - pz);
+    }
+    x1() *= inverseSqrtS(), x2() *= inverseSqrtS();
+    if (!x_validity_range_.contains(x1()) || !x_validity_range_.contains(x2()))
+      return 0.;
+  }
+  computeBeamKinematics();
+  // compute the four-momenta of the intermediate partons
+  const double norm = wCM() * wCM() * s(), inv_norm = 1. / norm, prefactor = 0.5 * std::sqrt(norm);
+  {  // positive-z incoming parton collinear kinematics
+    const double tau1 = q1().p2() / x1() * inv_norm;
+    q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
+  }
+  {  // negative-z incoming parton collinear kinematics
+    const double tau2 = q2().p2() / x2() * inv_norm;
+    q2().setPz(-prefactor * (x2() - tau2)).setEnergy(+prefactor * (x2() + tau2));
+  }
+  if (!validatedBeamKinematics())
+    return 0.;
   if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
     return cent_weight * phase_space_generator_->weight() * kin_prefactor_;
   return 0.;
@@ -119,6 +143,18 @@ void FactorisedProcess::fillKinematics() {
   }
 }
 
+void FactorisedProcess::computeBeamKinematics() {
+  // compute the four-momenta of the outgoing protons (or remnants)
+  const auto px_p = (1. - x1()) * pA().p() * M_SQRT2, px_m = (mX2() + q1().p2()) * 0.5 / px_p;
+  pX() = -Momentum(q1()).setPz((px_p - px_m) * M_SQRT1_2).setEnergy((px_p + px_m) * M_SQRT1_2);
+  const auto py_m = (1. - x2()) * pB().p() * M_SQRT2, py_p = (mY2() + q2().p2()) * 0.5 / py_m;
+  pY() = -Momentum(q2()).setPz((py_p - py_m) * M_SQRT1_2).setEnergy((py_p + py_m) * M_SQRT1_2);
+  CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
+      << "px+ = " << px_p << " / px- = " << px_m << ", py+ = " << py_p << " / py- = " << py_m << ". Remnants:\n\t"
+      << "- X (positive-z): pX = " << pX() << ", mX = " << pX().mass() << "\n\t"
+      << "- Y (negative-z): pY = " << pY() << ", mY = " << pY().mass() << ".";
+}
+
 //----- utilities
 
 double FactorisedProcess::that() const { return phase_space_generator_->that(); }
@@ -127,32 +163,15 @@ double FactorisedProcess::uhat() const { return phase_space_generator_->uhat(); 
 
 bool FactorisedProcess::validatedBeamKinematics() {
   const auto invariant_mass = (q1() + q2()).mass();
+  // define a window in central system invariant mass
+  if (!kinematics().cuts().central.mass_sum.contains(invariant_mass))
+    return 0.;
 
-  // compute and sanitise the momentum losses
-  x1() = x2() = 0.;
-  for (size_t i = 0; i < phase_space_generator_->central().size(); ++i) {
-    const auto energy = pc(i).energy(), pz = pc(i).pz();
-    x1() += std::fabs(energy + pz);
-    x2() += std::fabs(energy - pz);
-  }
-  x1() *= inverseSqrtS(), x2() *= inverseSqrtS();
-  if (!x_validity_range_.contains(x1()) || !x_validity_range_.contains(x2()))
-    return false;
   // impose additional conditions for energy-momentum conservation
   if (!kinematics().incomingBeams().positive().elastic() && x2() * s() - invariant_mass - q2().p2() <= mX2())
     return false;
   if (!kinematics().incomingBeams().negative().elastic() && x1() * s() - invariant_mass - q1().p2() <= mY2())
     return false;
-
-  // compute the four-momenta of the outgoing protons (or remnants)
-  const auto px_p = (1. - x1()) * pA().p() * M_SQRT2, px_m = (mX2() + q1().p2()) * 0.5 / px_p;
-  const auto py_m = (1. - x2()) * pB().p() * M_SQRT2, py_p = (mY2() + q2().p2()) * 0.5 / py_m;
-  pX() = -Momentum(q1()).setPz((px_p - px_m) * M_SQRT1_2).setEnergy((px_p + px_m) * M_SQRT1_2);
-  pY() = -Momentum(q2()).setPz((py_p - py_m) * M_SQRT1_2).setEnergy((py_p + py_m) * M_SQRT1_2);
-  CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
-      << "px+ = " << px_p << " / px- = " << px_m << ", py+ = " << py_p << " / py- = " << py_m << ". Remnants:\n\t"
-      << "- X (positive-z): pX = " << pX() << ", mX = " << pX().mass() << "\n\t"
-      << "- Y (negative-z): pY = " << pY() << ", mY = " << pY().mass() << ".";
 
   // impose numerical conditions on X/Y 4-momenta
   if (std::fabs(pX().mass2() - mX2()) > NUM_LIMITS) {

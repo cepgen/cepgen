@@ -48,10 +48,6 @@ public:
     //TODO: gaussian smearing of kt can be introduced here
     process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
     process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
-    // define a window in central system invariant mass
-    if (const auto invariant_mass = (process().q1() + process().q2()).mass();
-        !process().kinematics().cuts().central.mass_sum.contains(invariant_mass))
-      return false;
     return true;
   }
   double fluxes() const override {

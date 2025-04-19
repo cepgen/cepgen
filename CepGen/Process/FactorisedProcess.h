@@ -48,6 +48,7 @@ namespace cepgen::proc {
 
     virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
+    virtual void computeBeamKinematics();                 ///< Compute the outgoing beam kinematics
 
     //--- Mandelstam variables
     double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
