@@ -66,7 +66,7 @@ namespace cepgen::formfac {
                                       << ", should have 3.";
     }
 
-    inline static ParametersDescription description() {
+    static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Mergell et al.");
       desc.add("q20inv", 1. / 0.35);
@@ -84,9 +84,8 @@ namespace cepgen::formfac {
     }
 
   private:
-    inline void eval() override {
-      const double log1 = std::pow(log((lambda_sq_ + q2_) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
-
+    void eval() override {
+      const double log1 = std::pow(std::log((lambda_sq_ + q2_) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
       // best fit parameterisation
 
       // scalar part
@@ -121,7 +120,7 @@ namespace cepgen::formfac {
                         Fv2_term) *
                        log1;
 
-      const double F1 = Fv1 + Fs1, F2 = Fv2 + Fs2;
+      const auto F1 = Fv1 + Fs1, F2 = Fv2 + Fs2;
       setGEGM(F1 - tau(q2_) * F2, F1 + F2);
     }
 
