@@ -148,13 +148,13 @@ ParametersList& ParametersList::operator+=(const ParametersList& other) {
   REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
   // special case for parameters collection: concatenate values instead of full containers
-  for (const auto& par : other_modified.param_values_)
+  for (const auto& [key, parameters] : other_modified.param_values_)
     // if the two parameters list are modules, and do not have the same name,
     // simply replace the old one with the new parameters list
-    if (param_values_[par.first].getNameString() == par.second.getNameString())
-      param_values_[par.first] += par.second;
+    if (param_values_[key].getNameString() == parameters.getNameString())
+      param_values_[key] += parameters;
     else
-      param_values_[par.first] = par.second;
+      param_values_[key] = parameters;
   return *this;
 }
 
@@ -193,8 +193,7 @@ ParametersList& ParametersList::feed(const std::string& raw_args) {
     auto command = utils::split(argument, '/');  // browse through the parameters hierarchy
     if (argument[argument.size() - 1] != '\'' && argument[argument.size() - 1] != '"' &&
         command.size() > 1) {  // sub-parameters word found
-      operator[]<ParametersList>(command.at(0))
-          .feed(utils::merge(std::vector<std::string>(command.begin() + 1, command.end()), "/"));
+      operator[]<ParametersList>(command.at(0)).feed(utils::merge(std::vector(command.begin() + 1, command.end()), "/"));
       continue;
     }
     // from this point, a "key:value" or "key(:true)" was found
@@ -440,7 +439,7 @@ template <>
 Limits ParametersList::get<Limits>(const std::string& key, const Limits& default_value) const {
   // first try to find Limits object in collections
   auto out = default_value;
-  if (auto val =
+  if (const auto val =
           std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
       val != lim_values_.end())
     out = val->second;

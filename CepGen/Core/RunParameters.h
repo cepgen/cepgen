@@ -57,8 +57,8 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&, const RunParameters&);  ///< User-readable dump of runtime parameters
 
     void setTimeKeeper(utils::TimeKeeper*);                             ///< Initialise the timekeeper instance
-    utils::TimeKeeper* timeKeeper() { return tmr_.get(); }              ///< Pointer to a timekeeper instance
-    const utils::TimeKeeper* timeKeeper() const { return tmr_.get(); }  ///< Pointer to a timekeeper instance
+    utils::TimeKeeper* timeKeeper() { return timer_.get(); }              ///< Pointer to a timekeeper instance
+    const utils::TimeKeeper* timeKeeper() const { return timer_.get(); }  ///< Pointer to a timekeeper instance
 
     void initialiseModules();  ///< Initialise the event handling modules for an event generation
 
@@ -146,8 +146,8 @@ namespace cepgen {
     void prepareRun();  ///< Reset total generation time and number of events generated for this run, prepare kinematics
 
     /// Add a new timing into the total generation time
-    /// \param[in] gen_time Time to add (in seconds)
-    void addGenerationTime(double gen_time);
+    /// \param[in] generation_time Time to add (in seconds)
+    void addGenerationTime(double generation_time);
     inline double totalGenerationTime() const { return total_gen_time_; }  ///< Total generation time in s for this run
     inline unsigned int numGeneratedEvents() const { return num_gen_events_; }  ///< Number of events generated in run
 
@@ -160,7 +160,7 @@ namespace cepgen {
     unsigned long num_gen_events_{0ul};         ///< Number of events already generated
     ParametersList integrator_;                 ///< Integrator parameters
     Generation generation_;                     ///< Events generation parameters
-    std::unique_ptr<utils::TimeKeeper> tmr_;    ///< Collection of stopwatches for timing
+    std::unique_ptr<utils::TimeKeeper> timer_;    ///< Collection of stopwatches for timing
   };
 }  // namespace cepgen
 

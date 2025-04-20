@@ -28,7 +28,9 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
-static std::unordered_map<int, std::unique_ptr<cepgen::strfun::Parameterisation> > kBuiltStrFunsParameterisations;
+using namespace std::string_literals;
+
+static std::unordered_map<int, std::unique_ptr<cepgen::strfun::Parameterisation> > kBuiltStrFunctionsParameterisations;
 static std::unordered_map<int, std::unique_ptr<cepgen::KTFlux> > kBuiltKtFluxParameterisations;
 static std::unordered_map<std::string, std::unique_ptr<cepgen::Coupling> > kBuiltAlphaSParameterisations,
     kBuiltAlphaEMParameterisations;
@@ -39,9 +41,9 @@ extern "C" {
 /// Expose structure functions calculators to Fortran
 void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f2, double& fl) {
   using namespace cepgen;
-  if (kBuiltStrFunsParameterisations.count(sfmode) == 0)
-    kBuiltStrFunsParameterisations[sfmode] = StructureFunctionsFactory::get().build(sfmode);
-  const auto& sf = kBuiltStrFunsParameterisations.at(sfmode);
+  if (kBuiltStrFunctionsParameterisations.count(sfmode) == 0)
+    kBuiltStrFunctionsParameterisations[sfmode] = StructureFunctionsFactory::get().build(sfmode);
+  const auto& sf = kBuiltStrFunctionsParameterisations.at(sfmode);
   f2 = sf->F2(xbj, q2);
   fl = sf->FL(xbj, q2);
 }
@@ -88,8 +90,8 @@ double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
 double cepgen_particle_mass_(int& pdg_id) {
   try {
     return cepgen::PDG::get().mass(static_cast<cepgen::pdgid_t>(pdg_id));
-  } catch (const cepgen::Exception& e) {
-    e.dump();
+  } catch (const cepgen::Exception& exception) {
+    exception.dump();
     std::exit(EXIT_FAILURE);
   }
 }
@@ -98,8 +100,8 @@ double cepgen_particle_mass_(int& pdg_id) {
 double cepgen_particle_charge_(int& pdg_id) {
   try {
     return cepgen::PDG::get().charge(static_cast<cepgen::pdgid_t>(pdg_id));
-  } catch (const cepgen::Exception& e) {
-    e.dump();
+  } catch (const cepgen::Exception& exception) {
+    exception.dump();
     std::exit(EXIT_FAILURE);
   }
 }
@@ -108,8 +110,8 @@ double cepgen_particle_charge_(int& pdg_id) {
 double cepgen_particle_colour_(int& pdg_id) {
   try {
     return cepgen::PDG::get().colours(static_cast<cepgen::pdgid_t>(pdg_id));
-  } catch (const cepgen::Exception& e) {
-    e.dump();
+  } catch (const cepgen::Exception& exception) {
+    exception.dump();
     std::exit(EXIT_FAILURE);
   }
 }
@@ -127,7 +129,7 @@ void cepgen_fatal_(char* str, int size) { throw CG_FATAL("fortran_process") << s
 double cepgen_alphas_(char* str, double& q, int size) {
   const auto name = std::string(str, size);
   if (name.empty())
-    throw CG_FATAL("cepgen_alphas") << "Invalid name retrieved for alphaS(q) parameterisation: '" << name << "'.";
+    throw CG_FATAL("cepgen_alphas"s) << "Invalid name retrieved for alphaS(q) parameterisation: '" << name << "'.";
   if (kBuiltAlphaSParameterisations.count(name) == 0)
     kBuiltAlphaSParameterisations[name] = cepgen::AlphaSFactory::get().build(name);
   return kBuiltAlphaSParameterisations.at(name)->operator()(q);
@@ -136,7 +138,7 @@ double cepgen_alphas_(char* str, double& q, int size) {
 double cepgen_alphaem_(char* str, double& q, int size) {
   const auto name = std::string(str, size);
   if (name.empty())
-    throw CG_FATAL("cepgen_alphaem") << "Invalid name retrieved for alphaEM(q) parameterisation: '" << name << "'.";
+    throw CG_FATAL("cepgen_alphaem"s) << "Invalid name retrieved for alphaEM(q) parameterisation: '" << name << "'.";
   if (kBuiltAlphaEMParameterisations.count(name) == 0)
     kBuiltAlphaEMParameterisations[name] = cepgen::AlphaEMFactory::get().build(name);
   return kBuiltAlphaEMParameterisations.at(name)->operator()(q);

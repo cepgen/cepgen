@@ -28,15 +28,15 @@ Steerable::Steerable(const ParametersList& params) { setParameters(params); }
 void Steerable::setParameters(const ParametersList& params) { params_ += params; }
 
 std::string Steerable::steerPath(const std::string& key) const {
-  const auto fn = steer<std::string>(key);
-  if (fn.empty())
-    return fn;
-  for (const auto& path : utils::env::searchPaths())
-    if (const auto abs_path = fs::path(path) / fn; utils::fileExists(abs_path)) {
-      CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << abs_path << "'.";
-      return abs_path;
-    }
-  return fn;
+  if (const auto filename = steer<std::string>(key); !filename.empty()) {
+    for (const auto& path : utils::env::searchPaths())
+      if (const auto abs_path = fs::path(path) / filename; utils::fileExists(abs_path)) {
+        CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << abs_path << "'.";
+        return abs_path;
+      }
+    return filename;
+  }
+  return {};
 }
 
 ParametersDescription Steerable::description() {

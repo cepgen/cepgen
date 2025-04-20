@@ -49,18 +49,18 @@ namespace cepgen {
 #else
     const auto full_path = match ? "lib" + path + ".so" : path;
 #endif
-    if (callPath(full_path, [](const auto& path) {
+    if (callPath(full_path, [](const auto& file_path) {
 #ifdef _WIN32
-          if (LoadLibraryA(path.c_str()) != nullptr)
+          if (LoadLibraryA(file_path.c_str()) != nullptr)
             return true;
-          CG_WARNING("loadLibrary") << "Failed to load library \"" << path << "\".\n\t"
+          CG_WARNING("loadLibrary") << "Failed to load library \"" << file_path << "\".\n\t"
                                     << "Error code #" << GetLastError() << ".";
           return false;
 #else
-          if (dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL) != nullptr)
+          if (::dlopen(file_path.c_str(), RTLD_LAZY | RTLD_GLOBAL) != nullptr)
             return true;
           const char* err = dlerror();
-          CG_WARNING("loadLibrary") << "Failed to load library " << path << "."
+          CG_WARNING("loadLibrary") << "Failed to load library " << file_path << "."
                                     << (err != nullptr ? utils::format("\n\t%s", err) : "");
           return false;
 #endif
@@ -91,15 +91,13 @@ namespace cepgen {
     search_paths = utils::env::searchPaths();
     CG_DEBUG("initialise") << utils::s("Search path", search_paths.size(), false) << ": " << search_paths << ".";
 
-    // display header message
     try {
-      printHeader();
+      printHeader();  // display header message
     } catch (const Exception& e) {
       e.dump();
     }
 
     // particles table parsing
-    std::string addons_file;
     if (!callPath("mass_width_2023.txt", [](const auto& path) {
           pdg::MCDFileParser::parse(path);
           return true;
@@ -110,6 +108,7 @@ namespace cepgen {
                          << " are defined in the runtime environment.\n\t"
                          << "Make sure the path to the MCD file is correct.";
 
+    std::string addons_file;
     for (const auto& search_path : search_paths) {
       if (const fs::path the_path{search_path}; addons_file.empty() && utils::fileExists(the_path / "CepGenAddOns.txt"))
         addons_file = the_path / "CepGenAddOns.txt";

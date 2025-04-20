@@ -54,7 +54,7 @@ RunParameters::RunParameters(RunParameters& param)
       num_gen_events_(param.num_gen_events_),
       integrator_(param.integrator_),
       generation_(param.generation_),
-      tmr_(std::move(param.tmr_)) {}
+      timer_(std::move(param.timer_)) {}
 
 RunParameters::RunParameters(const RunParameters& param)
     : SteeredObject(param),
@@ -74,33 +74,33 @@ RunParameters& RunParameters::operator=(RunParameters param) {
   num_gen_events_ = param.num_gen_events_;
   integrator_ = param.integrator_;
   generation_ = param.generation_;
-  tmr_ = std::move(param.tmr_);
+  timer_ = std::move(param.timer_);
   return *this;
 }
 
 void RunParameters::initialiseModules() {
   // prepare the event modifications algorithms for event generation
-  for (auto& mod : evt_modifiers_)
-    mod->initialise(*this);
+  for (const auto& modifier : evt_modifiers_)
+    modifier->initialise(*this);
   // prepare the output modules for event generation
-  for (auto& mod : evt_exporters_)
-    mod->initialise(*this);
+  for (const auto& exporter : evt_exporters_)
+    exporter->initialise(*this);
 }
 
 void RunParameters::prepareRun() {
-  if (tmr_)
-    tmr_->clear();
-  CG_TICKER(tmr_.get());
+  if (timer_)
+    timer_->clear();
+  CG_TICKER(timer_.get());
 
-  //--- clear the run statistics
+  // clear the run statistics
   total_gen_time_ = 0.;
   num_gen_events_ = 0ul;
 }
 
-void RunParameters::setTimeKeeper(utils::TimeKeeper* kpr) { tmr_.reset(kpr); }
+void RunParameters::setTimeKeeper(utils::TimeKeeper* time_keeper) { timer_.reset(time_keeper); }
 
-void RunParameters::addGenerationTime(double gen_time) {
-  total_gen_time_ += gen_time;
+void RunParameters::addGenerationTime(double generation_time) {
+  total_gen_time_ += generation_time;
   num_gen_events_++;
 }
 
@@ -124,12 +124,12 @@ std::string RunParameters::processName() const {
 
 void RunParameters::clearProcess() { delete process_.release(); }
 
-void RunParameters::setProcess(std::unique_ptr<proc::Process> proc) { process_ = std::move(proc); }
+void RunParameters::setProcess(std::unique_ptr<proc::Process> process) { process_ = std::move(process); }
 
-void RunParameters::setProcess(proc::Process* proc) {
-  if (!proc)
+void RunParameters::setProcess(proc::Process* process) {
+  if (!process)
     throw CG_FATAL("RunParameters") << "Trying to clone an invalid process!";
-  process_.reset(proc);
+  process_.reset(process);
 }
 
 const Kinematics& RunParameters::kinematics() const {
@@ -142,26 +142,28 @@ EventModifier& RunParameters::eventModifier(size_t i) const { return *evt_modifi
 
 void RunParameters::clearEventModifiersSequence() { evt_modifiers_.clear(); }
 
-void RunParameters::addModifier(std::unique_ptr<EventModifier> mod) { evt_modifiers_.emplace_back(std::move(mod)); }
+void RunParameters::addModifier(std::unique_ptr<EventModifier> modifier) {
+  evt_modifiers_.emplace_back(std::move(modifier));
+}
 
-void RunParameters::addModifier(EventModifier* mod) {
-  evt_modifiers_.emplace_back(std::unique_ptr<EventModifier>(mod));
+void RunParameters::addModifier(EventModifier* modifier) {
+  evt_modifiers_.emplace_back(std::unique_ptr<EventModifier>(modifier));
 }
 
 EventExporter& RunParameters::eventExporter(size_t i) const { return *evt_exporters_.at(i); }
 
 void RunParameters::clearEventExportersSequence() { evt_exporters_.clear(); }
 
-void RunParameters::addEventExporter(std::unique_ptr<EventExporter> mod) {
-  evt_exporters_.emplace_back(std::move(mod));
+void RunParameters::addEventExporter(std::unique_ptr<EventExporter> exporter) {
+  evt_exporters_.emplace_back(std::move(exporter));
 }
 
-void RunParameters::addEventExporter(EventExporter* mod) {
-  evt_exporters_.emplace_back(std::unique_ptr<EventExporter>(mod));
+void RunParameters::addEventExporter(EventExporter* exporter) {
+  evt_exporters_.emplace_back(std::unique_ptr<EventExporter>(exporter));
 }
 
-void RunParameters::addTamingFunction(std::unique_ptr<utils::Functional> fct) {
-  taming_functions_.emplace_back(std::move(fct));
+void RunParameters::addTamingFunction(std::unique_ptr<utils::Functional> functional) {
+  taming_functions_.emplace_back(std::move(functional));
 }
 
 ParametersDescription RunParameters::description() {
@@ -173,7 +175,7 @@ ParametersDescription RunParameters::description() {
 
 namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const RunParameters& param) {
-    constexpr int wb = 90, wt = 33;
+    static constexpr int wb = 90, wt = 33;
 
     os << std::left << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n\n";
@@ -261,24 +263,22 @@ namespace cepgen {
     if (!kin.minimumFinalState().empty()) {
       os << std::setw(wt) << "Minimum final state";
       std::string sep;
-      for (const auto& part : kin.minimumFinalState())
-        os << sep << static_cast<PDG::Id>(part), sep = ", ";
+      for (const auto& pdg_id : kin.minimumFinalState())
+        os << sep << static_cast<PDG::Id>(pdg_id), sep = ", ";
       os << "\n";
     }
     dump_cuts(cuts.central);
     if (cuts.central_particles.size() > 0) {
       os << std::setw(wt) << utils::boldify(">>> per-particle cuts:") << "\n";
-      for (const auto& part_per_lim : cuts.central_particles) {
-        os << " * all single " << std::setw(wt - 3) << static_cast<PDG::Id>(part_per_lim.first) << "\n";
-        for (const auto& lim : part_per_lim.second.parameters().keysOf<Limits>()) {
-          const auto& limit = part_per_lim.second.parameters().get<Limits>(lim);
-          if (limit.valid())
+      for (const auto& [pdg_id, cuts] : cuts.central_particles) {
+        os << " * all single " << std::setw(wt - 3) << static_cast<PDG::Id>(pdg_id) << "\n";
+        for (const auto& lim : cuts.parameters().keysOf<Limits>())
+          if (const auto& limit = cuts.parameters().get<Limits>(lim); limit.valid())
             os << "   - " << std::setw(wt - 5) << cuts::Central::description().get(lim).description() << limit << "\n";
-        }
       }
     }
-    os << "\n";
-    os << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Proton / remnants ") << std::setfill(' ')
+    os << "\n"
+       << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Proton / remnants ") << std::setfill(' ')
        << "\n\n";
     dump_cuts(cuts.remnants);
     return os << "\n"
