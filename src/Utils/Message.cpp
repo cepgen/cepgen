@@ -23,9 +23,12 @@ using namespace cepgen;
 
 std::string Message::now() { return utils::timeAs("%H:%M:%S"); }
 
-LoggedMessage::LoggedMessage(
-    const char* mod, const char* from, MessageType type, const char* file, short lineno) noexcept
-    : from_(from), file_(file), line_num_(lineno), type_(type), module_(mod) {}
+LoggedMessage::LoggedMessage(const std::string& module,
+                             const std::string& from,
+                             MessageType type,
+                             const std::string& file,
+                             short lineno) noexcept
+    : from_(from), file_(file), line_num_(lineno), type_(type), module_(module) {}
 
 LoggedMessage::LoggedMessage(const LoggedMessage& rhs) noexcept
     : message_(rhs.message_.str()),  // only reason to customise the copy constructor

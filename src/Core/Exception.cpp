@@ -23,10 +23,14 @@
 
 using namespace cepgen;
 
-Exception::Exception(const char* mod, const char* from, Type type, const char* file, short lineno) noexcept
-    : LoggedMessage(mod, from, MessageType::undefined, file, lineno),
+Exception::Exception(
+    const std::string& module, const std::string& from, Type type, const std::string& file, short lineno) noexcept
+    : LoggedMessage(module, from, MessageType::undefined, file, lineno),
       std::runtime_error("cepgen::Exception"),
       type_(type) {}
+
+Exception::Exception(const Exception& rhs) noexcept
+    : LoggedMessage(rhs), std::runtime_error("cepgen::Exception"), type_(rhs.type_) {}
 
 Exception::~Exception() noexcept {
   if (type_ >= error)
@@ -46,16 +50,16 @@ void Exception::dump(std::ostream* os) const noexcept {
   if (!os)
     return;
 
-  const std::string sep(80, '-');
-  (*os) << sep << "\n" << type_ << " occurred at " << now() << "\n";
+  static const std::string separator(80, '-');
+  *os << separator << "\n" << type_ << " occurred at " << now() << "\n";
   if (!from_.empty())
-    (*os) << "  raised by: " << colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
+    *os << "  raised by: " << colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
   if (utils::Logger::get().extended() && !file_.empty()) {
-    (*os) << "  file: " << colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
+    *os << "  file: " << colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
     if (line_num_ != 0)
-      (*os) << "  line #" << line_num_ << "\n";
+      *os << "  line #" << line_num_ << "\n";
   }
-  (*os) << "\n" << message_.str() << "\n" << sep << "\n";
+  *os << "\n" << message_.str() << "\n" << separator << "\n";
 }
 
 namespace cepgen {

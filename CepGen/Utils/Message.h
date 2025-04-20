@@ -30,8 +30,7 @@ namespace cepgen {
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date 27 Mar 2015
   struct Message {
-    /// Generic message constructor
-    explicit inline Message() = default;
+    explicit Message() = default;  ///< Generic message constructor
     virtual ~Message() = default;
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
@@ -52,32 +51,29 @@ namespace cepgen {
       warning,         ///< Casual non-stopping warning
     };
     /// Generic constructor
-    /// \param[in] mod exception classifier
+    /// \param[in] module exception classifier
     /// \param[in] from method invoking the exception
     /// \param[in] type exception type
     /// \param[in] file file where this occurred
     /// \param[in] lineno Line number where exception occurred
-    explicit LoggedMessage(const char* mod,
-                           const char* from = "",
+    explicit LoggedMessage(const std::string& module,
+                           const std::string& from = "",
                            MessageType type = MessageType::undefined,
-                           const char* file = "",
-                           short lineno = 0) noexcept;
-    /// Copy constructor
-    LoggedMessage(const LoggedMessage&) noexcept;
-    /// Default destructor
-    ~LoggedMessage() noexcept override;
+                           const std::string& file = "",
+                           short lineno = 0) noexcept(true);
+    LoggedMessage(const LoggedMessage&) noexcept(true);  ///< Copy constructor
+    ~LoggedMessage() noexcept override;                  ///< Default destructor
 
-    /// Printout operator for message type
-    friend std::ostream& operator<<(std::ostream&, const MessageType&);
+    friend std::ostream& operator<<(std::ostream&, const MessageType&);  ///< Printout operator for message type
 
     //----- Overloaded stream operators
 
     /// Generic templated message feeder operator
     template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const T& var) noexcept {
-      auto& nc_except = const_cast<LoggedMessage&>(exc);
-      nc_except.message_ << var;
-      return exc;
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const T& message) noexcept {
+      auto& nc_except = const_cast<LoggedMessage&>(log);
+      nc_except.message_ << message;
+      return log;
     }
     /// Specialised feeder operator for booleans
     friend const LoggedMessage& operator<<(const LoggedMessage&, const bool&) noexcept;
@@ -85,90 +81,80 @@ namespace cepgen {
     friend const LoggedMessage& operator<<(const LoggedMessage&, const std::wstring&) noexcept;
     /// Generic templated pair-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::pair<T, U>& pair_var) noexcept {
-      return exc << "(" << pair_var.first << ", " << pair_var.second << ")";
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const std::pair<T, U>& pair_var) noexcept {
+      return log << "(" << pair_var.first << ", " << pair_var.second << ")";
     }
     /// Generic templated vector-variables feeder operator
     template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::set<T>& set_var) noexcept {
-      exc << "[";
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const std::set<T>& set_var) noexcept {
+      (void)(log << "[");
       std::string sep;
       if (!set_var.empty())
         for (const auto& var : set_var)
-          exc << sep << var, sep = ", ";
-      return exc << "]";
+          log << sep << var, sep = ", ";
+      return log << "]";
     }
     /// Generic templated vector-variables feeder operator
     template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::vector<T>& vec_var) noexcept {
-      exc << "{";
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const std::vector<T>& vec_var) noexcept {
+      (void)(log << "{");
       std::string sep;
       if (!vec_var.empty())
         for (const auto& var : vec_var)
-          exc << sep << var, sep = ", ";
-      return exc << "}";
+          log << sep << var, sep = ", ";
+      return log << "}";
     }
     /// Generic templated vector-variables feeder operator
     template <typename T, std::size_t N>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::array<T, N>& vec_var) noexcept {
-      exc << "{";
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const std::array<T, N>& vec_var) noexcept {
+      (void)(log << "{");
       std::string sep;
       if (!vec_var.empty())
         for (const auto& var : vec_var)
-          exc << sep << var, sep = ", ";
-      return exc << "}";
+          log << sep << var, sep = ", ";
+      return log << "}";
     }
     /// Generic templated mapping-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::map<T, U>& map_var) noexcept {
-      exc << "{";
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const std::map<T, U>& map_var) noexcept {
+      (void)(log << "{");
       std::string sep;
       if (!map_var.empty())
         for (const auto& var : map_var)
-          exc << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
-      return exc << "}";
+          log << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
+      return log << "}";
     }
     /// Generic templated mapping-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc,
-                                                  const std::unordered_map<T, U>& map_var) noexcept {
-      exc << "{";
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, const std::unordered_map<T, U>& map_var) noexcept {
+      (void)(log << "{");
       std::string sep;
       if (!map_var.empty())
         for (const auto& var : map_var)
-          exc << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
-      return exc << "}";
+          log << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
+      return log << "}";
     }
     /// Pipe modifier operator
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc,
-                                                  std::ios_base& (*f)(std::ios_base&)) noexcept {
-      LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
+    friend const LoggedMessage& operator<<(const LoggedMessage& log, std::ios_base& (*f)(std::ios_base&)) noexcept {
+      auto& nc_except = const_cast<LoggedMessage&>(log);
       f(nc_except.message_);
-      return exc;
+      return log;
     }
 
     /// Lambda function handler
     template <typename T>
-    inline const LoggedMessage& log(T&& lam) noexcept {
-      lam(*this);
+    const LoggedMessage& log(T&& lambda) noexcept {
+      lambda(*this);
       return *this;
     }
 
-    /// Human-readable message
-    std::string message() const { return message_.str(); }
-
-    /// Origin of the exception
-    const std::string& from() const { return from_; }
-    /// File where the exception occurred
-    const std::string& file() const { return file_; }
-    /// Line number where the exception occurred
-    short lineNumber() const { return line_num_; }
-    /// Message type
-    const MessageType& type() const { return type_; }
-    /// Human-readable dump of the message
-    void dump(std::ostream* os = nullptr) const noexcept override;
-    /// Output stream object
-    std::ostream& stream() { return message_; }
+    std::string message() const { return message_.str(); }          ///< Human-readable message
+    const std::string& from() const { return from_; }               ///< Origin of the exception
+    const std::string& file() const { return file_; }               ///< File where the exception occurred
+    short lineNumber() const { return line_num_; }                  ///< Line number where the exception occurred
+    const MessageType& type() const { return type_; }               ///< Message type
+    void dump(std::ostream* os = nullptr) const noexcept override;  ///< Human-readable dump of the message
+    std::ostream& stream() { return message_; }                     ///< Output stream object
 
   protected:
     std::ostringstream message_;  ///< Message to throw
@@ -185,11 +171,9 @@ namespace cepgen {
   /// \date Apr 2018
   struct NullStream : Message {
     using Message::Message;
-    /// Empty constructor
-    inline NullStream() = default;
-    /// Empty constructor
-    inline NullStream(const LoggedMessage&) {}
-    void dump(std::ostream* os = nullptr) const override { (void)(os); }
+    NullStream() = default;              ///< Empty constructor
+    NullStream(const LoggedMessage&) {}  ///< Empty constructor
+    void dump(std::ostream* = nullptr) const override {}
     /// Stream operator (null and void)
     template <class T>
     NullStream& operator<<(const T&) {

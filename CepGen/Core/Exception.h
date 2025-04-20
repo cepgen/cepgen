@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
+  /// Standard exception message
   class Exception : public LoggedMessage, public std::runtime_error {
   public:
     /// Enumeration of exception severities
@@ -30,31 +31,29 @@ namespace cepgen {
       error,           ///< General non-stopping error
       fatal            ///< Critical and stopping error
     };
-    explicit Exception(const char* mod,
-                       const char* from = "",
-                       Type type = Type::undefined,
-                       const char* file = "",
-                       short lineno = 0) noexcept;
-    /// Destructor (potentially killing the process)
-    virtual ~Exception() noexcept override;
+    explicit Exception(const std::string& module,
+                       const std::string& from = "",
+                       Type type = undefined,
+                       const std::string& file = "",
+                       short lineno = 0) noexcept(true);
+    Exception(const Exception&) noexcept(true);  ///< Copy constructor
+    ~Exception() noexcept override;              ///< Destructor (potentially killing the process)
 
-    /// Printout operator for exception type
-    friend std::ostream& operator<<(std::ostream&, const Type&);
+    friend std::ostream& operator<<(std::ostream&, const Type&);  ///< Printout operator for exception type
 
     template <typename T>
-    inline friend const Exception& operator<<(const Exception& exc, const T& var) noexcept {
-      static_cast<const LoggedMessage&>(exc) << var;
-      return exc;
+    friend const Exception& operator<<(const Exception& exception, const T& message) noexcept {
+      static_cast<const LoggedMessage&>(exception) << message;
+      return exception;
     }
-    /// Human-readable dump of the exception
-    void dump(std::ostream* os = nullptr) const noexcept override;
-
-    const char* what() const noexcept override;
+    void dump(std::ostream* = nullptr) const noexcept(true) override;  ///< Human-readable dump of the exception
+    const char* what() const noexcept(true) override;
 
   private:
-    Type type_{Type::undefined};
+    const Type type_{undefined};
     mutable char what_[50]{""};
   };
+  static_assert(std::is_nothrow_copy_constructible_v<Exception>, "Exception must be nothrow copy-constructible");
 }  // namespace cepgen
 
 #define CG_ERROR(mod) cepgen::Exception(mod, __FUNC__, cepgen::Exception::Type::error, __FILE__, __LINE__)
