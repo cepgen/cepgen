@@ -86,19 +86,19 @@ namespace cepgen {
   }
 
   void initialise(bool safe_mode) {
-    //--- parse all particles properties
+    // parse all particles properties
     static const std::string pdg_file = "";
     search_paths = utils::env::searchPaths();
     CG_DEBUG("initialise") << utils::s("Search path", search_paths.size(), false) << ": " << search_paths << ".";
 
-    //--- header message
+    // display header message
     try {
       printHeader();
     } catch (const Exception& e) {
       e.dump();
     }
 
-    //--- particles table parsing
+    // particles table parsing
     std::string addons_file;
     if (!callPath("mass_width_2023.txt", [](const auto& path) {
           pdg::MCDFileParser::parse(path);
@@ -110,14 +110,13 @@ namespace cepgen {
                          << " are defined in the runtime environment.\n\t"
                          << "Make sure the path to the MCD file is correct.";
 
-    for (const auto& path : search_paths) {
-      const fs::path the_path{path};
-      if (addons_file.empty() && utils::fileExists(the_path / "CepGenAddOns.txt"))
+    for (const auto& search_path : search_paths) {
+      if (const fs::path the_path{search_path}; addons_file.empty() && utils::fileExists(the_path / "CepGenAddOns.txt"))
         addons_file = the_path / "CepGenAddOns.txt";
-      utils::env::append("LD_LIBRARY_PATH", path);
+      utils::env::append("LD_LIBRARY_PATH", search_path);
     }
 
-    //--- load all necessary modules
+    // load all necessary modules
     if (!safe_mode && !addons_file.empty())
       for (const auto& lib : utils::split(utils::readFile(addons_file), '\n'))
         loadLibrary(lib, true);
@@ -125,7 +124,7 @@ namespace cepgen {
     if (!invalid_libraries.empty())
       CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";
 
-    //--- greeting message
+    // greeting message
     CG_INFO("init").log([&](auto& log) {
       log << "CepGen " << version::tag << " (" << version::extended << ") "
           << "initialised";

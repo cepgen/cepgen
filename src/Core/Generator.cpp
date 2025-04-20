@@ -37,15 +37,15 @@
 using namespace cepgen;
 
 Generator::Generator(bool safe_mode) : parameters_(new RunParameters) {
-  static bool init = false;
-  if (!init) {
+  static bool kInitialised = false;
+  if (!kInitialised) {
     cepgen::initialise(safe_mode);
-    init = true;
+    kInitialised = true;
     CG_DEBUG("Generator:init") << "Generator initialised";
   }
 }
 
-Generator::Generator(RunParameters* ip) : parameters_(ip) {}
+Generator::Generator(RunParameters* run_parameters) : parameters_(run_parameters) {}
 
 Generator::~Generator() {
   if (parameters_->timeKeeper())
@@ -82,19 +82,21 @@ RunParameters& Generator::runParameters() {
   return *parameters_;
 }
 
-void Generator::setRunParameters(std::unique_ptr<RunParameters>& ip) { parameters_ = std::move(ip); }
+void Generator::setRunParameters(std::unique_ptr<RunParameters>& run_parameters) {
+  parameters_ = std::move(run_parameters);
+}
 
-double Generator::computePoint(const std::vector<double>& coord) {
+double Generator::computePoint(const std::vector<double>& coordinates) {
   if (!worker_)
     clearRun();
   if (!parameters_->hasProcess())
     throw CG_FATAL("Generator:computePoint") << "Trying to compute a point with no process specified!";
   const size_t ndim = worker_->integrand().process().ndim();
-  if (coord.size() != ndim)
+  if (coordinates.size() != ndim)
     throw CG_FATAL("Generator:computePoint")
-        << "Invalid phase space dimension (ndim=" << ndim << ", given=" << coord.size() << ").";
-  const auto res = worker_->integrand().eval(coord);
-  CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
+        << "Invalid phase space dimension (ndim=" << ndim << ", given=" << coordinates.size() << ").";
+  const auto res = worker_->integrand().eval(coordinates);
+  CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coordinates << ":\n\t" << res << ".";
   return res;
 }
 
@@ -125,17 +127,16 @@ Value Generator::computeXsection() {
 
 void Generator::resetIntegrator() {
   CG_TICKER(parameters_->timeKeeper());
-  // create a spec-defined integrator in the current scope
-  setIntegrator(IntegratorFactory::get().build(parameters_->integrator()));
+  setIntegrator(IntegratorFactory::get().build(
+      parameters_->integrator()));  // create a spec-defined integrator in the current scope
 }
 
 void Generator::setIntegrator(std::unique_ptr<Integrator> integrator) {
   CG_TICKER(parameters_->timeKeeper());
-  // copy the integrator instance (or create it if unspecified) in the current scope
-  if (!integrator)
-    resetIntegrator();
-  else
+  if (integrator)  // copy the integrator instance (or create it if unspecified) in the current scope
     integrator_ = std::move(integrator);
+  else
+    resetIntegrator();
   CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
 }
 
@@ -143,15 +144,15 @@ void Generator::integrate() {
   CG_TICKER(parameters_->timeKeeper());
 
   clearRun();
-
   if (!parameters_->hasProcess())
     throw CG_FATAL("Generator:integrate") << "Trying to integrate while no process is specified!";
-  const size_t ndim = worker_->integrand().process().ndim();
-  if (ndim == 0)
+  const size_t num_dimensions = worker_->integrand().process().ndim();
+  if (num_dimensions == 0)
     throw CG_FATAL("Generator:integrate") << "Invalid phase space dimension. "
                                           << "At least one integration variable is required!";
 
-  CG_DEBUG("Generator:integrate") << "New integrator instance created for " << ndim << "-dimensional integration.";
+  CG_DEBUG("Generator:integrate") << "New integrator instance created for " << num_dimensions
+                                  << "-dimensional integration.";
 
   if (!integrator_)
     throw CG_FATAL("Generator:integrate") << "No integrator object was declared for the generator!";
@@ -161,11 +162,11 @@ void Generator::integrate() {
   CG_DEBUG("Generator:integrate") << "Computed cross section: (" << cross_section_ << ") pb.";
 
   // now that the cross-section has been computed, feed it to the event modification algorithms...
-  for (auto& mod : parameters_->eventModifiersSequence())
-    mod->setCrossSection(cross_section_);
+  for (const auto& event_modifier : parameters_->eventModifiersSequence())
+    event_modifier->setCrossSection(cross_section_);
   // ...and to the event storage algorithms
-  for (auto& mod : parameters_->eventExportersSequence())
-    mod->setCrossSection(cross_section_);
+  for (const auto& event_exporter : parameters_->eventExportersSequence())
+    event_exporter->setCrossSection(cross_section_);
 }
 
 void Generator::initialise() {
@@ -174,14 +175,12 @@ void Generator::initialise() {
 
   CG_TICKER(parameters_->timeKeeper());
 
-  // if no worker is found, launch a new integration/run preparation
-  if (!worker_)
+  if (!worker_)  // if no worker is found, launch a new integration/run preparation
     integrate();
 
   // prepare the run parameters for event generation
   parameters_->initialiseModules();
   worker_->initialise();
-
   initialised_ = true;
 }
 
@@ -202,7 +201,7 @@ void Generator::generate(size_t num_events, const std::function<void(const proc:
   if (!worker_ || !initialised_)
     initialise();
 
-  //--- if invalid argument, retrieve from runtime parameters
+  // if invalid argument, retrieve from runtime parameters
   if (num_events < 1) {
     if (parameters_->generation().targetLuminosity() > 0.) {
       num_events = std::ceil(parameters_->generation().targetLuminosity() * cross_section_);
@@ -215,23 +214,22 @@ void Generator::generate(size_t num_events, const std::function<void(const proc:
 
   const utils::Timer tmr;
 
-  //--- launch the event generation
+  worker_->generate(num_events, callback);  // launch the event generation
 
-  worker_->generate(num_events, callback);
-
-  const double gen_time_s = tmr.elapsed();
-  const double rate_ms =
-      (parameters_->numGeneratedEvents() > 0) ? gen_time_s / parameters_->numGeneratedEvents() * 1.e3 : 0.;
-  const double equiv_lumi = parameters_->numGeneratedEvents() / crossSection();
-  CG_INFO("Generator") << utils::s("event", parameters_->numGeneratedEvents()) << " generated in " << gen_time_s
+  const double generation_time = tmr.elapsed();
+  const double rate_ms = (parameters_->numGeneratedEvents() > 0)
+                             ? generation_time * 1.e3 /* s -> ms */ / parameters_->numGeneratedEvents()
+                             : 0.;
+  const double equivalent_luminosity = parameters_->numGeneratedEvents() / crossSection();
+  CG_INFO("Generator") << utils::s("event", parameters_->numGeneratedEvents()) << " generated in " << generation_time
                        << " s "
                        << "(" << rate_ms << " ms/event).\n\t"
-                       << "Equivalent luminosity: " << utils::format("%g", equiv_lumi) << " pb^-1.";
+                       << "Equivalent luminosity: " << utils::format("%g", equivalent_luminosity) << " pb^-1.";
 }
 
 void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {
-  generate(num_events, [this, &callback](const proc::Process& proc) {
+  generate(num_events, [this, &callback](const proc::Process& process) {
     if (callback)
-      callback(proc.event(), parameters_->numGeneratedEvents());
+      callback(process.event(), parameters_->numGeneratedEvents());
   });
 }

@@ -64,13 +64,14 @@ bool GeneratorWorker::storeEvent() const {
     return true;
 
   const auto& event = integrand_->process().event();
-  const auto ngen = run_params_->numGeneratedEvents();
-  if ((ngen + 1) % run_params_->generation().printEvery() == 0)
-    CG_DEBUG("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
+  if (const auto num_events_generated = run_params_->numGeneratedEvents();
+      (num_events_generated + 1) % run_params_->generation().printEvery() == 0)
+    CG_DEBUG("GeneratorWorker:store") << utils::s("event", num_events_generated + 1, true) << " generated.";
   if (callback_proc_)
     callback_proc_(integrand_->process());
-  for (const auto& mod : run_params_->eventExportersSequence())
-    *mod << event;
+  for (const auto& event_exporter : run_params_->eventExportersSequence())
+    if (!(*event_exporter << event))
+      return false;
   const_cast<RunParameters*>(run_params_)->addGenerationTime(event.metadata("time:total"));
   return true;
 }

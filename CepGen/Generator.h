@@ -78,9 +78,9 @@ namespace cepgen {
     const Event& next();  ///< Generate one single event
 
     /// Compute one single point from the total phase space
-    /// \param[in] x the n-dimensional point to compute
+    /// \param[in] coordinates the n-dimensional point to compute
     /// \return the function value for the given point
-    double computePoint(const std::vector<double>& x);
+    double computePoint(const std::vector<double>& coordinates);
 
   private:
     void initialise();       ///< Initialise event generation
