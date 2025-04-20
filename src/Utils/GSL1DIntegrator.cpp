@@ -69,7 +69,7 @@ private:
       CG_ERROR("GSL1DIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
       return Value{};
     }
-    return eval(
+    return integrate(
         GSLFunctionWrapper::build(FunctionWrapper{[&integrand](double x) { return integrand.eval(std::vector{x}); }},
                                   integrand_parameters_)
             .get(),
@@ -88,7 +88,7 @@ private:
     Rational = 7,
     Chebyshev2 = 8
   };
-  Value eval(const gsl_function* wrp, const Limits& range) const {
+  Value integrate(const gsl_function* wrp, const Limits& range) const {
 #if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
     double result{0.}, error{0.};
     int res = GSL_SUCCESS;

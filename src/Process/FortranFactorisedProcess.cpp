@@ -30,17 +30,13 @@
 using namespace cepgen;
 using namespace cepgen::proc;
 
-namespace {
-  extern "C" {
-  extern ktblock::Constants constants_;
-  extern ktblock::GenParameters genparams_;
-  extern ktblock::KTKinematics ktkin_;
-  extern ktblock::KinCuts kincuts_;
-  extern ktblock::EventKinematics evtkin_;
-  }
-}  // namespace
-
 extern "C" {
+extern ktblock::Constants constants_;
+extern ktblock::GenParameters genparams_;
+extern ktblock::KTKinematics ktkin_;
+extern ktblock::KinCuts kincuts_;
+extern ktblock::EventKinematics evtkin_;
+
 /// Print the full list of parameters in the runtime process parameters collection
 void cepgen_list_params_() {
   CG_LOG << "\t" << ParametersDescription(FortranFactorisedProcess::kProcParameters).describe(1);
