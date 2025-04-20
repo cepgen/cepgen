@@ -28,7 +28,9 @@ int main(int argc, char* argv[]) {
   CG_TEST_DEBUG(verbose);
 
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";  // try with a bit of Unicode too
-  for (int type = cepgen::Exception::Type::undefined; type < cepgen::Exception::Type::fatal; ++type) {
+  for (auto type = static_cast<int>(cepgen::Exception::Type::undefined);
+       type < static_cast<int>(cepgen::Exception::Type::fatal);
+       ++type) {
     ostringstream type_name;
     type_name << "Type " << static_cast<cepgen::Exception::Type>(type);
     auto throw_except = [&type, &test_string]() {
