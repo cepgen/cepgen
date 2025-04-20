@@ -40,6 +40,7 @@
 
 using namespace cepgen;
 using namespace cepgen::card;
+using namespace std::string_literals;
 using std::string;
 
 static constexpr int kInvalidInt = -999999;
@@ -63,7 +64,7 @@ public:
     return desc;
   }
 
-  inline LpairHandler& parseFile(const std::string& filename) override {
+  LpairHandler& parseFile(const std::string& filename) override {
     if (!utils::fileExists(filename))
       throw CG_FATAL("LpairHandler:parseFile") << "Unable to locate steering card \"" << filename << "\".";
     if (const auto file_content = utils::split(utils::readFile(filename), '\n'); !file_content.empty())
@@ -72,15 +73,14 @@ public:
     return *this;
   }
 
-  inline LpairHandler& parseCommands(const std::vector<std::string>& commands) override {
+  LpairHandler& parseCommands(const std::vector<std::string>& commands) override {
     std::ostringstream os;
     init();
     for (auto line : commands) {
       if (line = utils::trim(line); line.empty() || line[0] == '#')  // skip comments
         continue;
       const auto fields = utils::split(line, ' ', true);  // parse all fields
-
-      if (fields.size() < 2) {  // skip all invalid lines
+      if (fields.size() < 2) {                            // skip all invalid lines
         CG_WARNING("LpairHandler:parseCommands") << "Invalid command read: '" << line << "'.";
         continue;
       }
@@ -89,7 +89,6 @@ public:
       if (const auto descr = describe(key); descr != kInvalidStr)
         os << utils::format("\n\t>> %-8s %-25s (%s)", key.data(), parameter(key).data(), descr.data());
     }
-
     CG_INFO("LpairHandler:parseCommands")
         << "LPAIR configuration successfully loaded! Now parsing the following parameters:" << os.str() << ".";
     parse();
@@ -97,7 +96,7 @@ public:
   }
 
   /// Store a configuration into a LPAIR steering card
-  inline void write(const std::string& filename) const override {
+  void write(const std::string& filename) const override {
     std::ofstream file(filename, std::fstream::out | std::fstream::trunc);
     if (!file.is_open())
       throw CG_ERROR("LpairHandler") << "Failed to open file '" << filename << "' for writing.";
@@ -117,57 +116,55 @@ private:
   LpairHandler& setRunParameters(const RunParameters*) override;
 
   void init();
-  inline void parse() {
+  void parse() {
     for (const auto& lib : utils::split(addons_list_, ','))
       loadLibrary(lib);
 
-    //--- parse the PDG library
+    // parse the PDG library
     if (!pdg_input_path_.empty())
       pdg::MCDFileParser::parse(pdg_input_path_);
     if (!kmr_grid_path_.empty())
       kmr::GluonGrid::get(ParametersList().set("path", kmr_grid_path_));
 
-    //--- build the ticker if required
-    if (timer_)
+    if (timer_)  // build the ticker if required
       runParameters()->setTimeKeeper(new utils::TimeKeeper);
     utils::Logger::get().setLevel(static_cast<utils::Logger::Level>(log_level_));
     utils::Logger::get().setExtended(ext_log_);
 
-    {  //--- parse the structure functions code
-      auto& kin_params = proc_params_.operator[]<ParametersList>("kinematics");
+    {  // parse the structure functions code
+      auto& kinematics_params = proc_params_.operator[]<ParametersList>("kinematics");
       bool beam1_elastic{true}, beam2_elastic{true};
-      if (pmod_ == "1")
-        kin_params.set<int>("beam1id", PDG::electron);
+      if (p_mode_ == "1")
+        kinematics_params.set<int>("beam1id", PDG::electron);
       else {
-        kin_params.set<int>("beam1id", PDG::proton);
-        if (pmod_ != "2") {
+        kinematics_params.set<int>("beam1id", PDG::proton);
+        if (p_mode_ != "2") {
           beam1_elastic = false;
-          auto sf_params = StructureFunctionsFactory::get().describeParameters(pmod_).parameters();
+          auto sf_params = StructureFunctionsFactory::get().describeParameters(p_mode_).parameters();
           sf_params.set("sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-          if (pmod_ == "205" /* MSTWgrid */ && !mstw_grid_path_.empty())
+          if (p_mode_ == "205" /* MSTW grid */ && !mstw_grid_path_.empty())
             sf_params.set("gridPath", mstw_grid_path_);
-          kin_params.set("structureFunctions", sf_params);
+          kinematics_params.set("structureFunctions", sf_params);
         }
       }
-      if (emod_ == "1")
-        kin_params.set<int>("beam2id", PDG::electron);
+      if (e_mode_ == "1")
+        kinematics_params.set<int>("beam2id", PDG::electron);
       else {
-        kin_params.set<int>("beam2id", PDG::proton);
-        if (emod_ != "2") {
+        kinematics_params.set<int>("beam2id", PDG::proton);
+        if (e_mode_ != "2") {
           beam2_elastic = false;
-          if (emod_ != pmod_)
-            CG_WARNING("LpairHandler") << "Incoming particles' modes are inconsistent: PMOD=" << pmod_
-                                       << ", EMOD=" << emod_ << ".";
+          if (e_mode_ != p_mode_)
+            CG_WARNING("LpairHandler") << "Incoming particles' modes are inconsistent: PMOD=" << p_mode_ << ", "
+                                       << "EMOD"s << "=" << e_mode_ << ".";
         }
       }
-      auto& mode = kin_params.operator[]<int>("mode");
+      auto& mode = kinematics_params.operator[]<int>("mode");
       mode = static_cast<int>(
           beam1_elastic ? (beam2_elastic ? mode::Kinematics::ElasticElastic : mode::Kinematics::ElasticInelastic)
                         : (beam2_elastic ? mode::Kinematics::InelasticElastic : mode::Kinematics::InelasticInelastic));
     }
 
-    //--- parse the process name
-    if (!proc_name_.empty() || !proc_params_.empty()) {
+    if (!proc_name_.empty() || !proc_params_.empty()) {  // parse the process parameters
       if (!runParameters()->hasProcess() && proc_name_.empty())
         throw CG_FATAL("LpairHandler") << "Process name not specified!";
       if (runParameters()->hasProcess() && runParameters()->process().name() == proc_name_)
@@ -181,20 +178,17 @@ private:
       runParameters()->integrator() += int_params_;
     runParameters()->generation().setParameters(gen_params_);
 
-    //--- parse the hadronisation algorithm name
-    if (!evt_mod_name_.empty())
-      for (const auto& mod : utils::split(evt_mod_name_, ','))
-        runParameters()->addModifier(EventModifierFactory::get().build(mod, ParametersList()));
+    for (const auto& mod : utils::split(evt_mod_name_, ','))  // parse the hadronisation algorithm name
+      runParameters()->addModifier(EventModifierFactory::get().build(mod, ParametersList()));
 
-    //--- parse the output module name
-    if (!out_mod_name_.empty()) {
+    if (!out_mod_name_.empty()) {  // parse the output module name
       const auto& out_files = utils::split(out_file_name_, ',');
       size_t i = 0;
       for (const auto& mod : utils::split(out_mod_name_, ',')) {
-        ParametersList outm;
+        ParametersList output_params;
         if (out_files.size() > i && !out_files.at(i).empty())
-          outm.set("filename", out_files.at(i));
-        runParameters()->addEventExporter(EventExporterFactory::get().build(mod, outm));
+          output_params.set("filename", out_files.at(i));
+        runParameters()->addEventExporter(EventExporterFactory::get().build(mod, output_params));
         ++i;
       }
     }
@@ -231,16 +225,16 @@ private:
   }
   /// Set a parameter value
   template <typename T>
-  inline void set(const std::string& /*key*/, const T& /*value*/) {}
+  void set(const std::string& /*key*/, const T& /*value*/) {}
   /// Retrieve a parameter value
   template <typename T>
-  inline T get(const std::string& /*key*/) const {
+  T get(const std::string& /*key*/) const {
     return T();
   }
 
   void setParameter(const std::string& key, const std::string& value);
   std::string parameter(const std::string& key) const;
-  inline std::string describe(const std::string& key) const {
+  std::string describe(const std::string& key) const {
 #define __TYPE_ENUM(type, map, default_val) \
   if (map.count(key))                       \
     return map.at(key).description;
@@ -250,8 +244,8 @@ private:
   }
 
   ParametersList proc_params_, gen_params_, int_params_;
-  int timer_{0}, iend_{1}, log_level_{static_cast<int>(utils::Logger::get().level())}, ext_log_{0};
-  std::string emod_{"2"}, pmod_{"2"};
+  int timer_{0}, generation_mode_{1}, log_level_{static_cast<int>(utils::Logger::get().level())}, ext_log_{0};
+  std::string e_mode_{"2"}, p_mode_{"2"};
   int sr_type_{1}, lepton_id_{0};
   std::string proc_name_, evt_mod_name_, out_mod_name_;
   std::string out_file_name_, addons_list_;
@@ -262,7 +256,7 @@ private:
 #undef __TYPE_ENUM
 };
 
-//----- specialised registers
+// specialised registers
 #define __TYPE_ENUM(type, map, default_val)                                        \
   template <>                                                                      \
   inline void LpairHandler::registerParameter<type>(                               \
@@ -296,107 +290,107 @@ std::string LpairHandler::parameter(const std::string& key) const {
 void LpairHandler::init() {
   //-------------------------------------------------------------------------------------------
   // Process/integration/hadronisation parameters
-  registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
-  registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
-  registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
-  registerParameter<std::string>("OUTP", "Output module", &out_mod_name_);
-  registerParameter<std::string>("OUTF", "Output file name", &out_file_name_);
-  registerParameter<std::string>("ADDN", "Additional libraries to load", &addons_list_);
-  registerIntegratorParameter<std::string>("ITYP", "Integration algorithm", MODULE_NAME);
-  registerIntegratorParameter<int>("NTRT", "Smoothen the integrand", "treat");
-  registerIntegratorParameter<int>("NCVG", "Number of function calls", "numFunctionCalls");
-  registerIntegratorParameter<int>("ITVG", "Number of integration iterations", "iterations");
-  registerIntegratorParameter<int>("SEED", "Random generator seed", "seed");
+  registerParameter<std::string>("PROC"s, "Process name to simulate", &proc_name_);
+  registerParameter<std::string>("HADR"s, "Hadronisation algorithm", &evt_mod_name_);
+  registerParameter<std::string>("EVMD"s, "Events modification algorithms", &evt_mod_name_);
+  registerParameter<std::string>("OUTP"s, "Output module", &out_mod_name_);
+  registerParameter<std::string>("OUTF"s, "Output file name", &out_file_name_);
+  registerParameter<std::string>("ADDN"s, "Additional libraries to load", &addons_list_);
+  registerIntegratorParameter<std::string>("ITYP"s, "Integration algorithm", MODULE_NAME);
+  registerIntegratorParameter<int>("NTRT"s, "Smoothen the integrand", "treat");
+  registerIntegratorParameter<int>("NCVG"s, "Number of function calls", "numFunctionCalls");
+  registerIntegratorParameter<int>("ITVG"s, "Number of integration iterations", "iterations");
+  registerIntegratorParameter<int>("SEED"s, "Random generator seed", "seed");
 
   //-------------------------------------------------------------------------------------------
   // General parameters
-  registerParameter("TIMR", "Enable the time ticker", &timer_);
-  registerParameter("IEND", "Generation type", &iend_);
-  registerParameter("DEBG", "Debugging verbosity", &log_level_);
-  registerParameter("LOGE", "Extended logging", &ext_log_);
-  registerGenerationParameter<int>("NTHR", "Number of threads to use for events generation", "numThreads");
-  registerGenerationParameter<int>("NCSG", "Number of points to probe", "numPoints");
-  registerGenerationParameter<int>("NGEN", "Number of events to generate", "maxgen");
-  registerGenerationParameter<int>("NPRN", "Number of events before printout", "printEvery");
+  registerParameter("TIMR"s, "Enable the time ticker", &timer_);
+  registerParameter("IEND"s, "Generation type", &generation_mode_);
+  registerParameter("DEBG"s, "Debugging verbosity", &log_level_);
+  registerParameter("LOGE"s, "Extended logging", &ext_log_);
+  registerGenerationParameter<int>("NTHR"s, "Number of threads to use for events generation", "numThreads"s);
+  registerGenerationParameter<int>("NCSG"s, "Number of points to probe", "numPoints"s);
+  registerGenerationParameter<int>("NGEN"s, "Number of events to generate", "maxgen"s);
+  registerGenerationParameter<int>("NPRN"s, "Number of events before printout", "printEvery"s);
 
   //-------------------------------------------------------------------------------------------
   // Process-specific parameters
-  registerProcessParameter<int>("METH", "Computation method (kT-factorisation)", "method");
-  registerProcessParameter<int>("IPOL", "Polarisation states to consider", "polarisationStates");
+  registerProcessParameter<int>("METH"s, "Computation method (kT-factorisation)", "method"s);
+  registerProcessParameter<int>("IPOL"s, "Polarisation states to consider", "polarisationStates"s);
 
   //-------------------------------------------------------------------------------------------
   // Process kinematics parameters
-  registerParameter("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
-  registerParameter("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
-  registerParameter("PDGI", "Input file for PDG information", &pdg_input_path_);
-  registerParameter("PMOD", "Outgoing primary particles' mode", &pmod_);
-  registerParameter("EMOD", "Outgoing primary particles' mode", &emod_);
-  registerParameter("RTYP", "R-ratio computation type", &sr_type_);
-  registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
-  registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
-  registerKinematicsParameter<int>("MODE", "Subprocess' mode", "mode");
-  registerKinematicsParameter<int>("INA1", "Heavy ion atomic weight (1st incoming beam)", "beam1A");
-  registerKinematicsParameter<int>("INZ1", "Heavy ion atomic number (1st incoming beam)", "beam1Z");
-  registerKinematicsParameter<int>("INA2", "Heavy ion atomic weight (2nd incoming beam)", "beam2A");
-  registerKinematicsParameter<int>("INZ2", "Heavy ion atomic number (2nd incoming beam)", "beam2Z");
-  registerKinematicsParameter<double>("INP1", "Momentum (1st primary particle)", "beam1pz");
-  registerKinematicsParameter<double>("INP2", "Momentum (2nd primary particle)", "beam2pz");
-  registerKinematicsParameter<double>("INPP", "Momentum (1st primary particle)", "beam1pz");
-  registerKinematicsParameter<double>("INPE", "Momentum (2nd primary particle)", "beam2pz");
+  registerParameter("KMRG"s, "KMR grid interpolation path", &kmr_grid_path_);
+  registerParameter("MGRD"s, "MSTW grid interpolation path", &mstw_grid_path_);
+  registerParameter("PDGI"s, "Input file for PDG information", &pdg_input_path_);
+  registerParameter("PMOD"s, "Outgoing primary particles' mode", &p_mode_);
+  registerParameter("EMOD"s, "Outgoing primary particles' mode", &e_mode_);
+  registerParameter("RTYP"s, "R-ratio computation type", &sr_type_);
+  registerProcessParameter<int>("PAIR"s, "Outgoing particles' PDG id", "pair"s);
+  registerKinematicsParameter<std::string>("FFAC"s, "Form factors for the incoming beams", "formFactors"s);
+  registerKinematicsParameter<int>("MODE"s, "Subprocess' mode", "mode"s);
+  registerKinematicsParameter<int>("INA1"s, "Heavy ion atomic weight (1st incoming beam)", "beam1A"s);
+  registerKinematicsParameter<int>("INZ1"s, "Heavy ion atomic number (1st incoming beam)", "beam1Z"s);
+  registerKinematicsParameter<int>("INA2"s, "Heavy ion atomic weight (2nd incoming beam)", "beam2A"s);
+  registerKinematicsParameter<int>("INZ2"s, "Heavy ion atomic number (2nd incoming beam)", "beam2Z"s);
+  registerKinematicsParameter<double>("INP1"s, "Momentum (1st primary particle)", "beam1pz"s);
+  registerKinematicsParameter<double>("INP2"s, "Momentum (2nd primary particle)", "beam2pz"s);
+  registerKinematicsParameter<double>("INPP"s, "Momentum (1st primary particle)", "beam1pz"s);
+  registerKinematicsParameter<double>("INPE"s, "Momentum (2nd primary particle)", "beam2pz"s);
   registerKinematicsParameter<double>(
-      "PTCT", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
+      "PTCT"s, "Minimal transverse momentum (single central outgoing particle)", "ptmin"s);
   registerKinematicsParameter<double>(
-      "PTMX", "Maximal transverse momentum (single central outgoing particle)", "ptmax");
-  registerKinematicsParameter<double>("MSCT", "Minimal central system mass", "invmassmin");
-  registerKinematicsParameter<double>("MSMX", "Maximal central system mass", "invmassmax");
-  registerKinematicsParameter<double>("ECUT", "Minimal energy (single central outgoing particle)", "energysummin");
-  registerKinematicsParameter<double>("ETMN", "Minimal pseudo-rapidity (central outgoing particles)", "etamin");
-  registerKinematicsParameter<double>("ETMX", "Maximal pseudo-rapidity (central outgoing particles)", "etamax");
-  registerKinematicsParameter<double>("YMIN", "Minimal rapidity (central outgoing particles)", "rapiditymin");
-  registerKinematicsParameter<double>("YMAX", "Maximal rapidity (central outgoing particles)", "rapiditymax");
+      "PTMX"s, "Maximal transverse momentum (single central outgoing particle)", "ptmax"s);
+  registerKinematicsParameter<double>("MSCT"s, "Minimal central system mass", "invmassmin"s);
+  registerKinematicsParameter<double>("MSMX"s, "Maximal central system mass", "invmassmax"s);
+  registerKinematicsParameter<double>("ECUT"s, "Minimal energy (single central outgoing particle)", "energysummin"s);
+  registerKinematicsParameter<double>("ETMN"s, "Minimal pseudo-rapidity (central outgoing particles)", "etamin"s);
+  registerKinematicsParameter<double>("ETMX"s, "Maximal pseudo-rapidity (central outgoing particles)", "etamax"s);
+  registerKinematicsParameter<double>("YMIN"s, "Minimal rapidity (central outgoing particles)", "rapiditymin"s);
+  registerKinematicsParameter<double>("YMAX"s, "Maximal rapidity (central outgoing particles)", "rapiditymax"s);
   registerKinematicsParameter<double>(
-      "PDMN", "Minimal transverse momentum difference (central outgoing particles)", "ptdiffmin");
+      "PDMN"s, "Minimal transverse momentum difference (central outgoing particles)", "ptdiffmin"s);
   registerKinematicsParameter<double>(
-      "PDMX", "Maximal transverse momentum difference (central outgoing particles)", "ptdiffmax");
-  registerKinematicsParameter<double>("Q2MN", "Minimal Q^2 = -q^2 (exchanged parton)", "q2min");
-  registerKinematicsParameter<double>("Q2MX", "Maximal Q^2 = -q^2 (exchanged parton)", "q2max");
-  registerKinematicsParameter<double>("QTMN", "Minimal Q_T (exchanged parton)", "qtmin");
-  registerKinematicsParameter<double>("QTMX", "Maximal Q_T (exchanged parton)", "qtmax");
-  registerKinematicsParameter<double>("MXMN", "Minimal invariant mass of proton remnants", "mxmin");
-  registerKinematicsParameter<double>("MXMX", "Maximal invariant mass of proton remnants", "mxmax");
-  registerKinematicsParameter<double>("XIMN", "Minimal fractional momentum loss of outgoing proton (xi)", "ximin");
-  registerKinematicsParameter<double>("XIMX", "Maximal fractional momentum loss of outgoing proton (xi)", "ximax");
-  registerKinematicsParameter<double>("YJMN", "Minimal remnant jet rapidity", "yjmin");
-  registerKinematicsParameter<double>("YJMX", "Maximal remnant jet rapidity", "yjmax");
+      "PDMX"s, "Maximal transverse momentum difference (central outgoing particles)", "ptdiffmax"s);
+  registerKinematicsParameter<double>("Q2MN"s, "Minimal Q^2 = -q^2 (exchanged parton)", "q2min"s);
+  registerKinematicsParameter<double>("Q2MX"s, "Maximal Q^2 = -q^2 (exchanged parton)", "q2max"s);
+  registerKinematicsParameter<double>("QTMN"s, "Minimal Q_T (exchanged parton)", "qtmin"s);
+  registerKinematicsParameter<double>("QTMX"s, "Maximal Q_T (exchanged parton)", "qtmax"s);
+  registerKinematicsParameter<double>("MXMN"s, "Minimal invariant mass of proton remnants", "mxmin"s);
+  registerKinematicsParameter<double>("MXMX"s, "Maximal invariant mass of proton remnants", "mxmax"s);
+  registerKinematicsParameter<double>("XIMN"s, "Minimal fractional momentum loss of outgoing proton (xi)", "ximin"s);
+  registerKinematicsParameter<double>("XIMX"s, "Maximal fractional momentum loss of outgoing proton (xi)", "ximax"s);
+  registerKinematicsParameter<double>("YJMN"s, "Minimal remnant jet rapidity", "yjmin"s);
+  registerKinematicsParameter<double>("YJMX"s, "Maximal remnant jet rapidity", "yjmax"s);
 
   //-------------------------------------------------------------------------------------------
   // PPtoLL cards backward compatibility
-  registerIntegratorParameter<int>("NTREAT", "Smoothen the integrand", "treat");
-  registerIntegratorParameter<int>("ITMX", "Number of integration iterations", "iterations");
-  registerIntegratorParameter<int>("NCVG", "Number of function calls to perform", "numFunctionCalls");
-  registerProcessParameter<int>("METHOD", "Computation method (kT-factorisation)", "method");
-  registerParameter("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
+  registerIntegratorParameter<int>("NTREAT"s, "Smoothen the integrand", "treat"s);
+  registerIntegratorParameter<int>("ITMX"s, "Number of integration iterations", "iterations"s);
+  registerIntegratorParameter<int>("NCVG"s, "Number of function calls to perform", "numFunctionCalls"s);
+  registerProcessParameter<int>("METHOD"s, "Computation method (kT-factorisation)", "method"s);
+  registerParameter("LEPTON"s, "Outgoing leptons' flavour", &lepton_id_);
   registerKinematicsParameter<double>(
-      "PTMIN", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
+      "PTMIN"s, "Minimal transverse momentum (single central outgoing particle)", "ptmin"s);
   registerKinematicsParameter<double>(
-      "PTMAX", "Maximal transverse momentum (single central outgoing particle)", "ptmax");
-  registerKinematicsParameter<double>("Q1TMIN", "Minimal Q_T (exchanged parton)", "qtmin");
-  registerKinematicsParameter<double>("Q1TMAX", "Maximal Q_T (exchanged parton)", "qtmax");
-  registerKinematicsParameter<double>("Q2TMIN", "Minimal Q_T (exchanged parton)", "qtmin");
-  registerKinematicsParameter<double>("Q2TMAX", "Maximal Q_T (exchanged parton)", "qtmax");
-  registerKinematicsParameter<double>("MXMIN", "Minimal invariant mass of proton remnants", "mxmin");
-  registerKinematicsParameter<double>("MXMAX", "Maximal invariant mass of proton remnants", "mxmax");
+      "PTMAX"s, "Maximal transverse momentum (single central outgoing particle)", "ptmax"s);
+  registerKinematicsParameter<double>("Q1TMIN"s, "Minimal Q_T (exchanged parton)", "qtmin"s);
+  registerKinematicsParameter<double>("Q1TMAX"s, "Maximal Q_T (exchanged parton)", "qtmax"s);
+  registerKinematicsParameter<double>("Q2TMIN"s, "Minimal Q_T (exchanged parton)", "qtmin"s);
+  registerKinematicsParameter<double>("Q2TMAX"s, "Maximal Q_T (exchanged parton)", "qtmax"s);
+  registerKinematicsParameter<double>("MXMIN"s, "Minimal invariant mass of proton remnants", "mxmin"s);
+  registerKinematicsParameter<double>("MXMAX"s, "Maximal invariant mass of proton remnants", "mxmax"s);
 }
 
 LpairHandler& LpairHandler::setRunParameters(const RunParameters* params) {
   Handler::setRunParameters(params);
   const auto beam_mode = runParameters()->kinematics().incomingBeams().mode();
-  pmod_ =
+  p_mode_ =
       (beam_mode == mode::Kinematics::InelasticElastic || beam_mode == mode::Kinematics::InelasticInelastic)
           ? runParameters()->kinematics().incomingBeams().structureFunctions().name()
           : (std::abs(runParameters()->kinematics().incomingBeams().positive().integerPdgId()) == PDG::electron ? "1"
                                                                                                                 : "2");
-  emod_ =
+  e_mode_ =
       (beam_mode == mode::Kinematics::ElasticInelastic || beam_mode == mode::Kinematics::InelasticInelastic)
           ? runParameters()->kinematics().incomingBeams().structureFunctions().name()
           : (std::abs(runParameters()->kinematics().incomingBeams().negative().integerPdgId()) == PDG::electron ? "1"
@@ -405,14 +399,14 @@ LpairHandler& LpairHandler::setRunParameters(const RunParameters* params) {
   //kmr_grid_path_ = kmr::GluonGrid::get().path();
   //mstw_grid_path_ =
   //pdg_input_path_ =
-  iend_ = static_cast<int>(runParameters()->generation().enabled());
+  generation_mode_ = static_cast<int>(runParameters()->generation().enabled());
   log_level_ = static_cast<int>(utils::Logger::get().level());
   ext_log_ = utils::Logger::get().extended();
   proc_name_ = runParameters()->processName();
   proc_params_ += runParameters()->process().parameters();
   if (proc_params_.has<ParticleProperties>("pair"))
     proc_params_.set<int>("pair", proc_params_.get<ParticleProperties>("pair").pdgid);
-  if (proc_name_ == "pptoff" || proc_name_ == "pptoll" /* legacy */)
+  if (proc_name_ == "pptoff"s || proc_name_ == "pptoll"s /* legacy */)
     lepton_id_ = (runParameters()->process().parameters().get<int>("pair") - PDG::electron) / 2. + 1;
   {
     std::vector<std::string> evt_mod;

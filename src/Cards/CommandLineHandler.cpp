@@ -35,6 +35,7 @@
 
 using namespace cepgen;
 using namespace cepgen::card;
+using namespace std::string_literals;
 
 /// Command line parser
 class CommandLineHandler final : public Handler {
@@ -52,99 +53,103 @@ public:
     return desc;
   }
 
-  inline CommandLineHandler& parseFile(const std::string& filename) override {
+  CommandLineHandler& parseFile(const std::string& filename) override {
     if (filename.empty())
       throw CG_FATAL("CommandLineHandler") << "Empty filename to be parsed! Aborting.";
     return parseCommands(utils::split(utils::readFile(filename), '\n'));
   }
 
-  inline CommandLineHandler& parseCommands(const std::vector<std::string>& commands) override {
+  CommandLineHandler& parseCommands(const std::vector<std::string>& commands) override {
     if (commands.empty())
       return *this;
-    ParametersList pars;
-    for (const auto& cmd : commands)
-      pars.feed(cmd);
-    CG_INFO("CommandLineHandler") << "Arguments list: " << commands << " unpacked to:\n\t" << pars << ".";
+    ParametersList parameters;
+    for (const auto& command : commands)
+      parameters.feed(command);
+    CG_INFO("CommandLineHandler") << "Arguments list: " << commands << " unpacked to:\n\t" << parameters << ".";
 
-    //----- timer definition
-    if (pars.get<bool>("timer", false))
+    // timer definition
+    if (parameters.get<bool>("timer"s, false))
       runParameters()->setTimeKeeper(new utils::TimeKeeper);
 
-    //----- logging definition
-    if (pars.has<int>("logging"))
-      utils::Logger::get().setLevel(pars.getAs<int, cepgen::utils::Logger::Level>("logging"));
-    else if (pars.has<ParametersList>("logging")) {
-      const auto& log = pars.get<ParametersList>("logging");
-      if (log.has<int>("level"))
-        utils::Logger::get().setLevel(log.getAs<int, cepgen::utils::Logger::Level>("level"));
-      if (log.has<std::string>("modules"))
-        utils::Logger::get().addExceptionRule(log.get<std::string>("modules"));
-      else if (log.has<std::vector<std::string> >("modules"))
-        for (const auto& mod : log.get<std::vector<std::string> >("modules"))
+    // logging definition
+    if (parameters.has<int>("logging"s))
+      utils::Logger::get().setLevel(parameters.getAs<int, utils::Logger::Level>("logging"s));
+    else if (parameters.has<ParametersList>("logging"s)) {
+      const auto& logging_params = parameters.get<ParametersList>("logging"s);
+      if (logging_params.has<int>("level"s))
+        utils::Logger::get().setLevel(logging_params.getAs<int, utils::Logger::Level>("level"s));
+      if (logging_params.has<std::string>("modules"s))
+        utils::Logger::get().addExceptionRule(logging_params.get<std::string>("modules"s));
+      else if (logging_params.has<std::vector<std::string> >("modules"s))
+        for (const auto& mod : logging_params.get<std::vector<std::string> >("modules"s))
           utils::Logger::get().addExceptionRule(mod);
-      utils::Logger::get().setExtended(log.get<bool>("extended", false));
+      utils::Logger::get().setExtended(logging_params.get<bool>("extended"s, false));
     }
 
-    //----- PDG definition
-    auto pars_pdg = pars.get<ParametersList>("pdg");
-    for (const auto& id : pars_pdg.keys())
-      PDG::get().define(pars_pdg.get<ParticleProperties>(id));
+    // PDG definition
+    const auto pdg_params = parameters.get<ParametersList>("pdg"s);
+    for (const auto& id : pdg_params.keys())
+      PDG::get().define(pdg_params.get<ParticleProperties>(id));
 
-    //----- phase space definition
-    auto pars_kin = pars.get<ParametersList>("kinematics");
+    // phase space definition
+    auto kinematics_params = parameters.get<ParametersList>("kinematics"s);
 
-    //----- process definition
-    if (auto proc = pars.get<ParametersList>("process"); !proc.empty()) {
+    // process definition
+    if (auto process_params = parameters.get<ParametersList>("process"s); !process_params.empty()) {
       if (runParameters()->hasProcess())
-        proc = ParametersList(runParameters()->process().parameters()) + proc;
-      runParameters()->setProcess(ProcessFactory::get().build(proc));
-      if (proc.has<int>("mode"))
-        pars_kin.set("mode", proc.get<int>("mode"));
+        process_params = ParametersList(runParameters()->process().parameters()) + process_params;
+      runParameters()->setProcess(ProcessFactory::get().build(process_params));
+      if (process_params.has<int>("mode"s))
+        kinematics_params.set("mode"s, process_params.get<int>("mode"s));
     }
 
-    if (!pars_kin.empty()) {
-      //----- set auxiliary information for phase space definition
-      if (pars_kin.has<int>("strfun"))
-        pars_kin
-            .set("structureFunctions",
-                 StructureFunctionsFactory::get().describeParameters(pars_kin.get<int>("strfun")).parameters())
-            .erase("strfun");
-      else if (pars_kin.has<std::string>("strfun"))
-        pars_kin
-            .set("structureFunctions",
-                 StructureFunctionsFactory::get().describeParameters(pars_kin.get<std::string>("strfun")).parameters())
-            .erase("strfun");
-      else if (pars_kin.has<ParametersList>("strfun"))
-        pars_kin.rename("strfun", "structureFunctions");
-      pars_kin.rename("formfac", "formFactors");
+    if (!kinematics_params.empty()) {  // set auxiliary information for phase space definition
+      if (kinematics_params.has<int>("strfun"))
+        kinematics_params
+            .set(
+                "structureFunctions"s,
+                StructureFunctionsFactory::get().describeParameters(kinematics_params.get<int>("strfun"s)).parameters())
+            .erase("strfun"s);
+      else if (kinematics_params.has<std::string>("strfun"s))
+        kinematics_params
+            .set("structureFunctions"s,
+                 StructureFunctionsFactory::get()
+                     .describeParameters(kinematics_params.get<std::string>("strfun"s))
+                     .parameters())
+            .erase("strfun"s);
+      else if (kinematics_params.has<ParametersList>("strfun"s))
+        kinematics_params.rename("strfun"s, "structureFunctions");
+      kinematics_params.rename("formfac"s, "formFactors");
 
-      //----- get the kinematics as already defined in the process object and modify it accordingly
-      pars_kin = runParameters()->process().kinematics().parameters() + pars_kin;
-      runParameters()->process().kinematics().setParameters(pars_kin);
+      // get the kinematics as already defined in the process object and modify it accordingly
+      kinematics_params = runParameters()->process().kinematics().parameters() + kinematics_params;
+      runParameters()->process().kinematics().setParameters(kinematics_params);
     }
 
-    //----- integration
-    pars.fill<ParametersList>("integrator", runParameters()->integrator());
+    // integration
+    parameters.fill<ParametersList>("integrator"s, runParameters()->integrator());
 
-    //----- events generation
-    const auto& gen = pars.get<ParametersList>("generation");
-    runParameters()->generation().setMaxGen(gen.get<int>("ngen", runParameters()->generation().maxGen()));
-    if (gen.has<int>("nthreads"))
-      runParameters()->generation().setNumThreads(gen.get<int>("nthreads"));
-    if (gen.has<int>("nprn"))
-      runParameters()->generation().setPrintEvery(gen.get<int>("nprn"));
-    if (gen.has<int>("seed"))
-      runParameters()->integrator().set("seed", gen.get<int>("seed"));
+    // events generation
+    const auto& generation_params = parameters.get<ParametersList>("generation"s);
+    runParameters()->generation().setMaxGen(
+        generation_params.get<int>("ngen"s, runParameters()->generation().maxGen()));
+    if (generation_params.has<int>("nthreads"s))
+      runParameters()->generation().setNumThreads(generation_params.get<int>("nthreads"s));
+    if (generation_params.has<int>("nprn"s))
+      runParameters()->generation().setPrintEvery(generation_params.get<int>("nprn"s));
+    if (generation_params.has<int>("seed"s))
+      runParameters()->integrator().set("seed", generation_params.get<int>("seed"s));
 
-    //----- event modification modules
-    if (const auto& mod = pars.get<ParametersList>("eventmod"); !mod.keys(true).empty()) {
-      runParameters()->addModifier(EventModifierFactory::get().build(mod));
+    // event modification modules
+    if (const auto& event_mod_params = parameters.get<ParametersList>("eventmod"s);
+        !event_mod_params.keys(true).empty()) {
+      runParameters()->addModifier(EventModifierFactory::get().build(event_mod_params));
       runParameters()->eventModifiersSequence().rbegin()->get()->initialise(*runParameters());
     }
 
-    //----- output modules definition
-    if (const auto& out = pars.get<ParametersList>("output"); !out.keys(true).empty())
-      runParameters()->addEventExporter(EventExporterFactory::get().build(out));
+    // output modules definition
+    if (const auto& output_params = parameters.get<ParametersList>("output"s); !output_params.keys(true).empty())
+      runParameters()->addEventExporter(EventExporterFactory::get().build(output_params));
     return *this;
   }
 };
