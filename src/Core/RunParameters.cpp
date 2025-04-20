@@ -37,6 +37,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 RunParameters::RunParameters()
     : SteeredObject(ParametersList()),
@@ -239,12 +240,15 @@ namespace cepgen {
 
     // helper to print cuts list for a given category
     const auto dump_cuts = [&os](const auto& obj) {
-      for (const auto& lim : obj.parameters().template keysOf<Limits>())
-        if (const auto& limit = obj.parameters().template get<Limits>(lim); limit.valid() && obj.description().has(lim))
-          os << std::setw(wt) << obj.description().get(lim).description() << limit << "\n";
-      for (const auto& vlim : obj.parameters().template keysOf<std::vector<Limits> >())
-        if (const auto& limit = obj.parameters().template get<std::vector<Limits> >(vlim); obj.description().has(vlim))
-          os << std::setw(wt) << obj.description().get(vlim).description() << utils::repr(limit, " and ") << "\n";
+      for (const auto& limits : obj.parameters().template keysOf<Limits>())
+        if (const auto& limit = obj.parameters().template get<Limits>(limits);
+            limit.valid() && obj.description().has(limits))
+          os << std::setw(wt) << obj.description().get(limits).description() << limit << "\n";
+      for (const auto& limits_vector : obj.parameters().template keysOf<std::vector<Limits> >())
+        if (const auto& limit = obj.parameters().template get<std::vector<Limits> >(limits_vector);
+            obj.description().has(limits_vector))
+          os << std::setw(wt) << obj.description().get(limits_vector).description() << utils::repr(limit, " and ")
+             << "\n";
     };
 
     os << "\n"
@@ -287,23 +291,23 @@ namespace cepgen {
 
 RunParameters::Generation::Generation(const ParametersList& params) : SteeredObject(params) {
   (*this)
-      .add("maxgen", max_gen_)
-      .add("printEvery", gen_print_every_)
-      .add("targetLumi", target_lumi_)
-      .add("symmetrise", symmetrise_)
-      .add("numThreads", num_threads_)
-      .add("numPoints", num_points_);
+      .add("maxgen"s, max_gen_)
+      .add("printEvery"s, gen_print_every_)
+      .add("targetLumi"s, target_lumi_)
+      .add("symmetrise"s, symmetrise_)
+      .add("numThreads"s, num_threads_)
+      .add("numPoints"s, num_points_);
 }
 
 ParametersDescription RunParameters::Generation::description() {
   auto desc = ParametersDescription();
-  desc.add("worker", GeneratorWorkerFactory::get().describeParameters("grid_optimised"))
+  desc.add("worker"s, GeneratorWorkerFactory::get().describeParameters("grid_optimised"))
       .setDescription("type of generator worker to use for event generation");
-  desc.add("maxgen", 0).setDescription("Number of events to generate");
-  desc.add("printEvery", 10'000).setDescription("Printing frequency for the events content");
-  desc.add("targetLumi", -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
-  desc.add("symmetrise", false).setDescription("Are events to be symmetrised wrt beam collinear axis");
-  desc.add("numThreads", 1).setDescription("Number of threads to use for event generation");
-  desc.add("numPoints", 100);
+  desc.add("maxgen"s, 0).setDescription("Number of events to generate");
+  desc.add("printEvery"s, 10'000).setDescription("Printing frequency for the events content");
+  desc.add("targetLumi"s, -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
+  desc.add("symmetrise"s, false).setDescription("Are events to be symmetrised wrt beam collinear axis");
+  desc.add("numThreads"s, 1).setDescription("Number of threads to use for event generation");
+  desc.add("numPoints"s, 100);
   return desc;
 }

@@ -25,47 +25,50 @@
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
-#define IMPL_TYPE_GET(type, coll)                                                                     \
-  template <>                                                                                         \
-  type ParametersList::get<type>(const std::string& key, const type& def) const {                     \
-    if (coll.count(key) > 0)                                                                          \
-      return coll.at(key);                                                                            \
-    CG_DEBUG("ParametersList") << "Failed to retrieve " << utils::demangle(typeid(type).name())       \
-                               << " parameter with key=" << key << ". Default value: " << def << "."; \
-    return def;                                                                                       \
-  }                                                                                                   \
+#define IMPL_TYPE_GET(type, values_collection)                                                                  \
+  template <>                                                                                                   \
+  type ParametersList::get<type>(const std::string& key, const type& default_value) const {                     \
+    if (values_collection.count(key) > 0)                                                                       \
+      return values_collection.at(key);                                                                         \
+    CG_DEBUG("ParametersList") << "Failed to retrieve " << utils::demangle(typeid(type).name())                 \
+                               << " parameter with key=" << key << ". Default value: " << default_value << "."; \
+    return default_value;                                                                                       \
+  }                                                                                                             \
   static_assert(true, "")
 
-#define IMPL_TYPE_SET(type, coll)                                                                                   \
-  template <>                                                                                                       \
-  bool ParametersList::has<type>(const std::string& key) const {                                                    \
-    return coll.count(key) != 0;                                                                                    \
-  }                                                                                                                 \
-  template <>                                                                                                       \
-  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                            \
-    coll[key] = static_cast<type>(value);                                                                           \
-    return *this;                                                                                                   \
-  }                                                                                                                 \
-  template <>                                                                                                       \
-  type& ParametersList::operator[]<type>(const std::string& key) {                                                  \
-    return coll[key];                                                                                               \
-  }                                                                                                                 \
-  template <>                                                                                                       \
-  std::vector<std::string> ParametersList::keysOf<type>() const {                                                   \
-    std::vector<std::string> out;                                                                                   \
-    std::transform(coll.begin(), coll.end(), std::back_inserter(out), [](const auto& pair) { return pair.first; }); \
-    return out;                                                                                                     \
-  }                                                                                                                 \
-  template <>                                                                                                       \
-  size_t ParametersList::erase<type>(const std::string& key) {                                                      \
-    return coll.erase(key);                                                                                         \
-  }                                                                                                                 \
+#define IMPL_TYPE_SET(type, values_collection)                                                                         \
+  template <>                                                                                                          \
+  bool ParametersList::has<type>(const std::string& key) const {                                                       \
+    return values_collection.count(key) != 0;                                                                          \
+  }                                                                                                                    \
+  template <>                                                                                                          \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                               \
+    values_collection[key] = static_cast<type>(value);                                                                 \
+    return *this;                                                                                                      \
+  }                                                                                                                    \
+  template <>                                                                                                          \
+  type& ParametersList::operator[]<type>(const std::string& key) {                                                     \
+    return values_collection[key];                                                                                     \
+  }                                                                                                                    \
+  template <>                                                                                                          \
+  std::vector<std::string> ParametersList::keysOf<type>() const {                                                      \
+    std::vector<std::string> out;                                                                                      \
+    std::transform(values_collection.begin(), values_collection.end(), std::back_inserter(out), [](const auto& pair) { \
+      return pair.first;                                                                                               \
+    });                                                                                                                \
+    return out;                                                                                                        \
+  }                                                                                                                    \
+  template <>                                                                                                          \
+  size_t ParametersList::erase<type>(const std::string& key) {                                                         \
+    return values_collection.erase(key);                                                                               \
+  }                                                                                                                    \
   static_assert(true, "")
 
-#define IMPL_TYPE_ALL(type, coll) \
-  IMPL_TYPE_GET(type, coll);      \
-  IMPL_TYPE_SET(type, coll);      \
+#define IMPL_TYPE_ALL(type, values_collection) \
+  IMPL_TYPE_GET(type, values_collection);      \
+  IMPL_TYPE_SET(type, values_collection);      \
   static_assert(true, "")
 
 ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
@@ -191,9 +194,9 @@ ParametersList& ParametersList::feed(const std::string& raw_args) {
       continue;
     }
     // from this point, a "key:value" or "key(:true)" was found
-    const auto& subplist = utils::between(arg, "{", "}");
-    if (!subplist.empty()) {
-      for (const auto& subp : subplist)
+    const auto& sub_plist = utils::between(arg, "{", "}");
+    if (!sub_plist.empty()) {
+      for (const auto& subp : sub_plist)
         feed(subp);
       return *this;
     }
@@ -322,7 +325,7 @@ std::string ParametersList::getString(const std::string& key, bool wrap) const {
   if (has<std::vector<double> >(key) || has<Limits>(key)) {
     std::string sep;
     if (has<std::vector<double> >(key)) {
-      os << wrap_coll(get<std::vector<double> >(key), "vfloat");
+      os << wrap_coll(get<std::vector<double> >(key), "vfloat"s);
       sep = "|";
     }
     if (has<Limits>(key))
