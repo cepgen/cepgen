@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,9 +63,9 @@ namespace cepgen {
     ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
 
-    bool hasName() const;                                 ///< Does the parameters list have a name key?
-    std::string name(const std::string& def = "") const;  ///< Retrieve the module name if any
-    ParametersList& setName(const std::string&);          ///< Set the module name
+    bool hasName() const;                                           ///< Does the parameters list have a name key?
+    std::string name(const std::string& default_value = "") const;  ///< Retrieve the module name if any
+    ParametersList& setName(const std::string&);                    ///< Set the module name
 
     bool operator==(const ParametersList&) const;                                  ///< Equality operator
     bool operator!=(const ParametersList& oth) const { return !operator==(oth); }  ///< Inequality operator
@@ -125,7 +125,7 @@ namespace cepgen {
     }
     ParametersList& rename(const std::string&, const std::string&);  ///< Rename the key to a parameter value
     ParametersList& operator+=(const ParametersList& oth);           ///< Concatenate two parameters containers
-    ParametersList operator+(const ParametersList& oth) const;       ///< Concatenation of two parameters containers
+    ParametersList operator+(const ParametersList& other) const;     ///< Concatenation of two parameters containers
     bool empty() const;                                              ///< Is the list empty?
 
     template <typename T>

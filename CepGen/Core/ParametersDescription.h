@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ namespace cepgen {
     /// Module name for this parameter
     const std::string& key() const { return mod_key_; }
     /// Set the description of this parameter (or parameters collection)
-    ParametersDescription& setDescription(const std::string& descr);
+    ParametersDescription& setDescription(const std::string& description);
     /// Description of this parameter (or parameters collection)
     const std::string& description() const { return mod_descr_; }
     /// This parameter is a collection of sub-parameters
@@ -77,7 +77,7 @@ namespace cepgen {
     /// Add the description to a collection of ParametersList objects
     ParametersDescription& addParametersDescriptionVector(const std::string&,
                                                           const ParametersDescription&,
-                                                          const std::vector<ParametersList>& def = {});
+                                                          const std::vector<ParametersList>& default_values = {});
     std::string describe(size_t offset = 0) const;  ///< Human-readable description of parameters and their default value
     ParametersList& parameters();                   ///< List of parameters associated to this description object
     const ParametersList& parameters() const;       ///< List of parameters associated to this description object

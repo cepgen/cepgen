@@ -32,32 +32,31 @@ ParametersDescription::ParametersDescription(const std::string& mod_key) {
 }
 
 ParametersDescription::ParametersDescription(const ParametersList& params) : ParametersList(params) {
-  for (const auto& key : ParametersList::keys()) {
+  for (const auto& key : keys()) {
     if (obj_descr_.count(key) == 0)
       obj_descr_[key] = ParametersList::has<ParametersList>(key)
                             ? ParametersDescription(ParametersList::get<ParametersList>(key))
                             : ParametersDescription();
   }
   // avoid doubly-defined Limits/vector<double> situations
-  for (const auto& klim : ParametersList::keysOf<Limits>())
-    if (utils::contains(ParametersList::keysOf<std::vector<double> >(), klim))
-      ParametersList::set(
-          klim, ParametersList::get<Limits>(klim));  // hack to ensure vector<double> is dropped by set<Limits>(...)
+  for (const auto& limits_keys : keysOf<Limits>())
+    if (utils::contains(keysOf<std::vector<double> >(),
+                        limits_keys))  // hack to ensure vector<double> is dropped by set<Limits>(...)
+      set(limits_keys, ParametersList::get<Limits>(limits_keys));
 }
 
 bool ParametersDescription::empty() const {
   // description is declared empty if
-  // 1) it has no sub-description object, and
-  // 2) it is not itself describing anything
-  return obj_descr_.empty() && mod_descr_.empty();
+  return obj_descr_.empty() &&  // 1) it has no sub-description object, and
+         mod_descr_.empty();    // 2) it is not itself describing anything
 }
 
 ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
-  for (const auto& key : ParametersList::keysOf<std::vector<ParametersList> >())
+  for (const auto& key : keysOf<std::vector<ParametersList> >())
     // particular case if one describes a set of key-indexed parameters list as a vector of parameters lists
     if (oth.parameters().has<ParametersList>(key)) {
       const auto& desc = get(key);
-      ParametersList::erase(key);
+      erase(key);
       add(key, oth.get(key)).setDescription(desc.description()).allowedValues().append(desc.allowedValues());
     }
   obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
@@ -74,8 +73,8 @@ const ParametersDescription& ParametersDescription::get(const std::string& key) 
       log << "Failed to retrieve a parameters description member named \'" << key << "\'.\n"
           << "List of keys registered: ";
       std::string sep;
-      for (const auto& k : obj_descr_)
-        log << sep << "'" << k.first << "'", sep = ", ";
+      for (const auto& [key, description] : obj_descr_)
+        log << sep << "'" << key << "'", sep = ", ";
     });
   return obj_descr_.at(key);
 }
@@ -85,33 +84,33 @@ ParametersDescription::Type ParametersDescription::type() const {
     return Type::ParametersVector;
   if (obj_descr_.empty())
     return Type::Value;
-  if (const auto& mod_name = ParametersList::getNameString(); mod_name.empty())
+  if (const auto& mod_name = getNameString(); mod_name.empty())
     return Type::Parameters;
   return Type::Module;
 }
 
 std::string ParametersDescription::describe(size_t offset) const {
   static auto sep = [](size_t offset) -> std::string { return std::string(2 * offset, ' '); };
-  const auto& mod_name = ParametersList::getNameString();
-  const auto& pdtype = type();
+  const auto& mod_name = getNameString();
+  const auto& parameters_description_type = type();
   const auto& keys = ParametersList::keys(false);
   std::ostringstream os;
   // write collection type (if collection)
-  if (pdtype == Type::Parameters)
+  if (parameters_description_type == Type::Parameters)
     os << colourise("Parameters", utils::Colour::none, utils::Modifier::italic | utils::Modifier::underline)
        << " collection";
-  else if (pdtype == Type::Module)
+  else if (parameters_description_type == Type::Module)
     os << utils::boldify(mod_name) << " module";
   // write human-readable description (if exists)
-  if (pdtype != Type::ParametersVector && !mod_descr_.empty())
+  if (parameters_description_type != Type::ParametersVector && !mod_descr_.empty())
     os << " <- " << utils::colourise(mod_descr_, utils::Colour::blue, utils::Modifier::italic);
   if (keys.empty())  // no keys to this module ; can return
     return os.str();
-  if (pdtype == Type::ParametersVector) {
+  if (parameters_description_type == Type::ParametersVector) {
     os << parameters();
     return os.str();
   }
-  if (pdtype == Type::Module)
+  if (parameters_description_type == Type::Module)
     os << " with parameters";
   os << ":";
   // write list of parameters (if it has some)
@@ -120,47 +119,43 @@ std::string ParametersDescription::describe(size_t offset) const {
     if (obj_descr_.count(key) == 0)
       continue;
     os << "= ";
-    const auto& obj = obj_descr_.at(key);
-    switch (obj.type()) {
+    switch (const auto& parameter = obj_descr_.at(key); parameter.type()) {
       case Type::Value: {
         if (ParametersList::has<std::string>(key))
-          os << "\"" << ParametersList::getString(key) << "\"";
+          os << "\"" << getString(key) << "\"";
         else
-          os << ParametersList::getString(key);
-        if (const auto& par_desc = obj.description(); !par_desc.empty())
-          os << " <- " << utils::colourise(par_desc, utils::Colour::blue, utils::Modifier::italic);
-        if (const auto& allowed_vals = obj.allowedValues(); !allowed_vals.empty()) {
+          os << getString(key);
+        if (const auto& parameter_description = parameter.description(); !parameter_description.empty())
+          os << " <- " << utils::colourise(parameter_description, utils::Colour::blue, utils::Modifier::italic);
+        if (const auto& allowed_values = parameter.allowedValues(); !allowed_values.empty()) {
           os << " with allowed values:\n" << sep(offset + 2);
           std::string list_sep;
-          for (const auto& kv : allowed_vals.allowed())
-            os << list_sep << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : ""), list_sep = ", ";
+          for (const auto& [value, description] : allowed_values.allowed())
+            os << list_sep << value << (!description.empty() ? " (" + description + ")" : ""), list_sep = ", ";
         }
       } break;
       case Type::ParametersVector: {
         os << colourise("Vector of parameters collections",
                         utils::Colour::none,
                         utils::Modifier::italic | utils::Modifier::underline);
-        const auto& par_desc = obj.description();
-        if (!par_desc.empty())
-          os << " (" << colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
-        const auto& params = ParametersList::get<ParametersList>(key);
-        if (!params.empty())
-          os << " with user-steered content: " << obj.steer(params).describe(offset + 1);
+        if (const auto& parameters_description = parameter.description(); !parameters_description.empty())
+          os << " (" << colourise(parameters_description, utils::Colour::none, utils::Modifier::italic) << ")";
+        if (const auto& parameters = ParametersList::get<ParametersList>(key); !parameters.empty())
+          os << " with user-steered content: " << parameter.steer(parameters).describe(offset + 1);
         else
-          os << " with expected content: " << obj.describe(offset + 1);
+          os << " with expected content: " << parameter.describe(offset + 1);
       } break;
       default: {
-        const auto& descr = obj.describe(offset + 1);
-        if (!utils::trim(descr).empty())
-          os << descr;
+        if (const auto& description = parameter.describe(offset + 1); !utils::trim(description).empty())
+          os << description;
       } break;
     }
   }
   return os.str();
 }
 
-ParametersDescription& ParametersDescription::setDescription(const std::string& descr) {
-  mod_descr_ = descr;
+ParametersDescription& ParametersDescription::setDescription(const std::string& description) {
+  mod_descr_ = description;
   return *this;
 }
 
@@ -168,7 +163,7 @@ template <>
 ParametersDescription& ParametersDescription::add<ParametersDescription>(const std::string& name,
                                                                          const ParametersDescription& desc) {
   obj_descr_[name] += desc;
-  ParametersList::set<ParametersList>(name, desc.parameters());
+  set<ParametersList>(name, desc.parameters());
   CG_DEBUG_LOOP("ParametersDescription:add").log([this, &name, &desc](auto& log) {
     log << "Added a new parameters collection \"" << name << "\" as: " << desc;
     const auto& mod_name = this->getNameString();
@@ -187,24 +182,24 @@ ParametersDescription& ParametersDescription::add<ParametersList>(const std::str
       << "Please use a ParametersDescription object instead for the description of the '" << name << "' collection.";
 }
 
-ParametersDescription& ParametersDescription::addParametersDescriptionVector(const std::string& name,
-                                                                             const ParametersDescription& desc,
-                                                                             const std::vector<ParametersList>& def) {
-  obj_descr_[name] += desc;
+ParametersDescription& ParametersDescription::addParametersDescriptionVector(
+    const std::string& name,
+    const ParametersDescription& description,
+    const std::vector<ParametersList>& default_values) {
+  obj_descr_[name] += description;
   obj_descr_[name].setParametersVector(true);
-  auto& values = ParametersList::operator[]<std::vector<ParametersList> >(name);
-  for (const auto& val : def)
-    values.emplace_back(desc.validate(val));
-  CG_DEBUG_LOOP("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
-    log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
-    const auto& mod_name = this->getNameString();
-    if (!mod_name.empty())
-      log << "\n"
-          << "to the object with name: " << mod_name;
-    log << ".\n";
-    if (!def.empty())
-      log << "It is now composed of " << def << ".";
-  });
+  auto& values = operator[]<std::vector<ParametersList> >(name);
+  for (const auto& value : default_values)
+    values.emplace_back(description.validate(value));
+  CG_DEBUG_LOOP("ParametersDescription:addParametersDescriptionVector")
+      .log([this, &name, &description, &default_values](auto& log) {
+        log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << description;
+        if (const auto& mod_name = this->getNameString(); !mod_name.empty())
+          log << "\nto the object with name: " << mod_name;
+        log << ".\n";
+        if (!default_values.empty())
+          log << "It is now composed of " << default_values << ".";
+      });
   return obj_descr_[name];
 }
 
@@ -228,25 +223,25 @@ ParametersList ParametersDescription::validate(const ParametersList& user_params
             obj_descr_.at(key).validate(pit.get<ParametersList>(kit));
     }
   }
-  for (const auto& kv : obj_descr_) {  // simple value
-    if (!kv.second.allowedValues().allAllowed()) {
+  for (const auto& [key, parameters_description] : obj_descr_) {  // simple value
+    if (!parameters_description.allowedValues().allAllowed()) {
       const auto validation_error =
           [](const auto& key, const auto& val, const ParametersDescription& desc) -> std::string {
         std::ostringstream os;
         os << "Invalid value for key '" << key << "'"
            << (!desc.description().empty() ? " ("s + desc.description() + ")" : "") << ".\n"
            << "Allowed values:\n";
-        for (const auto& kv : desc.allowedValues().allowed())
-          os << " * " << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : "") << "\n";
+        for (const auto& [value, description] : desc.allowedValues().allowed())
+          os << " * " << value << (!description.empty() ? " (" + description + ")" : "") << "\n";
         os << "Steered value: '" << utils::toString(val) + "'.";
         return os.str();
       };
-      if (plist.has<int>(kv.first) && !kv.second.allowedValues().validate(plist.get<int>(kv.first)))
+      if (plist.has<int>(key) && !parameters_description.allowedValues().validate(plist.get<int>(key)))
         throw CG_FATAL("ParametersDescription:validate")
-            << validation_error(kv.first, plist.get<int>(kv.first), kv.second);
-      if (plist.has<std::string>(kv.first) && !kv.second.allowedValues().validate(plist.get<std::string>(kv.first)))
+            << validation_error(key, plist.get<int>(key), parameters_description);
+      if (plist.has<std::string>(key) && !parameters_description.allowedValues().validate(plist.get<std::string>(key)))
         throw CG_FATAL("ParametersDescription:validate")
-            << validation_error(kv.first, plist.get<std::string>(kv.first), kv.second);
+            << validation_error(key, plist.get<std::string>(key), parameters_description);
     }
   }
   CG_DEBUG_LOOP("ParametersDescription:validate") << "Validating user parameters:\n"
@@ -257,9 +252,9 @@ ParametersList ParametersDescription::validate(const ParametersList& user_params
 }
 
 ParametersDescription ParametersDescription::steer(const ParametersList& params) const {
-  ParametersDescription pdesc(*this);
-  pdesc += ParametersDescription(params);
-  return pdesc;
+  ParametersDescription parameters_description(*this);
+  parameters_description += ParametersDescription(params);
+  return parameters_description;
 }
 
 template <>
@@ -290,8 +285,8 @@ ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::
 
 std::map<std::string, std::string> ParametersDescription::ParameterValues::allowed() const {
   auto out = str_vals_;
-  for (const auto& val : int_vals_)
-    out[std::to_string(val.first)] = val.second;
+  for (const auto& [value, description] : int_vals_)
+    out[std::to_string(value)] = description;
   return out;
 }
 

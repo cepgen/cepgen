@@ -111,41 +111,44 @@ ParametersList ParametersList::diff(const ParametersList& oth) const {
   return diff;
 }
 
-ParametersList& ParametersList::operator+=(const ParametersList& oth_orig) {
+ParametersList& ParametersList::operator+=(const ParametersList& other) {
   if (empty()) {
-    *this = oth_orig;
+    *this = other;
     return *this;
   }
-  if (oth_orig.empty() || *this == oth_orig)  // ensure the two collections are not identical or empty
+  if (other.empty() || *this == other)  // ensure the two collections are not identical or empty
     return *this;
-  auto oth = oth_orig;
+  auto other_modified = other;
   std::vector<std::string> keys_erased;
-  for (const auto& oth_key : oth.keys()) {  // check if any key of the other collection is already present in the list
-    if (has<ParametersList>(oth_key)) {
+  for (const auto& other_key :
+       other_modified.keys()) {  // check if any key of the other collection is already present in the list
+    if (has<ParametersList>(other_key)) {
       // do not remove a duplicate parameters collection if they are not strictly identical ;
       // will concatenate its values with the other object's
-      if (get<ParametersList>(oth_key) == oth.get<ParametersList>(oth_key) && oth.erase(oth_key) > 0)
-        keys_erased.emplace_back(oth_key);
-    } else if (oth.has<double>(oth_key) && (utils::endsWith(oth_key, "max") || utils::endsWith(oth_key, "min"))) {
-      // hacky path to drop 'xxxmin'/'xxxmax' keys if 'xxx' limits were found
-      auto& lim = operator[]<Limits>(oth_key.substr(0, oth_key.size() - 3));
-      if (utils::endsWith(oth_key, "max"))
-        lim.max() = oth.get<double>(oth_key);
-      else if (utils::endsWith(oth_key, "min"))
-        lim.min() = oth.get<double>(oth_key);
-      if (erase(oth_key) > 0 && oth.erase(oth_key) > 0)
-        keys_erased.emplace_back(oth_key);
-    } else if (erase(oth_key) > 0)  // any other duplicate key is just replaced
-      keys_erased.emplace_back(oth_key);
+      if (get<ParametersList>(other_key) == other_modified.get<ParametersList>(other_key) &&
+          other_modified.erase(other_key) > 0)
+        keys_erased.emplace_back(other_key);
+    } else if (other_modified.has<double>(other_key) &&
+               (utils::endsWith(other_key, "max") || utils::endsWith(other_key, "min"))) {
+      // hacky path to drop '*min'/'*max' keys if '*' limits were found
+      if (auto& limits = operator[]<Limits>(other_key.substr(0, other_key.size() - 3));
+          utils::endsWith(other_key, "max"))
+        limits.max() = other_modified.get<double>(other_key);
+      else if (utils::endsWith(other_key, "min"))
+        limits.min() = other_modified.get<double>(other_key);
+      if (erase(other_key) > 0 && other_modified.erase(other_key) > 0)
+        keys_erased.emplace_back(other_key);
+    } else if (erase(other_key) > 0)  // any other duplicate key is just replaced
+      keys_erased.emplace_back(other_key);
   }
   if (!keys_erased.empty())
     CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
-  //--- concatenate all typed lists
-#define __TYPE_ENUM(type, map, name) map.insert(oth.map.begin(), oth.map.end());
+  // concatenate all typed lists
+#define __TYPE_ENUM(type, map, name) map.insert(other_modified.map.begin(), other_modified.map.end());
   REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
   // special case for parameters collection: concatenate values instead of full containers
-  for (const auto& par : oth.param_values_)
+  for (const auto& par : other_modified.param_values_)
     // if the two parameters list are modules, and do not have the same name,
     // simply replace the old one with the new parameters list
     if (param_values_[par.first].getNameString() == par.second.getNameString())
@@ -155,53 +158,53 @@ ParametersList& ParametersList::operator+=(const ParametersList& oth_orig) {
   return *this;
 }
 
-ParametersList ParametersList::operator+(const ParametersList& oth) const {
+ParametersList ParametersList::operator+(const ParametersList& other) const {
   auto out = *this;
-  out += oth;
+  out += other;
   return out;
 }
 
 ParametersList& ParametersList::feed(const std::string& raw_args) {
   auto raw_list = raw_args;
-  const auto raw_list_stripped = utils::between(raw_list, "{", "}");
-  if (raw_list_stripped.size() == 1 && raw_list == "{" + raw_list_stripped[0] + "}")
+  if (const auto raw_list_stripped = utils::between(raw_list, "{", "}");
+      raw_list_stripped.size() == 1 && raw_list == "{" + raw_list_stripped[0] + "}")
     raw_list = raw_list_stripped[0];
   // first pre-process the arguments list to isolate all comma-separated arguments
-  std::vector<std::string> list;
-  std::vector<std::string> buf;
+  std::vector<std::string> arguments_list;
+  std::vector<std::string> buffer;
   short num_open_braces = 0;
   for (const auto& item : utils::split(raw_list, ',')) {
-    buf.emplace_back(item);
+    buffer.emplace_back(item);
     num_open_braces += std::count(item.begin(), item.end(), '{') - std::count(item.begin(), item.end(), '}');
     if (num_open_braces <= 0) {
-      list.emplace_back(utils::merge(buf, ","));
-      buf.clear();
+      arguments_list.emplace_back(utils::merge(buffer, ","));
+      buffer.clear();
     }
   }
-  CG_DEBUG("ParametersList:feed") << "Parsed arguments: " << list << ", raw list: " << raw_list
+  CG_DEBUG("ParametersList:feed") << "Parsed arguments: " << arguments_list << ", raw list: " << raw_list
                                   << " (split: " << utils::split(raw_list, ',') << "), "
                                   << "{-} imbalance: " << num_open_braces << ".";
   if (num_open_braces != 0)
     throw CG_ERROR("ParametersList:feed") << "Invalid string to be parsed as a parameters list!\n\t"
                                           << "Open-closed braces imbalance: " << num_open_braces << "\n\t"
                                           << "Raw list: " << raw_list << "\n\t"
-                                          << "Resulting list: " << list << ", buffer: " << buf << ".";
-  for (const auto& arg : list) {        // loop through all unpacked arguments
-    auto cmd = utils::split(arg, '/');  // browse through the parameters hierarchy
-    if (arg[arg.size() - 1] != '\'' && arg[arg.size() - 1] != '"' && cmd.size() > 1) {  // sub-parameters word found
-      operator[]<ParametersList>(cmd.at(0)).feed(
-          utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
+                                          << "Resulting list: " << arguments_list << ", buffer: " << buffer << ".";
+  for (const auto& argument : arguments_list) {  // loop through all unpacked arguments
+    auto command = utils::split(argument, '/');  // browse through the parameters hierarchy
+    if (argument[argument.size() - 1] != '\'' && argument[argument.size() - 1] != '"' &&
+        command.size() > 1) {  // sub-parameters word found
+      operator[]<ParametersList>(command.at(0))
+          .feed(utils::merge(std::vector<std::string>(command.begin() + 1, command.end()), "/"));
       continue;
     }
     // from this point, a "key:value" or "key(:true)" was found
-    const auto& sub_plist = utils::between(arg, "{", "}");
-    if (!sub_plist.empty()) {
+    if (const auto& sub_plist = utils::between(argument, "{", "}"); !sub_plist.empty()) {
       for (const auto& subp : sub_plist)
         feed(subp);
       return *this;
     }
-    const auto& word = cmd.at(0);
-    const auto words = utils::split(arg, ':');
+    const auto& word = command.at(0);
+    const auto words = utils::split(argument, ':');
     auto key = words.at(0);
     if (erase(key) > 0)
       CG_DEBUG("ParametersList:feed") << "Replacing key '" << key << "' with a new value.";
@@ -210,16 +213,14 @@ ParametersList& ParametersList::feed(const std::string& raw_args) {
     if (words.size() == 1)  // basic key:true
       set<bool>(key, true);
     else if (words.size() == 2) {  // basic key:value
-      const auto& value = words.at(1);
-      if (utils::isInt(value))
+      if (const auto& value = words.at(1); utils::isInt(value))
         set(key, std::stoi(value));
       else if (utils::isFloat(value))
         set(key, std::stod(value));
       else if (value[0] == value[value.size() - 1] && (value[0] == '\'' || value[0] == '"'))  // string parameter
         set(key, value.substr(1, value.size() - 2));
       else {
-        const auto value_lc = utils::toLower(value);
-        if (value_lc == "off" || value_lc == "no" || value_lc == "false")
+        if (const auto value_lc = utils::toLower(value); value_lc == "off" || value_lc == "no" || value_lc == "false")
           set<bool>(key, false);
         else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
           set<bool>(key, true);
@@ -260,7 +261,7 @@ const ParametersList& ParametersList::print(std::ostream& os) const {
   std::string sep;
   if (std::find(keys_list.begin(), keys_list.end(), MODULE_NAME) != keys_list.end()) {
     const auto plist_name = getNameString();
-    auto mod_name = hasName() ? "\"" + plist_name + "\"" : plist_name;
+    const auto mod_name = hasName() ? "\"" + plist_name + "\"" : plist_name;
     os << "Module(" << mod_name, sep = ", ";
   } else
     os << "Parameters(";
@@ -289,7 +290,9 @@ std::string ParametersList::print(bool compact) const {
 
 bool ParametersList::hasName() const { return has<std::string>(MODULE_NAME); }
 
-std::string ParametersList::name(const std::string& def) const { return get<std::string>(MODULE_NAME, def); }
+std::string ParametersList::name(const std::string& default_value) const {
+  return get<std::string>(MODULE_NAME, default_value);
+}
 
 ParametersList& ParametersList::setName(const std::string& value) { return set(MODULE_NAME, value); }
 
@@ -434,9 +437,9 @@ IMPL_TYPE_ALL(std::vector<std::vector<double> >, vec_vec_dbl_values_);
 IMPL_TYPE_SET(Limits, lim_values_);
 
 template <>
-Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const {
+Limits ParametersList::get<Limits>(const std::string& key, const Limits& default_value) const {
   // first try to find Limits object in collections
-  auto out = def;
+  auto out = default_value;
   if (auto val =
           std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
       val != lim_values_.end())
@@ -451,11 +454,11 @@ Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) co
 template <>
 const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits& value) const {
   if (has<Limits>(key)) {
-    const auto& lim = get<Limits>(key);
-    if (lim.hasMin())
-      value.min() = lim.min();
-    if (lim.hasMax())
-      value.max() = lim.max();
+    const auto& limits = get<Limits>(key);
+    if (limits.hasMin())
+      value.min() = limits.min();
+    if (limits.hasMax())
+      value.max() = limits.max();
     return *this;
   }
   fill<double>(key + "min", value.min());
@@ -479,23 +482,25 @@ bool ParametersList::has<ParticleProperties>(const std::string& key) const {
 /// Get a particle properties object
 template <>
 ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
-                                                           const ParticleProperties& def) const {
+                                                           const ParticleProperties& default_value) const {
   if (has<ParametersList>(key)) {  // try to steer as a dictionary of particle properties
     const auto& plist = get<ParametersList>(key);
     if (plist.keys() == std::vector<std::string>{"pdgid"})
       return PDG::get()(plist.get<int>("pdgid"));
     return ParticleProperties(plist);
-  } else if (has<pdgid_t>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
+  }
+  if (has<pdgid_t>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
     CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '"
                                << get<pdgid_t>(key) << "' from PDG database.";
     return PDG::get()(get<pdgid_t>(key));
-  } else if (has<int>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
+  }
+  if (has<int>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
     CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '" << get<int>(key)
                                << "' from PDG database.";
     return PDG::get()(get<int>(key));
   }
   CG_DEBUG("ParametersList") << "Failed to retrieve particle properties parameter with key=" << key << ".";
-  return def;
+  return default_value;
 }
 
 /// Set a particle properties object value
@@ -515,8 +520,8 @@ std::vector<std::string> ParametersList::keysOf<ParticleProperties>() const {
 }
 
 namespace cepgen {
-  std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
-    params.print(os);
+  std::ostream& operator<<(std::ostream& os, const ParametersList& parameters) {
+    parameters.print(os);
     return os;
   }
 }  // namespace cepgen
