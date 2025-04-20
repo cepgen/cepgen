@@ -47,26 +47,26 @@ ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters)
 
 size_t ProcessIntegrand::size() const { return process().ndim(); }
 
-void ProcessIntegrand::setProcess(const proc::Process& proc) {
-  // each integrand object has its own clone of the process
-  process_ = proc.clone();  // note: kinematics is already set by the process copy constructor
-  // override default kinematics with the one defined in mother process
-  process().kinematics().setParameters(proc.kinematics().parameters());
+void ProcessIntegrand::setProcess(const proc::Process& original_process) {
+  process_ = original_process.clone();  // each integrand object has its own clone of the process
+  // NOTE: kinematics is already set by the process copy constructor
+  process().kinematics().setParameters(
+      original_process.kinematics().parameters());  // override default kinematics with the one defined in mother process
   CG_DEBUG("ProcessIntegrand:setProcess")
-      << "New '" << process().name() << "' process cloned from '" << proc.name()
+      << "New '" << process().name() << "' process cloned from '" << original_process.name()
       << "' process. New kinematics: " << process().kinematics().parameters() << ".";
 
   // first-run preparation
-  CG_DEBUG("ProcessIntegrand:setProcess").log([this](auto& dbg) {
-    dbg << "Run started for " << process().name() << " process " << std::hex << dynamic_cast<void*>(process_.get())
+  CG_DEBUG("ProcessIntegrand:setProcess").log([this](auto& log) {
+    log << "Run started for " << process().name() << " process " << std::hex << dynamic_cast<void*>(process_.get())
         << std::dec << ".\n\t";
     const auto& beams = process().kinematics().incomingBeams();
-    dbg << "Process mode considered: " << beams.mode() << "\n\t"
+    log << "Process mode considered: " << beams.mode() << "\n\t"
         << "  positive-z beam: " << beams.positive() << "\n\t"
         << "  negative-z beam: " << beams.negative();
     if (!beams.structureFunctions().empty())
-      dbg << "\n\t  structure functions: " << beams.structureFunctions();
-    process().dumpVariables(&dbg.stream());
+      log << "\n\t  structure functions: " << beams.structureFunctions();
+    process().dumpVariables(&log.stream());
   });
   process().initialise();
 
@@ -88,11 +88,9 @@ const proc::Process& ProcessIntegrand::process() const {
 
 double ProcessIntegrand::eval(const std::vector<double>& x) {
   CG_TICKER(const_cast<RunParameters*>(run_parameters_)->timeKeeper());
+  timer_->reset();  // start the timer
 
-  //--- start the timer
-  timer_->reset();
   process().clearEvent();
-
   auto weight = process().weight(x);  // specify the phase space point to probe and calculate weight
   if (!utils::positive(weight))       // invalidate any unphysical behaviour
     return 0.;
@@ -112,45 +110,41 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
   if (storage_)
     event->metadata["time:generation"] = timer_->elapsed();  // pure CepGen part of the event generation
 
-  {  // trigger all event modification algorithms
-    double br = -1.;
-    const auto fast_mode = !storage_;
+  {  // run all event modification algorithms
+    double branching_ratio = -1.;
     for (auto& event_modifier : run_parameters_->eventModifiersSequence()) {
-      if (!event_modifier->run(*event, br, fast_mode) || br == 0.)
+      if (!event_modifier->run(*event, branching_ratio, !storage_) || branching_ratio == 0.)
         return 0.;
-      weight *= br;  // branching fraction for all decays
+      weight *= branching_ratio;  // branching fraction for all decays
     }
   }
-  {  // apply cuts on final state system (after event modification algorithms)
-    const auto& kinematics = process_->kinematics();
+  const auto& kinematics = process_->kinematics();
+  if (!kinematics.cuts().central.contain((*event)(Particle::Role::CentralSystem)))
+    // apply cuts on final state system (after event modification algorithms)
     // (polish your cuts, as this might be very time-consuming...)
-    if (!kinematics.cuts().central.contain((*event)(Particle::Role::CentralSystem)))
+    return 0.;
+  for (const auto& part : (*event)(Particle::Role::CentralSystem))
+    // retrieve all cuts associated to this final state particle in the central system
+    if (kinematics.cuts().central_particles.count(part.pdgId()) > 0 &&
+        !kinematics.cuts().central_particles.at(part.pdgId()).contain({part}))
       return 0.;
-    if (!kinematics.cuts().central_particles.empty())
-      for (const auto& part : (*event)(Particle::Role::CentralSystem)) {
-        // retrieve all cuts associated to this final state particle in the central system
-        if (kinematics.cuts().central_particles.count(part.pdgId()) > 0 &&
-            !kinematics.cuts().central_particles.at(part.pdgId()).contain({part}))
-          return 0.;
-      }
-    if (!kinematics.incomingBeams().positive().elastic() &&
-        !kinematics.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam1), event))
-      return 0.;
-    if (!kinematics.incomingBeams().negative().elastic() &&
-        !kinematics.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam2), event))
-      return 0.;
+  if (!kinematics.incomingBeams().positive().elastic() &&
+      !kinematics.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam1), event))
+    return 0.;
+  if (!kinematics.incomingBeams().negative().elastic() &&
+      !kinematics.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam2), event))
+    return 0.;
 
-    if (storage_) {  // add generation metadata to the event
-      event->metadata["weight"] = weight;
-      event->metadata["time:total"] = timer_->elapsed();
-    }
-
-    CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << dynamic_cast<void*>(process_.get()) << std::dec
-                                      << "]\n\t"
-                                      << "functional value for dimension-" << x.size() << " point " << x << ": "
-                                      << weight << ".\n\t"
-                                      << "Generation time: " << event->metadata("time:generation") * 1.e3 << " ms\n\t"
-                                      << "Total time (gen+mod+cuts): " << event->metadata("time:total") * 1.e3 << " ms";
+  if (storage_) {  // add generation metadata to the event
+    event->metadata["weight"] = weight;
+    event->metadata["time:total"] = timer_->elapsed();
   }
+
+  CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << dynamic_cast<void*>(process_.get()) << std::dec
+                                    << "]\n\t"
+                                    << "functional value for dimension-" << x.size() << " point " << x << ": " << weight
+                                    << ".\n\t"
+                                    << "Generation time: " << event->metadata("time:generation") * 1.e3 << " ms\n\t"
+                                    << "Total time (gen+mod+cuts): " << event->metadata("time:total") * 1.e3 << " ms";
   return weight;
 }

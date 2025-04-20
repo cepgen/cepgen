@@ -33,13 +33,13 @@ FunctionalIntegrand::FunctionalIntegrand(const std::string& expression,
                                   << variables << "): " << functional_->expression() << ".";
 }
 
-double FunctionalIntegrand::eval(const std::vector<double>& x) {
+double FunctionalIntegrand::eval(const std::vector<double>& coordinates) {
   if (!functional_)
     throw CG_FATAL("FunctionalIntegrand:eval") << "Functional object was not properly initialised!";
-  if (x.size() != size())
+  if (coordinates.size() != size())
     throw CG_FATAL("FunctionalIntegrand:eval")
-        << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
-  return (*functional_)(x);
+        << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << coordinates.size() << ")!";
+  return (*functional_)(coordinates);
 }
 
 size_t FunctionalIntegrand::size() const {

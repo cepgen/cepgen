@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>  // pow
+#include <cmath>
 #include <functional>
 
 #include "CepGen/Core/Exception.h"
@@ -27,11 +27,10 @@
 using namespace cepgen;
 
 GridParameters::GridParameters(size_t mbin, size_t ndim) : mbin_(mbin), inv_mbin_(1. / mbin_), num_dimensions_(ndim) {
-  // build and populate the grid
-  coord_t coord(ndim, 0);
-  for (size_t i = 0; i < static_cast<size_t>(std::pow(mbin_, num_dimensions_)); ++i) {
-    generateCoordinates(coord, i);
-    coords_.emplace_back(coord);
+  coord_t coordinate(ndim, 0);
+  for (size_t i = 0; i < static_cast<size_t>(std::pow(mbin_, num_dimensions_)); ++i) {  // build and populate the grid
+    generateCoordinates(coordinate, i);
+    coordinates_.emplace_back(coordinate);
     num_points_.emplace_back(0ul);
     f_max_.emplace_back(0.);
   }
@@ -46,7 +45,7 @@ void GridParameters::setValue(size_t coordinate, float value) {
 void GridParameters::shoot(utils::RandomGenerator& random_generator,
                            size_t coordinate,
                            std::vector<double>& out) const {
-  const auto& nv = coords_.at(coordinate);
+  const auto& nv = coordinates_.at(coordinate);
   out.resize(nv.size());
   for (size_t i = 0; i < nv.size(); ++i)
     out[i] = (random_generator.uniform() + nv.at(i)) * inv_mbin_;
@@ -54,9 +53,9 @@ void GridParameters::shoot(utils::RandomGenerator& random_generator,
 
 void GridParameters::dump() const {
   CG_INFO("GridParameters:dump").log([&](auto& info) {
-    for (size_t i = 0; i < coords_.size(); ++i)
+    for (size_t i = 0; i < coordinates_.size(); ++i)
       info << "\nn[" << i << "]: "
-           << "coord=" << coords_.at(i) << ", "
+           << "coord=" << coordinates_.at(i) << ", "
            << "num points: " << num_points_.at(i) << ", "
            << "max=" << f_max_.at(i) << ".";
   });
@@ -99,7 +98,6 @@ void GridParameters::initCorrectionCycle(size_t bin, float weight) {
   f_max_diff_ = weight - f_max_old_;
   setValue(bin, weight);
   correction_ = (num_points_.at(bin) - 1) * f_max_diff_ / f_max_global_ - 1.;
-
   CG_DEBUG("GridParameters:initCorrectionCycle")
       << "Correction " << correction_ << " will be applied "
       << "for phase space bin " << bin << " (" << utils::s("point", num_points_.at(bin), true) << "). "

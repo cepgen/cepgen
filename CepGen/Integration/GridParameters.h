@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,9 +37,9 @@ namespace cepgen {
 
     void dump() const;  ///< Dump the grid coordinates
 
-    inline size_t size() const { return coords_.size(); }  ///< Grid multiplicity
+    inline size_t size() const { return coordinates_.size(); }  ///< Grid multiplicity
     /// Number of times a phase space point has been randomly selected
-    inline const coord_t& n(size_t coord) const { return coords_.at(coord); }
+    inline const coord_t& n(size_t coord) const { return coordinates_.at(coord); }
     inline float globalMax() const { return f_max_global_; }  ///< Global function maximum
 
     /// Maximal function value for a given grid coordinate
@@ -76,10 +76,10 @@ namespace cepgen {
     bool gen_prepared_{false};  ///< Has the grid been already prepared?
     float correction_{0.};      ///< Correction to apply on the next phase space point generation
     float correction2_{0.};
-    std::vector<coord_t> coords_;     ///< Point coordinates in grid
-    std::vector<size_t> num_points_;  ///< Number of functions values evaluated for this point
-    std::vector<float> f_max_;        ///< Maximal value of the function at one given point
-    float f_max_global_{0.};          ///< Maximal value of the function in the considered integration range
+    std::vector<coord_t> coordinates_;  ///< Point coordinates in grid
+    std::vector<size_t> num_points_;    ///< Number of functions values evaluated for this point
+    std::vector<float> f_max_;          ///< Maximal value of the function at one given point
+    float f_max_global_{0.};            ///< Maximal value of the function in the considered integration range
     float f_max2_{0.};
     float f_max_diff_{0.};
     float f_max_old_{0.};
