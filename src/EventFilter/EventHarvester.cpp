@@ -36,8 +36,7 @@ EventHarvester::EventHarvester(const ParametersList& params)
       save_hists_(steer<bool>("save")),
       filename_(steer<std::string>("filename")) {
   // build the plotter object if specified
-  const auto& plotter = steer<std::string>("plotter");
-  if (!plotter.empty())
+  if (const auto& plotter = steer<std::string>("plotter"); !plotter.empty())
     drawer_ = DrawerFactory::get().build(plotter, params);
 
   // extract list of variables to be plotted in histogram
@@ -68,7 +67,7 @@ EventHarvester::EventHarvester(const ParametersList& params)
 }
 
 EventHarvester::~EventHarvester() {
-  //--- histograms printout
+  // histograms printout
   if (!show_hists_ && !save_hists_)
     return;
   try {
@@ -125,22 +124,22 @@ bool EventHarvester::operator<<(const Event& ev) {
 ParametersDescription EventHarvester::description() {
   auto desc = EventExporter::description();
   desc.setDescription("Text-based histogramming tool");
-  desc.add("plotter", ""s).setDescription("Plotting algorithm to use");
-  desc.add("filename", "output.hists.txt"s).setDescription("Output file name for histogram dump");
-  desc.add("show", true).setDescription("Show the histogram(s) at the end of the run?");
-  desc.add("save", false).setDescription("Save the histogram(s) at the end of the run?");
+  desc.add("plotter"s, ""s).setDescription("Plotting algorithm to use");
+  desc.add("filename"s, "output.hists.txt"s).setDescription("Output file name for histogram dump");
+  desc.add("show"s, true).setDescription("Show the histogram(s) at the end of the run?");
+  desc.add("save"s, false).setDescription("Save the histogram(s) at the end of the run?");
   // per-histogram default parameters
   ParametersDescription hist_desc;
   // x-axis attributes
-  hist_desc.add("xbins", std::vector<double>{}).setDescription("x-axis bins definition");
-  hist_desc.add("nbinsX", 25).setDescription("Bins multiplicity for x-axis");
-  hist_desc.add("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+  hist_desc.add("xbins"s, std::vector<double>{}).setDescription("x-axis bins definition");
+  hist_desc.add("nbinsX"s, 25).setDescription("Bins multiplicity for x-axis");
+  hist_desc.add("xrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
   // y-axis attributes
-  hist_desc.add("ybins", std::vector<double>{}).setDescription("y-axis bins definition");
-  hist_desc.add("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
-  hist_desc.add("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
-  hist_desc.add("log", false).setDescription("Plot logarithmic axis?");
-  desc.addParametersDescriptionVector("histVariables", hist_desc, {})
+  hist_desc.add("ybins"s, std::vector<double>{}).setDescription("y-axis bins definition");
+  hist_desc.add("nbinsY"s, 50).setDescription("Bins multiplicity for y-axis");
+  hist_desc.add("yrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+  hist_desc.add("log"s, false).setDescription("Plot logarithmic axis?");
+  desc.addParametersDescriptionVector("histVariables"s, hist_desc, {})
       .setDescription("Histogram definition for 1/2 variable(s)");
   return desc;
 }

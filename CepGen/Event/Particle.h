@@ -64,8 +64,8 @@ namespace cepgen {
     /// Build using the role of the particle in the process and its PDG id
     /// \param[in] role Role of the particle in the process
     /// \param[in] id PDG identifier
-    /// \param[in] st Current status
-    explicit Particle(Role role = Role::UnknownRole, pdgid_t id = 0, Status st = Status::Undefined);
+    /// \param[in] status Current status
+    explicit Particle(Role role = Role::UnknownRole, pdgid_t id = 0, Status status = Status::Undefined);
 
     bool operator<(const Particle&) const;   ///< Comparison operator (from unique identifier)
     bool operator==(const Particle&) const;  ///< Equality operator
@@ -104,8 +104,8 @@ namespace cepgen {
 
     /// Set the PDG identifier (along with the particle's electric charge)
     /// \param[in] pdg PDG identifier
-    /// \param[in] ch Electric charge (0, 1, or -1)
-    Particle& setPdgId(pdgid_t pdg, short ch = 0);
+    /// \param[in] charge_factor Electric charge (0, 1, or -1)
+    Particle& setPdgId(pdgid_t pdg, short charge_factor = 0);
     pdgid_t pdgId() const;  ///< Retrieve the objectified PDG identifier
     /// Set the PDG identifier (along with the particle's electric charge)
     /// \param[in] pdg_id PDG identifier (incl. electric charge in e)

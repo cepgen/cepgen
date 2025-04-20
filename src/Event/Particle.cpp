@@ -27,13 +27,14 @@
 
 using namespace cepgen;
 
-Particle::Particle(Role role, pdgid_t pdgId, Status st) : role_(role), status_(static_cast<int>(st)), pdg_id_(pdgId) {}
+Particle::Particle(Role role, pdgid_t pdg_id, Status status)
+    : role_(role), status_(static_cast<int>(status)), pdg_id_(pdg_id) {}
 
 bool Particle::operator<(const Particle& rhs) const { return id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_; }
 
-bool Particle::operator==(const Particle& oth) const {
-  return id_ == oth.id_ && pdg_id_ == oth.pdg_id_ && antiparticle_ == oth.antiparticle_ && helicity_ == oth.helicity_ &&
-         status_ == oth.status_ && momentum_ == oth.momentum_;
+bool Particle::operator==(const Particle& other) const {
+  return id_ == other.id_ && pdg_id_ == other.pdg_id_ && antiparticle_ == other.antiparticle_ &&
+         helicity_ == other.helicity_ && status_ == other.status_ && momentum_ == other.momentum_;
 }
 
 bool Particle::valid() const {
@@ -96,12 +97,14 @@ Particle& Particle::setMomentum(double px, double py, double pz, double energy) 
 
 pdgid_t Particle::pdgId() const { return pdg_id_; }
 
-Particle& Particle::setPdgId(pdgid_t pdg, short ch) { return setIntegerPdgId(pdg * (ch == 0 ? 1 : ch / abs(ch))); }
+Particle& Particle::setPdgId(pdgid_t pdg, short charge_factor) {
+  return setIntegerPdgId(pdg * (charge_factor == 0 ? 1 : charge_factor / abs(charge_factor)));
+}
 
-Particle& Particle::setIntegerPdgId(long pdg) {
-  if (pdg_id_ = std::labs(pdg); PDG::get().has(pdg_id_))
+Particle& Particle::setIntegerPdgId(long pdg_id) {
+  if (pdg_id_ = std::labs(pdg_id); PDG::get().has(pdg_id_))
     CG_DEBUG("Particle:setIntegerPdgId") << "Particle PDG id set to " << pdg_id_ << ".";
-  antiparticle_ = pdg < 0;
+  antiparticle_ = pdg_id < 0;
   return *this;
 }
 
@@ -133,8 +136,8 @@ namespace cepgen {
     return os << "}";
   }
 
-  std::ostream& operator<<(std::ostream& os, const Particle::Status& st) {
-    switch (st) {
+  std::ostream& operator<<(std::ostream& os, const Particle::Status& status) {
+    switch (status) {
       case Particle::Status::PrimordialIncoming:
         return os << "incoming beam particle";
       case Particle::Status::DebugResonance:
@@ -159,8 +162,8 @@ namespace cepgen {
     return os;
   }
 
-  std::ostream& operator<<(std::ostream& os, const Particle::Role& rl) {
-    switch (rl) {
+  std::ostream& operator<<(std::ostream& os, const Particle::Role& role) {
+    switch (role) {
       case Particle::Role::UnknownRole:
         return os << "unknown";
       case Particle::Role::IncomingBeam1:
@@ -184,14 +187,14 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-ParticlesMap::ParticlesMap(const ParticlesMap& oth)
+ParticlesMap::ParticlesMap(const ParticlesMap& other)
     : std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> >() {
-  *this = oth;
+  *this = other;
 }
 
-ParticlesMap& ParticlesMap::operator=(const ParticlesMap& oth) {
-  for (const auto& [role, particles] : oth)
-    for (const auto& part : particles)
-      (*this)[role].emplace_back(Particle(part));
+ParticlesMap& ParticlesMap::operator=(const ParticlesMap& other) {
+  for (const auto& [role, particles] : other)
+    for (const auto& particle : particles)
+      (*this)[role].emplace_back(Particle(particle));
   return *this;
 }

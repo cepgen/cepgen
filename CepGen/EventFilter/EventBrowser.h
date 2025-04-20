@@ -33,7 +33,7 @@ namespace cepgen::utils {
   class EventBrowser {
   public:
     EventBrowser() = default;
-    double get(const Event& ev, const std::string& var) const;  ///< Get/compute a variable value
+    double get(const Event& event, const std::string& variable_name) const;  ///< Get/compute a variable value
 
   private:
     /// Retrieve a particle named variable

@@ -19,6 +19,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
 
 using namespace cepgen;
 
@@ -29,15 +30,13 @@ EventModifier::EventModifier(const ParametersList& params)
                                  << "* maximum trials: " << max_trials_;
 }
 
-void EventModifier::readStrings(const std::vector<std::string>& params) {
-  if (params.empty())
+void EventModifier::readStrings(const std::vector<std::string>& parameters_list) {
+  if (parameters_list.empty())
     return;
-  std::ostringstream os;
-  for (const auto& p : params) {
+  for (const auto& p : parameters_list)
     readString(p);
-    os << "\n\t  '" << p << "'";
-  }
-  CG_DEBUG("EventModifier:configure") << "Feeding \"" << name_ << "\" event modifier algorithm with:" << os.str();
+  CG_DEBUG("EventModifier:configure") << "Feeding '" << name_ << "' event modifier algorithm with:\n\t  "
+                                      << utils::merge(parameters_list, "\n\t  ");
 }
 
 ParametersDescription EventModifier::description() {
