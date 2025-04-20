@@ -22,10 +22,10 @@
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
-  typedef unsigned long long pdgid_t;       ///< Alias for the integer-like particle PDG id
-  typedef std::vector<pdgid_t> pdgids_t;    ///< Alias for a collection of particles PDG ids
-  typedef long long spdgid_t;               ///< Alias for a signed particle PDG id (adding charge information)
-  typedef std::vector<spdgid_t> spdgids_t;  ///< Alias for a collection of particles signed PDG ids
+  using pdgid_t = unsigned long long;       ///< Alias for the integer-like particle PDG id
+  using pdgids_t = std::vector<pdgid_t>;    ///< Alias for a collection of particles PDG ids
+  using spdgid_t = long long;               ///< Alias for a signed particle PDG id (adding charge information)
+  using spdgids_t = std::vector<spdgid_t>;  ///< Alias for a collection of particles signed PDG ids
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties final : SteeredObject<ParticleProperties> {
     explicit ParticleProperties(const ParametersList&);

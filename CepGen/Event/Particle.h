@@ -26,7 +26,7 @@
 #include "CepGen/Utils/Hasher.h"
 
 namespace cepgen {
-  typedef std::set<int> ParticlesIds;  ///< A set of integer-type particle identifiers
+  using ParticlesIds = std::set<int>;  ///< A set of integer-type particle identifiers
 
   /// Kinematic information for one particle
   class Particle {
@@ -164,10 +164,10 @@ namespace cepgen {
 
   // --- particle containers
 
-  typedef std::reference_wrapper<Particle> ParticleRef;  ///< Reference to a Particle object
-  typedef std::vector<Particle> Particles;               ///< List of Particle objects
-  typedef std::vector<ParticleRef> ParticlesRefs;        ///< List of references to Particle objects
-  typedef std::vector<Particle::Role> ParticleRoles;     ///< List of particles' roles
+  using ParticleRef = std::reference_wrapper<Particle>;  ///< Reference to a Particle object
+  using Particles = std::vector<Particle>;               ///< List of Particle objects
+  using ParticlesRefs = std::vector<ParticleRef>;        ///< List of references to Particle objects
+  using ParticleRoles = std::vector<Particle::Role>;     ///< List of particles' roles
 
   /// Map between a particle's role and its associated Particle object
   class ParticlesMap : public std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > {

@@ -37,7 +37,7 @@ namespace cepgen {
   class GeneratorWorker : public SteeredObject<GeneratorWorker> {
   public:
     explicit GeneratorWorker(const ParametersList&);  ///< Book memory slots and structures for the generator
-    virtual ~GeneratorWorker();
+    ~GeneratorWorker() override;
 
     static ParametersDescription description();
 

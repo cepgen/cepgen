@@ -59,7 +59,7 @@ namespace cepgen {
 #undef __TYPE_ENUM
       return Steerable::parameters();
     }
-    virtual inline void setParameters(const ParametersList& params) override {
+    inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
       Steerable::setParameters(params);

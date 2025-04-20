@@ -190,7 +190,7 @@ namespace cepgen::proc {
     std::unique_ptr<Event> event_;      ///< Event object tracking all information on all particles in the system
     friend class utils::ProcessVariablesAnalyser;
   };
-  typedef std::unique_ptr<Process> ProcessPtr;  ///< Helper typedef for a Process unique pointer
+  using ProcessPtr = std::unique_ptr<Process>;  ///< Helper for a Process unique pointer
 }  // namespace cepgen::proc
 
 #endif

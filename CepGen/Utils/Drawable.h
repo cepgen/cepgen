@@ -85,7 +85,7 @@ namespace cepgen::utils {
       std::string label = "";  ///< Human-readable description of the bin
     };
     /// Metadata for an axis (coordinates and bins value)
-    typedef std::map<coord_t, Value> axis_t;
+    using axis_t = std::map<coord_t, Value>;
     /// Comparator of an axis by the values it holds
     struct CompareAxisByValue {
       bool operator()(const std::pair<coord_t, Value>& lhs, const std::pair<coord_t, Value>& rhs) const {
@@ -93,7 +93,7 @@ namespace cepgen::utils {
       }
     };
     /// Metadata for a two-dimensional axis definition (coordinates and bins values)
-    typedef std::map<coord_t, axis_t> dual_axis_t;
+    using dual_axis_t = std::map<coord_t, axis_t>;
 
     inline virtual bool isHist1D() const { return false; }   ///< Is this drawable a one-dimensional histogram?
     inline virtual bool isHist2D() const { return false; }   ///< Is this drawable a two-dimensional histogram?

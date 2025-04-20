@@ -111,13 +111,13 @@ namespace cepgen::utils {
     struct gsl_histogram_deleter {
       void operator()(gsl_histogram* h) const { gsl_histogram_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
+    using gsl_histogram_ptr = std::unique_ptr<gsl_histogram, gsl_histogram_deleter>;
     gsl_histogram_ptr hist_, hist_w2_;
     size_t underflow_{0ull}, overflow_{0ull};
     struct gsl_histogram_pdf_deleter {
       void operator()(gsl_histogram_pdf* h) const { gsl_histogram_pdf_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram_pdf, gsl_histogram_pdf_deleter> gsl_histogram_pdf_ptr;
+    using gsl_histogram_pdf_ptr = std::unique_ptr<gsl_histogram_pdf, gsl_histogram_pdf_deleter>;
     mutable gsl_histogram_pdf_ptr pdf_;
   };
 
@@ -197,13 +197,13 @@ namespace cepgen::utils {
     struct gsl_histogram2d_deleter {
       void operator()(gsl_histogram2d* h) const { gsl_histogram2d_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
+    using gsl_histogram2d_ptr = std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter>;
     gsl_histogram2d_ptr hist_, hist_w2_;
     contents_t out_of_range_values_;
     struct gsl_histogram2d_pdf_deleter {
       void operator()(gsl_histogram2d_pdf* h) const { gsl_histogram2d_pdf_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram2d_pdf, gsl_histogram2d_pdf_deleter> gsl_histogram2d_pdf_ptr;
+    using gsl_histogram2d_pdf_ptr = std::unique_ptr<gsl_histogram2d_pdf, gsl_histogram2d_pdf_deleter>;
     mutable gsl_histogram2d_pdf_ptr pdf_;
   };
 }  // namespace cepgen::utils

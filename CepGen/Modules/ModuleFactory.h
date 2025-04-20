@@ -56,7 +56,7 @@ namespace cepgen {
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
-    inline void registerModule(const std::string& name, const ParametersList& def_params = ParametersList()) {
+    void registerModule(const std::string& name, const ParametersList& def_params = ParametersList()) {
       static_assert(std::is_base_of_v<T, U>,
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (has(name)) {
@@ -113,8 +113,8 @@ namespace cepgen {
   private:
     /// Construct a module with its parameters set
     template <typename U>
-    inline static std::unique_ptr<T> buildModule(const ParametersList& params) {
-      return std::unique_ptr<T>(new U(params));
+    static std::unique_ptr<T> buildModule(const ParametersList& params) {
+      return std::make_unique<U>(params);
     }
     const std::string description_;                 ///< Factory name
     std::unordered_map<std::string, Builder> map_;  ///< Database of modules handled by this instance

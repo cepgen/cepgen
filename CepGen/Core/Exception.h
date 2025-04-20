@@ -26,14 +26,14 @@ namespace cepgen {
   class Exception : public LoggedMessage, public std::runtime_error {
   public:
     /// Enumeration of exception severities
-    enum Type {
+    enum struct Type {
       undefined = -1,  ///< Irregular message
       error,           ///< General non-stopping error
       fatal            ///< Critical and stopping error
     };
-    explicit Exception(const std::string& module,
+    explicit Exception(const std::string& module_name,
                        const std::string& from = "",
-                       Type type = undefined,
+                       Type type = Type::undefined,
                        const std::string& file = "",
                        short lineno = 0) noexcept(true);
     Exception(const Exception&) noexcept(true);  ///< Copy constructor
@@ -50,7 +50,7 @@ namespace cepgen {
     const char* what() const noexcept(true) override;
 
   private:
-    const Type type_{undefined};
+    const Type type_{Type::undefined};
     mutable char what_[50]{""};
   };
   static_assert(std::is_nothrow_copy_constructible_v<Exception>, "Exception must be nothrow copy-constructible");

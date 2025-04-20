@@ -28,7 +28,7 @@ namespace cepgen {
   /// \date Dec 2022
   class EventImporter : public EventHandler {
   public:
-    explicit EventImporter(const ParametersList& params) : EventHandler(params) {}
+    using EventHandler::EventHandler;
 
     static ParametersDescription description() {
       auto desc = EventHandler::description();

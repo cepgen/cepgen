@@ -31,8 +31,8 @@ namespace cepgen {
     enum class Mode { invalid = -1, full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
     friend std::ostream& operator<<(std::ostream&, const Mode&);
 
-    typedef std::vector<int> Polarisation;                        ///< list of polarisation states
-    typedef std::pair<Polarisation, Polarisation> Polarisations;  ///< polarisation for a pair of particles
+    using Polarisation = std::vector<int>;                        ///< list of polarisation states
+    using Polarisations = std::pair<Polarisation, Polarisation>;  ///< polarisation for a pair of particles
 
     const Mode& mode() const { return mode_; }                   ///< polarisation mode
     const Polarisations& polarisations() const { return pol_; }  ///< list of polarisation states

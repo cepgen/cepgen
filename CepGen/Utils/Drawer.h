@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,8 +29,7 @@ namespace cepgen::utils {
   class Hist1D;
   class Hist2D;
   class Drawable;
-  /// A collection of drawable objects
-  typedef std::vector<const Drawable*> DrawableColl;
+  using DrawableColl = std::vector<const Drawable*>;  ///< Collection of drawable objects
   /// A generic drawing utility
   class Drawer : public NamedModule<Drawer> {
   public:

@@ -36,7 +36,7 @@ namespace cepgen::utils {
     /// Collection of logging exceptions
     inline const std::vector<std::regex>& exceptionRules() const { return allowed_exc_; }
 
-    typedef std::unique_ptr<std::ostream, std::function<void(std::ostream*)> > StreamHandler;
+    using StreamHandler = std::unique_ptr<std::ostream, std::function<void(std::ostream*)> >;
 
     /// Logging threshold for the output stream
     enum class Level { nothing = 0, error, warning, information, debug, debugInsideLoop };

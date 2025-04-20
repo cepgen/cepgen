@@ -87,7 +87,7 @@ namespace cepgen {
     friend Matrix operator+(const Matrix&, const Matrix&);  ///< Addition of two matrices
     friend Matrix operator-(const Matrix&, const Matrix&);  ///< Subtraction of two matrices
 
-    typedef std::pair<size_t, size_t> Indices;
+    using Indices = std::pair<size_t, size_t>;
     Indices imin() const;  ///< Index (row, column) of the minimum matrix element
     Indices imax() const;  ///< Index (row, column) of the maximum matrix element
 

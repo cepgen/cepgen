@@ -26,7 +26,8 @@
 
 using namespace cepgen::python;
 
-Error::Error(const char *origin, const char *file, short lineno) noexcept : Exception("", origin, error, file, lineno) {
+Error::Error(const char *origin, const char *file, short lineno) noexcept
+    : Exception("", origin, Type::error, file, lineno) {
   // retrieve error indicator and clear it to handle ourself the error
   PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
   PyErr_Clear();

@@ -24,8 +24,8 @@
 using namespace cepgen;
 
 Exception::Exception(
-    const std::string& module, const std::string& from, Type type, const std::string& file, short lineno) noexcept
-    : LoggedMessage(module, from, MessageType::undefined, file, lineno),
+    const std::string& module_name, const std::string& from, Type type, const std::string& file, short lineno) noexcept
+    : LoggedMessage(module_name, from, MessageType::undefined, file, lineno),
       std::runtime_error("cepgen::Exception"),
       type_(type) {}
 
@@ -33,9 +33,9 @@ Exception::Exception(const Exception& rhs) noexcept
     : LoggedMessage(rhs), std::runtime_error("cepgen::Exception"), type_(rhs.type_) {}
 
 Exception::~Exception() noexcept {
-  if (type_ >= error)
+  if (type_ >= Type::error)
     Exception::dump();
-  if (type_ == fatal && raise(SIGINT) != 0)  // we stop execution on fatal exception
+  if (type_ == Type::fatal && raise(SIGINT) != 0)  // we stop execution on fatal exception
     std::exit(EXIT_FAILURE);
 }
 

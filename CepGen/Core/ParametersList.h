@@ -54,13 +54,13 @@ namespace cepgen {
     /// Retrieve the default argument for a given variable type
     template <typename T>
     struct default_arg {
-      static inline T get() { return T(); }  ///< Default variable argument
+      static T get() { return T(); }  ///< Default variable argument
     };
 
   public:
     ParametersList() = default;
     ParametersList(const ParametersList&);  ///< Copy constructor
-    ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
+    ~ParametersList() = default;  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
 
     bool hasName() const;                                           ///< Does the parameters list have a name key?
@@ -89,7 +89,7 @@ namespace cepgen {
     /// \param[in] key Unique key for parameter
     /// \param[out] value Object/variable to be filled with parameter value
     template <typename T>
-    inline const ParametersList& fill(const std::string& key, T& value) const {
+    const ParametersList& fill(const std::string& key, T& value) const {
       if (has<T>(key))
         value = get<T>(key);
       return *this;
@@ -105,7 +105,7 @@ namespace cepgen {
     /// \param[in] key Unique key for parameter
     /// \param[in] def Default parameters value if parameter is not contained
     template <typename T, typename U>
-    inline U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
+    U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
       return static_cast<U>(get<T>(key, static_cast<T>(def)));
     }
     /// Reference to a parameter value
@@ -120,7 +120,7 @@ namespace cepgen {
     /// \param[in] key Unique key for parameter
     /// \param[in] value Value to set the parameter
     template <typename T, typename U>
-    inline ParametersList& setAs(const std::string& key, const U& value) {
+    ParametersList& setAs(const std::string& key, const U& value) {
       return set<T>(key, static_cast<T>(value));
     }
     ParametersList& rename(const std::string&, const std::string&);  ///< Rename the key to a parameter value

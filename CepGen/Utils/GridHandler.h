@@ -45,8 +45,8 @@ namespace cepgen {
     explicit GridHandler(const GridType& grid_type);  ///< Build a grid interpolator from a grid type
     virtual ~GridHandler() = default;
 
-    typedef std::vector<double> coord_t;     ///< Coordinates container
-    typedef std::array<double, N> values_t;  ///< Value(s) at a given coordinate
+    using coord_t = std::vector<double>;     ///< Coordinates container
+    using values_t = std::array<double, N>;  ///< Value(s) at a given coordinate
 
     values_t eval(const coord_t& in_coords) const;  ///< Interpolate a point to a given coordinate
 

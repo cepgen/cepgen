@@ -93,7 +93,7 @@ namespace cepgen {
     /// A collection of valid values for a given parameter
     class ParameterValues {
     public:
-      ParameterValues() {}
+      ParameterValues() = default;
 
       /// Short printout of allowed parameter values
       friend std::ostream& operator<<(std::ostream&, const ParameterValues&);
@@ -122,7 +122,8 @@ namespace cepgen {
   private:
     inline ParameterValues& allowedValues() { return obj_values_; }  ///< Possible values for a parameter
 
-    std::string mod_key_, mod_descr_;
+    std::string mod_key_;
+    std::string mod_descr_;
     bool is_vec_params_{false};
     std::map<std::string, ParametersDescription> obj_descr_;
     ParameterValues obj_values_;

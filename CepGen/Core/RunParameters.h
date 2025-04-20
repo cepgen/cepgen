@@ -36,9 +36,9 @@ namespace cepgen::utils {
 }  // namespace cepgen::utils
 
 namespace cepgen {
-  typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;  ///< Event modification algos ordered set
-  typedef std::vector<std::unique_ptr<EventExporter> > EventExportersSequence;  ///< Event export modules ordered set
-  typedef std::vector<std::unique_ptr<utils::Functional> > TamingFunctionsSequence;  ///< Taming functions evaluators set
+  using EventModifiersSequence = std::vector<std::unique_ptr<EventModifier> >;  ///< Event modification algos collection
+  using EventExportersSequence = std::vector<std::unique_ptr<EventExporter> >;  ///< Event export modules collection
+  using TamingFunctionsSequence = std::vector<std::unique_ptr<utils::Functional> >;  ///< Function evaluators collection
 }  // namespace cepgen
 
 namespace cepgen {
@@ -56,7 +56,7 @@ namespace cepgen {
 
     friend std::ostream& operator<<(std::ostream&, const RunParameters&);  ///< User-readable dump of runtime parameters
 
-    void setTimeKeeper(utils::TimeKeeper*);                             ///< Initialise the timekeeper instance
+    void setTimeKeeper(utils::TimeKeeper*);                               ///< Initialise the timekeeper instance
     utils::TimeKeeper* timeKeeper() { return timer_.get(); }              ///< Pointer to a timekeeper instance
     const utils::TimeKeeper* timeKeeper() const { return timer_.get(); }  ///< Pointer to a timekeeper instance
 
@@ -105,10 +105,12 @@ namespace cepgen {
       inline size_t numPoints() const { return num_points_; }  ///< Number of points to "shoot" in each integration bin
 
     private:
-      int max_gen_, gen_print_every_;
+      int max_gen_;
+      int gen_print_every_;
       double target_lumi_;
       bool symmetrise_;
-      int num_threads_, num_points_;
+      int num_threads_;
+      int num_points_;
     };
     inline Generation& generation() { return generation_; }              ///< Event generation parameters
     inline const Generation& generation() const { return generation_; }  ///< Event generation parameters
@@ -160,7 +162,7 @@ namespace cepgen {
     unsigned long num_gen_events_{0ul};         ///< Number of events already generated
     ParametersList integrator_;                 ///< Integrator parameters
     Generation generation_;                     ///< Events generation parameters
-    std::unique_ptr<utils::TimeKeeper> timer_;    ///< Collection of stopwatches for timing
+    std::unique_ptr<utils::TimeKeeper> timer_;  ///< Collection of stopwatches for timing
   };
 }  // namespace cepgen
 

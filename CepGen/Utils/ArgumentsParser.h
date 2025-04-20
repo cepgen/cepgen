@@ -119,7 +119,7 @@ namespace cepgen {
       std::vector<int>* vec_int_variable_{nullptr};          ///< Pointer to a vector of integer variables
       std::vector<double>* vec_float_variable_{nullptr};     ///< Pointer to a vector of floating point variables
     };
-    typedef std::vector<Parameter> ParametersCollection;  ///< A collection of parameters
+    using ParametersCollection = std::vector<Parameter>;  ///< A collection of parameters
 
     const std::string command_name_;
     bool help_req_{false}, version_req_{false}, debug_req_{false};
