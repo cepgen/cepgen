@@ -28,13 +28,13 @@ using namespace cepgen::utils;
 using namespace std::string_literals;
 
 ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, const ParametersList& params)
-    : SteeredObject(params), proc_(proc) {
+    : SteeredObject(params), proc_(proc), drawer_(DrawerFactory::get().build(steer<ParametersList>("drawer"s))) {
   for (const auto& var : proc_.mapped_variables_)
     if (auto hist = steer<ParametersList>(var.name); !hist.empty())
       hists_.insert(std::make_pair(var.name, new Hist1D(hist.set("name", var.name))));
     else
       hists_.insert(std::make_pair(
-          var.name, new Hist1D(ParametersList().set("name", var.name).set("nbinsX", 50).set("xrange", var.limits))));
+          var.name, new Hist1D(ParametersList().set("name"s, var.name).set("nbinsX"s, 50).set("xrange"s, var.limits))));
 }
 
 void ProcessVariablesAnalyser::feed(double weight) const {
@@ -44,9 +44,8 @@ void ProcessVariablesAnalyser::feed(double weight) const {
 }
 
 void ProcessVariablesAnalyser::analyse() const {
-  auto drawer = DrawerFactory::get().build(steer<ParametersList>("drawer"));
-  for (const auto& var : hists_)
-    (void)drawer->draw(*var.second);
+  for (const auto& [variable_name, histogram] : hists_)
+    (void)drawer_->draw(*histogram);
 }
 
 ParametersDescription ProcessVariablesAnalyser::description() {

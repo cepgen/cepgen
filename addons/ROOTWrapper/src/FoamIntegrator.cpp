@@ -24,6 +24,7 @@
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
+#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/RandomGenerator.h"

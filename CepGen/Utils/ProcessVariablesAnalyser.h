@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,17 +20,19 @@
 #define CepGen_Utils_ProcessVariablesAnalyser_h
 
 #include <memory>
+
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen::proc {
   class Process;
-}
+}  // namespace cepgen::proc
 namespace cepgen::utils {
+  class Drawer;
   class Hist1D;
-}
+}  // namespace cepgen::utils
 
 namespace cepgen::utils {
-  class ProcessVariablesAnalyser : public SteeredObject<ProcessVariablesAnalyser> {
+  class ProcessVariablesAnalyser final : public SteeredObject<ProcessVariablesAnalyser> {
   public:
     explicit ProcessVariablesAnalyser(const proc::Process&, const ParametersList&);
 
@@ -41,6 +43,7 @@ namespace cepgen::utils {
 
   private:
     const proc::Process& proc_;
+    const std::unique_ptr<Drawer> drawer_;
     std::unordered_map<std::string, std::unique_ptr<Hist1D> > hists_;
   };
 }  // namespace cepgen::utils
