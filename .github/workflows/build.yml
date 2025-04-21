@@ -52,7 +52,7 @@ jobs:
     - name: 'Compress environment'
       run: |
         touch environment.tar.gz
-        tar cvfz environment.tar.gz CTest*.cmake /Package/install /Package/test /Package/mg5amcnlo-*
+        tar cvfz environment.tar.gz CTest*.cmake DartConfiguration.tcl /Package/src /Package/addons /Package/install /Package/test /Package/mg5amcnlo-*
 
     - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
