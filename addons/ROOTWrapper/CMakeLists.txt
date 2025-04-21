@@ -1,5 +1,5 @@
 #--- searching for ROOT
-find_package(ROOT COMPONENTS Hist MathCore)
+find_package(ROOT COMPONENTS Hist MathCore OPTIONAL_COMPONENTS Foam)
 if(NOT ROOT_FOUND)
   return()
 endif()
@@ -19,12 +19,8 @@ file(GLOB root_sources src/ROOT*.cpp
                        src/RandomGenerator.cpp)
 
 #--- FOAM integrator
-if(CMAKE_BUILD_FOAM)
-  find_package(ROOT COMPONENTS Hist MathCore Foam)
-  list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
-  if(${_idx} GREATER -1)
-    file(GLOB foam_sources src/Foam*.cpp)
-  endif()
+if("${ROOT_LIBRARIES}" MATCHES "^?(Foam)?$")
+  file(GLOB foam_sources src/Foam*.cpp)
 endif()
 
 #----- build the object
