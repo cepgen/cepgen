@@ -1,5 +1,6 @@
 import Config.Core as cepgen
 import Config.collinearProcess_cfi as coll
+from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator
 
 #--- process definition
@@ -9,6 +10,7 @@ process = coll.process.clone('mg5_aMC',
         mode = cepgen.ProcessMode.ElasticElastic,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.luxLike,
     ),

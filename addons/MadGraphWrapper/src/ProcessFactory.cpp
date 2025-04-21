@@ -45,10 +45,9 @@ namespace cepgen {
 
   template <>
   std::unique_ptr<mg5amc::Process> ModuleFactory<mg5amc::Process>::build(const ParametersList& params) const {
-    const auto mod_name = params.name();
-    if (mod_name.empty())
-      throw CG_FATAL("mg5amc:ModuleFactory")
-          << "Failed to retrieve a process name for the mg5_aMC constructors lookup table.";
-    return build(mod_name, params);
+    if (const auto mod_name = params.name(); !mod_name.empty())
+      return build(mod_name, params);
+    throw CG_FATAL("mg5amc:ModuleFactory")
+        << "Failed to retrieve a process name for the mg5_aMC constructors lookup table.";
   }
 }  // namespace cepgen

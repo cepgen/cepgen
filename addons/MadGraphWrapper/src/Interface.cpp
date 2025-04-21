@@ -197,14 +197,14 @@ void Interface::generateLibrary(const fs::path& proc_path, const fs::path& in_pa
   std::vector<std::string> src_files;
   src_files.emplace_back(proc_path.string());
 
-  //--- find all processes registered
+  // find the list of all processes computed in the library
   std::vector<std::string> processes;
   try {
     for (const auto& p : fs::directory_iterator(in_path / "SubProcesses"))
-      if (p.path().filename().string()[0] == 'P') {
+      if (p.path().filename().string()[0] == 'P') {  // all processes directories start with a 'P'
         processes.emplace_back(p.path());
         for (const auto& f : fs::directory_iterator(p))
-          if (f.path().extension() == ".cc")
+          if (f.path().extension() == ".cc")  // a new source file was found; add it to the stack
             src_files.emplace_back(f.path());
       }
   } catch (const fs::filesystem_error& err) {
@@ -218,7 +218,7 @@ void Interface::generateLibrary(const fs::path& proc_path, const fs::path& in_pa
   if (processes.size() != 1)
     throw CG_FATAL("mg5amc:Interface:generateLibrary") << "Currently only single-process cases are supported!";
 
-  //--- find all model source files
+  // find all model source files
   for (const auto& f : fs::directory_iterator(in_path / "src"))
     if (f.path().extension() == ".cc")
       src_files.emplace_back(f.path());
@@ -228,15 +228,16 @@ void Interface::generateLibrary(const fs::path& proc_path, const fs::path& in_pa
 #else
   {
     utils::Caller caller;
-    caller.call({CC_CFLAGS,
-                 "-fPIC",
-                 "-shared",
-                 "-Wno-unused-variable",
-                 "-Wno-int-in-bool-context",
-                 "-I" + (in_path / "src").string(),
-                 "-I" + processes.at(0),
-                 utils::merge(src_files, " "),
-                 "-o " + out_lib.string()});
+    const auto compilation_output = caller.call({CC_CFLAGS,
+                                                 "-fPIC"s,
+                                                 "-shared"s,
+                                                 "-Wno-unused-variable"s,
+                                                 "-Wno-int-in-bool-context"s,
+                                                 "-I"s + (in_path / "src").string(),
+                                                 "-I"s + processes.at(0),
+                                                 utils::merge(src_files, " "),
+                                                 "-o "s + out_lib.string()});
+    CG_DEBUG("mg5amc:Interface:generateLibrary") << "Output of library compilation:\n" << compilation_output;
   }
 #endif
 }

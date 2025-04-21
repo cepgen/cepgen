@@ -36,16 +36,15 @@
 using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
-  ProcessParticles unpackProcessParticles(const std::string& process_string) {
+  ProcessParticles unpackProcessParticles(const std::string& process_name) {
     ProcessParticles out;
-    const auto process_no_removals = utils::split(utils::trim(process_string), '/').at(0);
-    //--- dirty fix to specify incoming- and outgoing states
-    //    as extracted from the mg5_aMC process string
+    const auto process_no_removals = utils::split(utils::trim(process_name), '/').at(0);
+    // dirty fix to specify incoming- and outgoing states as extracted from the mg5_aMC process string
     const auto primary_process = utils::split(process_no_removals, ',', true).at(0);
     const auto parts = utils::split(primary_process, '>', true);
     if (parts.size() != 2)
       throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-          << "Unable to unpack particles from process name: \"" << process_string << "\" -> " << parts << "!";
+          << "Unable to unpack particles from process name: \"" << process_name << "\" -> " << parts << "!";
     out.first = utils::split(parts.at(0), ' ', true);  // incoming parton-like particles
     CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Primary particles: " << out.first << ".";
     if (out.first.size() != 2)
@@ -57,18 +56,18 @@ namespace cepgen::mg5amc {
     return out;
   }
 
-  ParticleProperties describeParticle(const std::string& part_name, const std::string& model) {
+  ParticleProperties describeParticle(const std::string& particle_name, const std::string& physics_model) {
     ParametersList plist_part;
     {  // this part retrieves the list of parameters for a given particle name, using a python call to MadGraph
       python::Environment env(ParametersList().set("name", "MadGraph5_aMC__describeParticles"s));
       const std::string name_part_dict = "part_dict";
       std::vector<std::string> cmds;
-      if (!model.empty()) {
+      if (!physics_model.empty()) {
         cmds.emplace_back("set auto_convert_model T");
-        cmds.emplace_back("import model " + model);
+        cmds.emplace_back("import model " + physics_model);
       }
       try {
-        cmds.emplace_back("display particles " + part_name);
+        cmds.emplace_back("display particles " + particle_name);
         std::string py_output;
         bool found_properties{false};
         const auto tmp_path = fs::temp_directory_path() / "mg5_aMC_part_query.dat";
@@ -95,21 +94,21 @@ namespace cepgen::mg5amc {
         if (py_output.empty())
           throw CG_ERROR("MadGraphInterface:describeParticle")
               << "No output retrieved from MadGraph command '" << cmds << "'. See the possible message output above.";
-        if (auto mod = python::ObjectPtr::defineModule("part", name_part_dict + "=" + py_output); mod) {
-          if (auto part_prop = mod.attribute(name_part_dict); part_prop)
+        if (const auto mod = python::ObjectPtr::defineModule("part", name_part_dict + "=" + py_output); mod) {
+          if (const auto part_prop = mod.attribute(name_part_dict); part_prop)
             plist_part = part_prop.value<ParametersList>();
         } else
           throw CG_ERROR("MadGraphInterface:describeParticle")
-              << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '" << model
-              << ". Python output:\n"
+              << "Error while parsing the MadGraph python output for particle '" << particle_name << "' of model '"
+              << physics_model << ". Python output:\n"
               << py_output;
       } catch (const Exception&) {
-        switch (part_name[part_name.size() - 1]) {
+        switch (particle_name[particle_name.size() - 1]) {
           case '+':
           case '-':
             throw;
           default:
-            return describeParticle(part_name + "+", model);
+            return describeParticle(particle_name + "+", physics_model);
         }
       }
     }
@@ -118,7 +117,7 @@ namespace cepgen::mg5amc {
       throw CG_FATAL("MadGraphInterface:describeParticle")
           << "Failed to retrieve a 'pdg_code' key to the unpacked particle properties: " << plist_part << ".";
     CG_DEBUG("MadGraphInterface:describeParticle") << "List of parameters retrieved from MadGraph on particle '"
-                                                   << part_name << "' from model '" << model << "':\n"
+                                                   << particle_name << "' from model '" << physics_model << "':\n"
                                                    << plist_part << ".";
     ParticleProperties props;
     if (auto name = plist_part.get<std::string>("name"); !name.empty()) {
@@ -128,7 +127,7 @@ namespace cepgen::mg5amc {
       props.human_name = name;
     }
     props.pdgid = plist_part.get<int>("pdg_code");
-    plist_part.fill<int>("color"s, props.colours);  //FIXME might not be correct
+    plist_part.fill<int>("color"s, props.colours);  //FIXME might require some additional massaging
     props.mass = plist_part.has<double>("mass"s) ? plist_part.get<double>("mass"s) : PDG::get().mass(props.pdgid);
     props.width = plist_part.has<double>("width"s) ? plist_part.get<double>("width"s) : PDG::get().width(props.pdgid);
     if (plist_part.has<double>("charge"s)) {
@@ -141,20 +140,20 @@ namespace cepgen::mg5amc {
     }
     props.fermion = plist_part.get<int>("spin", 0) % 2 == 0;
     CG_DEBUG("MadGraphInterface:describeParticle")
-        << "Particle '" << part_name << "' of model '" << model
+        << "Particle '" << particle_name << "' of model '" << physics_model
         << "' was successfully described from MG5 with properties: " << props << ".";
     return props;
   }
 
-  std::vector<std::string> runCommand(const std::vector<std::string>& cmds,
+  std::vector<std::string> runCommand(const std::vector<std::string>& commands_list,
                                       const std::string& card_path,
                                       bool keep_output) {
     CG_DEBUG("MadGraphInterface:runCommand")
-        << "Will run the following commands: " << cmds << " with the following card path: " << card_path
+        << "Will run the following commands: " << commands_list << " with the following card path: " << card_path
         << ". Will keep output? " << std::boolalpha << keep_output << ".";
     std::ofstream tmp_card(card_path);
-    for (const auto& cmd : cmds)
-      tmp_card << cmd << "\n";
+    for (const auto& command : commands_list)
+      tmp_card << command << "\n";
     tmp_card << "exit\n";
     tmp_card.close();
     std::vector<std::string> output;
@@ -163,22 +162,23 @@ namespace cepgen::mg5amc {
         << "Calling mg5_aMC with the following command(s):\n\t'" << commands << "'.";
     {
       utils::Caller caller;
-      for (const auto& line : utils::split(caller.call(commands), '\n')) {
-        if (!utils::startsWith(line, "MG5_aMC>"))
+      for (const auto& line : utils::split(caller.call(commands), '\n'))
+        if (!utils::startsWith(line, "MG5_aMC>"))  // skip the prompt lines
           output.emplace_back(line);
-      }
     }
-    CG_DEBUG("MadGraphInterface:runCommand") << "\nCommands:\n" << cmds << "\nOutput:\n" << utils::merge(output, "\n");
-    if (!keep_output) {
+    CG_DEBUG("MadGraphInterface:runCommand") << "\nCommands:\n"
+                                             << commands_list << "\nOutput:\n"
+                                             << utils::merge(output, "\n");
+    if (!keep_output) {  // drop the steering card after usage
       fs::remove(card_path);
       CG_DEBUG("MadGraphInterface:runCommand") << "Steering card file '" << card_path << "' was removed.";
     }
     return output;
   }
 
-  std::string normalise(const std::string& proc_name, const std::string& model) {
-    return (!model.empty() ? model + "__" : "") +
-           utils::replaceAll(proc_name,
+  std::string normalise(const std::string& process_name, const std::string& physics_model) {
+    return (!physics_model.empty() ? physics_model + "__" : "") +
+           utils::replaceAll(process_name,
                              {{" ", "_"}, {">", "_to_"}, {"+", "p"}, {"-", "m"}, {"~", "bar"}, {"/", "_exc_"}});
   }
 }  // namespace cepgen::mg5amc

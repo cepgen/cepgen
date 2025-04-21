@@ -16,9 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// This file allows to link the MadGraph interfacing module without any process
-// generation performed by MG5_aMC.
-// Include it in your source file prior to any linking with libCepGenMadGraph.
+// This file links the MadGraph interfacing module without any process generation performed by MG5_aMC.
+// Include it in your source file before any linking with libCepGenMadGraph.
 
 #include "CepGen/Physics/Momentum.h"
 #include "CepGenMadGraph/Process.h"
