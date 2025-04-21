@@ -30,30 +30,31 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
-/// Foam general-purpose integration algorithm
+/// Foam integration algorithm
 /// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
 class FoamIntegrator final : public Integrator, public TFoamIntegrand {
 public:
   explicit FoamIntegrator(const ParametersList& params)
       : Integrator(params),
-        random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {}
+        random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"s))) {}
 
   static ParametersDescription description() {
     auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
-    desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("root"));
-    desc.add("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
-    desc.add("nCells", 1000).setDescription("number of allocated number of cells");
-    desc.add("nSampl", 200).setDescription("number of MC events in the cell MC exploration");
-    desc.add("nBin", 8).setDescription("number of bins in edge-histogram in cell exploration");
-    desc.add("OptRej", 1)
+    desc.add("randomGenerator"s, RandomGeneratorFactory::get().describeParameters("root"));
+    desc.add("nCalls"s, 100'000).setDescription("number of calls for the cell evaluation");
+    desc.add("nCells"s, 1000).setDescription("number of allocated number of cells");
+    desc.add("nSampl"s, 200).setDescription("number of MC events in the cell MC exploration");
+    desc.add("nBin"s, 8).setDescription("number of bins in edge-histogram in cell exploration");
+    desc.add("OptRej"s, 1)
         .allow(0, "weighted events")
         .allow(1, "unweighted events")
         .setDescription("MC events weight determination type");
-    desc.add("OptDrive", 2).setDescription("maximum weight reduction (1 for variance reduction)");
-    desc.add("MaxWtRej", 1.1).setDescription("maximum weight used to get unweighted MC events");
-    desc.add("EvPerBin", 25)
+    desc.add("OptDrive"s, 2).setDescription("maximum weight reduction (1 for variance reduction)");
+    desc.add("MaxWtRej"s, 1.1).setDescription("maximum weight used to get unweighted MC events");
+    desc.add("EvPerBin"s, 25)
         .setDescription("maximum number of the effective wt=1 events/bin (0 deactivates this option)");
     return desc;
   }
@@ -61,17 +62,17 @@ public:
   Value run(Integrand& integrand, const std::vector<Limits>& range) override {
     integrand_ = &integrand;
     range_ = range;
-    std::unique_ptr<TFoam> foam(new TFoam("Foam"));
+    const auto foam = std::make_unique<TFoam>("Foam");
     CG_DEBUG("Integrator:integrate") << "FOAM integrator built\n\t"
                                      << "Version: " << foam->GetVersion() << ".";
     foam->SetPseRan(random_generator_->engine<TRandom>());
-    foam->SetnCells(steer<int>("nCells"));
-    foam->SetnSampl(steer<int>("nSampl"));
-    foam->SetnBin(steer<int>("nBin"));
-    foam->SetOptRej(steer<int>("OptRej"));
-    foam->SetOptDrive(steer<int>("OptDrive"));
-    foam->SetMaxWtRej(steer<double>("MaxWtRej"));
-    foam->SetEvPerBin(steer<int>("EvPerBin"));
+    foam->SetnCells(steer<int>("nCells"s));
+    foam->SetnSampl(steer<int>("nSampl"s));
+    foam->SetnBin(steer<int>("nBin"s));
+    foam->SetOptRej(steer<int>("OptRej"s));
+    foam->SetOptDrive(steer<int>("OptDrive"s));
+    foam->SetMaxWtRej(steer<double>("MaxWtRej"s));
+    foam->SetEvPerBin(steer<int>("EvPerBin"s));
     foam->SetChat(std::max(verbosity_, 0));
     foam->SetRho(this);
     foam->SetkDim(integrand_->size());
@@ -81,6 +82,7 @@ public:
       analyser.reset(
           new utils::ProcessVariablesAnalyser(dynamic_cast<ProcessIntegrand&>(integrand).process(), ParametersList{}));
     const auto num_calls = steer<int>("nCalls");
+    // launch integration
     for (int i = 0; i < num_calls; ++i) {
       foam->MakeEvent();
       if (analyser)
@@ -88,7 +90,6 @@ public:
     }
     if (analyser)
       analyser->analyse();
-    //--- launch integration
     double norm, err;
     foam->Finalize(norm, err);
 
@@ -101,27 +102,28 @@ public:
     const auto res = Value{result, abs_error};
 
     CG_DEBUG("FoamIntegrator").log([&](auto& log) {
-      double eps = 5.e-4, avewt, wtmax, sigma;
-      foam->GetWtParams(eps, avewt, wtmax, sigma);
-      const double ncalls = foam->GetnCalls();
-      const double effic = wtmax > 0 ? avewt / wtmax : 0.;
+      double eps = 5.e-4, average_event_weight, maximum_weight, sigma;
+      foam->GetWtParams(eps, average_event_weight, maximum_weight, sigma);
+      const double num_function_calls = foam->GetnCalls();
+      const double efficiency = maximum_weight > 0 ? average_event_weight / maximum_weight : 0.;
       log << "Result: " << res << "\n\t"
           << "Relative error: " << res.relativeUncertainty() * 100. << "%\n\t"
-          << "Dispersion/<wt> = " << sigma << ", <wt> = " << avewt << ", <wt>/wtmax = " << effic << ",\n\t"
+          << "Dispersion/<wt> = " << sigma << ", <wt> = " << average_event_weight << ", <wt>/wtmax = " << efficiency
+          << ",\n\t"
           << " for epsilon = " << eps << "\n\t"
-          << " nCalls (initialisation only)= " << ncalls << ".";
+          << " nCalls (initialisation only)= " << num_function_calls << ".";
     });
     return res;
   }
 
   /// Compute the weight for a given phase space point
-  inline double Density(int num_dimensions, double* x) override {
+  double Density(int num_dimensions, double* coordinates) override {
     if (!integrand_)
       throw CG_FATAL("FoamDensity") << "Integrand object not yet initialised!";
-    std::vector<double> coordinates;
+    std::vector<double> vec_coordinates;
     for (int i = 0; i < num_dimensions; ++i)
-      coordinates.emplace_back(range_.at(i).x(x[i]));
-    return integrand_->eval(coordinates);
+      vec_coordinates.emplace_back(range_.at(i).x(coordinates[i]));
+    return integrand_->eval(vec_coordinates);
   }
 
 private:

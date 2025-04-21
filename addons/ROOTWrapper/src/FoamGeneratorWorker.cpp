@@ -35,12 +35,11 @@ using namespace std::string_literals;
 class FoamGeneratorWorker final : public GeneratorWorker, public TFoamIntegrand {
 public:
   explicit FoamGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {
-    const auto& random_number_mode = steer<std::string>("rngEngine");
-    if (random_number_mode == "Ranlux")
+    if (const auto& random_number_mode = steer<std::string>("rngEngine"s); random_number_mode == "Ranlux"s)
       random_number_generator_.reset(new TRandom1);
-    else if (random_number_mode == "generic")
+    else if (random_number_mode == "generic"s)
       random_number_generator_.reset(new TRandom2);
-    else if (random_number_mode == "MersenneTwister")
+    else if (random_number_mode == "MersenneTwister"s)
       random_number_generator_.reset(new TRandom3);
     else
       throw CG_FATAL("FoamGeneratorWorker") << "Unrecognised random generator: \"" << random_number_mode << "\".";
@@ -54,29 +53,29 @@ public:
   static ParametersDescription description() {
     auto desc = GeneratorWorker::description();
     desc.setDescription("Foam generator worker");
-    desc.add("rngEngine", "MersenneTwister"s)
-        .allow("Ranlux")
-        .allow("generic")
-        .allow("MersenneTwister")
+    desc.add("rngEngine"s, "MersenneTwister"s)
+        .allow("Ranlux"s)
+        .allow("generic"s)
+        .allow("MersenneTwister"s)
         .setDescription("random number generator engine");
-    desc.add("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
-    desc.add("nCells", 1000);
-    desc.add("nSampl", 200);
-    desc.add("nBin", 8);
-    desc.add("EvPerBin", 25);
-    desc.add("verbosity", 0).setDescription("Verbosity level");
-    desc.add("seed", 42ull);
+    desc.add("nCalls"s, 100'000).setDescription("number of calls for the cell evaluation");
+    desc.add("nCells"s, 1000);
+    desc.add("nSampl"s, 200);
+    desc.add("nBin"s, 8);
+    desc.add("EvPerBin"s, 25);
+    desc.add("verbosity"s, 0).setDescription("Verbosity level");
+    desc.add("seed"s, 42ull);
     return desc;
   }
 
   void initialise() override {
-    foam_.reset(new TFoam("Foam"));
+    foam_ = std::make_unique<TFoam>("Foam");
     foam_->SetPseRan(random_number_generator_.get());
-    foam_->SetnCells(steer<int>("nCells"));
-    foam_->SetnSampl(steer<int>("nSampl"));
-    foam_->SetnBin(steer<int>("nBin"));
-    foam_->SetEvPerBin(steer<int>("EvPerBin"));
-    foam_->SetChat(std::max(steer<int>("verbosity"), 0));
+    foam_->SetnCells(steer<int>("nCells"s));
+    foam_->SetnSampl(steer<int>("nSampl"s));
+    foam_->SetnBin(steer<int>("nBin"s));
+    foam_->SetEvPerBin(steer<int>("EvPerBin"s));
+    foam_->SetChat(std::max(steer<int>("verbosity"s), 0));
     foam_->SetRho(this);
     foam_->SetkDim(integrand_->size());
     foam_->Initialize();
@@ -89,9 +88,9 @@ public:
   }
 
   /// Compute the weight for a given phase space point
-  inline double Density(int ndim, double* x) override {
+  double Density(int num_dimensions, double* coordinates) override {
     if (integrand_)
-      return integrand_->eval(std::vector<double>(x, x + ndim));
+      return integrand_->eval(std::vector(coordinates, coordinates + num_dimensions));
     throw CG_FATAL("FoamGeneratorWorker:density") << "Integrand object was not initialised!";
   }
 
