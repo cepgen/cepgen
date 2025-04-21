@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,11 +45,11 @@ namespace cepgen {
     void setIntegrator(const Integrator*);        ///< Specify the integrator instance handled by the mother generator
 
     /// Launch the event generation
-    /// \param[in] num_events Number of events to generate
+    /// \param[in] num_events Events multiplicity to generate
     /// \param[in] callback The callback function applied on every event generated
     void generate(size_t num_events, const std::function<void(const proc::Process&)>& callback);
 
-    inline ProcessIntegrand& integrand() { return *integrand_; }  ///< Function evaluator
+    inline ProcessIntegrand& integrand() const { return *integrand_; }  ///< Function evaluator
 
     virtual void initialise() = 0;  ///< Initialise the generation parameters
     virtual bool next() = 0;        ///< Generate a single event

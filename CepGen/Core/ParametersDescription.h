@@ -23,7 +23,7 @@
 
 namespace cepgen {
   /// A description object for parameters collection
-  class ParametersDescription : private ParametersList {
+  class ParametersDescription : ParametersList {
   public:
     /// Build the description of a parameters' collection object
     /// \param[in] mod_key Module name (where applicable)

@@ -28,7 +28,7 @@
 /// Looper over the list of parameter containers handled by the ParametersList object
 /// \note This can be edited to add an extra handled collection to this steering utility
 ///   e.g. add __TYPE_ENUM(typename,      // any C/C++ type name
-///                        map_variable,  // ParametersList object private attribute
+///                        map_variable,  // ParametersList object attribute
 ///                        "human-readable name of parameter")
 ///        to the following list.
 #define REGISTER_CONTENT_TYPE                                            \
@@ -47,10 +47,9 @@
   __TYPE_ENUM(std::vector<std::vector<double> >, vec_vec_dbl_values_, "vvfloat")
 
 namespace cepgen {
-  const char* const MODULE_NAME = "mod_name";  ///< Indexing key for the module name
+  const auto MODULE_NAME = "mod_name";  ///< Indexing key for the module name
   /// Parameters container
   class ParametersList {
-  private:
     /// Retrieve the default argument for a given variable type
     template <typename T>
     struct default_arg {
@@ -86,8 +85,8 @@ namespace cepgen {
     size_t erase(const std::string&);
 
     /// Fill a variable with the key content if exists
-    /// \param[in] key Unique key for parameter
-    /// \param[out] value Object/variable to be filled with parameter value
+    /// \param[in] key Unique key for the parameter
+    /// \param[out] value Object/variable to fill with parameter value
     template <typename T>
     const ParametersList& fill(const std::string& key, T& value) const {
       if (has<T>(key))
@@ -95,14 +94,14 @@ namespace cepgen {
       return *this;
     }
     /// Get a parameter value
-    /// \param[in] key Unique key for parameter
+    /// \param[in] key Unique key for the parameter
     /// \param[in] def Default parameters values if parameter is not contained
     template <typename T>
     T get(const std::string& key, const T& def = default_arg<T>::get()) const;
     /// Get a recast parameter value
-    /// \tparam T Base type of the parameter
+    /// \tparam T Base parameter type
     /// \tparam U Type to recast the parameter into
-    /// \param[in] key Unique key for parameter
+    /// \param[in] key Unique key for the parameter
     /// \param[in] def Default parameters values if parameter is not contained
     template <typename T, typename U>
     U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
@@ -115,9 +114,9 @@ namespace cepgen {
     template <typename T>
     ParametersList& set(const std::string&, const T&);  ///< Set a parameter value
     /// Set a recast parameter value
-    /// \tparam T Base type of the parameter
+    /// \tparam T Base parameter type
     /// \tparam U Type to recast the parameter into
-    /// \param[in] key Unique key for parameter
+    /// \param[in] key Unique key for the parameter
     /// \param[in] value Value to set the parameter
     template <typename T, typename U>
     ParametersList& setAs(const std::string& key, const U& value) {
@@ -134,7 +133,7 @@ namespace cepgen {
     /// \param[in] name_key Include the name variable?
     std::vector<std::string> keys(bool name_key = true) const;
     /// Get a string-converted version of a value
-    /// \param[in] key Unique key for parameter
+    /// \param[in] key Unique key for the parameter
     /// \param[in] wrap Encapsulate the value with type()
     std::string getString(const std::string& key, bool wrap = false) const;
     /// Get a string-converted version of the module name if any
