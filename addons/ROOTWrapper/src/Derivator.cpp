@@ -36,9 +36,9 @@ namespace cepgen::root {
     }
 
     /// Evaluate the derivative of a function at a given value
-    /// \param[in] function function to derive
-    /// \param[in] x_coordinate coordinate
-    /// \param[in] step_size (optional) step size ; if not provided, will use default algorithm value
+    /// \param[in] function Function to derive
+    /// \param[in] x_coordinate Coordinate
+    /// \param[in] step_size (Optional) step size; if not provided, will use default algorithm value
     Value derivate(const utils::FunctionWrapper& function, double x_coordinate, double step_size) const override {
       const auto root_function = TF1(
           "cepgen_functional",

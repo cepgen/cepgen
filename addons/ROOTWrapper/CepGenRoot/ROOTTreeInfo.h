@@ -36,8 +36,8 @@ namespace ROOT {
     double sqrt_s{-1.};                ///< Centre of mass energy for beam particles
     double xsect{-1.};                 ///< Process cross-section, in pb
     double errxsect{-1.};              ///< Uncertainty on process cross-section, in pb
-    unsigned int num_events{0};        ///< Number of events generated in run
-    unsigned int litigious_events{0};  ///< Number of litigious events in run
+    unsigned int num_events{0};        ///< Events multiplicity generated in run
+    unsigned int litigious_events{0};  ///< Litigious events multiplicity in run
     std::string process_name;          ///< Unique name of the process generated in this run
     std::string process_parameters;    ///< Serialised process parameters
 
@@ -59,10 +59,10 @@ namespace ROOT {
   /// All useful information about a generated event
   class CepGenEvent {
   public:
-    inline CepGenEvent() { clear(); }
+    CepGenEvent() { clear(); }
 
-    // book a sufficiently large number to allow the large multiplicity of excited proton fragmentation products
-    static constexpr size_t MAX_PART = 5000;            ///< Maximal number of particles in event
+    // book a large enough number to allow the large multiplicity of excited proton fragmentation products
+    static constexpr size_t MAX_PART = 5000;            ///< Maximal particles multiplicity in event
     static constexpr const char* TREE_NAME = "events";  ///< Output tree name
 
     static CepGenEvent load(TFile*, const std::string& events_tree = TREE_NAME);
@@ -72,7 +72,7 @@ namespace ROOT {
     float gen_time{-1.};        ///< Event generation time
     float tot_time{-1.};        ///< Total event generation time
     float weight{-1.};          ///< Event weight
-    int np{0};                  ///< Number of particles in the event
+    int np{0};                  ///< Particles multiplicity in the event
     double pt[MAX_PART];        ///< Particles transverse momentum
     double eta[MAX_PART];       ///< Particles pseudo-rapidity
     double phi[MAX_PART];       ///< Particles azimuthal angle
@@ -87,16 +87,16 @@ namespace ROOT {
     int role[MAX_PART];         ///< Particles role in the event
     int status[MAX_PART];       ///< Integer status code
 
-    void clear();                                       ///< Reinitialise the event content
-    inline TTree* tree() const { return tree_.get(); }  ///< Retrieve the ROOT tree
-    void create();                                      ///< Populate the tree and all associated branches
+    void clear();                                ///< Reinitialise the event content
+    TTree* tree() const { return tree_.get(); }  ///< Retrieve the ROOT tree
+    void create();                               ///< Populate the tree and all associated branches
 
     void attach();                                                      ///< Attach the event tree reader to a tree
     void attach(TFile* f, const std::string& events_tree = TREE_NAME);  ///< Attach the event tree reader to a file
     /// Attach the event tree reader to a file
     void attach(const std::string& filename, const std::string& events_tree = TREE_NAME);
 
-    //--- direct cepgen::Event I/O helpers
+    // direct cepgen::Event I/O helpers
 
     void fill(const cepgen::Event&, bool compress = false);  ///< Fill the tree with a new event
     bool next(cepgen::Event&);                               ///< Read the next event in the file

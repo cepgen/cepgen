@@ -53,23 +53,23 @@ public:
       hist->Write(utils::merge(names, "_vs_").c_str());
     for (const auto& [names, hist] : profiles2d_)
       hist->Write(utils::merge(names, "_vs_").c_str());
-    file_->Close();  // ROOT and its sumptuous memory management disallows the "delete" here
+    file_->Close();  // ROOT and its sumptuous memory management disallow the "delete" here
   }
 
   static ParametersDescription description() {
     auto desc = EventExporter::description();
     desc.setDescription("ROOT histogramming/profiling module");
-    desc.add("filename", "output.root"s).setDescription("Output filename");
+    desc.add("filename"s, "output.root"s).setDescription("Output filename");
     auto var_desc = ParametersDescription();
-    var_desc.add("title", ""s).setDescription("Variable description");
-    var_desc.add("nbins", -1);
-    var_desc.add("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
-    var_desc.add("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
-    var_desc.add("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
-    var_desc.add("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
-    var_desc.add("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
-    var_desc.add("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
-    var_desc.add("profile", false);
+    var_desc.add("title"s, ""s).setDescription("Variable description");
+    var_desc.add("nbins"s, -1);
+    var_desc.add("nbinsX"s, 10).setDescription("Bins multiplicity for x-axis");
+    var_desc.add("xrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+    var_desc.add("nbinsY"s, 10).setDescription("Bins multiplicity for y-axis");
+    var_desc.add("yrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+    var_desc.add("nbinsZ"s, 10).setDescription("Bins multiplicity for z-axis");
+    var_desc.add("zrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
+    var_desc.add("profile"s, false);
     desc.addParametersDescriptionVector("variables", var_desc);
     return desc;
   }
@@ -112,8 +112,8 @@ private:
 
 ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
     : EventExporter(params),
-      file_(TFile::Open(steer<std::string>("filename").c_str(), "recreate")),
-      variables_(steer<ParametersList>("variables")) {
+      file_(TFile::Open(steer<std::string>("filename"s).c_str(), "recreate")),
+      variables_(steer<ParametersList>("variables"s)) {
   //--- extract list of variables/correlations to be plotted in histograms
   for (const auto& key : variables_.keys()) {
     const auto& vars = utils::split(key, ':');
@@ -121,13 +121,13 @@ ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
       throw CG_FATAL("ROOTHistsHandler") << "Invalid number of variables to correlate for '" << key << "'!";
 
     const auto& variable = variables_.get<ParametersList>(key);
-    auto num_bins_x = variable.get<int>("nbinsX");
-    if (variable.get<int>("nbins") > 0)
-      num_bins_x = variable.get<int>("nbins");
-    const auto& x_range = variable.get<Limits>("xrange");
-    const bool profile = variable.get<bool>("profile");
+    auto num_bins_x = variable.get<int>("nbinsX"s);
+    if (variable.get<int>("nbins"s) > 0)
+      num_bins_x = variable.get<int>("nbins"s);
+    const auto& x_range = variable.get<Limits>("xrange"s);
+    const bool profile = variable.get<bool>("profile"s);
     if (vars.size() == 1) {  // 1D histogram
-      auto title = variable.get<std::string>("title");
+      auto title = variable.get<std::string>("title"s);
       if (title.empty())
         title = utils::format("%s;%s;d#sigma/d(%s) (pb/bin)", key.c_str(), key.c_str(), key.c_str());
       hists1d_.emplace_back(
@@ -136,10 +136,10 @@ ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
                                   << x_range << " for \"" << key << "\".";
       continue;
     }
-    const auto num_bins_y = variable.get<int>("nbinsY");
-    const auto& y_range = variable.get<Limits>("yrange");
+    const auto num_bins_y = variable.get<int>("nbinsY"s);
+    const auto& y_range = variable.get<Limits>("yrange"s);
     if (vars.size() == 2) {  // 2D histogram / 1D profile
-      auto title = variable.get<std::string>("title");
+      auto title = variable.get<std::string>("title"s);
       if (title.empty())
         title = utils::format("(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)/d(%s) (pb/bin)",
                               vars[0].c_str(),
@@ -169,10 +169,10 @@ ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
       }
       continue;
     }
-    const int num_bins_z = variable.get<int>("nbinsZ");
-    const auto& z_range = variable.get<Limits>("zrange");
+    const int num_bins_z = variable.get<int>("nbinsZ"s);
+    const auto& z_range = variable.get<Limits>("zrange"s);
     if (vars.size() == 3) {  // 3D histogram
-      auto title = variable.get<std::string>("title");
+      auto title = variable.get<std::string>("title"s);
       if (title.empty())
         title = utils::format("(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
                               vars[0].c_str(),

@@ -98,16 +98,16 @@ namespace cepgen::root {
           utils::sanitise(runParameters().process().kinematics().incomingBeams().structureFunctions().serialise());
       switch (runParameters().process().kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic:
-          process_mode = "el";
+          process_mode = "el"s;
           break;
         case mode::Kinematics::InelasticElastic:
-          process_mode = symmetrise ? "sd" : "sdie_" + sf_info;
+          process_mode = symmetrise ? "sd"s : "sdie_"s + sf_info;
           break;
         case mode::Kinematics::ElasticInelastic:
-          process_mode = symmetrise ? "sd" : "sdei_" + sf_info;
+          process_mode = symmetrise ? "sd"s : "sdei_"s + sf_info;
           break;
         case mode::Kinematics::InelasticInelastic:
-          process_mode = "dd_" + sf_info;
+          process_mode = "dd_"s + sf_info;
           break;
         case mode::Kinematics::invalid:
           break;

@@ -92,8 +92,9 @@ namespace cepgen {
 
     /// Build a canvas from its name, title, and attributes
     /// \param[in] name Canvas name (and subsequently filename on save)
+    /// \param[in] title Upper title to display on the canvas
     /// \param[in] ratio Divide the canvas into a main and ratio plots sub-parts?
-    explicit inline ROOTCanvas(const std::string& name, const std::string& title = "", bool ratio = false)
+    explicit ROOTCanvas(const std::string& name, const std::string& title = "", bool ratio = false)
         : TCanvas(name.c_str(), "", 600, 600), ratio_(ratio) {
       gStyle->SetOptStat(0);
       gStyle->SetGridColor(17);
@@ -106,7 +107,7 @@ namespace cepgen {
     inline void SetSize(double size = 600) { TCanvas::SetCanvasSize(size, 600); }
 
     /// Draw main plot attributes in a pretty manner
-    inline void Prettify(TH1* obj) {
+    inline void Prettify(TH1* obj) const {
       if (auto* x = obj->GetXaxis(); x) {
         x->CenterTitle();
         x->SetLabelFont(ROOTPaveText::fontType(3));
@@ -525,8 +526,7 @@ namespace cepgen {
         p2->SetGrid(0, 1);
         pads_.emplace_back(p2);
       }
-      // roll back to main pad
-      TCanvas::cd(1);
+      TCanvas::cd(1);  // roll back to the main pad
     }
     /// Build the text box on top of the canvas
     inline void BuildTopLabel() {
@@ -549,7 +549,7 @@ namespace cepgen {
       leg_->SetTextSize(0.04);
     }
     /// Retrieve the bin size for a histogram
-    inline double GetBinning(const TH1* hist) {
+    static double GetBinning(const TH1* hist) {
       return (hist->GetXaxis()->GetXmax() - hist->GetXaxis()->GetXmin()) / hist->GetXaxis()->GetNbins();
     }
 

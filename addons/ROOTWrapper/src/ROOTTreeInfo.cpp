@@ -63,7 +63,7 @@ void CepGenRun::fill() const {
 }
 
 void CepGenRun::attach(TFile* file, const std::string& run_tree) {
-  //--- special constructor to avoid the memory to be cleared at destruction time
+  // a special constructor to avoid the memory clearing at destruction time
   tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree.data())), [=](TTree*) {});
   if (!tree_)
     throw CG_FATAL("CepGenRun:attach") << "Failed to attach to the run TTree!";
@@ -110,8 +110,8 @@ void CepGenEvent::clear() {
 }
 
 void CepGenEvent::create() {
-  tree_ = std::make_shared<TTree>(TREE_NAME, "a tree containing information on events generated in previous run");
-  if (!tree_)
+  if (tree_ = std::make_shared<TTree>(TREE_NAME, "a tree containing information on events generated in previous run");
+      !tree_)
     throw CG_FATAL("CepGenEvent:create") << "Failed to create the events TTree!";
   tree_->Branch("npart", &np, "npart/I");
   tree_->Branch("role", role, "role[npart]/I");
@@ -166,9 +166,7 @@ void CepGenEvent::fill(const cepgen::Event& ev, bool compress) {
   tot_time = ev.metadata("time:total");
   weight = ev.metadata("weight");
   np = 0;
-  const auto& parts = compress ? ev.compress().particles() : ev.particles();
-  //--- loop over all particles in event
-  for (const auto& part : parts) {
+  for (const auto& part : compress ? ev.compress().particles() : ev.particles()) {  // loop over all particles in event
     const auto& mom = part.momentum();
     rapidity[np] = mom.rapidity();
     pt[np] = mom.pt();
@@ -191,7 +189,7 @@ void CepGenEvent::fill(const cepgen::Event& ev, bool compress) {
 }
 
 void CepGenEvent::attach(TFile* f, const std::string& events_tree) {
-  //--- special constructor to avoid the memory to be cleared at destruction time
+  // a special constructor to avoid the memory clearing at destruction time
   tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(f->Get(events_tree.data())), [=](TTree*) {});
   attach();
 }
@@ -211,8 +209,7 @@ bool CepGenEvent::next(cepgen::Event& ev) {
   ev.metadata["time:generation"] = gen_time;
   ev.metadata["time:total"] = tot_time;
   ev.metadata["weight"] = weight;
-  //--- first loop to populate the particles content
-  for (unsigned short i = 0; i < np; ++i) {
+  for (unsigned short i = 0; i < np; ++i) {  // first loop to populate the particle content
     cepgen::Particle part;
     part.setRole(static_cast<cepgen::Particle::Role>(role[i]));
     part.setPdgId(pdg_id[i]);
@@ -220,8 +217,7 @@ bool CepGenEvent::next(cepgen::Event& ev) {
     part.setMomentum(cepgen::Momentum::fromPtEtaPhiE(pt[i], eta[i], phi[i], E[i]));
     ev.addParticle(part);
   }
-  //--- second loop to associate the parentage
-  for (unsigned short i = 0; i < np; ++i) {
+  for (unsigned short i = 0; i < np; ++i) {  // second loop to associate the parentage
     auto& part = ev[i];
     if (parent1[i] > 0)
       part.addMother(ev[parent1[i]]);

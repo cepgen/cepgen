@@ -103,7 +103,7 @@ namespace cepgen::root {
     const std::string type_;           ///< integration type (adaptive, MC methods, etc...)
     const double absolute_tolerance_;  ///< desired absolute Error
     const double relative_tolerance_;  ///< desired relative Error
-    const unsigned int size_;          ///< maximum number of sub-intervals
+    const unsigned int size_;          ///< maximum sub-intervals multiplicity
 
     std::unique_ptr<ROOT::Math::IntegratorMultiDim> integrator_;
     std::unique_ptr<ROOT::Math::IntegratorOneDim> integrator_1d_;
