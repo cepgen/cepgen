@@ -21,16 +21,16 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic process definition to the list of handled processes
-#define REGISTER_PROCESS(name, obj)                                           \
-  namespace cepgen {                                                          \
-    namespace proc {                                                          \
-      struct BUILDERNM(obj) {                                                 \
-        BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name); } \
-      };                                                                      \
-      static const BUILDERNM(obj) gProc##obj;                                 \
-    }                                                                         \
-  }                                                                           \
+/// Add a process definition to the list of handled processes
+#define REGISTER_PROCESS(name, obj)                                              \
+  namespace cepgen {                                                             \
+    namespace proc {                                                             \
+      struct BUILDER_NAME(obj) {                                                 \
+        BUILDER_NAME(obj)() { ProcessFactory::get().registerModule<obj>(name); } \
+      };                                                                         \
+      static const BUILDER_NAME(obj) gProc##obj;                                 \
+    }                                                                            \
+  }                                                                              \
   static_assert(true, "")
 /// Name of the process (Fortran scope)
 #define PROCESS_F77_NAME(name) F77_##name

@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a central phase space generator to the list of handled modules
-#define REGISTER_PHASE_SPACE_GENERATOR(name, obj)                                       \
-  namespace cepgen {                                                                    \
-    struct BUILDERNM(obj) {                                                             \
-      BUILDERNM(obj)() { PhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \
-    };                                                                                  \
-    static const BUILDERNM(obj) gPhaseSpaceGen##obj;                                    \
-  }                                                                                     \
+#define REGISTER_PHASE_SPACE_GENERATOR(name, obj)                                          \
+  namespace cepgen {                                                                       \
+    struct BUILDER_NAME(obj) {                                                             \
+      BUILDER_NAME(obj)() { PhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                     \
+    static const BUILDER_NAME(obj) gPhaseSpaceGen##obj;                                    \
+  }                                                                                        \
   static_assert(true, "")
 
 namespace cepgen {

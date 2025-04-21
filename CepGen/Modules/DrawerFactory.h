@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a drawing utility
-#define REGISTER_DRAWER(name, obj)                                         \
-  namespace cepgen {                                                       \
-    struct BUILDERNM(obj) {                                                \
-      BUILDERNM(obj)() { DrawerFactory::get().registerModule<obj>(name); } \
-    };                                                                     \
-    static const BUILDERNM(obj) gDrawer##obj;                              \
-  }                                                                        \
+#define REGISTER_DRAWER(name, obj)                                            \
+  namespace cepgen {                                                          \
+    struct BUILDER_NAME(obj) {                                                \
+      BUILDER_NAME(obj)() { DrawerFactory::get().registerModule<obj>(name); } \
+    };                                                                        \
+    static const BUILDER_NAME(obj) gDrawer##obj;                              \
+  }                                                                           \
   static_assert(true, "")
 
 namespace cepgen::utils {

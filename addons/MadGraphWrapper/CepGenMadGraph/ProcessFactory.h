@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a MadGraph process definition to the factory
-#define REGISTER_MG5AMC_PROCESS(name, obj)                                  \
-  namespace cepgen::mg5amc {                                                \
-    struct BUILDERNM(obj) {                                                 \
-      BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name); } \
-    };                                                                      \
-    static const BUILDERNM(obj) gMGProc##obj;                               \
-  }                                                                         \
+#define REGISTER_MG5AMC_PROCESS(name, obj)                                     \
+  namespace cepgen::mg5amc {                                                   \
+    struct BUILDER_NAME(obj) {                                                 \
+      BUILDER_NAME(obj)() { ProcessFactory::get().registerModule<obj>(name); } \
+    };                                                                         \
+    static const BUILDER_NAME(obj) gMGProc##obj;                               \
+  }                                                                            \
   static_assert(true, "")
 
 namespace cepgen::mg5amc {

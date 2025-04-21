@@ -85,7 +85,7 @@ namespace cepgen::sigrat {
                    rb = b_.at(0) * inv_xl * th + (b_.at(1) / q2 + b_.at(2) / (q2 * q2 + 0.3 * 0.3)) * pb,
                    rc = c_.at(0) * inv_xl * th + c_.at(1) / utils::fastHypot(q2 - q2_thr, c_.at(2));
 
-      const double r = (ra + rb + rc) / 3.;  // R is set to be the average of the three fits
+      const double r = (ra + rb + rc) / 3.;  // R is the average of the three fits
       // numerical safety for low-Q²
       err = 0.0078 - 0.013 * xbj + (0.070 - 0.39 * xbj + 0.70 * xbj * xbj) / (1.7 + q2);
       if (q2 > q2_b_)
@@ -204,7 +204,7 @@ using sigrat::CLAS;
 using sigrat::E143;
 using sigrat::R1990;
 using sigrat::SibirtsevBlunden;
-REGISTER_SIGRAT("E143", 1, E143);
-REGISTER_SIGRAT("R1990", 2, R1990);
-REGISTER_SIGRAT("CLAS", 3, CLAS);
-REGISTER_SIGRAT("SibirtsevBlunden", 4, SibirtsevBlunden);
+REGISTER_SIGMA_RATIO("E143", 1, E143);
+REGISTER_SIGMA_RATIO("R1990", 2, R1990);
+REGISTER_SIGMA_RATIO("CLAS", 3, CLAS);
+REGISTER_SIGMA_RATIO("SibirtsevBlunden", 4, SibirtsevBlunden);

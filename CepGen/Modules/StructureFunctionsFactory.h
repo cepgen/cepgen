@@ -21,24 +21,24 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(name, id, obj)                                                                    \
-  namespace cepgen::strfun {                                                                              \
-    struct BUILDERNM(obj) {                                                                               \
-      BUILDERNM(obj)() { StructureFunctionsFactory::get().addIndex(id, name).registerModule<obj>(name); } \
-    };                                                                                                    \
-    static const BUILDERNM(obj) gStrFun##obj;                                                             \
-  }                                                                                                       \
+/// Add a structure functions definition to the list of handled parameterisations
+#define REGISTER_STRFUN(name, id, obj)                                                                       \
+  namespace cepgen::strfun {                                                                                 \
+    struct BUILDER_NAME(obj) {                                                                               \
+      BUILDER_NAME(obj)() { StructureFunctionsFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                                       \
+    static const BUILDER_NAME(obj) gStrFun##obj;                                                             \
+  }                                                                                                          \
   static_assert(true, "")
 
-/// Add a sigma ratio definition to the list of handled parameterisation
-#define REGISTER_SIGRAT(name, id, obj)                                                             \
-  namespace cepgen::sigrat {                                                                       \
-    struct BUILDERNM(obj) {                                                                        \
-      BUILDERNM(obj)() { SigmaRatiosFactory::get().addIndex(id, name).registerModule<obj>(name); } \
-    };                                                                                             \
-    static const BUILDERNM(obj) gSigRat##obj;                                                      \
-  }                                                                                                \
+/// Add a longitudinal/transverse cross-sections ratio definition to the list of handled parameterisations
+#define REGISTER_SIGMA_RATIO(name, id, obj)                                                           \
+  namespace cepgen::sigrat {                                                                          \
+    struct BUILDER_NAME(obj) {                                                                        \
+      BUILDER_NAME(obj)() { SigmaRatiosFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                                \
+    static const BUILDER_NAME(obj) gSigRat##obj;                                                      \
+  }                                                                                                   \
   static_assert(true, "")
 
 namespace cepgen::strfun {

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,20 +21,22 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a partons phase space generator to the list of handled modules
-#define REGISTER_PARTONS_PHASE_SPACE_GENERATOR(name, obj)                                      \
-  namespace cepgen {                                                                           \
-    struct BUILDERNM(obj) {                                                                    \
-      BUILDERNM(obj)() { PartonsPhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \
-    };                                                                                         \
-    static const BUILDERNM(obj) gPartonsPhaseSpaceGen##obj;                                    \
-  }                                                                                            \
+/// Add a partons' phase space generator to the list of handled modules
+#define REGISTER_PARTONS_PHASE_SPACE_GENERATOR(name, obj)                                         \
+  namespace cepgen {                                                                              \
+    struct BUILDER_NAME(obj) {                                                                    \
+      BUILDER_NAME(obj)() { PartonsPhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                            \
+    static const BUILDER_NAME(obj) gPartonsPhaseSpaceGen##obj;                                    \
+  }                                                                                               \
   static_assert(true, "")
 
 namespace cepgen {
   class PartonsPhaseSpaceGenerator;
-  /// A partons phase space mapping algorithms factory
-  DEFINE_FACTORY(PartonsPhaseSpaceGeneratorFactory, PartonsPhaseSpaceGenerator, "Partons phase space generator factory");
+  /// A partons' phase space mapping algorithms factory
+  DEFINE_FACTORY(PartonsPhaseSpaceGeneratorFactory,
+                 PartonsPhaseSpaceGenerator,
+                 "Partons phase space generator factory");
 }  // namespace cepgen
 
 #endif

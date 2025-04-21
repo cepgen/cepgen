@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic functional object builder definition
-#define REGISTER_FUNCTIONAL(name, obj)                                         \
-  namespace cepgen {                                                           \
-    struct BUILDERNM(obj) {                                                    \
-      BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
-    };                                                                         \
-    static const BUILDERNM(obj) gFunct##obj;                                   \
-  }                                                                            \
+#define REGISTER_FUNCTIONAL(name, obj)                                            \
+  namespace cepgen {                                                              \
+    struct BUILDER_NAME(obj) {                                                    \
+      BUILDER_NAME(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
+    };                                                                            \
+    static const BUILDER_NAME(obj) gFunct##obj;                                   \
+  }                                                                               \
   static_assert(true, "")
 
 namespace cepgen::utils {
@@ -37,7 +37,7 @@ namespace cepgen::utils {
 
 namespace cepgen {
   /// A functional objects factory
-  DEFINE_FACTORY(FunctionalFactory, utils::Functional, "Functionals factory");
+  DEFINE_FACTORY(FunctionalFactory, utils::Functional, "Functional factory");
 }  // namespace cepgen
 
 #endif

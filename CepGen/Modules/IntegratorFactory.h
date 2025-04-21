@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic integrator object builder definition
-#define REGISTER_INTEGRATOR(name, obj)                                                 \
-  namespace cepgen {                                                                   \
-    struct BUILDERNM(obj) {                                                            \
-      BUILDERNM(obj)() { cepgen::IntegratorFactory::get().registerModule<obj>(name); } \
-    };                                                                                 \
-    static const BUILDERNM(obj) gIntegr##obj;                                          \
-  }                                                                                    \
+#define REGISTER_INTEGRATOR(name, obj)                                                    \
+  namespace cepgen {                                                                      \
+    struct BUILDER_NAME(obj) {                                                            \
+      BUILDER_NAME(obj)() { cepgen::IntegratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                    \
+    static const BUILDER_NAME(obj) gIntegr##obj;                                          \
+  }                                                                                       \
   static_assert(true, "")
 
 namespace cepgen {

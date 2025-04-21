@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic derivator object builder definition
-#define REGISTER_DERIVATOR(name, obj)                                         \
-  namespace cepgen::utils {                                                   \
-    struct BUILDERNM(obj) {                                                   \
-      BUILDERNM(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
-    };                                                                        \
-    static const BUILDERNM(obj) gDeriv##obj;                                  \
-  }                                                                           \
+#define REGISTER_DERIVATOR(name, obj)                                            \
+  namespace cepgen::utils {                                                      \
+    struct BUILDER_NAME(obj) {                                                   \
+      BUILDER_NAME(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
+    };                                                                           \
+    static const BUILDER_NAME(obj) gDeriv##obj;                                  \
+  }                                                                              \
   static_assert(true, "")
 
 namespace cepgen::utils {

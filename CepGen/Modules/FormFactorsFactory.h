@@ -21,20 +21,20 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add an electromagnetic form factors definition to the list of handled parameterisation
-#define REGISTER_FORMFACTORS(name, obj)                                         \
-  namespace cepgen::formfac {                                                   \
-    struct BUILDERNM(obj) {                                                     \
-      BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
-    };                                                                          \
-    static const BUILDERNM(obj) gFF##obj;                                       \
-  }                                                                             \
+/// Add an electromagnetic form factors definition to the list of handled parameterisations
+#define REGISTER_FORMFACTORS(name, obj)                                            \
+  namespace cepgen::formfac {                                                      \
+    struct BUILDER_NAME(obj) {                                                     \
+      BUILDER_NAME(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
+    };                                                                             \
+    static const BUILDER_NAME(obj) gFF##obj;                                       \
+  }                                                                                \
   static_assert(true, "")
 
 namespace cepgen::formfac {
   class Parameterisation;
   /// Standard dipole handler name
-  static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
+  static constexpr auto gFFStandardDipoleHandler = "StandardDipole";
 }  // namespace cepgen::formfac
 
 namespace cepgen {

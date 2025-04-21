@@ -21,14 +21,14 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic random number generator definition to the list of handled modules
-#define REGISTER_RANDOM_GENERATOR(name, obj)                                        \
-  namespace cepgen {                                                                \
-    struct BUILDERNM(obj) {                                                         \
-      BUILDERNM(obj)() { RandomGeneratorFactory::get().registerModule<obj>(name); } \
-    };                                                                              \
-    static const BUILDERNM(obj) gRndGen##obj;                                       \
-  }                                                                                 \
+/// Add a random number generator definition to the list of handled modules
+#define REGISTER_RANDOM_GENERATOR(name, obj)                                           \
+  namespace cepgen {                                                                   \
+    struct BUILDER_NAME(obj) {                                                         \
+      BUILDER_NAME(obj)() { RandomGeneratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                 \
+    static const BUILDER_NAME(obj) gRndGen##obj;                                       \
+  }                                                                                    \
   static_assert(true, "")
 
 namespace cepgen::utils {

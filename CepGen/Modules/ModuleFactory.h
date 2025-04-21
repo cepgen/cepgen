@@ -25,8 +25,8 @@
 #include "CepGen/Core/ParametersDescription.h"
 
 /// Name of the object builder
-#define BUILDERNM(obj) obj##Builder
-/// Define a new factory instance for the definition of modules
+#define BUILDER_NAME(obj) obj##Builder
+/// Define a factory instance for the definition of modules
 #define DEFINE_FACTORY(name, obj_type, description)                 \
   struct name : public ModuleFactory<obj_type> {                    \
     explicit name() : ModuleFactory(description) {}                 \
@@ -102,7 +102,7 @@ namespace cepgen {
 
     std::vector<std::string> modules() const;           ///< List of modules registered in the database
     inline bool empty() const { return map_.empty(); }  ///< Is the database empty?
-    inline size_t size() const { return map_.size(); }  ///< Number of modules registered in the database
+    inline size_t size() const { return map_.size(); }  ///< Multiplicity of modules registered in the database
 
     ///< List of index-to-string associations in the database
     inline const std::unordered_map<int, std::string>& indices() const { return indices_; }
@@ -111,14 +111,14 @@ namespace cepgen {
     inline bool has(const std::string& name) const { return map_.count(name) > 0; }
 
   private:
-    /// Construct a module with its parameters set
+    /// Build a module with its parameters set
     template <typename U>
     static std::unique_ptr<T> buildModule(const ParametersList& params) {
       return std::make_unique<U>(params);
     }
     const std::string description_;                 ///< Factory name
     std::unordered_map<std::string, Builder> map_;  ///< Database of modules handled by this instance
-    std::unordered_map<std::string, ParametersDescription> params_map_;  ///< Default parameters associated to modules
+    std::unordered_map<std::string, ParametersDescription> params_map_;  ///< Default parameters associated with modules
     const ParametersDescription empty_params_desc_;                      ///< An empty parameters description
 
   protected:

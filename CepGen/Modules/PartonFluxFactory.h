@@ -22,22 +22,22 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic collinear parton flux evaluator builder definition
-#define REGISTER_COLLINEAR_FLUX(name, obj)                                        \
-  namespace cepgen {                                                              \
-    struct BUILDERNM(obj) {                                                       \
-      BUILDERNM(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
-    };                                                                            \
-    static const BUILDERNM(obj) gCollinearFlux##obj;                              \
-  }                                                                               \
+#define REGISTER_COLLINEAR_FLUX(name, obj)                                           \
+  namespace cepgen {                                                                 \
+    struct BUILDER_NAME(obj) {                                                       \
+      BUILDER_NAME(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
+    };                                                                               \
+    static const BUILDER_NAME(obj) gCollinearFlux##obj;                              \
+  }                                                                                  \
   static_assert(true, "")
 /// Add a generic KT-factorised flux evaluator builder definition
-#define REGISTER_KT_FLUX(name, id, obj)                                                       \
-  namespace cepgen {                                                                          \
-    struct BUILDERNM(obj) {                                                                   \
-      BUILDERNM(obj)() { KTFluxFactory::get().addIndex(id, name).registerModule<obj>(name); } \
-    };                                                                                        \
-    static const BUILDERNM(obj) gKTFlux##obj;                                                 \
-  }                                                                                           \
+#define REGISTER_KT_FLUX(name, id, obj)                                                          \
+  namespace cepgen {                                                                             \
+    struct BUILDER_NAME(obj) {                                                                   \
+      BUILDER_NAME(obj)() { KTFluxFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                           \
+    static const BUILDER_NAME(obj) gKTFlux##obj;                                                 \
+  }                                                                                              \
   static_assert(true, "")
 
 namespace cepgen {

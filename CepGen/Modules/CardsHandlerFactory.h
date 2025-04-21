@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a cards handler definition to the list of handled parsers
-#define REGISTER_CARD_HANDLER(name, obj)                                         \
-  namespace cepgen::card {                                                       \
-    struct BUILDERNM(obj) {                                                      \
-      BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
-    };                                                                           \
-    static const BUILDERNM(obj) gCard##obj;                                      \
-  }                                                                              \
+#define REGISTER_CARD_HANDLER(name, obj)                                            \
+  namespace cepgen::card {                                                          \
+    struct BUILDER_NAME(obj) {                                                      \
+      BUILDER_NAME(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
+    };                                                                              \
+    static const BUILDER_NAME(obj) gCard##obj;                                      \
+  }                                                                                 \
   static_assert(true, "")
 
 namespace cepgen::card {

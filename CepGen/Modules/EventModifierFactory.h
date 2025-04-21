@@ -21,14 +21,14 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic event modification module definition to the factory
-#define REGISTER_MODIFIER(name, obj)                                              \
-  namespace cepgen {                                                              \
-    struct BUILDERNM(obj) {                                                       \
-      BUILDERNM(obj)() { EventModifierFactory::get().registerModule<obj>(name); } \
-    };                                                                            \
-    static const BUILDERNM(obj) gEveMod##obj;                                     \
-  }                                                                               \
+/// Add an event modification module definition to the factory
+#define REGISTER_MODIFIER(name, obj)                                                 \
+  namespace cepgen {                                                                 \
+    struct BUILDER_NAME(obj) {                                                       \
+      BUILDER_NAME(obj)() { EventModifierFactory::get().registerModule<obj>(name); } \
+    };                                                                               \
+    static const BUILDER_NAME(obj) gEveMod##obj;                                     \
+  }                                                                                  \
   static_assert(true, "")
 
 namespace cepgen {
