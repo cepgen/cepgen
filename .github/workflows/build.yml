@@ -37,14 +37,17 @@ jobs:
       run: |
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
+              -DCMAKE_INSTALL_PREFIX=/Package/install \
               -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -DCMAKE_BUILD_TESTS=ON \
+              -DCMAKE_BUILD_UTILS=ON \
               -DMADGRAPH_BIN=/Package/mg5amcnlo-${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
 
     - name: 'Build environment'
       run: |
         cmake --build ${{ env.CEPGEN_PATH }}
         cmake --build ${{ env.CEPGEN_PATH }} -- package
+        cmake --build ${{ env.CEPGEN_PATH }} -- install
     - name: 'Compress environment'
       run: |
         touch environment.tar.gz
@@ -139,3 +142,30 @@ jobs:
       with:
         name: validation-env
         path: validation-environment.tar.gz
+
+  skimming:
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora40'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v4
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar xvfz environment.tar.gz -C /
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: 'Compress environment'
+      run: |
+        tar cvfz install-environment.tar.gz /Package/src /Package/addons /Package/install
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: install-env
+        path: install-environment.tar.gz
+    - uses: geekyeggo/delete-artifact@v5
+      with:
+        name: build-env

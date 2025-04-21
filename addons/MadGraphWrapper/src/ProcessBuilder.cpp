@@ -121,9 +121,9 @@ namespace cepgen::mg5amc {
     void loadMG5Library() const {
       utils::AbortHandler();
       try {
-        if (const auto& lib_file = steer<std::string>("lib"); !lib_file.empty())  // user-provided library file
+        if (const auto& lib_file = steer<std::string>("lib"); !lib_file.empty())  // user-provided shared library
           loadLibrary(lib_file);
-        else {  // library has to be generated from mg5_aMC directives
+        else {  // library must be generated from mg5_aMC directives
           const Interface interface(params_);
           loadLibrary(interface.run());
         }
