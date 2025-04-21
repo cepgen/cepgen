@@ -37,6 +37,7 @@ jobs:
       run: |
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
+              -DCMAKE_INSTALL_PREFIX=/Package/install \
               -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -DCMAKE_BUILD_TESTS=ON \
               -DMADGRAPH_BIN=/Package/mg5amcnlo-${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
@@ -45,10 +46,13 @@ jobs:
       run: |
         cmake --build ${{ env.CEPGEN_PATH }}
         cmake --build ${{ env.CEPGEN_PATH }} -- package
+    - name: 'Install CepGen'
+      run: |
+        cmake --install ${{ env.CEPGEN_PATH }}
     - name: 'Compress environment'
       run: |
         touch environment.tar.gz
-        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package
+        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package/install /Package/mg5amcnlo-*
 
     - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
