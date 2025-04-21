@@ -46,13 +46,11 @@ jobs:
       run: |
         cmake --build ${{ env.CEPGEN_PATH }}
         cmake --build ${{ env.CEPGEN_PATH }} -- package
-    - name: 'Install CepGen'
-      run: |
-        cmake --install ${{ env.CEPGEN_PATH }}
+        cmake --build ${{ env.CEPGEN_PATH }} -- install
     - name: 'Compress environment'
       run: |
         touch environment.tar.gz
-        tar cvfz environment.tar.gz build.ninja CTest*.cmake DartConfiguration.tcl ${{ env.CEPGEN_PATH }}/src ${{ env.CEPGEN_PATH }}/addons /Package/install /Package/test /Package/mg5amcnlo-*
+        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package
 
     - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
@@ -143,3 +141,27 @@ jobs:
       with:
         name: validation-env
         path: validation-environment.tar.gz
+
+  skimming:
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora40'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v4
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar xvfz environment.tar.gz -C /
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: 'Compress environment'
+      run: |
+        tar cvfz install-environment.tar.gz /Package/src /Package/addons /Package/install
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: install-env
+        path: install-environment.tar.gz
