@@ -53,11 +53,11 @@ namespace cepgen {
 
     /// \brief Set the information on one particle in the process
     /// \param[in] particle The Particle object to insert or modify in the event
-    /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
+    /// \param[in] replace Do we replace the particle if already present in the event, or do we append another particle with the same role?
     ParticleRef addParticle(Particle& particle, bool replace = false);
     /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
     /// \param[in] role The role the particle will play in the process
-    /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
+    /// \param[in] replace Do we replace the particle if already present in the event, or do we append another particle with the same role?
     ParticleRef addParticle(Particle::Role role, bool replace = false);
 
     //----- particles retrievers
@@ -66,7 +66,7 @@ namespace cepgen {
     bool empty() const;                                       ///< Is the particles map empty?
     Particles particles() const;                              ///< Vector of all particles in the event
     Particles stableParticles() const;                        ///< Vector of all stable particles in the event
-    Particles stableParticlesWithRole(Particle::Role) const;  ///< Vector of all stable particles of a given role
+    Particles stableParticlesWithRole(Particle::Role) const;  ///< Vector of all stable particles with a given role
     ParticlesMap& map() { return particles_; }                ///< Internal particles map retrieval operator
 
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
@@ -127,7 +127,7 @@ namespace cepgen {
     /// Collection of key -> value pairs storing event metadata
     struct EventMetadata : std::unordered_map<std::string, float> {
       EventMetadata();
-      /// Retrieve the metadata value associated to a key
+      /// Retrieve the metadata value associated with a key
       float operator()(const std::string& key) const { return count(key) > 0 ? at(key) : -1.; }
     };
     /// List of auxiliary information

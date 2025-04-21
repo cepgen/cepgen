@@ -46,7 +46,7 @@ namespace cepgen {
   class RunParameters : public SteeredObject<RunParameters> {
   public:
     RunParameters();
-    RunParameters(RunParameters&);  ///< Copy constructor (transfers ownership to process/event modification algorithm!)
+    RunParameters(RunParameters&);  ///< Copy constructor (transfers ownership to process/event modification algorithm)
     RunParameters(const RunParameters&);  ///< Const copy constructor (all but process + event handling algorithms)
     ~RunParameters() override;            // required for unique_ptr initialisation!
 
@@ -67,7 +67,7 @@ namespace cepgen {
 
     //----- process to compute
 
-    inline bool hasProcess() const { return !(!process_); }  ///< Are we holding any physics process?
+    inline bool hasProcess() const { return !!process_; }  ///< Are we holding any physics process?
     proc::Process& process();              ///< Process object for cross-section computation/events generation
     const proc::Process& process() const;  ///< Process object for cross-section computation/events generation
     std::string processName() const;       ///< Name of the process considered
@@ -90,7 +90,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      inline void setTargetLuminosity(double lipb) { target_lumi_ = lipb; }  ///< Set target luminosity, in pb^-1
+      inline void setTargetLuminosity(double lumi) { target_lumi_ = lumi; }  ///< Set target luminosity, in pb^-1
       inline double targetLuminosity() const { return target_lumi_; }        ///< Target luminosity to reach, in pb^-1
       inline void setMaxGen(size_t max_gen) { max_gen_ = max_gen; }  ///< Set the maximal number of events to generate
       inline size_t maxGen() const { return max_gen_; }              ///< Maximal number of events to generate
@@ -98,7 +98,7 @@ namespace cepgen {
       inline void setPrintEvery(size_t every) { gen_print_every_ = every; }  ///< Set the events display periodicity
       inline size_t printEvery() const { return gen_print_every_; }          ///< Periodicity of event displays
       inline void setSymmetrise(bool sym) { symmetrise_ = sym; }   ///< Symmetrisation of the z-axis for each event?
-      inline bool symmetrise() const { return symmetrise_; }       ///< Symmetrise events wrt the \f$z\f$-axis ?
+      inline bool symmetrise() const { return symmetrise_; }       ///< Symmetrise events wrt the \f$z\f$-axis?
       inline void setNumThreads(size_t nt) { num_threads_ = nt; }  ///< Set number of threads for event generation
       inline size_t numThreads() const { return num_threads_; }    ///< Number of threads to perform event generation
       inline void setNumPoints(size_t np) { num_points_ = np; }    ///< Set number of points to probe in each integr.bin
@@ -122,7 +122,7 @@ namespace cepgen {
     inline EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
     /// List of event modification algos
     inline const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
-    void clearEventModifiersSequence();                ///< Remove all event modifiers from sequence
+    void clearEventModifiersSequence();                ///< Remove all event modifiers from the sequence
     void addModifier(std::unique_ptr<EventModifier>);  ///< Add a new event modification algorithm to the sequence
     void addModifier(EventModifier*);                  ///< Add a new event modification algorithm to the sequence
 

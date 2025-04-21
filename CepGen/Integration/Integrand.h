@@ -19,7 +19,6 @@
 #ifndef CepGen_Integration_Integrand_h
 #define CepGen_Integration_Integrand_h
 
-#include <cstddef>  // size_t
 #include <vector>
 
 namespace cepgen {

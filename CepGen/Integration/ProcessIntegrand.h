@@ -41,23 +41,21 @@ namespace cepgen {
     explicit ProcessIntegrand(const proc::Process&);
     explicit ProcessIntegrand(const RunParameters*);
 
-    /// Compute the integrand for a given phase space point (or "event")
+    /// Compute the integrand for a given phase space point (or “event”)
     /// \param[in] x Phase space point coordinates
-    /// \note This weight includes the matrix element of the process
-    ///  considered, along with all the kinematic factors, and the cut
-    ///  restrictions imposed on this phase space.
-    ///  \f${\bf x}=\{x_1,\ldots,x_N\}\f$ is therefore an array of random
-    ///  numbers defined inside its boundaries (as normalised so that
-    ///  \f$\forall i=1,\ldots,N\f$, \f$0<x_i<1\f$).
+    /// \note The weight includes the matrix element of the process considered, along with all the kinematic factors,
+    ///  and the cut restrictions imposed on this phase space.
+    ///  \f${\bf x}=\{x_1,\ldots,x_N\}\f$ is therefore an array of random numbers defined inside its boundaries
+    ///  (as normalised so that \f$\forall i=1,\ldots,N\f$, \f$0<x_i<1\f$).
     double eval(const std::vector<double>& x) override;
     size_t size() const override;  ///< Phase space dimension
-    bool hasProcess() const final { return true; }
+    bool hasProcess() const override { return true; }
 
     proc::Process& process();              ///< Thread-local physics process
     const proc::Process& process() const;  ///< Thread-local physics process
 
-    void setStorage(bool store) { storage_ = store; }  ///< Specify if the generated events are to be stored
-    bool storage() const { return storage_; }          ///< Are the events currently generated in this run to be stored?
+    void setStorage(bool store) { storage_ = store; }  ///< Specify if the generated events will be stored
+    bool storage() const { return storage_; }          ///< Store the events generated in this run?
 
   private:
     void setProcess(const proc::Process&);
@@ -66,7 +64,7 @@ namespace cepgen {
     const RunParameters* run_parameters_{nullptr};  ///< Generator-owned runtime parameters
     const std::unique_ptr<utils::Timer> timer_;     ///< Timekeeper for event generation
     utils::EventBrowser bws_;                       ///< Event browser
-    bool storage_{false};                           ///< Is the next event to be generated to be stored?
+    bool storage_{false};                           ///< Will the next event generated be stored?
   };
 }  // namespace cepgen
 

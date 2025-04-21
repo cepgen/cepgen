@@ -19,7 +19,6 @@
 #ifndef CepGen_Integration_GridParameters_h
 #define CepGen_Integration_GridParameters_h
 
-#include <cstddef>
 #include <vector>
 
 namespace cepgen::utils {
@@ -55,7 +54,7 @@ namespace cepgen {
     /// Specify a new trial has been attempted for bin
     inline void increment(size_t coordinate) { num_points_.at(coordinate)++; }
 
-    inline bool prepared() const { return gen_prepared_; }                       ///< Has the grid been prepared
+    inline bool prepared() const { return gen_prepared_; }                       ///< Has the grid been prepared?
     inline void setPrepared(bool prepared = true) { gen_prepared_ = prepared; }  ///< Mark the grid as prepared
 
     /// Correction to apply on the next phase space point generation

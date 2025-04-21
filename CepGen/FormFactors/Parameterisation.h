@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace cepgen::formfac {
     double tau(double q2) const;  ///< \f$\tau={Q^2}\over{4m_p^2}\f$ variable definition
 
     virtual const FormFactors& operator()(double /*q2*/);      ///< Compute all form factors for a given \f$Q^2\f$ value
-    inline virtual bool fragmenting() const { return false; }  ///< Is the nucleon surviving the exchange?
+    inline virtual bool fragmenting() const { return false; }  ///< Will the nucleon survive the exchange?
     pdgid_t pdgId() const { return pdg_id_; }                  ///< Incoming particle's PDG identifier
 
   protected:

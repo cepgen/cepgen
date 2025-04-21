@@ -39,7 +39,7 @@ namespace cepgen {
     Exception(const Exception&) noexcept(true);  ///< Copy constructor
     ~Exception() noexcept override;              ///< Destructor (potentially killing the process)
 
-    friend std::ostream& operator<<(std::ostream&, const Type&);  ///< Printout operator for exception type
+    friend std::ostream& operator<<(std::ostream&, const Type&);  ///< Printout operator for the exception type
 
     template <typename T>
     friend const Exception& operator<<(const Exception& exception, const T& message) noexcept {

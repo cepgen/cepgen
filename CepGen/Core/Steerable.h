@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,12 +36,12 @@ namespace cepgen {
   protected:
     /// Retrieve a parameters as previously steered
     template <typename T>
-    inline T steer(const std::string& key) const {
+    T steer(const std::string& key) const {
       return params_.get<T>(key);
     }
     /// Retrieve a recast parameters as previously steered
     template <typename T, typename U>
-    inline U steerAs(const std::string& key) const {
+    U steerAs(const std::string& key) const {
       return params_.getAs<T, U>(key);
     }
     /// Retrieve module name from parameters

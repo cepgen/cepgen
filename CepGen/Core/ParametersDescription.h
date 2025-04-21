@@ -25,19 +25,19 @@ namespace cepgen {
   /// A description object for parameters collection
   class ParametersDescription : private ParametersList {
   public:
-    /// Build the description of a parameters collection object
+    /// Build the description of a parameters' collection object
     /// \param[in] mod_key Module name (where applicable)
     explicit ParametersDescription(const std::string& mod_key = "");
-    /// Build the (empty) description of a parameters collection object from its definition
+    /// Build the (empty) description of a parameters' collection object from its definition
     explicit ParametersDescription(const ParametersList& params);
 
-    /// Does a description of this parameter (or parameters collection) exist?
+    /// Does a description of this parameter (or parameters' collection) exist?
     bool empty() const;
     /// Concatenate another description to this one
     ParametersDescription& operator+=(const ParametersDescription&);
     /// Human-readable description
     friend std::ostream& operator<<(std::ostream&, const ParametersDescription&);
-    /// Set the module name for this parameter (or parameters collection)
+    /// Set the module name for this parameter (or parameters' collection)
     template <typename I>
     ParametersDescription& setKey(const I& key) {
       mod_key_ = std::to_string(key);
@@ -45,13 +45,13 @@ namespace cepgen {
     }
     /// Module name for this parameter
     const std::string& key() const { return mod_key_; }
-    /// Set the description of this parameter (or parameters collection)
+    /// Set the description of this parameter (or parameters' collection)
     ParametersDescription& setDescription(const std::string& description);
-    /// Description of this parameter (or parameters collection)
+    /// Description of this parameter (or parameters' collection)
     const std::string& description() const { return mod_descr_; }
     /// This parameter is a collection of sub-parameters
-    ParametersDescription& setParametersVector(bool pv = true) {
-      is_vec_params_ = pv;
+    ParametersDescription& setParametersVector(bool parameters_vector = true) {
+      is_vec_params_ = parameters_vector;
       return *this;
     }
     /// Add the description to a new parameter
@@ -59,7 +59,7 @@ namespace cepgen {
     ParametersDescription& add(const std::string& name, const T& def) {
       if (obj_descr_.count(name) == 0)
         // only add a new, empty description if not yet described
-        // (allows to ensure previous descriptions are not discarded)
+        // (ensures previous descriptions are not discarded)
         obj_descr_[name] = ParametersDescription();
       ParametersList::set<T>(name, def);
       return obj_descr_[name];
@@ -87,8 +87,8 @@ namespace cepgen {
     ParametersDescription steer(const ParametersList&) const;    ///< Set parameters value for this description object
 
     enum struct Type { Value, Parameters, Module, ParametersVector };  ///< Parameter type
-    friend std::ostream& operator<<(std::ostream&, const Type&);       ///< Human-readable description of parameter type
-    Type type() const;                                                 ///< Get the type of parameter considered
+    friend std::ostream& operator<<(std::ostream&, const Type&);  ///< Human-readable description of parameter types
+    Type type() const;                                            ///< Get the type of parameter considered
 
     /// A collection of valid values for a given parameter
     class ParameterValues {

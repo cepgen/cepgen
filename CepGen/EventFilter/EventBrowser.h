@@ -27,7 +27,7 @@ namespace cepgen {
   class Event;
 }
 namespace cepgen::utils {
-  /// User-friendly browser for the Event content
+  /// A user-friendly browser for the Event content
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2019
   class EventBrowser {
@@ -36,14 +36,17 @@ namespace cepgen::utils {
     double get(const Event& event, const std::string& variable_name) const;  ///< Get/compute a variable value
 
   private:
-    /// Retrieve a particle named variable
-    double variable(const Event&, const Particle&, const std::string&) const;
-    /// Retrieve a two-particle system named variable
-    double variable(const Event&, const Particle&, const Particle&, const std::string&) const;
-    /// Retrieve a whole event named variable
-    static double variable(const Event&, const std::string&);
+    double variable(const Event&, const Particle&, const std::string&) const;  ///< Retrieve a particle variable
+    double variable(const Event&,
+                    const Particle&,
+                    const Particle&,
+                    const std::string&) const;                 ///< Retrieve a two-particle variable
+    static double variable(const Event&, const std::string&);  ///< Retrieve a whole event variable
 
-    static const std::regex rgx_select_id_, rgx_select_id2_, rgx_select_role_, rgx_select_role2_;
+    static const std::regex rgx_select_id_;
+    static const std::regex rgx_select_id2_;
+    static const std::regex rgx_select_role_;
+    static const std::regex rgx_select_role2_;
     static constexpr double INVALID_OUTPUT = -999.;
 
     //--- auxiliary helper maps

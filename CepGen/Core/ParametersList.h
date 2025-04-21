@@ -25,7 +25,7 @@
 
 #include "CepGen/Utils/Limits.h"
 
-/// Looper over the list of parameters containers handled by the ParametersList object
+/// Looper over the list of parameter containers handled by the ParametersList object
 /// \note This can be edited to add an extra handled collection to this steering utility
 ///   e.g. add __TYPE_ENUM(typename,      // any C/C++ type name
 ///                        map_variable,  // ParametersList object private attribute
@@ -63,7 +63,7 @@ namespace cepgen {
     ~ParametersList() = default;  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
 
-    bool hasName() const;                                           ///< Does the parameters list have a name key?
+    bool hasName() const;                                           ///< Does the parameters' list have a name key?
     std::string name(const std::string& default_value = "") const;  ///< Retrieve the module name if any
     ParametersList& setName(const std::string&);                    ///< Set the module name
 
@@ -80,7 +80,7 @@ namespace cepgen {
     /// Erase a parameter with key
     /// \return Number of key-indexed values erased
     size_t erase(const std::string&);
-    /// Erase a typed parameter with key
+    /// Erase a typed parameter with the key
     /// \return Number of key-indexed values erased
     template <typename T>
     size_t erase(const std::string&);
@@ -96,14 +96,14 @@ namespace cepgen {
     }
     /// Get a parameter value
     /// \param[in] key Unique key for parameter
-    /// \param[in] def Default parameters value if parameter is not contained
+    /// \param[in] def Default parameters values if parameter is not contained
     template <typename T>
     T get(const std::string& key, const T& def = default_arg<T>::get()) const;
     /// Get a recast parameter value
     /// \tparam T Base type of the parameter
     /// \tparam U Type to recast the parameter into
     /// \param[in] key Unique key for parameter
-    /// \param[in] def Default parameters value if parameter is not contained
+    /// \param[in] def Default parameters values if parameter is not contained
     template <typename T, typename U>
     U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
       return static_cast<U>(get<T>(key, static_cast<T>(def)));
@@ -125,7 +125,7 @@ namespace cepgen {
     }
     ParametersList& rename(const std::string&, const std::string&);  ///< Rename the key to a parameter value
     ParametersList& operator+=(const ParametersList& oth);           ///< Concatenate two parameters containers
-    ParametersList operator+(const ParametersList& other) const;     ///< Concatenation of two parameters containers
+    ParametersList operator+(const ParametersList& other) const;     ///< Concatenation of two-parameter containers
     bool empty() const;                                              ///< Is the list empty?
 
     template <typename T>
@@ -140,12 +140,12 @@ namespace cepgen {
     /// Get a string-converted version of the module name if any
     /// \param[in] wrap Encapsulate the value with type()
     inline std::string getNameString(bool wrap = false) const { return getString(MODULE_NAME, wrap); }
-    std::string serialise() const;  ///< Serialise a parameters collection into a parseable string
+    std::string serialise() const;  ///< Serialise a parameter collection into a parseable string
 
     friend std::ostream& operator<<(std::ostream&,
-                                    const ParametersList&);  ///< Human-readable version of a parameters container
-    const ParametersList& print(std::ostream&) const;        ///< Debugging-like printout of a parameters container
-    std::string print(bool compact = false) const;           ///< Normal printout of a parameters container
+                                    const ParametersList&);  ///< Human-readable version of a parameter container
+    const ParametersList& print(std::ostream&) const;        ///< Debugging-like printout of a parameter container
+    std::string print(bool compact = false) const;           ///< Normal printout of a parameter container
 
   private:
     std::map<std::string, ParametersList> param_values_;

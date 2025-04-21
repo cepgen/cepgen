@@ -39,21 +39,21 @@ namespace cepgen {
 
     virtual double eval(Integrand&, const std::vector<double>&) const;  ///< Compute function value at one point
 
-    /// Evaluate the integral of an integrand for a given range
+    /// Evaluate the integral for a given range
     Value integrate(Integrand& integrand, const std::vector<Limits>& = {});
     /// Evaluate the integral of a function for a given range
-    /// \param[in] integrand function to integrate
+    /// \param[in] integrand Function to integrate
     /// \param[in] range_1d integration range
     Value integrate(const std::function<double(double)>& integrand, const Limits& range_1d = {0., 1.});
     /// Evaluate the integral of a function for a given range
-    /// \param[in] integrand function to integrate
+    /// \param[in] integrand Function to integrate
     /// \param[in] range integration range
     Value integrate(const std::function<double(const std::vector<double>&)>& integrand,
                     const std::vector<Limits>& range);
 
   protected:
     /// Evaluate the integral of a function for a given range
-    /// \param[in] integrand function to integrate
+    /// \param[in] integrand Function to integrate
     /// \param[in] range integration range
     virtual Value run(Integrand& integrand, const std::vector<Limits>& range) = 0;
 

@@ -42,14 +42,14 @@ namespace cepgen {
     /// Modify an event
     /// \param[inout] ev Input/output event
     /// \param[inout] weight Event weight after modification
-    /// \param[in] fast run a faster version of the algorithm (whenever available)
+    /// \param[in] fast Run a faster version of the algorithm (whenever available)
     /// \return Boolean stating whether the modification occurred successfully
     virtual bool run(Event& ev, double& weight, bool fast = false) = 0;
     inline virtual void setCrossSection(const Value&) {}  ///< Specify the cross-section value, in pb
 
   protected:
     long long seed_{0ll};           ///< Random numbers generator seed fed to the algorithm
-    unsigned short max_trials_{1};  ///< Maximal number of trials for the algorithm
+    unsigned short max_trials_{1};  ///< Maximal trials for the algorithm
   };
 }  // namespace cepgen
 

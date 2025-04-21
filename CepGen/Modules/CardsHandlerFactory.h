@@ -37,13 +37,13 @@ namespace cepgen::card {
 
 namespace cepgen {
   class RunParameters;
-  /// A cards handler base factory
+  /// A card handler base factory
   DEFINE_FACTORY(BaseCardsHandlerFactory, card::Handler, "Cards handlers factory");
-  /// A cards handler factory
+  /// A card handler factory
   struct CardsHandlerFactory final : BaseCardsHandlerFactory {
     using BaseCardsHandlerFactory::BaseCardsHandlerFactory;
     static CardsHandlerFactory& get();
-    /// Build one instance of a cards handler
+    /// Build one instance of a card handler
     /// \param[in] filename File path to retrieve
     std::unique_ptr<card::Handler> buildFromFilename(const std::string& filename) const;
   };

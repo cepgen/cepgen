@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,17 +48,17 @@ namespace cepgen {
 
   private:
     void initialise() override;
-    const std::unique_ptr<utils::EventBrowser> browser_;
-    //--- variables definition
-    const bool show_hists_, save_hists_;
-    const std::string filename_;
 
-    std::ofstream file_;
-    std::unique_ptr<utils::Drawer> drawer_;
+    const std::unique_ptr<utils::EventBrowser> browser_;  ///< Event string-to-quantity extaction tool
+    const bool show_hists_;                               ///< Display histograms after the run
+    const bool save_hists_;                               ///< Save histograms into the output file after the run
+    const std::string filename_;                          ///< Output file path
 
-    Value cross_section_{1., 0.};    ///< Cross-section value, in pb
-    unsigned long num_events_{0ul};  ///< Number of events processed
-    std::string proc_name_;          ///< Name of the physics process
+    std::ofstream file_;                     ///< Output file where all information is stored
+    std::unique_ptr<utils::Drawer> drawer_;  ///< Drawing utility
+    Value cross_section_{1., 0.};            ///< Cross-section value, in pb
+    unsigned long num_events_{0ul};          ///< Number of events processed
+    std::string proc_name_;                  ///< Name of the physics process
 
     /// 1D histogram definition
     struct Hist1DInfo {
@@ -69,7 +69,8 @@ namespace cepgen {
     std::vector<Hist1DInfo> hists_;  ///< List of 1D histograms
     /// 2D histogram definition
     struct Hist2DInfo {
-      std::string var1, var2;
+      std::string var1;
+      std::string var2;
       utils::Hist2D hist;
       bool log;
     };
