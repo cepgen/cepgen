@@ -52,7 +52,7 @@ jobs:
     - name: 'Compress environment'
       run: |
         touch environment.tar.gz
-        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package/install /Package/mg5amcnlo-*
+        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package/install /Package/test /Package/mg5amcnlo-*
 
     - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
