@@ -257,6 +257,7 @@ void TextDrawer::drawValues(
                min_value = std::min_element(axis.begin(), axis.end(), map_elements())->second;
   const double log_min_value = std::log(std::max(min_value, 1.e-10)),
                log_max_value = std::log(std::min(max_value, 1.e+10));
+  const auto values_range = Limits{min_value, max_value}, log_values_range = Limits{log_min_value, log_max_value};
   if (!dr.yAxis().label().empty()) {
     const auto y_label = delatexify(dr.yAxis().label());
     os << sep;
@@ -271,7 +272,7 @@ void TextDrawer::drawValues(
   size_t idx = 0;
   for (const auto& [coordinates, value] : axis) {
     const auto left_label = coordinates.label.empty() ? format("%17g", coordinates.value) : coordinates.label;
-    if (min_value == max_value) {
+    if (min_value == max_value) {  // empty plot; display the "EMPTY" banner
       os << "\n" << left_label << ":";
       if (idx == axis.size() / 2) {
         std::string padding;
@@ -281,24 +282,18 @@ void TextDrawer::drawValues(
       } else
         os << std::string(width_, ' ');
       os << ":";
-    } else {
+    } else {  // value is valid
       size_t i_value = 0ull, i_uncertainty = 0ull;
       {
-        double val_dbl = width_, unc_dbl = width_;
-        if (mode & Mode::logy) {
-          val_dbl *= (value > 0. && max_value > 0.)
-                         ? std::max((std::log(value) - log_min_value) / (log_max_value - log_min_value), 0.)
-                         : 0.;
-          unc_dbl *=
-              (value > 0. && max_value > 0.)
-                  ? std::max((std::log(value.uncertainty()) - log_min_value) / (log_max_value - log_min_value), 0.)
-                  : 0.;
-        } else if (max_value > 0.) {
-          val_dbl *= (value - min_value) / (max_value - min_value);
-          unc_dbl *= value.uncertainty() / (max_value - min_value);
+        if (mode & Mode::logy) {  // log scale
+          i_value = std::ceil(width_ *
+                              (value > 0. && max_value > 0. ? std::max(std::log(value) / log_values_range, 0.) : 0.));
+          i_uncertainty = std::ceil(
+              width_ * (value < max_value ? std::max(std::log(value.uncertainty()) / log_values_range, 0.) : 0.));
+        } else if (max_value > 0.) {  // linear scale
+          i_value = std::ceil(width_ * (value / values_range));
+          i_uncertainty = std::ceil(width_ * (value.uncertainty() / values_range.range()));
         }
-        i_value = std::ceil(val_dbl);
-        i_uncertainty = std::ceil(unc_dbl);
       }
       os << "\n"
          << left_label << ":" << (i_value > i_uncertainty ? std::string(i_value - i_uncertainty, ' ') : "")

@@ -44,6 +44,7 @@ namespace cepgen {
     friend Limits operator+(Limits, double);                                      ///< Add a constant to a limit
     friend Limits operator-(Limits, double);                                      ///< Subtract a constant to a limit
     friend Limits operator*(Limits, double);                                      ///< Multiply a limit by a constant
+    friend double operator/(double, const Limits&);                               ///< Find the [0,1] fraction of range
 
     Limits& validate();  ///< Ensure the limit object is valid by correcting it if necessary
 

@@ -179,4 +179,6 @@ namespace cepgen {
     lim *= c;
     return lim;
   }
+
+  double operator/(double x, const Limits& limits) { return (limits.trim(x) - limits.min()) / limits.range(); }
 }  // namespace cepgen
