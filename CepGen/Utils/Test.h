@@ -103,17 +103,15 @@ namespace cepgen::test {
   }
 
 #define CG_TEST_EXCEPT(sequence, name)                                                                                \
-  if (cepgen::test::debug)                                                                                            \
-    CG_LOG << cepgen::utils::colourise("TEST INFO", cepgen::utils::Colour::magenta, cepgen::utils::Modifier::bold)    \
-           << " " << cepgen::utils::colourise(name, cepgen::utils::Colour::magenta) << "\n"                           \
-           << "\tsequence: " << cepgen::utils::boldify(#sequence) << ".";                                             \
-  try {                                                                                                               \
-    sequence();                                                                                                       \
-    throw cepgen::Exception("", "this_test");                                                                         \
-  } catch (const cepgen::Exception& exc) {                                                                            \
-    if (exc.from() == "this_test")                                                                                    \
-      CG_FAILED(name);                                                                                                \
-    else {                                                                                                            \
+  {                                                                                                                   \
+    if (cepgen::test::debug)                                                                                          \
+      CG_LOG << cepgen::utils::colourise("TEST INFO", cepgen::utils::Colour::magenta, cepgen::utils::Modifier::bold)  \
+             << " " << cepgen::utils::colourise(name, cepgen::utils::Colour::magenta) << "\n"                         \
+             << "\tsequence: " << cepgen::utils::boldify(#sequence) << ".";                                           \
+    try {                                                                                                             \
+      sequence();                                                                                                     \
+      CG_FAILED(name) << "Exception was not thrown.";                                                                 \
+    } catch (const cepgen::Exception& exc) {                                                                          \
       CG_PASSED(name) << " Resulting exception:\n"                                                                    \
                       << cepgen::utils::colourise(exc.message(),                                                      \
                                                   cepgen::utils::Colour::none,                                        \
