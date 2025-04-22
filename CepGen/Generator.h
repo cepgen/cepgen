@@ -61,6 +61,7 @@ namespace cepgen {
     void setRunParameters(std::unique_ptr<RunParameters>&);  ///< Feed the generator with a RunParameters object
 
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
+    Integrator& integrator() const;                   ///< Retrieve the integrator object
     void integrate();                                 ///< Integrate the functional over the phase space of interest
 
     Value computeXsection();  ///< Compute the cross-section and uncertainty, in pb, for the run parameters

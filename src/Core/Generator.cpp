@@ -140,6 +140,12 @@ void Generator::setIntegrator(std::unique_ptr<Integrator> integrator) {
   CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
 }
 
+Integrator& Generator::integrator() const {
+  if (!integrator_)
+    throw CG_FATAL("Generator:integrator") << "Uninitialised integrator object.";
+  return *integrator_;
+}
+
 void Generator::integrate() {
   CG_TICKER(parameters_->timeKeeper());
 
