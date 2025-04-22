@@ -415,6 +415,8 @@ std::vector<T> ObjectPtr::vector() const {
 template <typename T>
 ObjectPtr ObjectPtr::tupleFromVector(const std::vector<T>& vec) {
   ObjectPtr tuple(PyTuple_New(vec.size()));
+  if (!tuple)
+    throw CG_ERROR("Python:tupleFromVector") << "Failed to allocate tuple memory for vector: " << vec << ".";
   for (size_t i = 0; i < vec.size(); ++i)
     if (const auto ret = PyTuple_SetItem(tuple.get(), i, make<T>(vec.at(i)).release()); ret != 0)
       throw CG_ERROR("Python:tupleFromVector")
@@ -425,6 +427,8 @@ ObjectPtr ObjectPtr::tupleFromVector(const std::vector<T>& vec) {
 template <>
 ObjectPtr ObjectPtr::tupleFromVector(const std::vector<PyObject*>& vec) {
   ObjectPtr tuple(PyTuple_New(vec.size()));
+  if (!tuple)
+    throw CG_ERROR("Python:tupleFromVector") << "Failed to allocate tuple memory for vector: " << vec << ".";
   for (size_t i = 0; i < vec.size(); ++i)
     if (const auto ret = PyTuple_SetItem(tuple.get(), i, vec.at(i)); ret != 0)
       throw CG_ERROR("Python:tupleFromVector")
