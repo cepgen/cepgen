@@ -61,11 +61,12 @@ int main(int argc, char* argv[]) {
     for (const auto& integrator_name : integrators) {
       if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
         continue;
+      auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
+      if (integrator->oneDimensional() && integrand.size() != 1)  // skip incompatible integrators
+        continue;
       bench.context("integrator", integrator_name)
-          .run(functional_parser + "+" + integrator_name, [&integrator_name, &integrand] {
-            auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
-            integrator->integrate(integrand);
-          });
+          .run(functional_parser + "+" + integrator_name,
+               [&integrator, &integrand] { integrator->integrate(integrand); });
     }
   }
   render_benchmark(bench, filename, outputs);

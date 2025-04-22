@@ -42,11 +42,10 @@ namespace cepgen::boost {
     }
 
   private:
+    bool oneDimensional() const override { return true; }
     Value run(Integrand& integrand, const std::vector<Limits>& range = {}) override {
-      if (integrand.size() != 1) {
-        CG_ERROR("GaussKronrodIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
-        return Value{};
-      }
+      if (integrand.size() != 1)
+        throw CG_ERROR("GaussKronrodIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
       double uncertainty;
       const auto value = ::boost::math::quadrature::gauss_kronrod<double, N>::integrate(
           [&integrand](double x) { return integrand.eval(std::vector{x}); },

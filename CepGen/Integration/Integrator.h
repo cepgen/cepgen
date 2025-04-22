@@ -37,6 +37,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
+    virtual bool oneDimensional() const { return false; }  ///< Is the integrator designed for one-dimensional case?
     virtual double eval(Integrand&, const std::vector<double>&) const;  ///< Compute function value at one point
 
     /// Evaluate the integral for a given range

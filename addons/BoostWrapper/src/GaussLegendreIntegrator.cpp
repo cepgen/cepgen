@@ -39,11 +39,11 @@ namespace cepgen::boost {
     }
 
   private:
+    bool oneDimensional() const override { return true; }
     Value run(Integrand& integrand, const std::vector<Limits>& range = {}) override {
-      if (integrand.size() != 1) {
-        CG_ERROR("GaussLegendreIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
-        return Value{};
-      }
+      if (integrand.size() != 1)
+        throw CG_ERROR("GaussLegendreIntegrator")
+            << "This integration algorithm only runs on 1-dimensional integrands.";
       return Value{::boost::math::quadrature::gauss<double, N>::integrate(
           [&integrand](double x) { return integrand.eval(std::vector{x}); }, range.at(0).min(), range.at(0).max())};
     }

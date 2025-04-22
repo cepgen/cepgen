@@ -64,11 +64,10 @@ public:
   }
 
 private:
+  bool oneDimensional() const override { return true; }
   Value run(Integrand& integrand, const std::vector<Limits>& range) override {
-    if (integrand.size() != 1) {
-      CG_ERROR("GSL1DIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
-      return Value{};
-    }
+    if (integrand.size() != 1)
+      throw CG_ERROR("GSL1DIntegrator") << "This integration algorithm only runs on 1-dimensional integrands.";
     return integrate(
         GSLFunctionWrapper::build(FunctionWrapper{[&integrand](double x) { return integrand.eval(std::vector{x}); }},
                                   integrand_parameters_)

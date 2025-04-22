@@ -63,8 +63,11 @@ int main(int argc, char* argv[]) {
     for (const auto& integrator_name : integrators) {
       if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
         continue;
-      bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&gen, &integrator_name] {
-        gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));
+      gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));
+      if (gen.integrator().oneDimensional() &&
+          gen.runParameters().process().ndim() > 1)  // skip incompatible integrators
+        continue;
+      bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&gen] {
         gen.computeXsection();
       });
     }

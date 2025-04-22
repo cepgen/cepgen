@@ -75,6 +75,8 @@ int main(int argc, char* argv[]) {
     // integration part
     size_t i = 0;
     for (auto& test : tests) {
+      if (test.integrand.size() > 1 && integrator->oneDimensional())  // skip multi-dimensional integration
+        continue;                                                     // if integrator does not support it
       const auto res = integrator->integrate(test.integrand, test.limits);
       const auto test_name = integrator_name + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
