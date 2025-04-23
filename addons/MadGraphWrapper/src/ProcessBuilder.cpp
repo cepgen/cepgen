@@ -46,15 +46,6 @@ ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library) 
                                             << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
 }
 
-void ProcessBuilder::addEventContent() {
-  const auto central_system = phase_space_generator_->central();
-  setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-                   {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                   {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-                   {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                   {Particle::Role::CentralSystem, spdgids_t(central_system.begin(), central_system.end())}});
-}
-
 ParametersDescription ProcessBuilder::description() {
   auto desc = FactorisedProcess::description();
   desc.setDescription("MadGraph_aMC process builder");

@@ -26,8 +26,6 @@ namespace cepgen::mg5amc {
 
     static ParametersDescription description();
 
-    void addEventContent() override;
-
   protected:
     void loadMG5Library() const;
     void prepareSteeringCard() const;
