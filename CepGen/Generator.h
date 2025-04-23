@@ -17,6 +17,7 @@
 #define CepGen_Generator_h
 
 #include <functional>
+#include <map>
 #include <memory>
 
 #include "CepGen/Utils/Value.h"
@@ -33,12 +34,13 @@ namespace cepgen::proc {
 }
 
 namespace cepgen {
-  static std::vector<std::string> loaded_libraries;   ///< Collection of libraries loaded in RTE
-  static std::vector<std::string> invalid_libraries;  ///< Collection of libraries tested not to work with RTE
-  static std::vector<std::string> search_paths;       ///< Collection of search paths to build RTE
+  static std::map<std::string, void*> loaded_libraries;  ///< Collection of libraries loaded in RTE
+  static std::vector<std::string> invalid_libraries;     ///< Collection of libraries tested not to work with RTE
+  static std::vector<std::string> search_paths;          ///< Collection of search paths to build RTE
   /// Execute an action on a path if found in search paths collection
-  bool callPath(const std::string&, bool (*callback)(const std::string&));
-  bool loadLibrary(const std::string&, bool match = false);  ///< Import a shared library in RTE
+  bool callPath(const std::string&, const std::function<bool(const std::string&)>&);
+  bool loadLibrary(const std::string&, bbool (*callback)(const std::string&));
+  bool unloadLibrary(const std::string&, bool match = false);  ///< Unload a shared library from RTE
   /// Launch the initialisation procedure
   /// \param[in] safe_mode Drop libraries initialisation?
   void initialise(bool safe_mode = false);
