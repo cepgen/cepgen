@@ -31,7 +31,7 @@ namespace cepgen::mg5amc {
   public:
     explicit ElectronPartonProcessBuilder(const ParametersList& params, bool load_library = true)
         : ProcessBuilder(params, load_library) {
-      auto central_system = mg5_proc_->centralSystem();
+      auto central_system = process().centralSystem();
       if (std::abs(*central_system.begin()) == PDG::electron) {
         e_pdg_ = *central_system.begin();
         mode_ = Mode::electron_parton;
@@ -59,18 +59,16 @@ namespace cepgen::mg5amc {
     void prepareFactorisedPhaseSpace() override {
       if (const auto psgen_partons = phase_space_generator_->partons();
           (mode_ == Mode::parton_electron &&
-           *mg5_proc_->intermediatePartons().begin() != static_cast<int>(psgen_partons.at(0))) ||
+           *process().intermediatePartons().begin() != static_cast<int>(psgen_partons.at(0))) ||
           (mode_ == Mode::electron_parton &&
-           *mg5_proc_->intermediatePartons().rbegin() != static_cast<int>(psgen_partons.at(1))))
+           *process().intermediatePartons().rbegin() != static_cast<int>(psgen_partons.at(1))))
         throw CG_FATAL("ElectronPartonProcessBuilder")
-            << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons()
+            << "MadGraph unpacked process incoming state (" << process().intermediatePartons()
             << ") is incompatible with user-steered incoming fluxes particles (" << phase_space_generator_->partons()
             << ").";
       prepareSteeringCard();
     }
     double computeFactorisedMatrixElement() override {
-      if (!mg5_proc_)
-        throw CG_FATAL("ElectronPartonProcessBuilder:eval") << "Process not properly linked!";
       if (!kinematics().cuts().initial.contain(event()(Particle::Role::Parton1)) ||
           !kinematics().cuts().initial.contain(event()(Particle::Role::Parton2)))
         return 0.;
@@ -84,21 +82,21 @@ namespace cepgen::mg5amc {
           << "outgoing: " << pc(0) << " (m=" << pc(0).mass() << "), " << pc(1) << " (m=" << pc(1).mass() << ").";
       if (mode_ == Mode::electron_parton) {
         size_t i = 0;
-        mg5_proc_->setMomentum(i++, pA());  // first "parton": beam electron
-        mg5_proc_->setMomentum(i++, q2());  // second "parton": parton-from-hadron
-        mg5_proc_->setMomentum(i++, pX());
+        process().setMomentum(i++, pA());  // first "parton": beam electron
+        process().setMomentum(i++, q2());  // second "parton": parton-from-hadron
+        process().setMomentum(i++, pX());
         for (size_t j = 0; j < phase_space_generator_->central().size(); ++j)
-          mg5_proc_->setMomentum(i++, pc(j));  // outgoing central particles
+          process().setMomentum(i++, pc(j));  // outgoing central particles
       } else if (mode_ == Mode::parton_electron) {
         size_t i = 0;
-        mg5_proc_->setMomentum(i++, q1());  // first "parton": parton-from-hadron
-        mg5_proc_->setMomentum(i++, pB());  // second "parton": beam electron
+        process().setMomentum(i++, q1());  // first "parton": parton-from-hadron
+        process().setMomentum(i++, pB());  // second "parton": beam electron
         for (size_t j = 0; j < phase_space_generator_->central().size(); ++j)
-          mg5_proc_->setMomentum(i++, pc(j));  // outgoing central particles
-        mg5_proc_->setMomentum(i, pY());
+          process().setMomentum(i++, pc(j));  // outgoing central particles
+        process().setMomentum(i, pY());
       } else
         throw CG_FATAL("ElectronPartonProcessBuilder:eval") << "Invalid beams mode: " << mode_ << ".";
-      if (const auto weight = mg5_proc_->eval(); utils::positive(weight))
+      if (const auto weight = process().eval(); utils::positive(weight))
         return weight * std::pow(shat(), -2);
       return 0.;
     }

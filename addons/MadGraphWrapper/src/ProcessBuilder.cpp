@@ -95,3 +95,9 @@ void ProcessBuilder::prepareSteeringCard() const {
     mg5_proc_->initialise(params_card);
   }
 }
+
+mg5amc::Process& ProcessBuilder::process() const {
+  if (!mg5_proc_)
+    CG_FATAL("mg5amc:GeneralProcessBuilder:eval") << "Process not properly linked!";
+  return *mg5_proc_;
+}
