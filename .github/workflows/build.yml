@@ -144,7 +144,10 @@ jobs:
         path: validation-environment.tar.gz
 
   skimming:
-    needs: build
+    needs:
+      - test
+      - validation
+      - benchmark
     runs-on: ubuntu-latest
     container:
       image: 'laufor/ci-images:cepgen-fedora40'
