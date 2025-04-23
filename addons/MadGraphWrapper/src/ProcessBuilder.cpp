@@ -37,13 +37,13 @@ using namespace std::string_literals;
 ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library) : FactorisedProcess(params, {}) {
   if (load_library)
     loadMG5Library();
-  CG_DEBUG("ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
-                             << ProcessFactory::get().modules() << ".";
+  CG_DEBUG("mg5amc:ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
+                                    << ProcessFactory::get().modules() << ".";
   // once MadGraph process library is loaded into runtime environment, can define its wrapper object
   mg5_proc_ = ProcessFactory::get().build(normalise(steer<std::string>("process")));
   if (mg5_proc_->centralSystem().empty())
-    throw CG_FATAL("ProcessBuilder") << "Failed to retrieve produced particles system from MadGraph process:\n"
-                                     << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
+    throw CG_FATAL("mg5amc:ProcessBuilder") << "Failed to retrieve produced particles system from MadGraph process:\n"
+                                            << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
 }
 
 void ProcessBuilder::addEventContent() {
@@ -74,6 +74,24 @@ void ProcessBuilder::loadMG5Library() const {
       loadLibrary(interface.run());
     }
   } catch (const utils::RunAbortedException&) {
-    CG_FATAL("ProcessBuilder") << "MadGraph_aMC process generation aborted.";
+    CG_FATAL("mg5amc:ProcessBuilder") << "MadGraph_aMC process generation aborted.";
+  }
+}
+
+void ProcessBuilder::prepareSteeringCard() const {
+  if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
+    CG_INFO("mg5amc:ProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
+    const auto unsteered_pcard = Interface::extractParamCardParameters(utils::readFile(params_card));
+    CG_DEBUG("mg5amc:ProcessBuilder") << "Unsteered parameters card:\n" << unsteered_pcard;
+    if (const auto mod_params = steer<ParametersList>("modelParameters"); !mod_params.empty()) {
+      const auto steered_pcard = unsteered_pcard.steer(mod_params);
+      CG_DEBUG("mg5amc:ProcessBuilder") << "User-steered parameters:" << mod_params << "\n"
+                                        << "Steered parameters card:\n"
+                                        << steered_pcard;
+      std::ofstream params_card_steered(params_card);
+      params_card_steered << Interface::generateParamCard(steered_pcard);
+      params_card_steered.close();
+    }
+    mg5_proc_->initialise(params_card);
   }
 }

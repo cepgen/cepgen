@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
@@ -25,12 +23,8 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/RandomGenerator.h"
-#include "CepGenMadGraph/Interface.h"
 #include "CepGenMadGraph/Process.h"
 #include "CepGenMadGraph/ProcessBuilder.h"
-
-using namespace cepgen;
-using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
   class ElectronPartonProcessBuilder final : public ProcessBuilder {
@@ -72,22 +66,7 @@ namespace cepgen::mg5amc {
             << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons()
             << ") is incompatible with user-steered incoming fluxes particles (" << phase_space_generator_->partons()
             << ").";
-      if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
-        CG_INFO("ElectronPartonProcessBuilder")
-            << "Preparing process kinematics for card at \"" << params_card << "\".";
-        const auto unsteered_pcard = Interface::extractParamCardParameters(utils::readFile(params_card));
-        CG_DEBUG("ElectronPartonProcessBuilder") << "Unsteered parameters card:\n" << unsteered_pcard;
-        if (const auto mod_params = steer<ParametersList>("modelParameters"); !mod_params.empty()) {
-          const auto steered_pcard = unsteered_pcard.steer(mod_params);
-          CG_DEBUG("ElectronPartonProcessBuilder") << "User-steered parameters:" << mod_params << "\n"
-                                                   << "Steered parameters card:\n"
-                                                   << steered_pcard;
-          std::ofstream params_card_steered(params_card);
-          params_card_steered << Interface::generateParamCard(steered_pcard);
-          params_card_steered.close();
-        }
-        mg5_proc_->initialise(params_card);
-      }
+      prepareSteeringCard();
     }
     double computeFactorisedMatrixElement() override {
       if (!mg5_proc_)
@@ -138,5 +117,5 @@ namespace cepgen::mg5amc {
     }
   };
 }  // namespace cepgen::mg5amc
-using MadGraphElectronPartonProcessBuilder = mg5amc::ElectronPartonProcessBuilder;
+using MadGraphElectronPartonProcessBuilder = cepgen::mg5amc::ElectronPartonProcessBuilder;
 REGISTER_PROCESS("mg5_aMC:eh", MadGraphElectronPartonProcessBuilder);
