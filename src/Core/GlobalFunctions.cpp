@@ -114,13 +114,13 @@ namespace cepgen {
     return false;
   }
 
-  bool callPath(const std::string& local_path, bool (*callback)(const std::string&)) {
+  bool callPath(const std::string& local_path, const std::function<bool(const std::string&)>& callback) {
     if (search_paths.empty()) {
       CG_WARNING("callPath") << "List of search paths is empty.";
       return false;
     }
     for (const auto& search_path : search_paths)
-      if (const auto the_path = fs::path{search_path} / local_path; utils::fileExists(the_path))
+      if (const auto the_path = fs::path{search_path} / local_path; utils::fileExists(the_path) && callback)
         return callback(the_path);
     return false;
   }

@@ -39,7 +39,7 @@ namespace cepgen {
   static std::vector<std::string> search_paths;          ///< Collection of search paths to build RTE
   /// Execute an action on a path if found in search paths collection
   bool callPath(const std::string&, const std::function<bool(const std::string&)>&);
-  bool loadLibrary(const std::string&, bbool (*callback)(const std::string&));
+  bool loadLibrary(const std::string&, bool match = false);    ///< Import a shared library in RTE
   bool unloadLibrary(const std::string&, bool match = false);  ///< Unload a shared library from RTE
   /// Launch the initialisation procedure
   /// \param[in] safe_mode Drop libraries initialisation?
