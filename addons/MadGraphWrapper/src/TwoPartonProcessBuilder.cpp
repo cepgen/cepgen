@@ -27,19 +27,19 @@
 #include "CepGenMadGraph/ProcessBuilder.h"
 
 namespace cepgen::mg5amc {
-  class GeneralProcessBuilder final : public ProcessBuilder {
+  class TwoPartonProcessBuilder final : public ProcessBuilder {
   public:
-    explicit GeneralProcessBuilder(const ParametersList& params, bool load_library = true)
+    explicit TwoPartonProcessBuilder(const ParametersList& params, bool load_library = true)
         : ProcessBuilder(params, load_library) {
       setCentral(process().centralSystem());
     }
 
-    proc::ProcessPtr clone() const override { return std::make_unique<GeneralProcessBuilder>(parameters(), false); }
+    proc::ProcessPtr clone() const override { return std::make_unique<TwoPartonProcessBuilder>(parameters(), false); }
 
     void prepareFactorisedPhaseSpace() override {
       if (const auto psgen_partons = phase_space_generator_->partons();
           process().intermediatePartons() != psgen_partons)
-        throw CG_FATAL("mg5amc:GeneralProcessBuilder")
+        throw CG_FATAL("mg5amc:TwoPartonProcessBuilder")
             << "MadGraph unpacked process incoming state (" << process().intermediatePartons() << ") "
             << "is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
       prepareSteeringCard();
@@ -51,19 +51,19 @@ namespace cepgen::mg5amc {
       if (!kinematics().cuts().central.contain(event()(Particle::Role::CentralSystem)))
         return 0.;
 
-      CG_DEBUG_LOOP("mg5amc:GeneralProcessBuilder:eval")
+      CG_DEBUG_LOOP("mg5amc:TwoPartonProcessBuilder:eval")
           << "Particles content:\n"
           << "incoming: " << q1() << " (m=" << q1().mass() << "), " << q2() << " (m=" << q2().mass() << ")\n"
           << "outgoing: " << pc(0) << " (m=" << pc(0).mass() << "), " << pc(1) << " (m=" << pc(1).mass() << ").";
-      process().setMomentum(0, q1());   // first incoming parton
-      process().setMomentum(1, q2());   // second incoming parton
-      process().setMomentum(2, pc(0));  // first outgoing central particle
-      process().setMomentum(3, pc(1));  // second outgoing central particle
+      process().setMomentum(0, q1());  // first incoming parton
+      process().setMomentum(1, q2());  // second incoming parton
+      for (size_t i = 0; i < event()(Particle::Role::CentralSystem).size(); ++i)
+        process().setMomentum(2 + i, pc(i));  // outgoing central particles
       if (const auto weight = process().eval(); utils::positive(weight))
         return weight * std::pow(shat(), -2);
       return 0.;
     }
   };
 }  // namespace cepgen::mg5amc
-using MadGraphGeneralProcessBuilder = cepgen::mg5amc::GeneralProcessBuilder;
-REGISTER_PROCESS("mg5_aMC", MadGraphGeneralProcessBuilder);
+using MadGraphTwoPartonProcessBuilder = cepgen::mg5amc::TwoPartonProcessBuilder;
+REGISTER_PROCESS("mg5_aMC", MadGraphTwoPartonProcessBuilder);
