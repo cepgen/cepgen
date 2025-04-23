@@ -167,9 +167,14 @@ namespace cepgen {
     CG_INFO("init").log([&](auto& log) {
       log << "CepGen " << version::tag << " (" << version::extended << ") "
           << "initialised";
-      if (!loaded_libraries.empty())
-        log << " with " << utils::s("add-on", loaded_libraries.size(), true) << ":\n\t" << loaded_libraries << ".\n\t";
-      else
+      if (!loaded_libraries.empty()) {
+        std::vector<std::string> libraries;
+        std::transform(
+            loaded_libraries.begin(), loaded_libraries.end(), std::back_inserter(libraries), [](const auto& library) {
+              return library.first;
+            });
+        log << " with " << utils::s("add-on", loaded_libraries.size(), true) << ":\n\t" << libraries << ".\n\t";
+      } else
         log << ". ";
       log << "Greetings!";
     });
