@@ -23,15 +23,17 @@ namespace cepgen::mg5amc {
   class ProcessBuilder : public proc::FactorisedProcess {
   public:
     explicit ProcessBuilder(const ParametersList& params, bool load_library = true);
+    ~ProcessBuilder() override;
 
     static ParametersDescription description();
 
   protected:
-    void loadMG5Library() const;
+    void loadMG5Library();
     void prepareSteeringCard() const;
     mg5amc::Process& process() const;
 
   private:
+    std::string library_filename_;
     std::unique_ptr<mg5amc::Process> mg5_proc_;
   };
 }  // namespace cepgen::mg5amc
