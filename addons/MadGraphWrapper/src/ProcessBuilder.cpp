@@ -34,7 +34,8 @@ using namespace cepgen;
 using namespace cepgen::mg5amc;
 using namespace std::string_literals;
 
-ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library) : FactorisedProcess(params, {}) {
+ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library)
+    : FactorisedProcess(params, {}), library_filename_(steer<std::string>("lib")) {
   if (load_library)
     loadMG5Library();
   CG_DEBUG("mg5amc:ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
@@ -46,26 +47,44 @@ ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library) 
                                             << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
 }
 
+ProcessBuilder::~ProcessBuilder() {
+  delete mg5_proc_.release();
+  if (!unloadLibrary(library_filename_))
+    CG_ERROR("mg5amc:~ProcessBuilder") << "Failed to unload library '" << library_filename_ << "'.";
+  if (steer<bool>("removeLibrary")) {
+    std::error_code error_code;
+    if (library_filename_.empty() || !std::filesystem::remove_all(library_filename_, error_code))
+      CG_WARNING("mg5amc:~ProcessBuilder")
+          << "Failed to remove generated library '" << library_filename_ << "'. Error: " << error_code.message() << ".";
+    else
+      CG_DEBUG("mg5amc:~ProcessBuilder") << "Successfully removed generated library '" << library_filename_ << "'.";
+  }
+}
+
 ParametersDescription ProcessBuilder::description() {
   auto desc = FactorisedProcess::description();
   desc.setDescription("MadGraph_aMC process builder");
   desc.add("lib", ""s).setDescription("Precompiled library for this process definition");
   desc.add("parametersCard", "param_card.dat"s).setDescription("Runtime MadGraph parameters card");
+  desc.add("removeLibrary", false).setDescription("Remove the library after usage?");
   desc += Interface::description();
   return desc;
 }
 
-void ProcessBuilder::loadMG5Library() const {
+void ProcessBuilder::loadMG5Library() {
   utils::AbortHandler();
   try {
-    if (const auto& lib_file = steer<std::string>("lib"); !lib_file.empty())  // user-provided library file
-      loadLibrary(lib_file);
-    else {  // library has to be generated from mg5_aMC directives
+    if (library_filename_.empty()) {  // library has to be generated from mg5_aMC directives
       const Interface interface(params_);
-      loadLibrary(interface.run());
+      library_filename_ = interface.run();
     }
+    if (!loadLibrary(library_filename_))
+      throw CG_ERROR("mg5amc:ProcessBuilder:loadMG5Library")
+          << "Failed to load MadGraph_aMC process library '" << library_filename_ << "'.";
+    CG_DEBUG("mg5amc:ProcessBuilder:loadMG5Library")
+        << "MadGraph_aMC process loaded from library '" << library_filename_ << "'.";
   } catch (const utils::RunAbortedException&) {
-    CG_FATAL("mg5amc:ProcessBuilder") << "MadGraph_aMC process generation aborted.";
+    CG_FATAL("mg5amc:ProcessBuilder:loadMG5Library") << "MadGraph_aMC process generation aborted.";
   }
 }
 
