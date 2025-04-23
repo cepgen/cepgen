@@ -31,22 +31,20 @@ namespace cepgen::mg5amc {
   public:
     explicit GeneralProcessBuilder(const ParametersList& params, bool load_library = true)
         : ProcessBuilder(params, load_library) {
-      setCentral(mg5_proc_->centralSystem());
+      setCentral(process().centralSystem());
     }
 
     proc::ProcessPtr clone() const override { return std::make_unique<GeneralProcessBuilder>(parameters(), false); }
 
     void prepareFactorisedPhaseSpace() override {
       if (const auto psgen_partons = phase_space_generator_->partons();
-          mg5_proc_->intermediatePartons() != psgen_partons)
+          process().intermediatePartons() != psgen_partons)
         throw CG_FATAL("mg5amc:GeneralProcessBuilder")
-            << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons() << ") "
+            << "MadGraph unpacked process incoming state (" << process().intermediatePartons() << ") "
             << "is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
       prepareSteeringCard();
     }
     double computeFactorisedMatrixElement() override {
-      if (!mg5_proc_)
-        CG_FATAL("mg5amc:GeneralProcessBuilder:eval") << "Process not properly linked!";
       if (!kinematics().cuts().initial.contain(event()(Particle::Role::Parton1)) ||
           !kinematics().cuts().initial.contain(event()(Particle::Role::Parton2)))
         return 0.;
@@ -57,11 +55,11 @@ namespace cepgen::mg5amc {
           << "Particles content:\n"
           << "incoming: " << q1() << " (m=" << q1().mass() << "), " << q2() << " (m=" << q2().mass() << ")\n"
           << "outgoing: " << pc(0) << " (m=" << pc(0).mass() << "), " << pc(1) << " (m=" << pc(1).mass() << ").";
-      mg5_proc_->setMomentum(0, q1());   // first incoming parton
-      mg5_proc_->setMomentum(1, q2());   // second incoming parton
-      mg5_proc_->setMomentum(2, pc(0));  // first outgoing central particle
-      mg5_proc_->setMomentum(3, pc(1));  // second outgoing central particle
-      if (const auto weight = mg5_proc_->eval(); utils::positive(weight))
+      process().setMomentum(0, q1());   // first incoming parton
+      process().setMomentum(1, q2());   // second incoming parton
+      process().setMomentum(2, pc(0));  // first outgoing central particle
+      process().setMomentum(3, pc(1));  // second outgoing central particle
+      if (const auto weight = process().eval(); utils::positive(weight))
         return weight * std::pow(shat(), -2);
       return 0.;
     }
