@@ -40,14 +40,12 @@ public:
   explicit PhaseSpaceGenerator2to4(const ParametersList& params)
       : PhaseSpaceGenerator(params),
         part_psgen_(PartonsPhaseSpaceGeneratorFactory::get().build(steer<std::string>("partonsGenerator"), params_)),
-        particles_(steer<std::vector<int> >("ids")),
         randomise_charge_(steer<bool>("randomiseCharge")) {}
 
   static ParametersDescription description() {
     auto desc = PhaseSpaceGenerator::description();
     desc.setDescription("2-to-4 phase space mapper");
     desc.add("partonsGenerator", ""s).setDescription("type of partons generator algorithm to use");
-    desc.add("ids", std::vector<int>{}).setDescription("list of particles produced");
     desc.add("randomiseCharge", true).setDescription("randomise the charges of the central system (if charged)?");
     return desc;
   }
@@ -62,6 +60,9 @@ public:
   void initialise(proc::FactorisedProcess* process) override {
     proc_ = process;
     CG_ASSERT(part_psgen_);
+    if (particles_.size() != 2)
+      throw CG_FATAL("PhaseSpaceGenerator2to4:initialise")
+          << "This phase space mapper only works for 2-to-4 mode (hence 2 central particles).";
     part_psgen_->initialise(process);
     const auto& kin_cuts = proc_->kinematics().cuts().central;
     const auto lim_rap = kin_cuts.rapidity_single.truncate(Limits{-6., 6.});
@@ -157,7 +158,7 @@ private:
   }
 
   // factor 1/4 from jacobian of transformations
-  static constexpr double prefactor_ = 0.25 * 0.0625 * M_1_PI * M_1_PI;
+  static constexpr double prefactor_ = M_1_PI * M_1_PI / 16. / 4.;
   static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
 
   const std::unique_ptr<PartonsPhaseSpaceGenerator> part_psgen_;

@@ -60,7 +60,7 @@ c     =================================================================
 c     =================================================================
 c     quarks production
 c     =================================================================
-      double precision t_max,amu2
+      double precision t_max,amu2,amu
 
 c     =================================================================
 c     at initialisation, retrieve a few user-defined parameters
@@ -442,15 +442,17 @@ c     first parton coupling
 c     =================================================================
       t_max = max(amt1,amt2)**2
       amu2 = max(eps12,t_max)
+      amu = dsqrt(amu2)
       if(iflux1.eq.21) then ! at least one gluon exchanged
-        coupling = coupling * 4.d0*pi*CepGen_alphaS(dsqrt(amu2))/2.d0
+        coupling = coupling * 4.d0*pi*CepGen_alphaS('pegasus',amu)/2.d0
       else ! photon exchange
-        coupling = coupling * 4.d0*pi*CepGen_alphaEM(dsqrt(amu2))*q_l**2
+        coupling = coupling * 4.d0*pi*
+     &                               CepGen_alphaEM('fixed',amu)*q_l**2
       endif
 c     =================================================================
 c     second parton coupling
 c     =================================================================
-      coupling = coupling * 4.d0*pi*CepGen_alphaEM(dsqrt(amu2))
+      coupling = coupling * 4.d0*pi*CepGen_alphaEM('fixed', amu)
      &         * q_l**2 ! photon exchange
 
 c     =================================================================

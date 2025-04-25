@@ -33,10 +33,8 @@ namespace cepgen::proc {
   /// \date Jul 2023
   class FactorisedProcess : public Process {
   public:
-    /// Class constructor
-    /// \param[in] params Parameters list
-    /// \param[in] output Produced final state particles
-    explicit FactorisedProcess(const ParametersList& params, const spdgids_t& output);
+    explicit FactorisedProcess(const ParametersList&);                    ///< Class constructor
+    explicit FactorisedProcess(const ParametersList&, const spdgids_t&);  ///< Class constructor
     FactorisedProcess(const FactorisedProcess&);
 
     double computeWeight() override;
@@ -50,6 +48,7 @@ namespace cepgen::proc {
   protected:
     void addEventContent() override;
     void prepareKinematics() final;
+    void setCentral(const spdgids_t&);  ///< Set central final state particles
 
     virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
@@ -67,6 +66,8 @@ namespace cepgen::proc {
   private:
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
     std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< Process-local random number generator engine
+
+    std::vector<int> central_particles_;  ///< List of particle Ids in the central system
 
     const Limits x_validity_range_{0., 1.};
     double kin_prefactor_{1.};

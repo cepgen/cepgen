@@ -31,20 +31,29 @@
 using namespace cepgen;
 using namespace cepgen::proc;
 
-FactorisedProcess::FactorisedProcess(const ParametersList& params, const spdgids_t& central)
+FactorisedProcess::FactorisedProcess(const ParametersList& params)
     : Process(params),
-      phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(
-          steer<ParametersList>("kinematicsGenerator").set("ids", std::vector<int>(central.begin(), central.end())))),
+      phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(steer<ParametersList>("kinematicsGenerator"))),
       symmetrise_(steer<bool>("symmetrise")),
-      store_alphas_(steer<bool>("storeAlphas")) {
-  event().map()[Particle::Role::CentralSystem].resize(central.size());
+      store_alphas_(steer<bool>("storeAlphas")) {}
+
+FactorisedProcess::FactorisedProcess(const ParametersList& params, const spdgids_t& central_particles)
+    : FactorisedProcess(params) {
+  setCentral(central_particles);
 }
 
 FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
     : Process(proc),
       phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(proc.phase_space_generator_->parameters())),
       symmetrise_(proc.symmetrise_),
-      store_alphas_(proc.store_alphas_) {}
+      store_alphas_(proc.store_alphas_) {
+  setCentral(spdgids_t(proc.central_particles_.begin(), proc.central_particles_.end()));
+}
+
+void FactorisedProcess::setCentral(const spdgids_t& central_particles) {
+  central_particles_ = std::vector<int>(central_particles.begin(), central_particles.end());
+  phase_space_generator_->setCentral(central_particles_);
+}
 
 void FactorisedProcess::addEventContent() {
   CG_ASSERT(phase_space_generator_);
@@ -66,6 +75,7 @@ void FactorisedProcess::prepareKinematics() {
 
   event().oneWithRole(Particle::Role::Parton1).setIntegerPdgId(phase_space_generator_->partons().at(0));
   event().oneWithRole(Particle::Role::Parton2).setIntegerPdgId(phase_space_generator_->partons().at(1));
+  event().map()[Particle::Role::CentralSystem].resize(central_particles_.size());
 
   CG_DEBUG("FactorisedProcess:prepareKinematics")
       << "Partons: " << phase_space_generator_->partons() << ", "
