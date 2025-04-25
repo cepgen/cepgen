@@ -109,9 +109,9 @@ c     go to energy of Nucleus = A*inp in order that generator puts out
 c     proper momenta in LAB frame
 c     =================================================================
 
-      inp_A = inp1*a_nuc1
+      inp_A = dabs(inp1)*a_nuc1
       am_A = am_p*a_nuc1
-      inp_B = inp2*a_nuc2
+      inp_B = dabs(inp2)*a_nuc2
       am_B = am_p*a_nuc2
 
 c     =================================================================
@@ -158,7 +158,8 @@ c     a window in final state transverse momentum
 c     =================================================================
 
       if(iptsum) then
-        if(ptsum.lt.ptsum_min.or.ptsum.gt.ptsum_max) return
+        if((ptsum_min.ge.0).and.(ptsum.lt.ptsum_min)) return
+        if((ptsum_max.ge.0).and.(ptsum.gt.ptsum_max)) return
       endif
 
 c     =================================================================
@@ -178,8 +179,8 @@ c     =================================================================
       pt2 = sqrt(pt2x**2+pt2y**2)
 
       if(ipt) then
-        if(pt1.lt.pt_min.or.pt2.lt.pt_min) return
-        if(pt_max.gt.0d0.and.(pt2.gt.pt_max.or.pt2.gt.pt_max)) return
+        if((pt_min.gt.0d0).and.(pt1.lt.pt_min.or.pt2.lt.pt_min)) return
+        if((pt_max.gt.0d0).and.(pt1.gt.pt_max.or.pt2.gt.pt_max)) return
       endif
 
       amt1 = dsqrt(pt1**2+am_l**2)
@@ -195,8 +196,8 @@ c     a window in final state invariant mass
 c     =================================================================
 
       if(iinvm) then
-        if(invm.lt.invm_min) return
-        if(invm_max.gt.0d0.and.invm.gt.invm_max) return
+        if((invm_min.gt.0d0).and.(invm.lt.invm_min)) return
+        if((invm_max.gt.0d0).and.(invm.gt.invm_max)) return
       endif
 
 c     =================================================================
