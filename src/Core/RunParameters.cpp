@@ -122,7 +122,7 @@ std::string RunParameters::processName() const {
   return process_->name();
 }
 
-void RunParameters::clearProcess() { delete process_.release(); }
+void RunParameters::clearProcess() { process_.reset(); }
 
 void RunParameters::setProcess(std::unique_ptr<proc::Process> process) { process_ = std::move(process); }
 
