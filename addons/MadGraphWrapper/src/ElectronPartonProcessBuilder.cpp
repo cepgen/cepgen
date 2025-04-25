@@ -33,17 +33,17 @@ namespace cepgen::mg5amc {
         : ProcessBuilder(params, load_library) {
       auto central_system = process().centralSystem();
       if (std::abs(*central_system.begin()) == PDG::electron) {
-        e_pdg_ = *central_system.begin();
         mode_ = Mode::electron_parton;
-        central_system.erase(central_system.begin());
+        e_pdg_ = *central_system.begin();              // electron, or positron?
+        central_system.erase(central_system.begin());  // first particle is lepton
       } else if (std::abs(*central_system.rbegin()) == PDG::electron) {
-        e_pdg_ = *central_system.rbegin();
         mode_ = Mode::parton_electron;
-        central_system.pop_back();
+        e_pdg_ = *central_system.rbegin();  // electron, or positron?
+        central_system.pop_back();          // last particle is lepton
       } else
         throw CG_FATAL("ElectronPartonProcessBuilder")
             << "No electron/positron found in mg5_aMC process particles list.";
-      phase_space_generator_->setCentral(central_system);
+      phase_space_generator_->setCentral(central_system);  // electron/positron stripped off central system
     }
 
     proc::ProcessPtr clone() const override {
@@ -57,7 +57,7 @@ namespace cepgen::mg5amc {
     }
 
     void prepareFactorisedPhaseSpace() override {
-      if (const auto psgen_partons = phase_space_generator_->partons();
+      if (const auto psgen_partons = phase_space_generator_->partons();  // ensure parton system is compatible
           (mode_ == Mode::parton_electron &&
            *process().intermediatePartons().begin() != static_cast<int>(psgen_partons.at(0))) ||
           (mode_ == Mode::electron_parton &&

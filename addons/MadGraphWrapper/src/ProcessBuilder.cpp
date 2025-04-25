@@ -35,7 +35,7 @@ using namespace cepgen::mg5amc;
 using namespace std::string_literals;
 
 ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library)
-    : FactorisedProcess(params, {}), library_filename_(steer<std::string>("lib")) {
+    : FactorisedProcess(params), library_filename_(steer<std::string>("lib")) {
   if (load_library)
     loadMG5Library();
   CG_DEBUG("mg5amc:ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
@@ -48,8 +48,8 @@ ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library)
 }
 
 ProcessBuilder::~ProcessBuilder() {
-  delete mg5_proc_.release();
-  if (!unloadLibrary(library_filename_))
+  mg5_proc_.reset();  // call the destructor, as the library will be invalidated
+  if (!library_filename_.empty() && !unloadLibrary(library_filename_))
     CG_ERROR("mg5amc:~ProcessBuilder") << "Failed to unload library '" << library_filename_ << "'.";
   if (steer<bool>("removeLibrary")) {
     std::error_code error_code;
