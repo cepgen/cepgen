@@ -82,9 +82,7 @@ Momentum Momentum::fromPThetaPhiE(double p, double theta, double phi, double e) 
 
 Momentum Momentum::fromPxPyPzE(double px, double py, double pz, double e) { return Momentum(px, py, pz, e); }
 
-Momentum Momentum::fromPxPyPzM(double px, double py, double pz, double m) {
-  return Momentum(px, py, pz).setMass(m).computeP();
-}
+Momentum Momentum::fromPxPyPzM(double px, double py, double pz, double m) { return Momentum(px, py, pz).setMass(m); }
 
 Momentum Momentum::fromPxPyYM(double px, double py, double rap, double m) {
   const double et = utils::fastHypot(px, py, m);
@@ -202,9 +200,9 @@ Momentum& Momentum::setEnergy(double e) {
   return *this;
 }
 
-Momentum& Momentum::setMass(double m) { return setEnergy(utils::fastHypot(p_, m)).computeP(); }
+Momentum& Momentum::setMass(double m) { return setEnergy(utils::fastHypot(p_, m)); }
 
-Momentum& Momentum::setMass2(double m2) { return setEnergy(std::sqrt(p_ * p_ + m2)).computeP(); }
+Momentum& Momentum::setMass2(double m2) { return setEnergy(std::sqrt(p_ * p_ + m2)); }
 
 Momentum& Momentum::setP(double px, double py, double pz, double e) { return setEnergy(e).setP(px, py, pz); }
 
