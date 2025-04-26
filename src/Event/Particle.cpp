@@ -34,7 +34,7 @@ bool Particle::operator<(const Particle& rhs) const { return id_ >= 0 && rhs.id_
 
 bool Particle::operator==(const Particle& other) const {
   return id_ == other.id_ && pdg_id_ == other.pdg_id_ && antiparticle_ == other.antiparticle_ &&
-         helicity_ == other.helicity_ && status_ == other.status_ && momentum_ == other.momentum_;
+         polarisation_ == other.polarisation_ && status_ == other.status_ && momentum_ == other.momentum_;
 }
 
 bool Particle::valid() const {
@@ -109,6 +109,18 @@ Particle& Particle::setIntegerPdgId(long pdg_id) {
 }
 
 long Particle::integerPdgId() const { return static_cast<long>(pdg_id_) * (antiparticle_ ? -1 : +1); }
+
+Particle& Particle::setPolarisation(float polarisation) {
+  static const Limits polarisation_range{-1., 1.};
+  if (polarisation_range.contains(polarisation))
+    polarisation_ = polarisation;
+  else {
+    CG_WARNING("Particle:setPolarisation")
+        << "Invalid value set for longitudinal particle polarisation. Allowed range: " << polarisation_range << ".";
+    polarisation_ = 0.;
+  }
+  return *this;
+}
 
 namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Particle& part) {

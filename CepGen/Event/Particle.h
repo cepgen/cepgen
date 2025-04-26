@@ -112,12 +112,8 @@ namespace cepgen {
     Particle& setIntegerPdgId(long pdg_id);
     long integerPdgId() const;  ///< Retrieve the integer value of the PDG identifier
 
-    inline float helicity() const { return helicity_; }  ///< Particle's helicity
-    /// Set the helicity of the particle
-    inline Particle& setHelicity(float heli) {
-      helicity_ = heli;
-      return *this;
-    }
+    inline float polarisation() const { return polarisation_; }  ///< Particle's longitudinal polarisation
+    Particle& setPolarisation(float);                            ///< Set the longitudinal polarisation of the particle
 
     inline Momentum& momentum() { return momentum_; }  ///< Retrieve the momentum object associated with this particle
     /// Retrieve the momentum object associated with this particle
@@ -154,7 +150,7 @@ namespace cepgen {
     int id_{-1};                                       ///< Unique identifier in an event
     bool antiparticle_{false};                         ///< Are we dealing with the particle or antiparticle?
     Momentum momentum_;                                ///< Momentum properties handler
-    float helicity_{0.};                               ///< Helicity
+    float polarisation_{0.};                           ///< Longitudinal particle polarisation (between -1 and 1)
     Role role_{Role::UnknownRole};                     ///< Role in the process
     int status_{static_cast<int>(Status::Undefined)};  ///< Decay/stability status
     ParticlesIds mothers_{};                           ///< List of mother particles
