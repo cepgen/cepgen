@@ -109,6 +109,8 @@ namespace cepgen::python {
     throw CG_ERROR("python:Functional:eval") << "Failed to build a tuple for the arguments.";
   }
 
+  const std::vector<std::string>& Functional::arguments() const { return arguments_; }
+
   ParametersDescription Functional::description() {
     auto desc = utils::Functional::description();
     desc.setDescription("Python mathematical expression evaluator");
