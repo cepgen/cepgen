@@ -47,7 +47,7 @@ public:
   }
 
   bool fragmenting() const final { return flux_->fragmenting(); }
-  pdgid_t partonPdgId() const final { return flux_->partonPdgId(); }
+  spdgid_t partonPdgId() const final { return flux_->partonPdgId(); }
   double mass2() const final { return flux_->mass2(); }
 
   static ParametersDescription description() {

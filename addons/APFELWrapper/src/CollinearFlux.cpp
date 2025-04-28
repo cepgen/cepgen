@@ -68,7 +68,7 @@ namespace cepgen::apfel {
       return desc;
     }
 
-    pdgid_t partonPdgId() const override { return parton_pdgid_; }
+    spdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
     double fluxQ2(double x, double q2) const override {
@@ -81,7 +81,7 @@ namespace cepgen::apfel {
     }
 
   private:
-    const pdgid_t parton_pdgid_;
+    const spdgid_t parton_pdgid_;
     const Limits q_range_;
   };
 }  // namespace cepgen::apfel

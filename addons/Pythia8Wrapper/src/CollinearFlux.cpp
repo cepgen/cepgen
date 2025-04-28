@@ -92,7 +92,7 @@ namespace cepgen::pythia8 {
       return desc;
     }
 
-    pdgid_t partonPdgId() const override { return parton_pdgid_; }
+    spdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mass2_; }
 
@@ -106,7 +106,8 @@ namespace cepgen::pythia8 {
     std::unique_ptr<Pythia8::PDF> pdf_;
     std::unique_ptr<Pythia8::Info> info_;
     const std::string type_;
-    const int parton_pdgid_, beam_pdgid_;
+    const spdgid_t parton_pdgid_;
+    const spdgid_t beam_pdgid_;
     const double mass2_;
   };
 }  // namespace cepgen::pythia8

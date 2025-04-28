@@ -67,7 +67,7 @@ namespace cepgen::proc {
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
     std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< Process-local random number generator engine
 
-    std::vector<int> central_particles_;  ///< List of particle Ids in the central system
+    spdgids_t central_particles_;  ///< List of particle Ids in the central system
 
     const Limits x_validity_range_{0., 1.};
     double kin_prefactor_{1.};

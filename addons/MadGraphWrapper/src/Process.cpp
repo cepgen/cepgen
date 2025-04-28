@@ -23,10 +23,14 @@
 
 using namespace cepgen::mg5amc;
 
+const auto make_pdgids = [](const std::vector<int>& particles) {
+  return cepgen::spdgids_t(particles.begin(), particles.end());
+};
+
 Process::Process(const ParametersList& params)
     : NamedModule(params),
-      incoming_pdgids_(steer<std::vector<int> >("incomingSystem")),
-      central_pdgids_(steer<std::vector<int> >("outgoingSystem")) {}
+      incoming_pdgids_(make_pdgids(steer<std::vector<int> >("incomingSystem"))),
+      central_pdgids_(make_pdgids(steer<std::vector<int> >("outgoingSystem"))) {}
 
 Process& Process::setMomentum(size_t i, const Momentum& mom) {
   if (i >= mom_.size())

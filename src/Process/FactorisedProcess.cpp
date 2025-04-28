@@ -46,23 +46,20 @@ FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
     : Process(proc),
       phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(proc.phase_space_generator_->parameters())),
       symmetrise_(proc.symmetrise_),
-      store_alphas_(proc.store_alphas_) {
-  setCentral(spdgids_t(proc.central_particles_.begin(), proc.central_particles_.end()));
-}
+      store_alphas_(proc.store_alphas_),
+      central_particles_(proc.central_particles_) {}
 
 void FactorisedProcess::setCentral(const spdgids_t& central_particles) {
-  central_particles_ = std::vector<int>(central_particles.begin(), central_particles.end());
-  phase_space_generator_->setCentral(central_particles_);
+  central_particles_ = central_particles;
+  CG_DEBUG("FactorisedProcess:setCentral") << "Setting the central particles system to: " << central_particles_ << ".";
 }
 
 void FactorisedProcess::addEventContent() {
-  CG_ASSERT(phase_space_generator_);
-  const auto central_pdg_ids = phase_space_generator_->central();
   setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
                    {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
                    {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
                    {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                   {Particle::Role::CentralSystem, spdgids_t(central_pdg_ids.begin(), central_pdg_ids.end())}});
+                   {Particle::Role::CentralSystem, central_particles_}});
 }
 
 void FactorisedProcess::prepareKinematics() {
@@ -71,6 +68,9 @@ void FactorisedProcess::prepareKinematics() {
     throw CG_FATAL("FactorisedProcess:prepareKinematics")
         << "Phase space generator not set. Please check your process initialisation procedure, as you might "
            "be doing something irregular.";
+  if (central_particles_.empty())
+    CG_WARNING("FactorisedProcess:prepareKinematics") << "Empty central particles content.";
+  phase_space_generator_->setCentral(central_particles_);
   phase_space_generator_->initialise(this);
 
   event().oneWithRole(Particle::Role::Parton1).setIntegerPdgId(phase_space_generator_->partons().at(0));

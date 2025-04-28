@@ -35,7 +35,7 @@ struct KMRGluonKTFlux final : KTFlux {
       return 0.;
     return kmr::GluonGrid::get()(x, kt2, mx2);
   }
-  pdgid_t partonPdgId() const override { return PDG::gluon; }
+  spdgid_t partonPdgId() const override { return PDG::gluon; }
   bool fragmenting() const override { return false; }
   double mass2() const override { return mp2_; }
 };

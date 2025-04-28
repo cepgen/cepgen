@@ -96,14 +96,14 @@ public:
     return fluxes_weight * central_weight_;
   }
 
-  pdgids_t partons() const override {
+  spdgids_t partons() const override {
     CG_ASSERT(part_psgen_);
-    return pdgids_t{part_psgen_->positiveFlux().partonPdgId(), part_psgen_->negativeFlux().partonPdgId()};
+    return {part_psgen_->positiveFlux().partonPdgId(), part_psgen_->negativeFlux().partonPdgId()};
   }
 
-  std::vector<int> central() const override { return particles_; }
+  spdgids_t central() const override { return particles_; }
 
-  void setCentral(const std::vector<int>& central_pdgids) override {
+  void setCentral(const spdgids_t& central_pdgids) override {
     if (central_pdgids.size() != 2)
       throw CG_FATAL("PhaseSpaceGenerator2to4:setCentral")
           << "Invalid central particles multiplicity: expecting 2, got " << central_pdgids << ".";
@@ -162,7 +162,7 @@ private:
   static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
 
   const std::unique_ptr<PartonsPhaseSpaceGenerator> part_psgen_;
-  std::vector<int> particles_;  ///< Type of particles produced in the final state (integer values)
+  spdgids_t particles_;  ///< Type of particles produced in the final state (integer values)
   const bool randomise_charge_;
 
   proc::FactorisedProcess* proc_{nullptr};  //NOT owning

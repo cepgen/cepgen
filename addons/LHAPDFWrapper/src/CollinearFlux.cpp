@@ -69,7 +69,7 @@ namespace cepgen::lhapdf {
       return desc;
     }
 
-    pdgid_t partonPdgId() const override { return parton_pdgid_; }
+    spdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
 
@@ -88,7 +88,7 @@ namespace cepgen::lhapdf {
 
   private:
     const std::unique_ptr<LHAPDF::PDF> pdf_;
-    const int parton_pdgid_;
+    const spdgid_t parton_pdgid_;
     const bool extrapolate_pdf_;
   };
 }  // namespace cepgen::lhapdf

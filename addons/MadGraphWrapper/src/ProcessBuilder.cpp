@@ -38,29 +38,29 @@ using namespace std::string_literals;
 namespace cepgen::mg5amc {
   class ProcessBuilder final : public proc::FactorisedProcess {
   public:
-    explicit ProcessBuilder(const ParametersList& params, bool load_library = true) : FactorisedProcess(params, {}) {
+    explicit ProcessBuilder(const ParametersList& params, bool load_library = true) : FactorisedProcess(params) {
       if (load_library)
         loadMG5Library();
       CG_DEBUG("mg5amc:ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
                                         << ProcessFactory::get().modules() << ".";
       // once MadGraph process library is loaded into runtime environment, can define its wrapper object
       mg5_proc_ = ProcessFactory::get().build(normalise(steer<std::string>("process")));
-      if (mg5_proc_->centralSystem().empty())
+      if (const auto& central_system = mg5_proc_->centralSystem(); !central_system.empty())
+        setCentral(mg5_proc_->centralSystem());
+      else
         throw CG_FATAL("mg5amc:ProcessBuilder")
             << "Failed to retrieve produced particles system from MadGraph process:\n"
             << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
-      phase_space_generator_->setCentral(mg5_proc_->centralSystem());
     }
 
     proc::ProcessPtr clone() const override { return std::make_unique<ProcessBuilder>(parameters(), false); }
 
     void addEventContent() override {
-      const auto mg5_proc_cent = mg5_proc_->centralSystem();
       setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
                        {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
                        {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
                        {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                       {Particle::Role::CentralSystem, spdgids_t(mg5_proc_cent.begin(), mg5_proc_cent.end())}});
+                       {Particle::Role::CentralSystem, mg5_proc_->centralSystem()}});
     }
 
     static ParametersDescription description() {
@@ -73,12 +73,11 @@ namespace cepgen::mg5amc {
     }
 
     void prepareFactorisedPhaseSpace() override {
-      const auto psgen_partons = phase_space_generator_->partons();
-      if (mg5_proc_->intermediatePartons() != std::vector<int>(psgen_partons.begin(), psgen_partons.end()))
+      if (const auto psgen_partons = phase_space_generator_->partons();
+          mg5_proc_->intermediatePartons() != psgen_partons)
         throw CG_FATAL("mg5amc:ProcessBuilder")
             << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons() << ") "
-            << "is incompatible with user-steered incoming fluxes particles (" << phase_space_generator_->partons()
-            << ").";
+            << "is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
       if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
         CG_INFO("mg5amc:ProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
         const auto unsteered_pcard = Interface::extractParamCardParameters(utils::readFile(params_card));

@@ -20,6 +20,7 @@
 #define CepGenMadGraph_Process_h
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
   class Momentum;
@@ -34,8 +35,8 @@ namespace cepgen::mg5amc {
 
     static ParametersDescription description();
 
-    inline const std::vector<int>& intermediatePartons() const { return incoming_pdgids_; }
-    inline const std::vector<int>& centralSystem() const { return central_pdgids_; }
+    inline const spdgids_t& intermediatePartons() const { return incoming_pdgids_; }
+    inline const spdgids_t& centralSystem() const { return central_pdgids_; }
 
     virtual void initialise(const std::string&) = 0;
     virtual double eval() = 0;
@@ -44,7 +45,8 @@ namespace cepgen::mg5amc {
     Process& setMomentum(size_t i, const Momentum& mom);
 
   protected:
-    const std::vector<int> incoming_pdgids_, central_pdgids_;
+    const spdgids_t incoming_pdgids_;  ///< incoming partons content
+    const spdgids_t central_pdgids_;   ///< central system particles content
     std::vector<double*> mom_;
   };
 }  // namespace cepgen::mg5amc

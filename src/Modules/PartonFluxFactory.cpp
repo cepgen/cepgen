@@ -46,7 +46,7 @@ bool PartonFluxFactory::elastic(const ParametersList& params) {
   throw CG_FATAL("PartonFluxFactory:elastic") << "Failed to find a parton flux with name '" << name << "'.";
 }
 
-int PartonFluxFactory::partonPdgId(const ParametersList& params) {
+spdgid_t PartonFluxFactory::partonPdgId(const ParametersList& params) {
   const auto& name = params.name();
   if (name.empty())
     throw CG_FATAL("PartonFluxFactory:partonPdgId") << "No name given to get parton flux modelling PDG id.";

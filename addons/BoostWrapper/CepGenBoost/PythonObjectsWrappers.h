@@ -37,7 +37,7 @@ struct PartonFluxWrap : cepgen::PartonFlux, py::wrapper<cepgen::PartonFlux> {
       return ov();
     return PartonFlux::fragmenting();
   }
-  cepgen::pdgid_t partonPdgId() const override {
+  cepgen::spdgid_t partonPdgId() const override {
     if (py::override ov = this->get_override("partonPdgId"))
       return ov();
     return PartonFlux::partonPdgId();

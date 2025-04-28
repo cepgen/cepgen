@@ -57,8 +57,8 @@ namespace cepgen {
 
     static ParametersDescription describeParameters(const std::string& name,
                                                     const ParametersList& params = ParametersList());
-    static bool elastic(const ParametersList&);     ///< Is the beam modelling elastic?
-    static int partonPdgId(const ParametersList&);  ///< Type of parton exchanged
+    static bool elastic(const ParametersList&);           ///< Is the beam modelling elastic?
+    static long long partonPdgId(const ParametersList&);  ///< Type of parton exchanged
   };
 }  // namespace cepgen
 

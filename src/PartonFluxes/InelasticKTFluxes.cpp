@@ -47,7 +47,7 @@ public:
 
   double mass2() const override { return mp2_; }
   bool fragmenting() const final { return true; }
-  pdgid_t partonPdgId() const override { return PDG::photon; }
+  spdgid_t partonPdgId() const override { return PDG::photon; }
   double fluxMX2(double x, double kt2, double mx2) const override {
     if (!x_range_.contains(x, true))
       return 0.;
