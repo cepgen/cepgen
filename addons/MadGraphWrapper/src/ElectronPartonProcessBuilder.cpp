@@ -43,7 +43,7 @@ namespace cepgen::mg5amc {
       } else
         throw CG_FATAL("ElectronPartonProcessBuilder")
             << "No electron/positron found in mg5_aMC process particles list.";
-      phase_space_generator_->setCentral(central_system);  // electron/positron stripped off central system
+      setCentral(central_system);  // electron/positron stripped off central system
     }
 
     proc::ProcessPtr clone() const override {
