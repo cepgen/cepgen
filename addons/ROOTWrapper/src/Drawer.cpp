@@ -129,7 +129,9 @@ namespace cepgen::root {
           histogram->SetMaximum(y_range.max());
       }
     }
-    static TString delatexify(const std::string& token) { return {utils::replaceAll(token, {{"$", ""}, {"\\", "#"}})}; }
+    static TString delatexify(const std::string& token) {
+      return {utils::replaceAll(token, {{"$", ""}, {"\\to", "\\rightarrow"}, {"\\", "#"}})};
+    }
     static TGraphErrors convert(const utils::Graph1D&);
     static TGraph2DErrors convert(const utils::Graph2D&);
     static TH1D convert(const utils::Hist1D&);
