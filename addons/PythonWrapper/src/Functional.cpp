@@ -63,6 +63,14 @@ namespace cepgen::python {
     CG_DEBUG("python:Functional") << "Functional '" << name_ << "' parsed from object.";
     if (const auto code = ObjectPtr::wrap(PyFunction_GetCode(func_.get())); code) {
       CG_DEBUG("python:Functional") << "Functional has an associated code.";
+      if (const auto argument_names_attribute = code.attribute("co_varnames");
+          argument_names_attribute && argument_names_attribute.isVector<std::string>()) {
+        for (const auto& argument_name : argument_names_attribute.vector<std::string>())
+          arguments_.emplace_back(argument_name);
+        CG_DEBUG("python:Functional") << "List of arguments unpacked for function '" << name_ << "': " << arguments_
+                                      << ".";
+      } else
+        CG_WARNING("python:Functional") << "Failed to retrieve argument names for function '" << name_ << "'.";
       if (const auto arg_count = code.attribute("co_argcount"); arg_count && arg_count.is<int>()) {
         CG_DEBUG("python:Functional") << "Retrieved " << utils::s("argument", arg_count.value<int>(), true) << ".";
         for (int i = 0; i < arg_count.value<int>(); ++i) {
