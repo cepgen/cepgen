@@ -401,13 +401,13 @@ std::vector<T> ObjectPtr::vector() const {
         << "Object has invalid type: list/tuple != \"" << get()->ob_type->tp_name << "\".";
   std::vector<T> vec;
   const bool tuple = PyTuple_Check(get());
-  const Py_ssize_t num_entries = tuple ? PyTuple_Size(get()) : PyList_Size(get());
-  //--- check every single element inside the list/tuple
-  for (Py_ssize_t i = 0; i < num_entries; ++i) {
-    auto pit = wrap(tuple ? PyTuple_GetItem(get(), i) /* borrowed */ : PyList_GetItem(get(), i) /* borrowed */);
-    if (!pit.is<T>())
+  for (Py_ssize_t i = 0; i < (tuple ? PyTuple_Size(get()) : PyList_Size(get())); ++i) {
+    if (const auto pit =
+            wrap(tuple ? PyTuple_GetItem(get(), i) /* borrowed */ : PyList_GetItem(get(), i) /* borrowed */);
+        pit.is<T>())  // check every single element inside the list/tuple
+      vec.emplace_back(pit.value<T>());
+    else
       throw CG_ERROR("python::ObjectPtr:vector") << "Mixed types detected in vector.";
-    vec.emplace_back(pit.value<T>());
   }
   return vec;
 }
@@ -468,13 +468,15 @@ ObjectPtr ObjectPtr::defineModule(const std::string& mod_name, const std::string
   auto mod = ObjectPtr(PyImport_AddModule(mod_name.data()));
   if (!mod)
     throw PY_ERROR << "Failed to add the module.";
-  auto* local_dict = PyModule_GetDict(mod.get());
-  if (!local_dict)
+  if (auto* local_dict = PyModule_GetDict(mod.get()); local_dict)
+    wrap(PyRun_String(code.data(), Py_file_input, local_dict, local_dict));
+  else
     throw PY_ERROR << "Failed to retrieve the local dictionary from module.";
-  wrap(PyRun_String(code.data(), Py_file_input, local_dict, local_dict));
+  std::vector<std::string> attributes;
+  if (const auto py_attributes = ObjectPtr(PyObject_Dir(mod.get())); py_attributes.isVector<std::string>())
+    attributes = py_attributes.vector<std::string>();
   CG_DEBUG("Python:defineModule") << "New '" << mod_name << "' module initialised from Python code parsing.\n"
-                                  << "List of attributes: " << ObjectPtr(PyObject_Dir(mod.get())).vector<std::string>()
-                                  << ".";
+                                  << "List of attributes: " << attributes << ".";
   return mod;
 }
 

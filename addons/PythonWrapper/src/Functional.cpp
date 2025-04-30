@@ -40,14 +40,23 @@ namespace cepgen::python {
       if (!func_ || !PyCallable_Check(func_.get()))
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
       if (const auto function_code = func_.attribute("__code__"); function_code) {
+        std::vector<std::string> arguments;
         if (const auto argument_names_attribute = function_code.attribute("co_varnames");
             argument_names_attribute && argument_names_attribute.isVector<std::string>()) {
           for (const auto& argument_name : argument_names_attribute.vector<std::string>())
-            arguments_.emplace_back(argument_name);
-          CG_DEBUG("python:Functional") << "List of arguments unpacked for function '" << name_ << "': " << arguments_
+            arguments.emplace_back(argument_name);
+          CG_DEBUG("python:Functional") << "List of arguments unpacked for function '" << name_ << "': " << arguments
                                         << ".";
         } else
           CG_WARNING("python:Functional") << "Failed to retrieve argument names for function '" << name_ << "'.";
+        if (const auto arg_count = function_code.attribute("co_argcount"); arg_count && arg_count.is<int>()) {
+          const size_t arguments_size = arg_count.value<int>();
+          CG_DEBUG("python:Functional") << "Retrieved " << utils::s("argument", arguments_size, true) << ".";
+          vars_.resize(arguments_size);
+          values_.resize(arguments_size);
+          for (size_t i = 0; i < arguments_size; ++i)
+            vars_[i] = i < arguments.size() ? arguments.at(i) : utils::format("var_%d", i);
+        }
       } else
         CG_WARNING("python:Functional") << "Failed to retrieve code for function '" << name_ << "'.";
     } catch (const Error& err) {
@@ -62,21 +71,23 @@ namespace cepgen::python {
     // Python environment is not needed, as it is already assumed to be present (if a Python object is given as an argument...)
     CG_DEBUG("python:Functional") << "Functional '" << name_ << "' parsed from object.";
     if (const auto code = ObjectPtr::wrap(PyFunction_GetCode(func_.get())); code) {
+      std::vector<std::string> arguments;
       CG_DEBUG("python:Functional") << "Functional has an associated code.";
       if (const auto argument_names_attribute = code.attribute("co_varnames");
           argument_names_attribute && argument_names_attribute.isVector<std::string>()) {
         for (const auto& argument_name : argument_names_attribute.vector<std::string>())
-          arguments_.emplace_back(argument_name);
-        CG_DEBUG("python:Functional") << "List of arguments unpacked for function '" << name_ << "': " << arguments_
+          arguments.emplace_back(argument_name);
+        CG_DEBUG("python:Functional") << "List of arguments unpacked for function '" << name_ << "': " << arguments
                                       << ".";
       } else
         CG_WARNING("python:Functional") << "Failed to retrieve argument names for function '" << name_ << "'.";
       if (const auto arg_count = code.attribute("co_argcount"); arg_count && arg_count.is<int>()) {
-        CG_DEBUG("python:Functional") << "Retrieved " << utils::s("argument", arg_count.value<int>(), true) << ".";
-        for (int i = 0; i < arg_count.value<int>(); ++i) {
-          vars_.emplace_back(utils::format("var_%d", i));
-          values_.emplace_back(0.);
-        }
+        const size_t arguments_size = arg_count.value<int>();
+        CG_DEBUG("python:Functional") << "Retrieved " << utils::s("argument", arguments_size, true) << ".";
+        vars_.resize(arguments_size);
+        values_.resize(arguments_size);
+        for (size_t i = 0; i < arguments_size; ++i)
+          vars_[i] = i < arguments.size() ? arguments.at(i) : utils::format("var_%d", i);
       }
     } else
       CG_WARNING("python:Functional") << "Python code object was not retrieved from function '" << name_
@@ -117,7 +128,7 @@ namespace cepgen::python {
     throw CG_ERROR("python:Functional:eval") << "Failed to build a tuple for the arguments.";
   }
 
-  const std::vector<std::string>& Functional::arguments() const { return arguments_; }
+  const std::vector<std::string>& Functional::arguments() const { return vars_; }
 
   ParametersDescription Functional::description() {
     auto desc = utils::Functional::description();
