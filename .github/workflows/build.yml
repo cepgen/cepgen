@@ -22,6 +22,7 @@ jobs:
       options: -v ${{ github.workspace }}:/Package
     steps:
     - uses: actions/checkout@v4
+    - uses: cvmfs-contrib/github-action-cvmfs@v4
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: 'MadGraph fetch'
@@ -35,6 +36,7 @@ jobs:
 
     - name: 'CMake configuration'
       run: |
+        source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-opt/setup.sh
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
               -DCMAKE_INSTALL_PREFIX=/Package/install \
