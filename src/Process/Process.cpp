@@ -387,8 +387,11 @@ void Process::setKinematics() {
   fillKinematics();
   if (event().hasRole(Particle::Role::Intermediate)) {
     Momentum intermediate_momentum;
-    for (size_t i = 0; i < event()[Particle::Role::CentralSystem].size(); ++i)
-      intermediate_momentum += pc(i);
+    if (const auto& central_particles = event()(Particle::Role::CentralSystem); !central_particles.empty())
+      for (size_t i = 0; i < central_particles.size(); ++i)
+        intermediate_momentum += pc(i);
+    else
+      intermediate_momentum = q1() + q2();
     event().oneWithRole(Particle::Role::Intermediate).setMomentum(intermediate_momentum, true);
   }
 }
