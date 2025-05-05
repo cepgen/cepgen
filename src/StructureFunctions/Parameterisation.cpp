@@ -122,9 +122,7 @@ Parameterisation& Parameterisation::setFM(double fm) {
   return *this;
 }
 
-double Parameterisation::tau(double xbj, double q2) const { return 4. * xbj * xbj * mp2_ / q2; }
-
-double Parameterisation::gamma2(double xbj, double q2) const { return 1. + tau(xbj, q2); }
+double Parameterisation::gamma2(double xbj, double q2) const { return 1. + utils::tau(xbj, q2, mp2_); }
 
 double Parameterisation::nu(double xbj, double q2) const {
   return 0.5 * (q2 + utils::mX2(xbj, q2, mp2_) - mp2_) * inv_mp_;

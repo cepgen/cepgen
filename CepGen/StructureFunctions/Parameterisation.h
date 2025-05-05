@@ -92,8 +92,6 @@ namespace cepgen::strfun {
     Parameterisation& setFE(double fe);
     Parameterisation& setFM(double fm);
 
-    /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
-    double tau(double xbj, double q2) const;
     /// Dimensionless variable \f$\gamma^2=1+\frac{4x_{\rm Bj}^2 m_p^2}{Q^2}=1+\tau\f$
     double gamma2(double xbj, double q2) const;
     double nu(double xbj, double q2) const;

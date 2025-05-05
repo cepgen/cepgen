@@ -46,6 +46,12 @@ namespace cepgen::utils {
       return 0.;
     return 0.5 * (w * w - mp2 + m2) / w;
   }
+
+  double tau(double xbj, double q2, double mp2) {
+    if (!positive(q2))
+      return 0.;
+    return 4. * xbj * xbj * mp2 / q2;
+  }
 }  // namespace cepgen::utils
 
 namespace cepgen::utils::kt {
