@@ -47,6 +47,7 @@ namespace cepgen::strfun {
 
     double F2(double xbj, double q2);  ///< Transverse structure function
     double FL(double xbj, double q2);  ///< Longitudinal structure function
+    double FT(double xbj, double q2);  ///< Transverse structure function
     double W1(double xbj, double q2);  ///< Longitudinal form factor
     double W2(double xbj, double q2);
     double FE(double xbj, double q2);  ///< Electric proton form factor

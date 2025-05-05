@@ -65,6 +65,8 @@ double Parameterisation::FL(double xbj, double q2) {
   return operator()(xbj, q2).vals_.fl;
 }
 
+double Parameterisation::FT(double xbj, double q2) { return utils::tau(xbj, q2, mp2_) * F2(xbj, q2) - FL(xbj, q2); }
+
 double Parameterisation::W1(double xbj, double q2) {
   if (hasW1W2())
     return operator()(xbj, q2).vals_.w1;
