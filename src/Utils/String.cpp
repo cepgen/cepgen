@@ -31,6 +31,8 @@
 
 #ifndef __APPLE__
 #include <cstring>
+#else
+#include <string.h>
 #endif
 
 #ifdef __GNUG__
