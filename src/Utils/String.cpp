@@ -382,7 +382,7 @@ namespace cepgen::utils {
 
   std::string describeError(int error_number) {
 #ifdef __APPLE__
-    return std::to_string(errnum);
+    return std::to_string(error_number);
 #else
     char* error = strerror(error_number);
     std::string error_description;
