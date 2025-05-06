@@ -229,8 +229,9 @@ namespace cepgen::utils {
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
+    static constexpr size_t charset_length = 26 * 2 + 10;
     auto rng = std::mt19937{std::random_device{}()};
-    auto dist = std::uniform_int_distribution{{}, std::strlen(charset) - 1};
+    auto dist = std::uniform_int_distribution{{}, charset_length - 1};
     auto output = std::string(size, '\0');
     std::generate_n(output.begin(), size, [=, &dist, &rng]() { return charset[dist(rng)]; });
     return output;
