@@ -26,7 +26,7 @@ if(IS_LXPLUS)
   list(APPEND CMAKE_PREFIX_PATH "$ENV{JSONMCPP_DIR}/lib64/cmake")
 endif()
 #--- searching for GSL
-find_package(GSL REQUIRED)
+find_package(GSL COMPONENTS gsl REQUIRED)
 list(APPEND CEPGEN_CORE_EXT GSL::gsl)
 #--- either use GSL's CBLAS or OpenBLAS implementation
 find_library(OPENBLAS_LIB openblas HINTS $ENV{OPENBLAS_DIR} PATH_SUFFIXES lib)
@@ -34,6 +34,7 @@ if(OPENBLAS_LIB)
   message(STATUS "OpenBLAS found in ${OPENBLAS_LIB}")
   list(APPEND CEPGEN_CORE_EXT ${OPENBLAS_LIB})
 else()
+  find_package(GSL COMPONENTS gsl gslcblas REQUIRED)
   list(APPEND CEPGEN_CORE_EXT GSL::gslcblas)
 endif()
 #--- searching for ROOT
