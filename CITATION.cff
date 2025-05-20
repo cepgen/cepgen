@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Forthomme"
+  given-names: "Laurent"
+  orcid: "https://orcid.org/0000-0002-3302-336X"
+- family-names: "Łuszczak"
+  given-names: "Marta"
+  orcid: "https://orcid.org/0000-0003-1776-8019"
+- family-names: "Schäfer"
+  given-names: "Wolfgang"
+  orcid: "https://orcid.org/0000-0002-0764-0372"
+title: "CepGen"
+doi: 10.5281/zenodo.6949077
+url: "https://github.com/cepgen/cepgen"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Forthomme"
+    given-names: "Laurent"
+    orcid: "https://orcid.org/0000-0002-3302-336X"
+  doi: "10.1016/j.cpc.2021.108225"
+  journal: "Computer Physics Communications"
+  month: 2
+  start: 108225
+  title: "CepGen - A generic central exclusive processes event generator for hadron-hadron collisions"
+  issue: 271
+  year: 2022
