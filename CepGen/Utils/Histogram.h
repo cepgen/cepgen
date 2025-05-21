@@ -27,11 +27,9 @@
 #include <memory>
 #include <set>
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Utils/Drawable.h"
 
-namespace cepgen {
-  class ParametersList;
-}
 namespace cepgen::utils {
   class RandomGenerator;
   /// Generic container for binned distributions
@@ -71,6 +69,8 @@ namespace cepgen::utils {
     /// Build a histogram from variable-width bins
     explicit Hist1D(const std::vector<double>& bins, const std::string& name = "", const std::string& title = "");
     Hist1D(const Hist1D&);  ///< Copy constructor
+
+    static ParametersDescription description();
 
     bool empty() const override;
     void clear() override;
@@ -139,6 +139,8 @@ namespace cepgen::utils {
                     const std::string& name = "",
                     const std::string& title = "");
     Hist2D(const Hist2D&);  ///< Copy constructor
+
+    static ParametersDescription description();
 
     bool empty() const override;
     void clear() override;
