@@ -40,34 +40,30 @@ public:
     if (const auto& plotter = steer<std::string>("plotter"); !plotter.empty())  // build the plotter object if specified
       drawer_ = DrawerFactory::get().build(plotter, params);
 
-    // extract list of variables to be plotted in histogram
     const auto& hist_vars = steer<ParametersList>("histVariables");
-    for (const auto& key : hist_vars.keys()) {
-      const auto& vars = utils::split(key, ':');
-      if (vars.size() < 1 || vars.size() > 2)
-        throw CG_FATAL("EventHarvester") << "Invalid number of variables to correlate for '" << key << "'!";
-
+    for (const auto& key : hist_vars.keys()) {  // extract list of variables to be plotted in histogram
       auto hvar = hist_vars.get<ParametersList>(key);
       const auto& log = hvar.get<bool>("log");
       auto name = utils::sanitise(key);
-      if (vars.size() == 1) {  // 1D histogram
+      if (const auto& vars = utils::split(key, ':'); vars.size() == 1) {  // 1D histogram
         auto hist = utils::Hist1D(hvar.set("name", name));
         hist.xAxis().setLabel(vars.at(0));
         hist.yAxis().setLabel("d$\\sigma$/d" + vars.at(0) + " (pb/bin)");
-        hists_.emplace_back(Hist1DInfo{vars.at(0), hist, log});
+        hists1d_.emplace_back(Hist1DInfo{vars.at(0), hist, log});
       } else if (vars.size() == 2) {  // 2D histogram
         auto hist = utils::Hist2D(hvar.set("name", utils::sanitise(name)));
         hist.xAxis().setLabel(vars.at(0));
         hist.yAxis().setLabel(vars.at(1));
-        hist.zAxis().setLabel("d$^2$$\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
+        hist.zAxis().setLabel("d${}^2\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
         hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), hist, log});
-      }
+      } else
+        throw CG_FATAL("EventHarvester") << "Invalid number of variables to correlate for '" << key << "'.";
     }
   }
   ~EventHarvester() override {
     try {  // histogram printout
-      for (auto& h_var : hists_) {
-        h_var.hist.scale(cross_section_ / (num_events_ + 1));
+      for (auto& h_var : hists1d_) {
+        h_var.hist.scale(cross_section_ / num_events_);
         h_var.hist.setTitle(proc_name_);
         std::ostringstream os;
         if (drawer_)
@@ -99,7 +95,7 @@ public:
   inline void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
   bool operator<<(const Event& event) override {
     // increment the corresponding histograms
-    for (auto& h_var : hists_)
+    for (auto& h_var : hists1d_)
       h_var.hist.fill(browser_->get(event, h_var.var));
     for (auto& h_var : hists2d_)
       h_var.hist.fill(browser_->get(event, h_var.var1), browser_->get(event, h_var.var2));
@@ -112,29 +108,27 @@ private:
     num_events_ = 0ul;
     proc_name_ = ProcessFactory::get().describe(runParameters().processName());
     proc_name_ +=
-        ", \\sqrt{s} = " + utils::format("%g", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3) + " TeV";
+        ", $\\sqrt{s} =$ " + utils::format("%g TeV", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3);
   }
 
   const std::unique_ptr<utils::EventBrowser> browser_;  ///< Event string-to-quantity extraction tool
   std::unique_ptr<utils::Drawer> drawer_;               ///< Drawing utility
-  Value cross_section_{1., 0.};                         ///< Cross-section value, in pb
-  unsigned long num_events_{0ul};                       ///< Number of events processed
-  std::string proc_name_;                               ///< Name of the physics process
 
-  /// 1D histogram definition
+  Value cross_section_{1., 0.};    ///< Cross-section value, in pb
+  unsigned long num_events_{0ul};  ///< Number of events processed
+  std::string proc_name_;          ///< Name of the physics process
   struct Hist1DInfo {
     std::string var;
     utils::Hist1D hist;
     bool log;
-  };
-  std::vector<Hist1DInfo> hists_;  ///< List of 1D histograms
-  /// 2D histogram definition
+  };  ///< 1D histogram definition
+  std::vector<Hist1DInfo> hists1d_;  ///< List of 1D histograms
   struct Hist2DInfo {
     std::string var1;
     std::string var2;
     utils::Hist2D hist;
     bool log;
-  };
+  };  ///< 2D histogram definition
   std::vector<Hist2DInfo> hists2d_;  ///< List of 2D histograms
 };
 REGISTER_EXPORTER("eventHarvester", EventHarvester);
