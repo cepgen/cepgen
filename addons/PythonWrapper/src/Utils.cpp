@@ -22,6 +22,7 @@
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenPython/Environment.h"
 #include "CepGenPython/Utils.h"
 
 namespace cepgen::python {
@@ -39,12 +40,20 @@ namespace cepgen::python {
   }
 
   std::vector<std::wstring> info() {
-    auto* py_home = Py_GetPythonHome();
 #ifdef PYTHON2
+    auto* py_home = Py_GetPythonHome();
     std::wstring path{utils::toWstring(std::string(Py_GetPath()))},
         home{utils::toWstring(std::string(py_home ? py_home : "(not set)"))};
-#else
+#elif PY_VERSION_HEX < 0x030d0000  // python < 3.13
+    auto* py_home = Py_GetPythonHome();
     std::wstring path{Py_GetPath()}, home{py_home ? py_home : L"(not set)"};
+#else
+    Environment env{ParametersList()};
+    std::wstring path;
+    for (Py_ssize_t i = 0; i < env.configuration().module_search_paths.length; ++i)
+      path += std::wstring{env.configuration().module_search_paths.items[i]};
+    std::wstring home{env.configuration().home};
+    throw CG_ERROR("");
 #endif
     return std::vector<std::wstring>{
         utils::toWstring("Python version: " + utils::replaceAll(std::string{Py_GetVersion()}, "\n", " ")),
