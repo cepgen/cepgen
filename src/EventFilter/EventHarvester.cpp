@@ -91,18 +91,7 @@ public:
     auto desc = EventExporter::description();
     desc.setDescription("Event-based histogramming tool");
     desc.add("plotter"s, ""s).setDescription("Plotting algorithm to use");
-    // per-histogram default parameters
-    ParametersDescription hist_desc;
-    // x-axis attributes
-    hist_desc.add("xbins"s, std::vector<double>{}).setDescription("x-axis bins definition");
-    hist_desc.add("nbinsX"s, 25).setDescription("Bins multiplicity for x-axis");
-    hist_desc.add("xrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
-    // y-axis attributes
-    hist_desc.add("ybins"s, std::vector<double>{}).setDescription("y-axis bins definition");
-    hist_desc.add("nbinsY"s, 50).setDescription("Bins multiplicity for y-axis");
-    hist_desc.add("yrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
-    hist_desc.add("log"s, false).setDescription("Plot logarithmic axis?");
-    desc.addParametersDescriptionVector("histVariables"s, hist_desc, {})
+    desc.addParametersDescriptionVector("histVariables"s, utils::Hist2D::description(), {})
         .setDescription("Histogram definition for 1/2 variable(s)");
     return desc;
   }

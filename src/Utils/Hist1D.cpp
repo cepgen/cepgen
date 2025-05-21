@@ -28,6 +28,7 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 Hist1D::Hist1D(const ParametersList& params)
     : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
@@ -60,6 +61,18 @@ Hist1D::Hist1D(const Hist1D& oth)
       hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
       underflow_(oth.underflow_),
       overflow_(oth.overflow_) {}
+
+ParametersDescription Hist1D::description() {
+  auto desc = ParametersDescription();
+  desc.add("name"s, ""s).setDescription("Histogram filename-safe name");
+  desc.add("title"s, ""s).setDescription("Histogram title/description");
+  desc.add("log"s, false).setDescription("Plot logarithmic axis?");
+  // x-axis attributes
+  desc.add("xbins"s, std::vector<double>{}).setDescription("x-axis bins definition");
+  desc.add("nbinsX"s, 25).setDescription("Bins multiplicity for x-axis");
+  desc.add("xrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+  return desc;
+}
 
 void Hist1D::buildFromBins(const std::vector<double>& bins) {
   if (bins.size() < 1)
