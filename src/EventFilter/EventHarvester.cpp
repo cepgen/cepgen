@@ -18,7 +18,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
-#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -62,20 +61,18 @@ public:
   }
   ~EventHarvester() override {
     try {  // histogram printout
-      for (auto& h_var : hists1d_) {
-        h_var.hist.scale(cross_section_ / num_events_);
-        h_var.hist.setTitle(proc_name_);
-        std::ostringstream os;
+      for (auto& info : hists1d_) {
+        info.histogram.scale(cross_section_ / num_events_);
+        info.histogram.setTitle(proc_name_);
         if (drawer_)
-          (void)drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
+          (void)drawer_->draw(info.histogram, info.log_y ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
       }
-      for (auto& h_var : hists2d_) {
-        std::ostringstream os;
-        h_var.hist.setTitle(proc_name_);
+      for (auto& info : hists2d_) {
+        info.histogram.setTitle(proc_name_);
         if (drawer_)
           (void)drawer_->draw(
-              h_var.hist,
-              utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
+              info.histogram,
+              utils::Drawer::Mode::grid | (info.log_z ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
       }
     } catch (const Exception& error) {
       CG_ERROR("EventHarvester") << "Failed to save the histograms harvested in this run. Error received: "
@@ -92,13 +89,13 @@ public:
     return desc;
   }
 
-  inline void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
+  void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
   bool operator<<(const Event& event) override {
     // increment the corresponding histograms
-    for (auto& h_var : hists1d_)
-      h_var.hist.fill(browser_.get(event, h_var.var));
-    for (auto& h_var : hists2d_)
-      h_var.hist.fill(browser_.get(event, h_var.var1), browser_.get(event, h_var.var2));
+    for (auto& info : hists1d_)
+      info.histogram.fill(browser_.get(event, info.variable));
+    for (auto& info : hists2d_)
+      info.histogram.fill(browser_.get(event, info.variable1), browser_.get(event, info.variable2));
     ++num_events_;
     return true;
   }
@@ -118,16 +115,16 @@ private:
   unsigned long num_events_{0ul};  ///< Number of events processed
   std::string proc_name_;          ///< Name of the physics process
   struct Hist1DInfo {
-    std::string var;
-    utils::Hist1D hist;
-    bool log;
+    std::string variable;
+    utils::Hist1D histogram;
+    bool log_y;
   };  ///< 1D histogram definition
   std::vector<Hist1DInfo> hists1d_;  ///< List of 1D histograms
   struct Hist2DInfo {
-    std::string var1;
-    std::string var2;
-    utils::Hist2D hist;
-    bool log;
+    std::string variable1;
+    std::string variable2;
+    utils::Hist2D histogram;
+    bool log_z;
   };  ///< 2D histogram definition
   std::vector<Hist2DInfo> hists2d_;  ///< List of 2D histograms
 };
