@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
@@ -33,19 +31,13 @@
 using namespace cepgen;
 using namespace std::string_literals;
 
-/// Generic text file output handler
+/// Generic per-event information output handler
 /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
 /// \date Jul 2019
 class EventHarvester : public EventExporter {
 public:
-  explicit EventHarvester(const ParametersList& params)
-      : EventExporter(params),
-        browser_(new utils::EventBrowser),
-        show_hists_(steer<bool>("show")),
-        save_hists_(steer<bool>("save")),
-        filename_(steer<std::string>("filename")) {
-    // build the plotter object if specified
-    if (const auto& plotter = steer<std::string>("plotter"); !plotter.empty())
+  explicit EventHarvester(const ParametersList& params) : EventExporter(params), browser_(new utils::EventBrowser) {
+    if (const auto& plotter = steer<std::string>("plotter"); !plotter.empty())  // build the plotter object if specified
       drawer_ = DrawerFactory::get().build(plotter, params);
 
     // extract list of variables to be plotted in histogram
@@ -71,24 +63,15 @@ public:
         hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), hist, log});
       }
     }
-    if (save_hists_ && !hists_.empty())
-      file_.open(filename_);
   }
   ~EventHarvester() override {
-    // histograms printout
-    if (!show_hists_ && !save_hists_)
-      return;
-    try {
+    try {  // histogram printout
       for (auto& h_var : hists_) {
         h_var.hist.scale(cross_section_ / (num_events_ + 1));
         h_var.hist.setTitle(proc_name_);
         std::ostringstream os;
         if (drawer_)
           (void)drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
-        if (show_hists_)
-          CG_INFO("EventHarvester") << os.str();
-        if (save_hists_)
-          file_ << "\n" << os.str() << "\n";
       }
       for (auto& h_var : hists2d_) {
         std::ostringstream os;
@@ -97,17 +80,10 @@ public:
           (void)drawer_->draw(
               h_var.hist,
               utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
-        if (show_hists_)
-          CG_INFO("EventHarvester") << os.str();
-        if (save_hists_)
-          file_ << "\n" << os.str() << "\n";
       }
-      if (save_hists_)
-        CG_INFO("EventHarvester") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
-                                  << "\".";
-    } catch (const Exception& exc) {
+    } catch (const Exception& error) {
       CG_ERROR("EventHarvester") << "Failed to save the histograms harvested in this run. Error received: "
-                                 << exc.what();
+                                 << error.what();
     }
   }
 
@@ -115,9 +91,6 @@ public:
     auto desc = EventExporter::description();
     desc.setDescription("Event-based histogramming tool");
     desc.add("plotter"s, ""s).setDescription("Plotting algorithm to use");
-    desc.add("filename"s, "output.hists.txt"s).setDescription("Output file name for histogram dump");
-    desc.add("show"s, true).setDescription("Show the histogram(s) at the end of the run?");
-    desc.add("save"s, false).setDescription("Save the histogram(s) at the end of the run?");
     // per-histogram default parameters
     ParametersDescription hist_desc;
     // x-axis attributes
@@ -151,20 +124,13 @@ private:
     proc_name_ = ProcessFactory::get().describe(runParameters().processName());
     proc_name_ +=
         ", \\sqrt{s} = " + utils::format("%g", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3) + " TeV";
-    if (save_hists_ && !hists_.empty())
-      file_ << banner("#") << "\n";
   }
 
-  const std::unique_ptr<utils::EventBrowser> browser_;  ///< Event string-to-quantity extaction tool
-  const bool show_hists_;                               ///< Display histograms after the run
-  const bool save_hists_;                               ///< Save histograms into the output file after the run
-  const std::string filename_;                          ///< Output file path
-
-  std::ofstream file_;                     ///< Output file where all information is stored
-  std::unique_ptr<utils::Drawer> drawer_;  ///< Drawing utility
-  Value cross_section_{1., 0.};            ///< Cross-section value, in pb
-  unsigned long num_events_{0ul};          ///< Number of events processed
-  std::string proc_name_;                  ///< Name of the physics process
+  const std::unique_ptr<utils::EventBrowser> browser_;  ///< Event string-to-quantity extraction tool
+  std::unique_ptr<utils::Drawer> drawer_;               ///< Drawing utility
+  Value cross_section_{1., 0.};                         ///< Cross-section value, in pb
+  unsigned long num_events_{0ul};                       ///< Number of events processed
+  std::string proc_name_;                               ///< Name of the physics process
 
   /// 1D histogram definition
   struct Hist1DInfo {
