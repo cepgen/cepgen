@@ -22,6 +22,7 @@
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventHarvester.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/String.h"
@@ -123,7 +124,7 @@ bool EventHarvester::operator<<(const Event& ev) {
 
 ParametersDescription EventHarvester::description() {
   auto desc = EventExporter::description();
-  desc.setDescription("Text-based histogramming tool");
+  desc.setDescription("Event-based histogramming tool");
   desc.add("plotter"s, ""s).setDescription("Plotting algorithm to use");
   desc.add("filename"s, "output.hists.txt"s).setDescription("Output file name for histogram dump");
   desc.add("show"s, true).setDescription("Show the histogram(s) at the end of the run?");
@@ -143,3 +144,4 @@ ParametersDescription EventHarvester::description() {
       .setDescription("Histogram definition for 1/2 variable(s)");
   return desc;
 }
+REGISTER_EXPORTER("eventHarvester", EventHarvester);
