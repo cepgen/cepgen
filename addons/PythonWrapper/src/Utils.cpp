@@ -40,25 +40,27 @@ namespace cepgen::python {
   }
 
   std::vector<std::wstring> info() {
-#ifdef PYTHON2
-    auto* py_home = Py_GetPythonHome();
-    std::wstring path{utils::toWstring(std::string(Py_GetPath()))},
-        home{utils::toWstring(std::string(py_home ? py_home : "(not set)"))};
-#elif PY_VERSION_HEX < 0x030d0000  // python < 3.13
-    auto* py_home = Py_GetPythonHome();
-    std::wstring path{Py_GetPath()}, home{py_home ? py_home : L"(not set)"};
-#else
-    Environment env{ParametersList()};
-    std::wstring path;
-    for (Py_ssize_t i = 0; i < env.configuration().module_search_paths.length; ++i)
-      path += std::wstring{env.configuration().module_search_paths.items[i]};
-    std::wstring home{env.configuration().home};
-    throw CG_ERROR("");
-#endif
-    return std::vector<std::wstring>{
+    auto info = std::vector<std::wstring>{
         utils::toWstring("Python version: " + utils::replaceAll(std::string{Py_GetVersion()}, "\n", " ")),
         utils::toWstring("Platform: " + std::string(Py_GetPlatform())),
-        utils::toWstring("Home directory: ") + home,
-        utils::toWstring("Parsed path: ") + path};
+    };
+#ifdef PYTHON2
+    auto* py_home = Py_GetPythonHome();
+    info.emplace_back(utils::toWstring("Home directory: ") +
+                      utils::toWstring(std::string{py_home ? py_home : "(not set)"}));
+    info.emplace_back(utils::toWstring("Parsed path: ") + utils::toWstring(std::string{Py_GetPath()}));
+#elif PY_VERSION_HEX < 0x030d0000  // python < 3.13
+    auto* py_home = Py_GetPythonHome();
+    info.emplace_back(utils::toWstring("Home directory: ") + std::wstring{py_home ? py_home : L"(not set)"});
+    info.emplace_back(utils::toWstring("Parsed path: ") + std::wstring{Py_GetPath()});
+#else
+    Environment env{ParametersList()};
+    info.emplace_back(utils::toWstring("Home directory: ") + std::wstring{env.configuration().home});
+    std::wstring path, sep;
+    for (Py_ssize_t i = 0; i < env.configuration().module_search_paths.length; ++i)
+      path += sep + std::wstring{env.configuration().module_search_paths.items[i]}, sep = L",";
+    info.emplace_back(utils::toWstring("Parsed path: ") + path);
+#endif
+    return info;
   }
 }  // namespace cepgen::python
