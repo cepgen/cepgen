@@ -89,6 +89,8 @@ void Hist1D::buildFromRange(size_t num_bins, const Limits& range) {
                                     << range << ".";
 }
 
+bool Hist1D::empty() const { return integral(true) == 0.; }
+
 void Hist1D::clear() {
   CG_ASSERT(hist_);
   CG_ASSERT(hist_w2_);

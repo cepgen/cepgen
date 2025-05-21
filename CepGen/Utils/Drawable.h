@@ -95,6 +95,7 @@ namespace cepgen::utils {
     /// Metadata for a two-dimensional axis definition (coordinates and bins values)
     using dual_axis_t = std::map<coord_t, axis_t>;
 
+    virtual bool empty() const = 0;                          ///< Is this drawable completely empty?
     inline virtual bool isHist1D() const { return false; }   ///< Is this drawable a one-dimensional histogram?
     inline virtual bool isHist2D() const { return false; }   ///< Is this drawable a two-dimensional histogram?
     inline virtual bool isGraph1D() const { return false; }  ///< Is this drawable a one-dimensional graph?

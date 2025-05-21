@@ -104,6 +104,8 @@ void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_
                                     << y_range << ".";
 }
 
+bool Hist2D::empty() const { return integral(true) == 0.; }
+
 void Hist2D::clear() {
   CG_ASSERT(hist_);
   CG_ASSERT(hist_w2_);
