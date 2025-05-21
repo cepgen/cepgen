@@ -50,7 +50,8 @@ void ProcessVariablesAnalyser::analyse() const {
 
 ParametersDescription ProcessVariablesAnalyser::description() {
   auto desc = ParametersDescription();
-  desc.addParametersDescriptionVector("histVariables", Hist1D::description(), {}).setDescription("Histogram definition");
+  desc.addParametersDescriptionVector("histVariables", Hist1D::description(), {})
+      .setDescription("Histogram definition");
   desc.add("drawer", DrawerFactory::get().describeParameters("root"));
   return desc;
 }
