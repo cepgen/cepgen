@@ -36,7 +36,7 @@ using namespace std::string_literals;
 /// \date Jul 2019
 class EventHarvester : public EventExporter {
 public:
-  explicit EventHarvester(const ParametersList& params) : EventExporter(params), browser_(new utils::EventBrowser) {
+  explicit EventHarvester(const ParametersList& params) : EventExporter(params) {
     if (const auto& plotter = steer<std::string>("plotter"); !plotter.empty())  // build the plotter object if specified
       drawer_ = DrawerFactory::get().build(plotter, params);
 
@@ -96,9 +96,9 @@ public:
   bool operator<<(const Event& event) override {
     // increment the corresponding histograms
     for (auto& h_var : hists1d_)
-      h_var.hist.fill(browser_->get(event, h_var.var));
+      h_var.hist.fill(browser_.get(event, h_var.var));
     for (auto& h_var : hists2d_)
-      h_var.hist.fill(browser_->get(event, h_var.var1), browser_->get(event, h_var.var2));
+      h_var.hist.fill(browser_.get(event, h_var.var1), browser_.get(event, h_var.var2));
     ++num_events_;
     return true;
   }
@@ -111,8 +111,8 @@ private:
         ", $\\sqrt{s} =$ " + utils::format("%g TeV", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3);
   }
 
-  const std::unique_ptr<utils::EventBrowser> browser_;  ///< Event string-to-quantity extraction tool
-  std::unique_ptr<utils::Drawer> drawer_;               ///< Drawing utility
+  const utils::EventBrowser browser_;      ///< Event string-to-quantity extraction tool
+  std::unique_ptr<utils::Drawer> drawer_;  ///< Drawing utility
 
   Value cross_section_{1., 0.};    ///< Cross-section value, in pb
   unsigned long num_events_{0ul};  ///< Number of events processed
