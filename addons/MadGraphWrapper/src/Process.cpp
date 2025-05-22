@@ -17,7 +17,7 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Modules/ModuleFactory.h"
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGenMadGraph/Process.h"
 
