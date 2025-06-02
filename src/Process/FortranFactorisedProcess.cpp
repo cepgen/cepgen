@@ -80,7 +80,6 @@ FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params,
                                                    const std::function<double(void)>& func)
     : FactorisedProcess(params), func_(func) {
   constants_.m_p = mp_;
-  constants_.units = constants::GEVM2_TO_PB;
   constants_.pi = M_PI;
   if (!func_)
     throw CG_FATAL("FortranFactorisedProcess")

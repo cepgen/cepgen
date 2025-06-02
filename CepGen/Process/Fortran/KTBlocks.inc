@@ -1,5 +1,5 @@
       ! CepGen: a central exclusive processes event generator
-      ! Copyright (C) 2018-2024  Laurent Forthomme
+      ! Copyright (C) 2018-2025  Laurent Forthomme
       !
       ! This program is free software: you can redistribute it and/or modify
       ! it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ c     =================================================================
 
 c     =================================================================
       !> collection of fundamental physics constants
-      common/constants/am_p,units,pi
-      double precision am_p,units,pi
+      common/constants/am_p,pi
+      double precision am_p,pi
 
 c     =================================================================
 c     information on the full process

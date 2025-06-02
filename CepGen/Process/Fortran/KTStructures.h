@@ -23,9 +23,8 @@
 namespace cepgen::ktblock {
   /// General physics constants
   struct Constants {
-    double m_p;    ///< Proton mass
-    double units;  ///< Conversion factor GeV\f$^2\to\f$ barn
-    double pi;     ///< \f$\pi\f$
+    double m_p;  ///< Proton mass
+    double pi;   ///< \f$\pi\f$
   };
   /// Generic run parameters
   struct GenParameters {
