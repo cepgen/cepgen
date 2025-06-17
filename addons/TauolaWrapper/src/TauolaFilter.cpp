@@ -155,11 +155,18 @@ namespace cepgen::tauola {
       CepGenEvent hepmc_event(event);  // conversion to a HepMC3 format
       const auto hepmc_event_size_before = hepmc_event.particles_size();
       TauolaHepMC3Event tauola_event(&hepmc_event);
-      tauola_event.decayTaus();
-      hepmc_event.merge(event);  // merge everything back into the original event
-      if (hepmc_event.particles_size() == hepmc_event_size_before)
-        return false;
-      return true;
+      size_t num_trials = 1;
+      while (true) {
+        if (num_trials++ >= max_trials_)
+          break;
+        tauola_event.decayTaus();
+        hepmc_event.merge(event);  // merge everything back into the original event
+        if (hepmc_event.particles_size() != hepmc_event_size_before)
+          return true;
+      }
+      CG_WARNING("TauolaFilter:run") << "Maximum number of trials (" << max_trials_
+                                     << ") reached without decay. Skipping the event.";
+      return false;
     }
   };
 }  // namespace cepgen::tauola
