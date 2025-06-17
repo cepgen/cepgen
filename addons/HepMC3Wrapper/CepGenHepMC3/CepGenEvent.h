@@ -40,7 +40,7 @@ namespace HepMC3 {
     void merge(cepgen::Event&) const;            ///< Merge this event with another CepGen event record
 
   private:
-    static constexpr double kTolerance = 1.e-10;
+    static constexpr double kTolerance = 1.e-6;
     std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > cepgen_id_vs_hepmc_particle_;
   };
 }  // namespace HepMC3
