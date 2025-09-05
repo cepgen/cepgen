@@ -35,6 +35,7 @@ namespace cepgen::strfun {
     explicit ChristyBosted(const ParametersList& params)
         : Parameterisation(params),
           m0_(steer<double>("m0")),
+          mx2_min_(mx_min_ * mx_min_),
           q20_(steer<double>("q20")),
           q21_(steer<double>("q21")),
           mpi_(PDG::get().mass(PDG::piZero)),
@@ -55,7 +56,7 @@ namespace cepgen::strfun {
 
     void eval() override {
       const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_);
-      if (sqrt(w2) < mx_min_)
+      if (w2 < mx2_min_)
         return;
 
       //-----------------------------
@@ -91,7 +92,7 @@ namespace cepgen::strfun {
 
     double resmod507(const Polarisation& pol, double w2, double q2) const;
 
-    class Resonance : public ResonanceObject, public SteeredObject<Resonance> {
+    class Resonance final : public ResonanceObject, public SteeredObject<Resonance> {
     public:
       explicit Resonance(const ParametersList& params)
           : ResonanceObject(params),
@@ -113,10 +114,9 @@ namespace cepgen::strfun {
       }
 
       double sigma(const Polarisation& pol, const KinematicsBlock& kin) const {
-        const auto pwidth = partialWidth(kin), pwidth2 = pwidth * pwidth;
-        const auto mass2 = mass_ * mass_;
+        const auto partial_width = partialWidth(kin), mass2 = mass_ * mass_;
         return height(pol, kin.q2) * kr() / kin.k * kcmr() / kin.kcm / width_ *
-               (pwidth * photonWidth(kin) / (pow(kin.w2 - mass2, 2) + mass2 * pwidth2));
+               (partial_width * photonWidth(kin) / (pow(kin.w2 - mass2, 2) + mass2 * partial_width * partial_width));
       }
 
     private:
@@ -139,7 +139,7 @@ namespace cepgen::strfun {
       const std::vector<double> fit_pars_;
     };
     /// Continuum parameterisation along one direction
-    struct ContinuumDirection : SteeredObject<ContinuumDirection> {
+    struct ContinuumDirection final : SteeredObject<ContinuumDirection> {
       explicit ContinuumDirection(const ParametersList& params)
           : SteeredObject(params), sig0(steer<double>("sig0")), fit_pars(steer<std::vector<double> >("fitParameters")) {
         if (fit_pars.size() != 4)
@@ -159,6 +159,7 @@ namespace cepgen::strfun {
       std::vector<double> fit_pars;
     };
     const double m0_;
+    const double mx2_min_;
     std::vector<Resonance> resonances_;          ///< Collection of resonance parameterisations
     std::vector<ContinuumDirection> continuum_;  ///< Three-dimensional parameterisation of the continuum
     const double q20_;
@@ -173,40 +174,40 @@ namespace cepgen::strfun {
     //--- kinematics needed for threshold relativistic B-W
     const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
 
-    //--- calculate Breit-Wigners for all resonances
-    const auto sig_res =
+    //--- calculate Breit-Wigner for all resonances
+    const auto sigma_resonant =
         w * std::accumulate(resonances_.begin(), resonances_.end(), 0., [&pol, &kin](auto sig, const auto& res) {
           return sig + res.sigma(pol, kin);
         });
 
     //--- non-resonant background calculation
-    const auto xpr = 1. / (1. + (w2 - mx_min_ * mx_min_) / (q2 + q20));
+    const auto xpr = 1. / (1. + (w2 - mx2_min_) / (q2 + q20));
     if (xpr > 1.)
       return 0.;
 
-    double sig_nr = 0.;
+    double sigma_non_resonant = 0.;
     switch (pol) {
       case transverse: {
-        if (const double wdif = w - mx_min_; wdif >= 0.) {
+        if (const double mass_diff = w - mx_min_; mass_diff >= 0.) {
           for (unsigned short i = 0; i < 2; ++i) {
             const auto& dir = continuum_.at(i);  // direction for this continuum
             const double expo = dir.fit_pars.at(1) + dir.fit_pars.at(2) * q2 + dir.fit_pars.at(3) * q2 * q2;
-            sig_nr += dir.sig0 / pow(q2 + dir.fit_pars.at(0), expo) * pow(wdif, i + 1.5);
+            sigma_non_resonant += dir.sig0 / pow(q2 + dir.fit_pars.at(0), expo) * pow(mass_diff, i + 1.5);
           }
         }
-        sig_nr *= xpr;
+        sigma_non_resonant *= xpr;
       } break;
       case longitudinal: {
-        const auto& dir = continuum_.at(2);
-        const double expo = dir.fit_pars.at(0);
-        const double xb = utils::xBj(q2, mp2_, w2);
-        constexpr double norm_q2 = 1. / 0.330 / 0.330;
-        const double t = log(log((q2 + m0_) * norm_q2) / log(m0_ * norm_q2));
-        sig_nr += dir.sig0 * pow(1. - xpr, expo) / (1. - xb) * pow(q2 / (q2 + q20), dir.fit_pars.at(1)) / (q2 + q20) *
-                  pow(xpr, dir.fit_pars.at(2) + dir.fit_pars.at(3) * t);
+        const auto& direction = continuum_.at(2);
+        const double expo = direction.fit_pars.at(0);
+        static constexpr double norm_q2 = 1. / 0.330 / 0.330;
+        const double t = std::log(std::log((q2 + m0_) * norm_q2) / std::log(m0_ * norm_q2));
+        sigma_non_resonant += direction.sig0 * pow(1. - xpr, expo) / (1. - utils::xBj(q2, mp2_, w2)) *
+                              pow(q2 / (q2 + q20), direction.fit_pars.at(1)) / (q2 + q20) *
+                              pow(xpr, direction.fit_pars.at(2) + direction.fit_pars.at(3) * t);
       }
     }
-    return sig_res + sig_nr;
+    return sigma_resonant + sigma_non_resonant;
   }
 
   ParametersDescription ChristyBosted::description() {

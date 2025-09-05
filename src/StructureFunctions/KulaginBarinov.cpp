@@ -51,8 +51,8 @@ namespace cepgen::strfun {
           derivator_(DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
           mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),
           meta2_(std::pow(PDG::get().mass(PDG::eta), 2)) {
-      for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
-        resonances_.emplace_back(res);
+      for (const auto& resonance : steer<std::vector<ParametersList> >("resonances"))
+        resonances_.emplace_back(resonance);
       {  // build the FT and F2 grid
         if (!utils::fileExists(sfs_grid_file_))
           throw CG_FATAL("KulaginBarinov")
@@ -62,28 +62,31 @@ namespace cepgen::strfun {
         static constexpr size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
         static constexpr double min_xbj = 1.01e-5;
         //--- xbj & Q2 binning
-        constexpr size_t nxbb = num_xbj / 2;
-        const double x1 = 0.3, xlog1 = log(x1), delta_x = (xlog1 - log(min_xbj)) / (nxbb - 1),
-                     delta_x1 = std::pow(1. - x1, 2) / (nxbb + 1);
+        constexpr size_t num_bins_xbj = num_xbj / 2;
+        const double x1 = 0.3, log_x1 = std::log(x1), delta_x = (log_x1 - std::log(min_xbj)) / (num_bins_xbj - 1),
+                     delta_x1 = std::pow(1. - x1, 2) / (num_bins_xbj + 1);
         const double deltas =
-            (log(log(q2_grid_range_.max() / 0.04)) - log(log(q2_grid_range_.min() / 0.04))) / (num_q2 - 1);
+            (std::log(std::log(q2_grid_range_.max() / 0.04)) - std::log(std::log(q2_grid_range_.min() / 0.04))) /
+            (num_q2 - 1);
         // parameterisation of Twist-4 correction from A08 analysis arXiv:0710.0124 [hep-ph] (assuming F2ht=FTht)
-        auto sfnht = [](double xbj, double q2) -> double {
+        auto sf_higher_twist = [](double xbj, double q2) -> double {
           return (std::pow(xbj, 0.9) * std::pow(1. - xbj, 3.63) * (xbj - 0.356) *
                   (1.0974 + 47.7352 * std::pow(xbj, 4))) /
                  q2;
         };
 
         for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
-          const double xbj = idx_xbj < nxbb
-                                 ? exp(log(min_xbj) + delta_x * idx_xbj)
-                                 : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delta_x1 * (idx_xbj - nxbb + 1)));
+          const double xbj =
+              idx_xbj < num_bins_xbj
+                  ? std::exp(log(min_xbj) + delta_x * idx_xbj)
+                  : 1. - std::sqrt(std::fabs(std::pow(1. - x1, 2) - delta_x1 * (idx_xbj - num_bins_xbj + 1)));
           for (size_t idx_q2 = 0; idx_q2 < num_q2; ++idx_q2) {  // Q^2 grid
-            const double q2 = 0.04 * exp(exp(log(log(q2_grid_range_.min() / 0.04)) + deltas * idx_q2));
+            const double q2 =
+                0.04 * std::exp(std::exp(std::log(std::log(q2_grid_range_.min() / 0.04)) + deltas * idx_q2));
             std::array<double, num_sf> sfs{};
             for (size_t idx_sf = 0; idx_sf < num_sf; ++idx_sf) {
               grid_file >> sfs[idx_sf];  // FT, F2
-              sfs[idx_sf] += sfnht(xbj, q2);
+              sfs[idx_sf] += sf_higher_twist(xbj, q2);
             }
             CG_DEBUG("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector{xbj, q2} << "("
                                             << std::vector{idx_xbj, idx_q2} << "): " << sfs;
@@ -196,7 +199,7 @@ namespace cepgen::strfun {
             f_gamma * kcmr() * mass2 * width_t / (std::pow(kin.w2 - mass2, 2) + mass2 * std::pow(width_t, 2));
 
         // compute structure functions using model of resonance helicity amplitudes
-        fl = f_bw * std::pow((c_.at(0) + c_.at(1) * kin.q2) * exp(-c_.at(2) * kin.q2), 2);
+        fl = f_bw * std::pow((c_.at(0) + c_.at(1) * kin.q2) * std::exp(-c_.at(2) * kin.q2), 2);
         ft = f_bw * std::pow((a_.at(0) + a_.at(1) * kin.q2) * std::pow(1. + a_.at(2) * kin.q2, -a_.at(3)), 2);
         return true;
       }
@@ -242,7 +245,7 @@ namespace cepgen::strfun {
         ft_res += ft_sng_res;
       }  // end of resonance loop
 
-      // finalize calculation of sfn and xsec taking into account normalization factors
+      // finalize calculation of structure functions and x-section taking into account normalization factors
       ft_res *= prefactor_ * args_.xbj * mp_;
       fl_res *= 2. * prefactor_ * args_.xbj * mp_ * args_.q2 / q2cm;
       const double f2_res = (fl_res + ft_res) / gamma2(args_.xbj, args_.q2);
@@ -283,26 +286,26 @@ namespace cepgen::strfun {
                 t * 1.e-2);
           }
           const double fl_der = args_.q2 * (std::pow(args_.q2, dis_params_.pml - 1.) / std::pow(t, dis_params_.pml) *
-                                            (fl_dis + log(t / args_.q2) * (dis_params_.pml * fl_dis - t * ddl)));
+                                            (fl_dis + std::log(t / args_.q2) * (dis_params_.pml * fl_dis - t * ddl)));
 
           /// Regge fit to total photoproduction cross section from hep-ph/9908218
           /// \param[in] w2 invariant mass squared (in GeV^2)
           /// \return cross section value in mb
-          auto photot = [](double w2) -> double {
+          auto photoproduction_t = [](double w2) -> double {
             return 0.0598 * std::pow(w2, 0.0933) + 0.1164 * std::pow(w2, -0.357);
           };
           // extrapolation in q2 ; note cross-section in mb units, and converted to GeV units
-          const double f0t = photot(w2) / constants::G_EM_SQ * M_1_PI / (constants::GEVM2_TO_PB * 1.e-9);
+          const double f0t = photoproduction_t(w2) / constants::G_EM_SQ * M_1_PI / (constants::GEVM2_TO_PB * 1.e-9);
           const double ft_der =
-              args_.q2 *
-              (f0t + std::pow(args_.q2, dis_params_.pmt - 1.) / std::pow(t, dis_params_.pmt) *
-                         (ft_dis - f0t * t +
-                          log(t / args_.q2) * (dis_params_.pmt * ft_dis - t * ddt - (dis_params_.pmt - 1.) * f0t * t)));
+              args_.q2 * (f0t + std::pow(args_.q2, dis_params_.pmt - 1.) / std::pow(t, dis_params_.pmt) *
+                                    (ft_dis - f0t * t +
+                                     std::log(t / args_.q2) *
+                                         (dis_params_.pmt * ft_dis - t * ddt - (dis_params_.pmt - 1.) * f0t * t)));
           fl_dis = fl_der;
           ft_dis = ft_der;
         }
-        const double bl = 1. - exp(-dis_params_.bg1l * std::pow(w2 - mx_min_, dis_params_.bg2l)),
-                     bt = 1. - exp(-dis_params_.bg1t * std::pow(w2 - mx_min_, dis_params_.bg2t));
+        const double bl = 1. - std::exp(-dis_params_.bg1l * std::pow(w2 - mx_min_, dis_params_.bg2l)),
+                     bt = 1. - std::exp(-dis_params_.bg1t * std::pow(w2 - mx_min_, dis_params_.bg2t));
         fl_dis *= bl;
         ft_dis *= bt;
         f2_dis = (fl_dis + ft_dis) / gamma2(args_.xbj, args_.q2);
