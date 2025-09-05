@@ -24,6 +24,7 @@
 #include "CepGen/Physics/Utils.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 /// Virtuality-dependent Drees-Zeppenfeld photon flux
 /// \note Corresponds to PDF:Proton2gammaSet=2 in Pythia 8
@@ -33,13 +34,13 @@ public:
   explicit DreesZeppenfeldCollinearFlux(const ParametersList& params)
       : CollinearFlux(params),
         scale_(steer<double>("scale")),
-        coefficients_a_(steer<std::vector<double> >("coeffsA")) {}
+        coefficients_a_(steer<std::vector<double> >("coeffsA"s)) {}
 
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
     desc.setDescription("Drees-Zeppenfeld Q^{2}-dependent flux");
     desc.add("scale", 0.71).setDescription("factorisation scale (in GeV^2)");
-    desc.add("coeffsA", std::vector{-11. / 6, 3., -1.5, 1. / 3});
+    desc.add("coeffsA"s, std::vector{-11. / 6, 3., -1.5, 1. / 3});
     return desc;
   }
 

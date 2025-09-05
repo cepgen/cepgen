@@ -70,7 +70,7 @@ namespace cepgen::formfac {
     }
 
   private:
-    inline void eval() override {
+    void eval() override {
       const double tau_val = tau(q2_);
 
       double num_e = 1., den_e = 1.;

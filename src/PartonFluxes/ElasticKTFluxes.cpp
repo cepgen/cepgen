@@ -40,7 +40,7 @@ public:
 
   static ParametersDescription description() {
     auto desc = KTFlux::description();
-    desc.setDescription("Nucl. el. photon emission");
+    desc.setDescription("Nuclear el. photon emission");
     desc.add("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
     return desc;
   }
@@ -52,9 +52,9 @@ public:
     if (!x_range_.contains(x))
       return 0.;
     const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
-    const double qnorm = 1. - q2min / q2;
-    const auto& formfac = (*form_factors_)(q2);
-    return alpha_over_pi_ * formfac.FE * qnorm * qnorm / q2;
+    const double q_norm = 1. - q2min / q2;
+    const auto& form_fac = (*form_factors_)(q2);
+    return alpha_over_pi_ * form_fac.FE * q_norm * q_norm / q2;
   }
 
 protected:
@@ -66,16 +66,16 @@ struct BudnevElasticNucleonKTFlux : ElasticNucleonKTFlux {
   using ElasticNucleonKTFlux::ElasticNucleonKTFlux;
   static ParametersDescription description() {
     auto desc = ElasticNucleonKTFlux::description();
-    desc.setDescription("Nucl. el. photon emission (Budnev flux)");
+    desc.setDescription("Nuclear el. photon emission (Budnev flux)");
     return desc;
   }
   double fluxMX2(double x, double kt2, double) const final {
     if (!x_range_.contains(x))
       return 0.;
-    const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x), qnorm = 1. - q2min / q2;
-    const auto& ff_value = (*form_factors_)(q2);
-    const double f_D = ff_value.FE * (1. - x) * qnorm;
-    const double f_C = ff_value.FM;
+    const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x), q_norm = 1. - q2min / q2;
+    const auto& form_fac = (*form_factors_)(q2);
+    const double f_D = form_fac.FE * (1. - x) * q_norm;
+    const double f_C = form_fac.FM;
     return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
   }
 };

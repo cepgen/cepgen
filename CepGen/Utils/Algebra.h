@@ -37,9 +37,14 @@ namespace cepgen {
     /// Object constructor (from vectors)
     /// \param[in] vectors set of (vector) rows
     Matrix(const std::initializer_list<Vector>& vectors);
+    /// Object constructor (from a GSL matrix)
+    Matrix(const gsl_matrix&);
+    /// Object constructor (from a view)
+    Matrix(const gsl_matrix_const_view&);
 
     Matrix(const Matrix&);             ///< Copy constructor
     Matrix& operator=(const Matrix&);  ///< Assignment operator
+    operator double() const;           ///< Implicit conversion to floating point coordinate
     operator Vector() const;           ///< Implicit conversion to vector
 
     /// Build a zeroed matrix
