@@ -22,6 +22,7 @@
 #include "CepGen/Utils/Message.h"
 
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
 
@@ -40,13 +41,13 @@ namespace cepgen::utils {
       return os << "none";
     std::string sep;
     if (mode & Drawer::Mode::logx)
-      os << sep << "logx", sep = "|";
+      os << sep << "logx"s, sep = "|";
     if (mode & Drawer::Mode::logy)
-      os << sep << "logy", sep = "|";
+      os << sep << "logy"s, sep = "|";
     if (mode & Drawer::Mode::logz)
-      os << sep << "logz", sep = "|";
+      os << sep << "logz"s, sep = "|";
     if (mode & Drawer::Mode::nostack)
-      os << sep << "nostack", sep = "|";
+      os << sep << "nostack"s, sep = "|";
     if (mode & Drawer::Mode::grid)
       os << sep << "grid", sep = "|";
     if (mode & Drawer::Mode::col)
@@ -61,7 +62,7 @@ namespace cepgen::utils {
 
 namespace cepgen {
   Drawer::Mode operator|(const Drawer::Mode::value_t& lhs, const Drawer::Mode::value_t& rhs) {
-    std::bitset<16> mod1(static_cast<int>(lhs)), mod2(static_cast<int>(rhs));
+    const std::bitset<16> mod1(static_cast<int>(lhs)), mod2(static_cast<int>(rhs));
     return Drawer::Mode((mod1 | mod2).to_ulong());
   }
 }  // namespace cepgen

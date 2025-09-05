@@ -32,10 +32,10 @@ using namespace std::string_literals;
 
 Hist1D::Hist1D(const ParametersList& params)
     : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
-  if (const auto& x_bins = params.get<std::vector<double> >("xbins"); x_bins.size() > 1)
+  if (const auto& x_bins = params.get<std::vector<double> >("xbins"s); x_bins.size() > 1)
     buildFromBins(x_bins);
   else if (const auto& xrange = params.get<Limits>("xrange"); xrange.valid())
-    buildFromRange(params.get<int>("nbins") > 0 ? params.get<int>("nbins") : params.get<int>("nbinsX"), xrange);
+    buildFromRange(params.get<int>("nbins"s) > 0 ? params.get<int>("nbins"s) : params.get<int>("nbinsX"s), xrange);
   else
     throw CG_FATAL("Hist1D") << "Failed to build a 1D histogram with user parameters: " << params << ".";
 }

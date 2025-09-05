@@ -32,9 +32,9 @@ using namespace std::string_literals;
 
 Hist2D::Hist2D(const ParametersList& params)
     : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
-  const auto &x_bins = params.get<std::vector<double> >("xbins"), &y_bins = params.get<std::vector<double> >("ybins");
-  const auto &x_range = params.get<Limits>("xrange"), &y_range = params.get<Limits>("yrange");
-  const auto &num_bins_x = params.get<int>("nbinsX"), &num_bins_y = params.get<int>("nbinsY");
+  const auto &x_bins = params.get<std::vector<double> >("xbins"s), &y_bins = params.get<std::vector<double> >("ybins"s);
+  const auto &x_range = params.get<Limits>("xrange"s), &y_range = params.get<Limits>("yrange"s);
+  const auto &num_bins_x = params.get<int>("nbinsX"s), &num_bins_y = params.get<int>("nbinsY"s);
   if (x_bins.size() > 1 && y_bins.size() > 1)
     buildFromBins(x_bins, y_bins);
   else if (x_range.valid() && y_range.valid() && num_bins_x > 1 && num_bins_y > 1)

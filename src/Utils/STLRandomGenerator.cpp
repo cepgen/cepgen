@@ -62,10 +62,10 @@ public:
     desc.setDescription("STL random number generator engine");
     desc.add("type", "default"s)
         .allow("default", "implementation-defined algorithm")
-        .allow("minstd_rand0",
+        .allow("minstd_rand0"s,
                "Discovered in 1969 by Lewis, Goodman and Miller, adopted as \"Minimal standard\" in 1988 by Park and "
                "Miller")
-        .allow("minstd_rand", "Newer \"Minimum standard\", recommended by Park, Miller, and Stockmeyer in 1993")
+        .allow("minstd_rand"s, "Newer \"Minimum standard\", recommended by Park, Miller, and Stockmeyer in 1993")
         .allow("mt19937", "32-bit Mersenne Twister by Matsumoto and Nishimura, 1998")
         .allow("mt19937_64", "64-bit Mersenne Twister by Matsumoto and Nishimura, 2000")
         .allow("ranlux24_base", "subtract-w/-carry algorithm (24, 10, 24)")
