@@ -50,11 +50,26 @@ Matrix::Matrix(const Matrix& oth) : gsl_mat_(gsl_matrix_alloc(oth.numRows(), oth
     throw CG_FATAL("Matrix") << "Failed to clone a matrix!";
 }
 
+Matrix::Matrix(const gsl_matrix& matrix)
+    : gsl_mat_(gsl_matrix_alloc_from_matrix(const_cast<gsl_matrix*>(&matrix), 0, 0, matrix.size1, matrix.size2),
+               gsl_matrix_free) {}
+
+Matrix::Matrix(const gsl_matrix_const_view& matrix_view) : Matrix(matrix_view.matrix) {}
+
 Matrix& Matrix::operator=(const Matrix& oth) {
   gsl_mat_.reset(gsl_matrix_alloc(oth.numRows(), oth.numColumns()));
   if (gsl_matrix_memcpy(gsl_mat_.get(), oth.gsl_mat_.get()) != 0)
     throw CG_FATAL("Matrix") << "Failed to clone a matrix!";
   return *this;
+}
+
+Matrix::operator double() const {
+  if (numRows() != 1 || numColumns() != 1)
+    throw CG_FATAL("Matrix")
+        << "Conversion to float is only possible for 1x1 matrices (aka scalars). This matrix is of dimension "
+        << numRows() << "x" << numColumns() << ":\n"
+        << *this;
+  return operator()(0, 0);
 }
 
 Matrix::operator Vector() const {
@@ -97,10 +112,7 @@ size_t Matrix::numColumns() const { return gsl_mat_->size2; }
 size_t Matrix::numRows() const { return gsl_mat_->size1; }
 
 Matrix Matrix::subset(size_t min_y, size_t min_x, size_t max_y, size_t max_x) const {
-  const size_t num_x = max_x - min_y, num_y = max_y - min_y;
-  Matrix out(num_y, num_x);
-  gsl_matrix_const_submatrix(out.gsl_mat_.get(), min_y, min_x, num_y, num_x);
-  return out;
+  return gsl_matrix_const_submatrix(gsl_mat_.get(), min_y, min_x, max_y - min_y, max_x - min_x);
 }
 
 bool Matrix::operator==(const Matrix& oth) const { return gsl_matrix_equal(gsl_mat_.get(), oth.gsl_mat_.get()) == 1; }
@@ -161,15 +173,15 @@ double Matrix::operator()(size_t ix, size_t iy) const {
 }
 
 Matrix::Indices Matrix::imin() const {
-  size_t imax, jmax;
-  gsl_matrix_min_index(gsl_mat_.get(), &imax, &jmax);
-  return std::make_pair(imax, jmax);
+  size_t i_max, j_max;
+  gsl_matrix_min_index(gsl_mat_.get(), &i_max, &j_max);
+  return std::make_pair(i_max, j_max);
 }
 
 Matrix::Indices Matrix::imax() const {
-  size_t imax, jmax;
-  gsl_matrix_max_index(gsl_mat_.get(), &imax, &jmax);
-  return std::make_pair(imax, jmax);
+  size_t i_max, j_max;
+  gsl_matrix_max_index(gsl_mat_.get(), &i_max, &j_max);
+  return std::make_pair(i_max, j_max);
 }
 
 double Matrix::min() const { return gsl_matrix_min(gsl_mat_.get()); }
