@@ -46,7 +46,7 @@ namespace gammaUPC {
     }
 
     bool fragmenting() const override { return false; }
-    pdgid_t partonPdgId() const override { return parton_id_; }
+    spdgid_t partonPdgId() const override { return parton_id_; }
     double mass2() const override { return mass2_; }
 
   private:
@@ -61,6 +61,7 @@ namespace gammaUPC {
           log_parton_virtuality_(steer<bool>("logPartonVirtuality")),
           force_p_nonhadr_(steer<bool>("forcePNonHadr")),
           heavy_ion_mode_(steerAs<int, gammaUPC::HeavyIonMode>("heavyIonMode")) {}
+
     static ParametersDescription description() {
       auto desc = cepgen::PartonsPhaseSpaceGenerator::description();
       desc.setDescription("Two-photon central phase space generator w/ gammaUPC fluxes");
@@ -78,8 +79,8 @@ namespace gammaUPC {
       pos_flux_.reset(new TrivialPartonFlux(params_));
       neg_flux_.reset(new TrivialPartonFlux(params_));
       // register the incoming partons' virtuality
-      const auto lim_q2_1 = process().kinematics().cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
-                 lim_q2_2 = process().kinematics().cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
+      //const auto lim_q2_1 = process().kinematics().cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
+      //           lim_q2_2 = process().kinematics().cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
       const auto lim_log_xi = Limits{1.e-10, 1.}.compute(std::log);
       process().defineVariable(
           process().x1(), proc::Process::Mapping::exponential, lim_log_xi, "Positive-z parton momentum fraction");
