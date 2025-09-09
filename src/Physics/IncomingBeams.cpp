@@ -32,9 +32,10 @@
 #include "CepGen/Utils/Math.h"
 
 using namespace cepgen;
+using namespace std::string_literals;
 
 IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
-  (*this).add("structureFunctions", strfun_);
+  add("structureFunctions", strfun_);
 }
 
 void IncomingBeams::setParameters(const ParametersList& params) {
@@ -62,8 +63,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
 
   //--- beams PDG ids
   if (const auto& plist_pdg_ids = steer<std::vector<ParametersList> >("pdgIds"); plist_pdg_ids.size() >= 2) {
-    pos_pdg = plist_pdg_ids.at(0).get<int>("pdgid");
-    neg_pdg = plist_pdg_ids.at(1).get<int>("pdgid");
+    pos_pdg = plist_pdg_ids.at(0).get<int>("pdgid"s);
+    neg_pdg = plist_pdg_ids.at(1).get<int>("pdgid"s);
   } else if (const auto& pdg_ids = steer<std::vector<int> >("pdgIds"); pdg_ids.size() >= 2) {
     pos_pdg = pdg_ids.at(0);
     neg_pdg = pdg_ids.at(1);
@@ -105,16 +106,16 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   plist_neg.set("pz", -fabs(p2z)).set<int>("pdgId", neg_pdg);
 
   //--- form factors
-  ParametersList pos_formfac, neg_formfac;
+  ParametersList pos_form_factors, neg_form_factors;
   if (const auto& vec_form_factors = steer<std::vector<ParametersList> >("formFactors"); vec_form_factors.size() >= 2) {
-    pos_formfac = vec_form_factors.at(0);
-    neg_formfac = vec_form_factors.at(1);
+    pos_form_factors = vec_form_factors.at(0);
+    neg_form_factors = vec_form_factors.at(1);
   } else if (const auto& form_factors = steer<ParametersList>("formFactors"); !form_factors.empty())
-    pos_formfac = neg_formfac = form_factors;
-  pos_formfac.set<int>("pdgId", std::abs(pos_pdg));
-  neg_formfac.set<int>("pdgId", std::abs(neg_pdg));
-  plist_pos.set("formFactors", pos_formfac);
-  plist_neg.set("formFactors", neg_formfac);
+    pos_form_factors = neg_form_factors = form_factors;
+  pos_form_factors.set<int>("pdgId", std::abs(pos_pdg));
+  neg_form_factors.set<int>("pdgId", std::abs(neg_pdg));
+  plist_pos.set("formFactors", pos_form_factors);
+  plist_neg.set("formFactors", neg_form_factors);
 
   //--- structure functions
   const auto structure_functions_parameters = steer<ParametersList>("structureFunctions");
@@ -150,8 +151,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
     set_part_fluxes_from_name(kt_fluxes_name);
     CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
   }
-  pos_flux.set("formFactors", pos_formfac).set("structureFunctions", structure_functions_parameters);
-  neg_flux.set("formFactors", neg_formfac).set("structureFunctions", structure_functions_parameters);
+  pos_flux.set("formFactors", pos_form_factors).set("structureFunctions", structure_functions_parameters);
+  neg_flux.set("formFactors", neg_form_factors).set("structureFunctions", structure_functions_parameters);
   plist_pos.set("partonFlux", pos_flux);
   plist_neg.set("partonFlux", neg_flux);
 
@@ -162,8 +163,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
     const auto set_beam_elasticity = [](ParametersList& plist_beam) {
       if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux"); !parton_flux_mod.name().empty())
         plist_beam.set("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
-      else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors"); !formfac_mod.name().empty())
-        plist_beam.set("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
+      else if (const auto& form_factors = plist_beam.get<ParametersList>("formFactors"); !form_factors.name().empty())
+        plist_beam.set("elastic", !FormFactorsFactory::get().build(form_factors)->fragmenting());
       else {
         CG_WARNING("IncomingBeams") << "Neither kinematics mod, parton flux modelling, or form factors modelling "
                                        "were set. Assuming elastic emission.";
@@ -181,24 +182,24 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   neg_beam_ = Beam(plist_neg);
 }
 
-void IncomingBeams::setSqrtS(double sqrts) {
+void IncomingBeams::setSqrtS(double sqrt_s) {
   if (std::abs(pos_beam_.integerPdgId()) != std::abs(neg_beam_.integerPdgId()))
     throw CG_FATAL("IncomingBeams:setSqrtS")
         << "Trying to set √s with asymmetric beams"
         << " (" << pos_beam_.integerPdgId() << "/" << neg_beam_.integerPdgId() << ").\n"
         << "Please fill incoming beams objects manually!";
-  const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_beam_.integerPdgId()));
+  const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrt_s, PDG::get().mass(pos_beam_.integerPdgId()));
   pos_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., +pz_abs, PDG::get().mass(pos_beam_.integerPdgId())));
   neg_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., -pz_abs, PDG::get().mass(neg_beam_.integerPdgId())));
 }
 
 double IncomingBeams::s() const {
-  const auto sval = (pos_beam_.momentum() + neg_beam_.momentum()).mass2();
+  const auto s_value = (pos_beam_.momentum() + neg_beam_.momentum()).mass2();
   CG_DEBUG("IncomingBeams:s") << "Beams momenta:\n"
                               << "\t" << pos_beam_.momentum() << "\n"
                               << "\t" << neg_beam_.momentum() << "\n"
-                              << "\ts = (p1 + p2)^2 = " << sval << ", sqrt(s) = " << std::sqrt(sval) << ".";
-  return sval;
+                              << "\ts = (p1 + p2)^2 = " << s_value << ", sqrt(s) = " << std::sqrt(s_value) << ".";
+  return s_value;
 }
 
 double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
@@ -228,10 +229,10 @@ void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) const {
   sf_params = StructureFunctionsFactory::get().describeParameters(sf_model).parameters().set(
       "sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_model).parameters());
   if (sf_model / kLHAPDFCodeDec == 1) {  // SF from parton
-    const unsigned long icode = sf_model % kLHAPDFCodeDec;
-    sf_params.setName("lhapdf")
-        .set<int>("pdfId", icode % kLHAPDFPartDec)
-        .set<int>("mode", icode / kLHAPDFPartDec);  // 0, 1, 2
+    const unsigned long integer_pdf_id = sf_model % kLHAPDFCodeDec;
+    sf_params.setName("lhapdf"s)
+        .set<int>("pdfId", integer_pdf_id % kLHAPDFPartDec)
+        .set<int>("mode", integer_pdf_id / kLHAPDFPartDec);  // 0, 1, 2
   }
   params_.set("structureFunctions", sf_params);
   CG_DEBUG("IncomingBeams:setStructureFunctions") << "Structure functions modelling to be built: " << sf_params << ".";

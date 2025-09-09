@@ -45,22 +45,22 @@ ParametersDescription NachtmannAmplitudes::EFTParameters::description() {
   return desc;
 }
 
-NachtmannAmplitudes::Kinematics::Kinematics(double mw2, double shat, double that, double uhat)
-    : shat(shat),
-      that(that),
-      uhat(uhat),
+NachtmannAmplitudes::Kinematics::Kinematics(double mw2, double s_hat, double t_hat, double u_hat)
+    : shat(s_hat),
+      that(t_hat),
+      uhat(u_hat),
       mw2_(mw2),
-      shat2(shat * shat),
-      beta2(1. - 4. * mw2_ / shat),
+      shat2(s_hat * s_hat),
+      beta2(1. - 4. * mw2_ / s_hat),
       beta(sqrt(beta2)),
       inv_gamma2(1. - beta2),
       gamma2(1. / inv_gamma2),
       gamma(sqrt(gamma2)),
       inv_gamma(1. / gamma) {
-  setCosTheta((that - uhat) / shat / beta);
+  setCosTheta((t_hat - u_hat) / s_hat / beta);
 }
 
-NachtmannAmplitudes::Kinematics NachtmannAmplitudes::Kinematics::fromScosTheta(double shat,
+NachtmannAmplitudes::Kinematics NachtmannAmplitudes::Kinematics::fromSCosTheta(double shat,
                                                                                double cos_theta,
                                                                                double mw2) {
   Kinematics kin(mw2, shat, 0., 0.);
@@ -94,13 +94,13 @@ std::complex<double> NachtmannAmplitudes::operator()(
     case Mode::Wbar:
       return amplitudeWbar(kin, hel);
     case Mode::phiW:
-      return amplitudephiW(kin, hel);
+      return amplitudePhiW(kin, hel);
     case Mode::phiWbar:
-      return 2i * static_cast<double>(lam1) * amplitudephiW(kin, hel);
+      return 2i * static_cast<double>(lam1) * amplitudePhiW(kin, hel);
     case Mode::phiB:
-      return std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudephiW(kin, hel);
+      return std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudePhiW(kin, hel);
     case Mode::phiBbar:
-      return 2i * static_cast<double>(lam1) * std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudephiW(kin, hel);
+      return 2i * static_cast<double>(lam1) * std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudePhiW(kin, hel);
     case Mode::WB:
       return amplitudeWB(kin, hel);
     case Mode::WbarB:
@@ -178,7 +178,7 @@ std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, c
           0.};
 }
 
-std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, const HelicityStates& hel) const {
+std::complex<double> NachtmannAmplitudes::amplitudePhiW(const Kinematics& kin, const HelicityStates& hel) const {
   const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return -0.25i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * invB * (1. + kin.beta2) *

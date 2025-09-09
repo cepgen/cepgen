@@ -32,7 +32,7 @@ using namespace cepgen;
 using namespace cepgen::utils;
 using namespace std::string_literals;
 
-class TextDrawer : public Drawer {
+class TextDrawer final : public Drawer {
 public:
   explicit TextDrawer(const ParametersList& params)
       : Drawer(params),
@@ -134,7 +134,7 @@ private:
   const char CHAR, ERR_CHAR, NEG_CHAR;
   const std::string MARKERS_CHAR, VALUES_CHAR;
 
-  inline static std::string delatexify(const std::string& tok) { return replaceAll(tok, {{"$", ""}}); }
+  static std::string delatexify(const std::string& tok) { return replaceAll(tok, {{"$", ""}}); }
 
   /// Sorting helper for the axis metadata container
   struct map_elements {

@@ -26,7 +26,7 @@ using namespace std::string_literals;
 Handler::Handler(const ParametersList& params)
     : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
   if (!filename_.empty())
-    parseFile(filename_);
+    Handler::parseFile(filename_);
 }
 
 Handler& Handler::setRunParameters(const RunParameters* params) {

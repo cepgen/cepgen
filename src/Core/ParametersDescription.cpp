@@ -73,8 +73,8 @@ const ParametersDescription& ParametersDescription::get(const std::string& key) 
       log << "Failed to retrieve a parameters description member named \'" << key << "\'.\n"
           << "List of keys registered: ";
       std::string sep;
-      for (const auto& [key, description] : obj_descr_)
-        log << sep << "'" << key << "'", sep = ", ";
+      for (const auto& [search_key, description] : obj_descr_)
+        log << sep << "'" << search_key << "'", sep = ", ";
     });
   return obj_descr_.at(key);
 }
@@ -226,9 +226,9 @@ ParametersList ParametersDescription::validate(const ParametersList& user_params
   for (const auto& [key, parameters_description] : obj_descr_) {  // simple value
     if (!parameters_description.allowedValues().allAllowed()) {
       const auto validation_error =
-          [](const auto& key, const auto& val, const ParametersDescription& desc) -> std::string {
+          [](const auto& search_key, const auto& val, const ParametersDescription& desc) -> std::string {
         std::ostringstream os;
-        os << "Invalid value for key '" << key << "'"
+        os << "Invalid value for key '" << search_key << "'"
            << (!desc.description().empty() ? " ("s + desc.description() + ")" : "") << ".\n"
            << "Allowed values:\n";
         for (const auto& [value, description] : desc.allowedValues().allowed())
@@ -263,14 +263,14 @@ ParametersDescription& ParametersDescription::setKey<std::string>(const std::str
   return *this;
 }
 
-ParametersDescription& ParametersDescription::allow(int val, const std::string& descr) {
-  obj_values_.int_vals_[val] = descr;
+ParametersDescription& ParametersDescription::allow(int val, const std::string& _description) {
+  obj_values_.int_vals_[val] = _description;
   obj_values_.all_allowed_ = false;
   return *this;
 }
 
-ParametersDescription& ParametersDescription::allow(const std::string& val, const std::string& descr) {
-  obj_values_.str_vals_[val] = descr;
+ParametersDescription& ParametersDescription::allow(const std::string& val, const std::string& _description) {
+  obj_values_.str_vals_[val] = _description;
   obj_values_.all_allowed_ = false;
   return *this;
 }

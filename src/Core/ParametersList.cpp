@@ -198,8 +198,8 @@ ParametersList& ParametersList::feed(const std::string& raw_args) {
     }
     // from this point, a "key:value" or "key(:true)" was found
     if (const auto& sub_plist = utils::between(argument, "{", "}"); !sub_plist.empty()) {
-      for (const auto& subp : sub_plist)
-        feed(subp);
+      for (const auto& sub_parameter : sub_plist)
+        feed(sub_parameter);
       return *this;
     }
     const auto& word = command.at(0);
@@ -484,8 +484,8 @@ ParticleProperties ParametersList::get<ParticleProperties>(const std::string& ke
                                                            const ParticleProperties& default_value) const {
   if (has<ParametersList>(key)) {  // try to steer as a dictionary of particle properties
     const auto& plist = get<ParametersList>(key);
-    if (plist.keys() == std::vector<std::string>{"pdgid"})
-      return PDG::get()(plist.get<int>("pdgid"));
+    if (plist.keys() == std::vector<std::string>{"pdgid"s})
+      return PDG::get()(plist.get<int>("pdgid"s));
     return ParticleProperties(plist);
   }
   if (has<pdgid_t>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database

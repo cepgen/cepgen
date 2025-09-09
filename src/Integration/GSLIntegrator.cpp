@@ -46,13 +46,13 @@ void GSLIntegrator::prepare(Integrand& integrand, const std::vector<Limits>& ran
     throw CG_FATAL("GSLIntegrator:prepare") << "Invalid phase space dimension: " << gsl_function_->dim << ".";
   CG_DEBUG("GSLIntegrator:prepare") << "Number of integration dimensions: " << gsl_function_->dim << ".";
 
-  if (const auto ndim = integrand.size(); ndim > 0) {  // set the integration range
-    if (range.size() < ndim)
+  if (const auto num_dimensions = integrand.size(); num_dimensions > 0) {  // set the integration range
+    if (range.size() < num_dimensions)
       throw CG_FATAL("GSLIntegrator:prepare")
-          << "Insufficient number of limits (" << range << ") provided for dim-" << ndim << " integrand.";
-    x_low_.resize(ndim);
-    x_high_.resize(ndim);
-    for (size_t i = 0; i < ndim; ++i)
+          << "Insufficient number of limits (" << range << ") provided for dim-" << num_dimensions << " integrand.";
+    x_low_.resize(num_dimensions);
+    x_high_.resize(num_dimensions);
+    for (size_t i = 0; i < num_dimensions; ++i)
       x_low_[i] = range.at(i).min(), x_high_[i] = range.at(i).max();
   }
 }

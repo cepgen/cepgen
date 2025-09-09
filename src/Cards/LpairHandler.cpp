@@ -86,8 +86,8 @@ public:
       }
       const auto &key = fields.at(0), &value = fields.at(1);
       setParameter(key, value);
-      if (const auto descr = describe(key); descr != kInvalidStr)
-        os << utils::format("\n\t>> %-8s %-25s (%s)", key.data(), parameter(key).data(), descr.data());
+      if (const auto key_description = describe(key); key_description != kInvalidStr)
+        os << utils::format("\n\t>> %-8s %-25s (%s)", key.data(), parameter(key).data(), key_description.data());
     }
     CG_INFO("LpairHandler:parseCommands")
         << "LPAIR configuration successfully loaded! Now parsing the following parameters:" << os.str() << ".";
@@ -169,7 +169,7 @@ private:
         throw CG_FATAL("LpairHandler") << "Process name not specified!";
       if (runParameters()->hasProcess() && runParameters()->process().name() == proc_name_)
         proc_params_ = runParameters()->process().parameters() + proc_params_;
-      if (proc_name_ == "pptoff" && lepton_id_ != 0)  // backward-compatibility for PPtoLL cards
+      if (proc_name_ == "pptoff"s && lepton_id_ != 0)  // backward-compatibility for PPtoLL cards
         proc_params_.set<int>("pair", PDG::electron + (lepton_id_ - 1) * 2);
       runParameters()->setProcess(ProcessFactory::get().build(proc_name_, proc_params_));
     }

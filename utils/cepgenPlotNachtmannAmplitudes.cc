@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   const std::vector<short> lambdas = {-1, 0, 1};
   auto dsig_dcosth = [&integrator, &lambdas](
                          const cepgen::NachtmannAmplitudes& ampl, double shat, double costh) -> double {
-    const auto kin = cepgen::NachtmannAmplitudes::Kinematics::fromScosTheta(shat, costh, 80.379);
+    const auto kin = cepgen::NachtmannAmplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
     auto dsig = [&ampl, &kin, &lambdas](double theta1, double phi1, double theta2, double phi2) -> double {
       auto l = [](short lam, double theta, double phi) -> std::complex<double> {
         auto dp = [](double theta) -> double { return 0.5 * (1. + cos(theta)) * M_SQRT2; };

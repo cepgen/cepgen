@@ -52,7 +52,7 @@ HeavyIon::operator pdgid_t() const {
   return static_cast<pdgid_t>(10'000'000) + 1000 * static_cast<unsigned short>(Z) + A;
 }
 
-bool HeavyIon::isHI(const spdgid_t& pdgid) { return pdgid / 10'000'000 != 0; }
+bool HeavyIon::isHI(const spdgid_t& pdg_id) { return pdg_id / 10'000'000 != 0; }
 
 bool HeavyIon::isHI(const ParticleProperties& prop) {
   return isHI(prop.pdgid);  //FIXME can refine a bit

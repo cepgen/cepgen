@@ -120,7 +120,8 @@ void PDG::dump(std::ostream* os) const {
   for (const auto& prt : tmp)
     if (prt.first != PDG::invalid)
       oss << utils::format(
-          "\n%16s %-32s\tcharges: {%6s}, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
+          "\n%16s %-32s\t"
+          "charges: {%6s}, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
           utils::colourise(std::to_string(prt.second.pdgid), utils::Colour::none, utils::Modifier::italic).data(),
           (utils::boldify(prt.second.name) + " " + (prt.second.fermion ? "fermion" : "boson") + ":").data(),
           utils::merge(prt.second.charges, ",").data(),

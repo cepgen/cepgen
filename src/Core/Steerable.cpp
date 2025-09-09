@@ -23,7 +23,7 @@
 
 using namespace cepgen;
 
-Steerable::Steerable(const ParametersList& params) { setParameters(params); }
+Steerable::Steerable(const ParametersList& params) { Steerable::setParameters(params); }
 
 void Steerable::setParameters(const ParametersList& params) { params_ += params; }
 
