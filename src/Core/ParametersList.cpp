@@ -27,15 +27,15 @@
 using namespace cepgen;
 using namespace std::string_literals;
 
-#define IMPL_TYPE_GET(type, values_collection)                                                                  \
-  template <>                                                                                                   \
-  type ParametersList::get<type>(const std::string& key, const type& default_value) const {                     \
-    if (values_collection.count(key) > 0)                                                                       \
-      return values_collection.at(key);                                                                         \
-    CG_DEBUG("ParametersList") << "Failed to retrieve " << utils::demangle(typeid(type).name())                 \
-                               << " parameter with key=" << key << ". Default value: " << default_value << "."; \
-    return default_value;                                                                                       \
-  }                                                                                                             \
+#define IMPL_TYPE_GET(type, values_collection)                                                                     \
+  template <>                                                                                                      \
+  type ParametersList::get<type>(const std::string& key, const type& default_value) const {                        \
+    if (values_collection.count(key) > 0)                                                                          \
+      return values_collection.at(key);                                                                            \
+    CG_DEBUG("ParametersList") << "Found no '" << utils::demangle(typeid(type).name()) << "' parameter with key '" \
+                               << key << "'. Returning default value '" << default_value << "'.";                  \
+    return default_value;                                                                                          \
+  }                                                                                                                \
   static_assert(true, "")
 
 #define IMPL_TYPE_SET(type, values_collection)                                                                         \
