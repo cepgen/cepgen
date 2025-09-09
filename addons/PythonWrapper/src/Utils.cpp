@@ -55,7 +55,8 @@ namespace cepgen::python {
     info.emplace_back(utils::toWstring("Parsed path: ") + std::wstring{Py_GetPath()});
 #else
     Environment env{ParametersList()};
-    info.emplace_back(utils::toWstring("Home directory: ") + std::wstring{env.configuration().home});
+    if (const auto& home = env.configuration().home; home)
+      info.emplace_back(utils::toWstring("Home directory: ") + std::wstring{home});
     std::wstring path, sep;
     for (Py_ssize_t i = 0; i < env.configuration().module_search_paths.length; ++i)
       path += sep + std::wstring{env.configuration().module_search_paths.items[i]}, sep = L",";
