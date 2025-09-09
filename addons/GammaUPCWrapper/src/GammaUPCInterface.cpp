@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <CepGen/Core/Exception.h>
+
 #include "CepGenGammaUPC/GammaUPCInterface.h"
 
 extern "C" {
@@ -28,36 +30,70 @@ extern double __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(doubl
 extern double __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(double& x1, double& x2, int& force_p_nohad1);
 }
 
-using namespace gammaUPC;
-
-double photonFluxP(double x, double gamma) { return __elasticphotonphotonflux_MOD_photonflux_proton_nob(x, gamma); }
-
-double photonFluxA(double a, double gamma, double z, double ra) {
-  return __elasticphotonphotonflux_MOD_photonflux_nucleus_nob(a, gamma, z, ra);
-}
-
-double twoPhotonFluxPP(double x1, double x2, int force_p_nohad1) {
-  return __elasticphotonphotonflux_MOD_photonphotonflux_pp(x1, x2, force_p_nohad1);
-}
-
-double twoPhotonFluxPA(double x1, double x2, int force_p_nohad1, HeavyIonMode mode) {
-  switch (mode) {
-    case HeavyIonMode::HardSphere:
-      return __elasticphotonphotonflux_MOD_photonphotonflux_pA_hardsphere(x1, x2, force_p_nohad1);
-    case HeavyIonMode::WoodsSaxon:
-      return __elasticphotonphotonflux_MOD_photonphotonflux_pA_WoodsSaxon(x1, x2, force_p_nohad1);
-    default:
-      return -1.;
+namespace gammaUPC {
+  double photonFluxP(double x, double gamma) {
+    const auto flux = __elasticphotonphotonflux_MOD_photonflux_proton_nob(x, gamma);
+    CG_DEBUG_LOOP("gammaUPC:photonFluxP")
+        << "Single-photon flux from proton (gamma=" << gamma << ", no b-effect): " << flux << ".";
+    return flux;
   }
-}
 
-double twoPhotonFluxAB(double x1, double x2, int force_p_nohad1, HeavyIonMode mode) {
-  switch (mode) {
-    case HeavyIonMode::HardSphere:
-      return __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(x1, x2, force_p_nohad1);
-    case HeavyIonMode::WoodsSaxon:
-      return __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(x1, x2, force_p_nohad1);
-    default:
-      return -1.;
+  double photonFluxA(double a, double gamma, double z, double ra) {
+    const auto flux = __elasticphotonphotonflux_MOD_photonflux_nucleus_nob(a, gamma, z, ra);
+    CG_DEBUG_LOOP("gammaUPC:photonFluxA") << "Single-photon flux from HI{A=" << a << ", Z=" << z << ", gamma=" << gamma
+                                          << ", rA=" << ra << "} (no b-effect): " << flux << ".";
+    return flux;
   }
-}
+
+  double twoPhotonFluxPP(double x1, double x2, int force_p_nohad1) {
+    const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pp(x1, x2, force_p_nohad1);
+    CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxPP")
+        << "Two-photon flux from proton-proton for x1=" << x1 << ", x2=" << x2
+        << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+    return flux;
+  }
+
+  double twoPhotonFluxPA(double x1, double x2, int force_p_nohad1, HeavyIonMode mode) {
+    switch (mode) {
+      case HeavyIonMode::HardSphere: {
+        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pA_hardsphere(x1, x2, force_p_nohad1);
+        CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxPA")
+            << "Two-photon flux from proton-HI with hard sphere modelling for x1=" << x1 << ", x2=" << x2
+            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+        return flux;
+      }
+      case HeavyIonMode::WoodsSaxon: {
+        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pA_WoodsSaxon(x1, x2, force_p_nohad1);
+        CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxPA")
+            << "Two-photon flux from proton-HI with Woods-Saxon modelling for x1=" << x1 << ", x2=" << x2
+            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+        return flux;
+      }
+      default:
+        throw CG_FATAL("gammaUPC:twoPhotonFluxPA")
+            << "Invalid mode for the heavy ion modelling: " << static_cast<int>(mode) << ".";
+    }
+  }
+
+  double twoPhotonFluxAB(double x1, double x2, int force_p_nohad1, HeavyIonMode mode) {
+    switch (mode) {
+      case HeavyIonMode::HardSphere: {
+        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(x1, x2, force_p_nohad1);
+        CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxAB")
+            << "Two-photon flux from HI-HI with hard sphere modelling for x1=" << x1 << ", x2=" << x2
+            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+        return flux;
+      }
+      case HeavyIonMode::WoodsSaxon: {
+        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(x1, x2, force_p_nohad1);
+        CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxAB")
+            << "Two-photon flux from HI-HI with Woods-Saxon modelling for x1=" << x1 << ", x2=" << x2
+            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+        return flux;
+      }
+      default:
+        throw CG_FATAL("gammaUPC:twoPhotonFluxAB")
+            << "Invalid mode for the heavy ion modelling: " << static_cast<int>(mode) << ".";
+    }
+  }
+}  // namespace gammaUPC
