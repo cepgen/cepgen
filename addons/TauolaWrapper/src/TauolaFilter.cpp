@@ -16,10 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <HepMC3/Print.h>
 #include <Tauola/Log.h>
 #include <Tauola/Tauola.h>
 #include <Tauola/TauolaEvent.h>
 #include <Tauola/TauolaHepMC3Event.h>
+#include <gsl/gsl_const_mksa.h>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -36,32 +38,46 @@
 using namespace Tauolapp;
 
 namespace cepgen::tauola {
-  std::unique_ptr<utils::RandomGenerator> gRandomGenerator;  ///< CepGen-specific random number generator to use
+  std::unique_ptr<utils::RandomGenerator> gRandomGenerator{};  ///< CepGen-specific random number generator to use
 
   /// Interface to the Tauola decay routine
   class TauolaFilter final : public EventModifier {
   public:
     explicit TauolaFilter(const ParametersList& params) : EventModifier(params) {
-      if (const auto& random_generator = steer<ParametersList>("randomGenerator"); !random_generator.empty()) {
-        gRandomGenerator = RandomGeneratorFactory::get().build(random_generator);
-        Tauola::setRandomGenerator([]() -> double { return gRandomGenerator->uniform(); });
-      }
       Log::LogAll(steer<bool>("debug"));
+      // default parameters
+      const auto decaying_particle = steer<int>("decayingParticle");
+      if (!PDG::get().has(decaying_particle))
+        throw CG_FATAL("TauolaFilter") << "Undefined decaying particle: " << decaying_particle << ".";
+      Tauola::setDecayingParticle(decaying_particle);
+      Tauola::setSameParticleDecayMode(steer<int>("sameParticleDecayMode"));
+      Tauola::setOppositeParticleDecayMode(steer<int>("oppositeParticleDecayMode"));
+      Tauola::setUnits(Tauola::GEV, Tauola::MM);
+      // random number generator initialisation
+      if (const auto& random_generator = steer<ParametersList>("randomGenerator"); !random_generator.empty()) {
+        if (gRandomGenerator = RandomGeneratorFactory::get().build(random_generator); gRandomGenerator)
+          Tauola::setRandomGenerator([]() -> double { return gRandomGenerator->uniform(); });
+      } else
+        Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
+      if (const auto lifetime = steer<double>("decayingParticleLifetime"); tau_lifetime > 0.)
+        Tauola::setTauLifetime(lifetime);
+      else if (lifetime == 0.)
+        Tauola::setTauLifetime(
+            (GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR / GSL_CONST_MKSA_ELECTRON_VOLT /* kg m^2 / s -> eV * s */
+             * 1.e-9                                                             /* eV * s -> GeV * s */
+             / PDG::get().width(decaying_particle))                              /* s */
+            * GSL_CONST_MKSA_SPEED_OF_LIGHT                                      /* s -> m */
+            * 1.e3                                                               /* m -> mm */
+        );
       std::string buf;
       {
-        Tauola::setUnits(Tauola::GEV, Tauola::MM);
         auto sc = utils::StreamCollector(buf);
         Tauola::initialize();
       }
       CG_INFO("TauolaFilter") << "Tauola initialised. Output:\n" << std::string(80, '-') << buf << std::string(80, '-');
+      Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
       if (!Tauola::getIsTauolaIni())
         throw CG_FATAL("TauolaFilter") << "Tauola was not properly initialised!";
-      // default parameters
-      Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
-      Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
-      Tauola::setDecayingParticle(steer<int>("decayingParticle"));
-      Tauola::setSameParticleDecayMode(steer<int>("sameParticleDecayMode"));
-      Tauola::setOppositeParticleDecayMode(steer<int>("oppositeParticleDecayMode"));
       // list of polarisation and spin correlations-specific parameters
       if (const auto& pol_states = steer<ParametersList>("polarisations"); !pol_states.empty()) {  // spin correlations
         if (pol_states.has<bool>("full"))
@@ -109,6 +125,10 @@ namespace cepgen::tauola {
           .allow(Tauola::KMode, "K")
           .allow(Tauola::KStarMode, "K*")
           .setDescription("uniformise the decay mode of all particle with the one given in 'decayingParticle'");
+      desc.add("decayingParticleLifetime", -1.)
+          .setDescription(
+              "custom lifetime for decaying particle, in millimetre"
+              " (< 0: use internal value, 0: retrieve from PDG info, > 0: set manually)");
       desc.add("oppositeParticleDecayMode", static_cast<int>(Tauola::All))
           .allow(Tauola::All, "all")
           .allow(Tauola::ElectronMode, "electron")
@@ -120,8 +140,7 @@ namespace cepgen::tauola {
           .allow(Tauola::KStarMode, "K*")
           .setDescription(
               "uniformise the decay mode of all particle with opposite charge to the one given in 'decayingParticle'");
-      desc.add("momentumConservationThreshold", 1.e-6)
-          .setDescription("numerical limit to ensure momentum conservation");
+      desc.add("momentumConservationThreshold", 1.e-6).setDescription("numerical limit for momentum conservation");
       auto pol_desc = ParametersDescription();
       pol_desc.add("full", true);
       pol_desc.add("GAMMA", Tauola::spin_correlation.GAMMA);
