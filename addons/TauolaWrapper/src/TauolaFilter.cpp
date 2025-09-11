@@ -174,11 +174,23 @@ namespace cepgen::tauola {
       CepGenEvent hepmc_event(event);  // conversion to a HepMC3 format
       const auto hepmc_event_size_before = hepmc_event.particles_size();
       TauolaHepMC3Event tauola_event(&hepmc_event);
+      CG_DEBUG("TauolaFilter:run").log([&tauola_event](auto& log) {
+        log << "Event prior to decay:\n";
+        HepMC3::Print::line(log.stream(), *tauola_event.getEvent(), true);
+        log << "\n";
+        HepMC3::Print::listing(log.stream(), *tauola_event.getEvent(), 2);
+      });
       size_t num_trials = 1;
       while (true) {
         if (num_trials++ >= max_trials_)
           break;
         tauola_event.decayTaus();
+        CG_DEBUG("TauolaFilter:run").log([&tauola_event](auto& log) {
+          log << "Event after to decay:\n";
+          HepMC3::Print::line(log.stream(), *tauola_event.getEvent(), true);
+          log << "\n";
+          HepMC3::Print::listing(log.stream(), *tauola_event.getEvent(), 2);
+        });
         hepmc_event.merge(event);  // merge everything back into the original event
         if (hepmc_event.particles_size() != hepmc_event_size_before)
           return true;
