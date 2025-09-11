@@ -64,5 +64,5 @@ namespace cepgen::lhapdf {
 #endif
   };
 }  // namespace cepgen::lhapdf
-using AlphaSLHAPDF = cepgen::lhapdf::AlphaS;
-REGISTER_ALPHAS_MODULE("lhapdf", AlphaSLHAPDF);
+using AlphaS_LHAPDF = cepgen::lhapdf::AlphaS;
+REGISTER_ALPHAS_MODULE("lhapdf", AlphaS_LHAPDF);
