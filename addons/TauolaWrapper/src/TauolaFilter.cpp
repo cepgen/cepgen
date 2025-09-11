@@ -59,7 +59,7 @@ namespace cepgen::tauola {
           Tauola::setRandomGenerator([]() -> double { return gRandomGenerator->uniform(); });
       } else
         Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
-      if (const auto lifetime = steer<double>("decayingParticleLifetime"); tau_lifetime > 0.)
+      if (const auto lifetime = steer<double>("decayingParticleLifetime"); lifetime > 0.)
         Tauola::setTauLifetime(lifetime);
       else if (lifetime == 0.)
         Tauola::setTauLifetime(
