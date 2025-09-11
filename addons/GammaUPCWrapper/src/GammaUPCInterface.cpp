@@ -16,18 +16,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <CepGen/Core/Exception.h>
-
 #include "CepGenGammaUPC/GammaUPCInterface.h"
+
+#include <CepGen/Core/Exception.h>
 
 extern "C" {
 extern double __elasticphotonphotonflux_MOD_photonflux_proton_nob(double& x, double& gamma);
 extern double __elasticphotonphotonflux_MOD_photonflux_nucleus_nob(double& x, double& gamma, double& z, double& ra);
-extern double __elasticphotonphotonflux_MOD_photonphotonflux_pp(double& x1, double& x2, int& force_p_nohad1);
-extern double __elasticphotonphotonflux_MOD_photonphotonflux_pA_hardsphere(double& x1, double& x2, int& force_p_nohad1);
-extern double __elasticphotonphotonflux_MOD_photonphotonflux_pA_WoodsSaxon(double& x1, double& x2, int& force_p_nohad1);
-extern double __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(double& x1, double& x2, int& force_p_nohad1);
-extern double __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(double& x1, double& x2, int& force_p_nohad1);
+extern double __elasticphotonphotonflux_MOD_photonphotonflux_pp(double& x1, double& x2, int& force_p_no_hadronisation);
+extern double __elasticphotonphotonflux_MOD_photonphotonflux_pA_hardsphere(double& x1,
+                                                                           double& x2,
+                                                                           int& force_p_no_hadronisation);
+extern double __elasticphotonphotonflux_MOD_photonphotonflux_pA_WoodsSaxon(double& x1,
+                                                                           double& x2,
+                                                                           int& force_p_no_hadronisation);
+extern double __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(double& x1,
+                                                                           double& x2,
+                                                                           int& force_p_no_hadronisation);
+extern double __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(double& x1,
+                                                                           double& x2,
+                                                                           int& force_p_no_hadronisation);
 }
 
 namespace gammaUPC {
@@ -45,28 +53,30 @@ namespace gammaUPC {
     return flux;
   }
 
-  double twoPhotonFluxPP(double x1, double x2, int force_p_nohad1) {
-    const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pp(x1, x2, force_p_nohad1);
+  double twoPhotonFluxPP(double x1, double x2, int force_p_no_hadronisation) {
+    const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pp(x1, x2, force_p_no_hadronisation);
     CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxPP")
         << "Two-photon flux from proton-proton for x1=" << x1 << ", x2=" << x2
-        << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+        << " [non-had.: " << static_cast<bool>(force_p_no_hadronisation) << "]: " << flux << ".";
     return flux;
   }
 
-  double twoPhotonFluxPA(double x1, double x2, int force_p_nohad1, HeavyIonMode mode) {
+  double twoPhotonFluxPA(double x1, double x2, int force_p_no_hadronisation, HeavyIonMode mode) {
     switch (mode) {
       case HeavyIonMode::HardSphere: {
-        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pA_hardsphere(x1, x2, force_p_nohad1);
+        const auto flux =
+            __elasticphotonphotonflux_MOD_photonphotonflux_pA_hardsphere(x1, x2, force_p_no_hadronisation);
         CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxPA")
             << "Two-photon flux from proton-HI with hard sphere modelling for x1=" << x1 << ", x2=" << x2
-            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+            << " [non-had.: " << static_cast<bool>(force_p_no_hadronisation) << "]: " << flux << ".";
         return flux;
       }
       case HeavyIonMode::WoodsSaxon: {
-        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_pA_WoodsSaxon(x1, x2, force_p_nohad1);
+        const auto flux =
+            __elasticphotonphotonflux_MOD_photonphotonflux_pA_WoodsSaxon(x1, x2, force_p_no_hadronisation);
         CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxPA")
             << "Two-photon flux from proton-HI with Woods-Saxon modelling for x1=" << x1 << ", x2=" << x2
-            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+            << " [non-had.: " << static_cast<bool>(force_p_no_hadronisation) << "]: " << flux << ".";
         return flux;
       }
       default:
@@ -75,20 +85,22 @@ namespace gammaUPC {
     }
   }
 
-  double twoPhotonFluxAB(double x1, double x2, int force_p_nohad1, HeavyIonMode mode) {
+  double twoPhotonFluxAB(double x1, double x2, int force_p_no_hadronisation, HeavyIonMode mode) {
     switch (mode) {
       case HeavyIonMode::HardSphere: {
-        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(x1, x2, force_p_nohad1);
+        const auto flux =
+            __elasticphotonphotonflux_MOD_photonphotonflux_AB_hardsphere(x1, x2, force_p_no_hadronisation);
         CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxAB")
             << "Two-photon flux from HI-HI with hard sphere modelling for x1=" << x1 << ", x2=" << x2
-            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+            << " [non-had.: " << static_cast<bool>(force_p_no_hadronisation) << "]: " << flux << ".";
         return flux;
       }
       case HeavyIonMode::WoodsSaxon: {
-        const auto flux = __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(x1, x2, force_p_nohad1);
+        const auto flux =
+            __elasticphotonphotonflux_MOD_photonphotonflux_AB_WoodsSaxon(x1, x2, force_p_no_hadronisation);
         CG_DEBUG_LOOP("gammaUPC:twoPhotonFluxAB")
             << "Two-photon flux from HI-HI with Woods-Saxon modelling for x1=" << x1 << ", x2=" << x2
-            << " [non-had.: " << static_cast<bool>(force_p_nohad1) << "]: " << flux << ".";
+            << " [non-had.: " << static_cast<bool>(force_p_no_hadronisation) << "]: " << flux << ".";
         return flux;
       }
       default:

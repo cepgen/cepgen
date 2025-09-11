@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@ namespace gammaUPC {
   enum struct HeavyIonMode { HardSphere, WoodsSaxon };
   double photonFluxP(double x, double gamma);
   double photonFluxA(double a, double gamma, double z, double ra);
-  double twoPhotonFluxPP(double x1, double x2, int force_p_nohad1);
-  double twoPhotonFluxPA(double x1, double x2, int force_p_nohad1, HeavyIonMode mode);
-  double twoPhotonFluxAB(double x1, double x2, int force_p_nohad1, HeavyIonMode mode);
+  double twoPhotonFluxPP(double x1, double x2, int force_p_no_hadronisation);
+  double twoPhotonFluxPA(double x1, double x2, int force_p_no_hadronisation, HeavyIonMode mode);
+  double twoPhotonFluxAB(double x1, double x2, int force_p_no_hadronisation, HeavyIonMode mode);
 }  // namespace gammaUPC
 
 #endif
