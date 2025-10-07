@@ -177,8 +177,14 @@ namespace cepgen::mg5amc {
   }
 
   std::string normalise(const std::string& process_name, const std::string& physics_model) {
-    return (!physics_model.empty() ? physics_model + "__" : "") +
-           utils::replaceAll(process_name,
-                             {{" ", "_"}, {">", "_to_"}, {"+", "p"}, {"-", "m"}, {"~", "bar"}, {"/", "_exc_"}});
+    return (physics_model.empty() ? ""s : physics_model + "__") + utils::replaceAll(process_name,
+                                                                                    {{" ", "_"},
+                                                                                     {">", "_to_"},
+                                                                                     {"+", "p"},
+                                                                                     {"-", "m"},
+                                                                                     {"~", "bar"},
+                                                                                     {"/", "_exc_"},
+                                                                                     {"$", "_excs_"},
+                                                                                     {"|", "_or_"}});
   }
 }  // namespace cepgen::mg5amc
