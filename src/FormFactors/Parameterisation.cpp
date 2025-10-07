@@ -27,7 +27,7 @@ using namespace cepgen::formfac;
 
 Parameterisation::Parameterisation(const ParametersList& params)
     : NamedModule(params),
-      pdg_id_(steer<pdgid_t>("pdgId")),
+      pdg_id_(steer<int>("pdgId")),
       mass2_(std::pow(PDG::get().mass(pdg_id_), 2)),
       mp_(PDG::get().mass(PDG::proton)),
       mp2_(mp_ * mp_) {}

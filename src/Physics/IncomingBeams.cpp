@@ -151,8 +151,12 @@ void IncomingBeams::setParameters(const ParametersList& params) {
     set_part_fluxes_from_name(kt_fluxes_name);
     CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
   }
-  pos_flux.set("formFactors", pos_form_factors).set("structureFunctions", structure_functions_parameters);
-  neg_flux.set("formFactors", neg_form_factors).set("structureFunctions", structure_functions_parameters);
+  pos_flux.set("formFactors", pos_form_factors);
+  neg_flux.set("formFactors", neg_form_factors);
+  if (!structure_functions_parameters.empty()) {
+    pos_flux.set("structureFunctions", structure_functions_parameters);
+    neg_flux.set("structureFunctions", structure_functions_parameters);
+  }
   plist_pos.set("partonFlux", pos_flux);
   plist_neg.set("partonFlux", neg_flux);
 
