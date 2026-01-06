@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  */
 
 #include <cmath>
-#include <fstream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -38,40 +37,79 @@
 
 using namespace std::string_literals;
 
-namespace cepgen::utils {
-  class TopdrawerDrawer : public Drawer {
+namespace cepgen::topdrawer {
+  class Drawer : public utils::Drawer {
   public:
-    explicit TopdrawerDrawer(const ParametersList&);
+    explicit Drawer(const ParametersList& params)
+        : utils::Drawer(params), font_(utils::toUpper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = utils::Drawer::description();
+      desc.setDescription("Topdrawer plotter");
+      desc.add("font", "duplex"s).setDescription("Topdrawer font to use");
+      desc.add("filling", true).setDescription("allow to fill the whole available space?");
+      return desc;
+    }
 
-    const TopdrawerDrawer& draw(const Graph1D&, const Mode&) const override;
-    const TopdrawerDrawer& draw(const Graph2D&, const Mode&) const override;
-    const TopdrawerDrawer& draw(const Hist1D&, const Mode&) const override;
-    const TopdrawerDrawer& draw(const Hist2D&, const Mode&) const override;
+    const Drawer& draw(const utils::Graph1D& graph, const Mode& mode) const override {
+      utils::Piper::Commands cmds;
+      cmds += preDraw(graph, mode);
+      cmds += plot(graph);
+      cmds += stringify("TITLE TOP", graph.title());
+      cmds += postDraw(graph, mode);
+      execute(cmds, graph.name());
+      return *this;
+    }
+    const Drawer& draw(const utils::Graph2D& graph, const Mode& mode) const override {
+      utils::Piper::Commands cmds;
+      cmds += preDraw(graph, mode);
+      cmds += plot(graph, mode);
+      cmds += stringify("TITLE TOP", graph.title());
+      cmds += postDraw(graph, mode);
+      execute(cmds, graph.name());
+      return *this;
+    }
+    const Drawer& draw(const utils::Hist1D& hist, const Mode& mode) const override {
+      utils::Piper::Commands cmds;
+      cmds += preDraw(hist, mode);
+      cmds += plot(hist);
+      cmds += stringify("TITLE TOP", hist.title());
+      cmds += postDraw(hist, mode);
+      execute(cmds, hist.name());
+      return *this;
+    }
+    const Drawer& draw(const utils::Hist2D& hist, const Mode& mode) const override {
+      utils::Piper::Commands cmds;
+      cmds += preDraw(hist, mode);
+      cmds += plot(hist, mode);
+      cmds += stringify("TITLE TOP", hist.title());
+      cmds += postDraw(hist, mode);
+      execute(cmds, hist.name());
+      return *this;
+    }
 
-    const TopdrawerDrawer& draw(const DrawableColl&,
-                                const std::string& name = "",
-                                const std::string& title = "",
-                                const Mode& mode = Mode::none) const override;
+    const Drawer& draw(const utils::DrawableColl&,
+                       const std::string& name = "",
+                       const std::string& title = "",
+                       const Mode& mode = Mode::none) const override;
 
   private:
-    static void execute(const Piper::Commands&, const std::string&);
-    static Piper::Commands plot(const Graph1D&);
-    static Piper::Commands plot(const Graph2D&, const Mode&);
-    static Piper::Commands plot(const Hist1D&);
-    static Piper::Commands plot(const Hist2D&, const Mode&);
-    static Piper::Commands postDraw(const Drawable&, const Mode&);
-    static Piper::Commands stringify(const std::string&, const std::string&);
-    static const std::map<std::string, std::pair<char, char> > kSpecChars;
+    static void execute(const utils::Piper::Commands&, const std::string&);
+    static utils::Piper::Commands plot(const utils::Graph1D&);
+    static utils::Piper::Commands plot(const utils::Graph2D&, const Mode&);
+    static utils::Piper::Commands plot(const utils::Hist1D&);
+    static utils::Piper::Commands plot(const utils::Hist2D&, const Mode&);
+    static utils::Piper::Commands postDraw(const utils::Drawable&, const Mode&);
+    static utils::Piper::Commands stringify(const std::string&, const std::string&);
+    static const std::unordered_map<std::string, std::pair<char, char> > kSpecialCharacters;
 
-    Piper::Commands preDraw(const Drawable&, const Mode&) const;
+    utils::Piper::Commands preDraw(const utils::Drawable&, const Mode&) const;
 
     const std::string font_;
     const bool filling_;
   };
 
-  const std::map<std::string, std::pair<char, char> > TopdrawerDrawer::kSpecChars = {
+  const std::unordered_map<std::string, std::pair<char, char> > Drawer::kSpecialCharacters = {
       {"Alpha", {'A', 'F'}},      {"Beta", {'B', 'F'}},
       {"Chi", {'C', 'F'}},        {"Delta", {'D', 'F'}},
       {"Epsilon", {'E', 'F'}},    {"Phi", {'F', 'F'}},
@@ -110,79 +148,35 @@ namespace cepgen::utils {
       {"langle", {'B', 'S'}},     {"rangle", {'E', 'S'}},
       {"hbar", {'H', 'K'}},       {"lambdabar", {'L', 'K'}}};
 
-  TopdrawerDrawer::TopdrawerDrawer(const ParametersList& params)
-      : Drawer(params), font_(toUpper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
-
-  const TopdrawerDrawer& TopdrawerDrawer::draw(const Graph1D& graph, const Mode& mode) const {
-    Piper::Commands cmds;
-    cmds += preDraw(graph, mode);
-    cmds += plot(graph);
-    cmds += stringify("TITLE TOP", graph.title());
-    cmds += postDraw(graph, mode);
-    execute(cmds, graph.name());
-    return *this;
-  }
-
-  const TopdrawerDrawer& TopdrawerDrawer::draw(const Graph2D& graph, const Mode& mode) const {
-    Piper::Commands cmds;
-    cmds += preDraw(graph, mode);
-    cmds += plot(graph, mode);
-    cmds += stringify("TITLE TOP", graph.title());
-    cmds += postDraw(graph, mode);
-    execute(cmds, graph.name());
-    return *this;
-  }
-
-  const TopdrawerDrawer& TopdrawerDrawer::draw(const Hist1D& hist, const Mode& mode) const {
-    Piper::Commands cmds;
-    cmds += preDraw(hist, mode);
-    cmds += plot(hist);
-    cmds += stringify("TITLE TOP", hist.title());
-    cmds += postDraw(hist, mode);
-    execute(cmds, hist.name());
-    return *this;
-  }
-
-  const TopdrawerDrawer& TopdrawerDrawer::draw(const Hist2D& hist, const Mode& mode) const {
-    Piper::Commands cmds;
-    cmds += preDraw(hist, mode);
-    cmds += plot(hist, mode);
-    cmds += stringify("TITLE TOP", hist.title());
-    cmds += postDraw(hist, mode);
-    execute(cmds, hist.name());
-    return *this;
-  }
-
-  const TopdrawerDrawer& TopdrawerDrawer::draw(const DrawableColl& objs,
-                                               const std::string& name,
-                                               const std::string& title,
-                                               const Mode& mode) const {
+  const Drawer& Drawer::draw(const utils::DrawableColl& objs,
+                             const std::string& name,
+                             const std::string& title,
+                             const Mode& mode) const {
     std::vector<std::string> line_styles = {
         "SOLID", "DOTS", "DASHES", "DAASHES", "DOTDASH", "SPACE", "PATTERNED", "FUNNY", "PERMANENT"};
     size_t plot_id = 0;
-    Piper::Commands cmds;
-    const Drawable* first{nullptr};
-    Piper::Commands cmds_plots;
+    const utils::Drawable* first{nullptr};
+    utils::Piper::Commands cmds_plots;
     for (const auto* obj : objs) {
-      auto line_style = plot_id % line_styles.size();
+      const auto line_style = (plot_id++) % line_styles.size();
       if (obj->isGraph1D()) {
-        const auto* gr = dynamic_cast<const Graph1D*>(obj);
+        const auto* gr = dynamic_cast<const utils::Graph1D*>(obj);
         cmds_plots.emplace_back("SET TEXTURE " + line_styles.at(line_style));
         cmds_plots += plot(*gr);
         if (!first)
           first = gr;
       } else if (obj->isHist1D()) {
-        const auto* hist = dynamic_cast<const Hist1D*>(obj);
+        const auto* hist = dynamic_cast<const utils::Hist1D*>(obj);
         cmds_plots.emplace_back("SET TEXTURE " + line_styles.at(line_style));
         cmds_plots += plot(*hist);
         if (!first)
           first = hist;
       } else
-        throw CG_FATAL("TopdrawerDrawer:draw") << "Invalid object type to be plotted in multigraph!";
-      ++plot_id;
+        throw CG_FATAL("topdrawer:Drawer:draw") << "Invalid object type to be plotted in multigraph!";
     }
     if (!first)
-      throw CG_FATAL("TopdrawerDrawer:draw") << "No object defined as the first drawable in the canvas.";
+      throw CG_FATAL("topdrawer:Drawer:draw") << "No object defined as the first drawable in the canvas.";
+    utils::Piper::Commands cmds;
     cmds += preDraw(*first, mode);
     cmds += cmds_plots;
     cmds += postDraw(*first, mode);
@@ -191,16 +185,16 @@ namespace cepgen::utils {
     return *this;
   }
 
-  Piper::Commands TopdrawerDrawer::plot(const Graph1D& graph) {
-    Piper::Commands cmds;
+  utils::Piper::Commands Drawer::plot(const utils::Graph1D& graph) {
+    utils::Piper::Commands cmds;
     for (const auto& pt : graph.points())
-      cmds += format("%g,%g,%g,%g", pt.first.value, pt.second, pt.first.value_unc, pt.second.uncertainty());
+      cmds += utils::format("%g,%g,%g,%g", pt.first.value, pt.second, pt.first.value_unc, pt.second.uncertainty());
     cmds += "JOIN";
     return cmds;
   }
 
-  Piper::Commands TopdrawerDrawer::plot(const Graph2D& graph, const Mode& mode) {
-    Piper::Commands cmds;
+  utils::Piper::Commands Drawer::plot(const utils::Graph2D& graph, const Mode& mode) {
+    utils::Piper::Commands cmds;
     auto to_fortran_float = [](double val) -> std::string {
       return utils::replaceAll(utils::format("%g", val), {{"e", "D"}});
     };
@@ -227,19 +221,19 @@ namespace cepgen::utils {
     return cmds;
   }
 
-  Piper::Commands TopdrawerDrawer::plot(const Hist1D& hist) {
-    Piper::Commands cmds;
+  utils::Piper::Commands Drawer::plot(const utils::Hist1D& hist) {
+    utils::Piper::Commands cmds;
     for (size_t i = 0; i < hist.nbins(); ++i) {
       const auto& bin = hist.binRange(i);
       const auto& val = hist.value(i);
-      cmds += format("%g,%g,%g,%g", bin.x(0.5), val, 0.5 * bin.range(), val.uncertainty());
+      cmds += utils::format("%g,%g,%g,%g", bin.x(0.5), static_cast<double>(val), 0.5 * bin.range(), val.uncertainty());
     }
-    cmds += "HIST";
+    cmds += "HISTOGRAM";
     return cmds;
   }
 
-  Piper::Commands TopdrawerDrawer::plot(const Hist2D& hist, const Mode& mode) {
-    Piper::Commands cmds;
+  utils::Piper::Commands Drawer::plot(const utils::Hist2D& hist, const Mode& mode) {
+    utils::Piper::Commands cmds;
     cmds += "READ MESH BINS";
     std::ostringstream osl;
     std::string sep;
@@ -251,7 +245,7 @@ namespace cepgen::utils {
       osl.str("");
       osl << "X=" << hist.binRangeX(ix).x(0.5) << " Z=";
       for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
-        osl << " " << hist.value(ix, iy);
+        osl << " " << static_cast<double>(hist.value(ix, iy));
       }
       cmds += osl.str();
     }
@@ -266,8 +260,8 @@ namespace cepgen::utils {
     return cmds;
   }
 
-  Piper::Commands TopdrawerDrawer::preDraw(const Drawable& dr, const Mode& mode) const {
-    Piper::Commands cmds;
+  utils::Piper::Commands Drawer::preDraw(const utils::Drawable& dr, const Mode& mode) const {
+    utils::Piper::Commands cmds;
     cmds += "SET DEVICE POSTSCR ORIENTATION 3";
     cmds += "SET FONT " + font_;
     if (filling_)
@@ -282,30 +276,30 @@ namespace cepgen::utils {
       cmds += "SET SCALE Z LOG";
     const auto& xrng = dr.xAxis().range();
     if (xrng.valid())
-      cmds += format("SET LIMITS X %g TO %g", xrng.min(), xrng.max());
+      cmds += utils::format("SET LIMITS X %g TO %g", xrng.min(), xrng.max());
     const auto& yrng = dr.yAxis().range();
     if (yrng.valid())
-      cmds += format("SET LIMITS Y %g TO %g", yrng.min(), yrng.max());
+      cmds += utils::format("SET LIMITS Y %g TO %g", yrng.min(), yrng.max());
     const auto& zrng = dr.zAxis().range();
     if (zrng.valid())
-      cmds += format("SET LIMITS Z %g TO %g", zrng.min(), zrng.max());
+      cmds += utils::format("SET LIMITS Z %g TO %g", zrng.min(), zrng.max());
     return cmds;
   }
 
-  Piper::Commands TopdrawerDrawer::postDraw(const Drawable& dr, const Mode&) {
-    Piper::Commands cmds;
+  utils::Piper::Commands Drawer::postDraw(const utils::Drawable& dr, const Mode&) {
+    utils::Piper::Commands cmds;
     cmds += stringify("TITLE BOTTOM", dr.xAxis().label());
     cmds += stringify("TITLE LEFT", dr.yAxis().label());
     cmds += stringify("TITLE CENTER 10.8 9.25", "CepGen v" + version::tag);
     return cmds;
   }
 
-  void TopdrawerDrawer::execute(const Piper::Commands& cmds, const std::string& name) {
-    Piper("TOPDRAWER_OUTPUT=" + name + ".ps " + TD).execute(cmds).execute({"EXIT"});
-    CG_DEBUG("TopdrawerDrawer:execute") << "Topdrawer just plotted:\n" << cmds;
+  void Drawer::execute(const utils::Piper::Commands& cmds, const std::string& name) {
+    utils::Piper("TOPDRAWER_OUTPUT=" + name + ".ps " + TD).execute(cmds).execute({"EXIT"});
+    CG_DEBUG("topdrawer:Drawer:execute") << "Topdrawer just plotted:\n" << cmds;
   }
 
-  Piper::Commands TopdrawerDrawer::stringify(const std::string& label, const std::string& str) {
+  utils::Piper::Commands Drawer::stringify(const std::string& label, const std::string& str) {
     bool in_math{false}, in_bs{false}, in_sub{false}, in_sup{false};
     std::map<int, std::string> m_spec_char, m_sub_char;
     std::string lab;
@@ -316,13 +310,12 @@ namespace cepgen::utils {
         in_math = !in_math;
         continue;
       }
-      // check if we are in superscript/subscript mode
-      if (ch == '_') {
+      if (ch == '_') {  // check if we are in subscript mode
         in_sub = true;
         m_sub_char[lab.size()] = "";
         continue;
       }
-      if (ch == '^') {
+      if (ch == '^') {  // check if we are in superscript mode
         in_sup = true;
         m_sub_char[lab.size()] = "";
         continue;
@@ -344,8 +337,7 @@ namespace cepgen::utils {
         lab.push_back(ch);
         continue;
       }
-      // check if we have a special character
-      if (ch == '\\') {
+      if (ch == '\\') {  // check if we have a special character
         in_bs = true;
         m_spec_char[lab.size()] = "";
         lab.push_back('*');
@@ -364,37 +356,24 @@ namespace cepgen::utils {
           continue;
         }
       }
-      // otherwise assume we are just pushing into the characters buffer
-      lab.push_back(ch);
+      lab.push_back(ch);  // otherwise assume we are just pushing into the characters buffer
     }
     std::string mod(lab.size(), ' ');
-    for (const auto& ch : m_spec_char) {
-      if (kSpecChars.count(ch.second) == 0) {
-        CG_WARNING("TopdrawerDrawer:stringify")
+    for (const auto& ch : m_spec_char)
+      if (kSpecialCharacters.count(ch.second) > 0)
+        std::tie(lab[ch.first], mod[ch.first]) = kSpecialCharacters.at(ch.second);
+      else
+        CG_WARNING("topdrawer:Drawer:stringify")
             << "Special character '" << ch.second << "' is not defined. Please either define it or use another one.";
-        continue;
-      }
-      const auto& tok = kSpecChars.at(ch.second);
-      lab[ch.first] = tok.first;
-      mod[ch.first] = tok.second;
-    }
     for (const auto& ch : m_sub_char) {
       mod[ch.first] = 'C';
       mod[ch.first + ch.second.size() + 1] = 'C';
     }
-    Piper::Commands out;
+    utils::Piper::Commands out;
     out += label + " '" + lab + "'";
     out += "CASE" + std::string(label.size() - 4, ' ') + " '" + mod + "'";
     return out;
   }
-
-  ParametersDescription TopdrawerDrawer::description() {
-    auto desc = Drawer::description();
-    desc.setDescription("Topdrawer plotter");
-    desc.add("font", "duplex"s).setDescription("Topdrawer font to use");
-    desc.add("filling", true).setDescription("allow to fill the whole available space?");
-    return desc;
-  }
-}  // namespace cepgen::utils
-typedef cepgen::utils::TopdrawerDrawer TopdrawerDrawer;
+}  // namespace cepgen::topdrawer
+using TopdrawerDrawer = cepgen::topdrawer::Drawer;
 REGISTER_DRAWER("topdrawer", TopdrawerDrawer);
