@@ -50,7 +50,7 @@ namespace cepgen::lhapdf {
     const std::unique_ptr<LHAPDF::AlphaS_ODE> ode_;
   };
 }  // namespace cepgen::lhapdf
-using AlphaSLHAPDFODE = cepgen::lhapdf::AlphaSODE;
-REGISTER_ALPHAS_MODULE("lhapdfODE", AlphaSLHAPDFODE);
+using AlphaS_LHAPDF_ODE = cepgen::lhapdf::AlphaSODE;
+REGISTER_ALPHAS_MODULE("lhapdfODE", AlphaS_LHAPDF_ODE);
 
 #endif

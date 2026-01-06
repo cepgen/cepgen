@@ -33,6 +33,9 @@ namespace cepgen::python {
 
     void setProgramName(const std::string&);  ///< Set the name of the Python program
     static bool initialised();                ///< Is the python environment already initialised?
+#if PY_VERSION_HEX >= 0x03080000
+    inline const PyConfig& configuration() const { return config_; }  ///< Set of configuration variables
+#endif
 
   private:
 #if PY_VERSION_HEX >= 0x03080000

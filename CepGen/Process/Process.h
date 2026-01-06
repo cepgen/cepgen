@@ -132,15 +132,15 @@ namespace cepgen::proc {
     /// Register a variable to be handled and populated whenever a new phase space point weight is to be calculated.
     /// \note To be run once per generation (before any point computation)
     /// \param[out] out Reference to the variable to be mapped
-    /// \param[in] type Type of mapping to apply
-    /// \param[in] lim Integration limits
+    /// \param[in] mapping_type Type of mapping to apply
+    /// \param[in] limits Integration limits
     /// \param[in] name Computer-readable variable name
-    /// \param[in] description Human-readable description of the variable
+    /// \param[in] _description Human-readable description of the variable
     Process& defineVariable(double& out,
-                            const Mapping& type,
-                            const Limits& lim,
+                            const Mapping& mapping_type,
+                            const Limits& limits,
                             const std::string& name,
-                            const std::string& description = "");
+                            const std::string& _description = "");
     /// Retrieve the physical value for one variable
     double variableValue(size_t i, double x) const;
 

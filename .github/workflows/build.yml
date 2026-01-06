@@ -21,7 +21,7 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: 'MadGraph fetch'
@@ -54,13 +54,13 @@ jobs:
         tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package
 
     - name: 'Upload environment artifact'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: build-env
         path: environment.tar.gz
 
     - name: 'Upload packages artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: package-env
         path: /Package/cepgen-*.rpm
@@ -72,9 +72,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -93,9 +93,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -109,7 +109,7 @@ jobs:
     - name: 'Compress environment'
       run: tar cvfz benchmark-environment.tar.gz /Package/*.html
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: benchmark-env
         path: benchmark-environment.tar.gz
@@ -121,9 +121,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -138,7 +138,7 @@ jobs:
       run: |
         tar cvfz validation-environment.tar.gz ${{ env.CEPGEN_PATH }}/validation/
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: validation-env
         path: validation-environment.tar.gz
@@ -153,9 +153,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -165,7 +165,7 @@ jobs:
       run: |
         tar cvfz install-environment.tar.gz /Package/src /Package/addons /Package/install
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: install-env
         path: install-environment.tar.gz

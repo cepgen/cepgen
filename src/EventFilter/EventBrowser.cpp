@@ -111,7 +111,7 @@ double EventBrowser::variable(const Event& event, const std::string& variable_na
   }
   if (variable_name == "met")  // missing transverse energy
     return event.missingMomentum().pt();
-  if (variable_name == "mephi")  // azimuthal component of the missing transverse energy
+  if (variable_name == "mephi"s)  // azimuthal component of the missing transverse energy
     return event.missingMomentum().phi();
   if (variable_name == "cmEnergy")  // two-beam centre-of-mass energy
     return event.cmEnergy();

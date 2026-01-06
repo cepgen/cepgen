@@ -51,8 +51,8 @@ namespace mstw {
           throw CG_FATAL("MSTW") << "Only proton structure function grids can be retrieved for this purpose!";
 
         // retrieve all points and evaluate grid boundaries
-        sfval_t val{};
-        while (file.read(reinterpret_cast<char*>(&val), sizeof(sfval_t)))
+        values_t val{};
+        while (file.read(reinterpret_cast<char*>(&val), sizeof(values_t)))
           insert({val.xbj, val.q2}, {val.f2, val.fl});
         file.close();
         initialise();  // initialise the grid after filling its nodes
@@ -80,7 +80,7 @@ namespace mstw {
       enum nucleon_t : unsigned short { proton = 1, neutron = 2 } nucleon;  ///< Type of nucleon interpolated
     };
     /// Structure functions value at a given \f$Q^2/x_{\rm Bj}\f$ coordinate
-    struct sfval_t {
+    struct values_t {
       float q2{0.};   ///< four-momentum transfer, in GeV\f$^2\f$
       float xbj{0.};  ///< Bjorken's scaling variable
       double f2{0.};  ///< Transverse structure function value
@@ -107,7 +107,7 @@ namespace mstw {
   };
 
   /// Human-readable description of a values point
-  std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
+  std::ostream& operator<<(std::ostream& os, const Grid::values_t& val) {
     return os << cepgen::utils::format(
                "xbj = %.4f\tQ² = %.5e GeV²\tF_2 = % .6e\tF_1 = % .6e", val.xbj, val.q2, val.f2, val.fl);
   }

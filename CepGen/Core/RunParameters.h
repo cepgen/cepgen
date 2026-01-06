@@ -60,7 +60,7 @@ namespace cepgen {
     utils::TimeKeeper* timeKeeper() { return timer_.get(); }              ///< Pointer to a timekeeper instance
     const utils::TimeKeeper* timeKeeper() const { return timer_.get(); }  ///< Pointer to a timekeeper instance
 
-    void initialiseModules();  ///< Initialise the event handling modules for an event generation
+    void initialiseModules() const;  ///< Initialise the event handling modules for an event generation
 
     inline ParametersList& integrator() { return integrator_; }              ///< Integrator specific user parameters
     inline const ParametersList& integrator() const { return integrator_; }  ///< Integrator specific user parameters

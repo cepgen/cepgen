@@ -231,7 +231,8 @@ void CepGenEvent::merge(cepgen::Event& event) const {
   const auto cs_size = central_system.size();  // freeze the "primordial" central system size
   if (cs_size != vertex_central_system->particles_out().size()) {
     CG_ERROR("HepMC3:CepGenEvent:merge")
-        << "Central system particles multiplicities differ between CepGen and HepMC3 event records.";
+        << "Central system particles multiplicities differ between CepGen and HepMC3 event records.\nCepGen: "
+        << central_system << ", HepMC3: " << vertex_central_system->particles_out().size() << ".";
     return;
   }
 

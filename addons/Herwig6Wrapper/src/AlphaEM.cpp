@@ -20,6 +20,8 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::herwig6 {
   class AlphaEM final : public cepgen::Coupling {
   public:
@@ -31,7 +33,7 @@ namespace cepgen::herwig6 {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("Herwig6 modelling of alpha(EM) running");
       initialise();
-      desc.add("alphem", hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
+      desc.add("alphem"s, hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
       return desc;
     }
 

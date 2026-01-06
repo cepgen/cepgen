@@ -41,6 +41,7 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : NamedModule(params) {
   const auto categories = steer<std::vector<std::string> >("categories"),
@@ -66,24 +67,26 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
   };
   add_category("proc", "Processes", "", cepgen::ProcessFactory::get());
   add_category("cards", "Cards handler", "", cepgen::CardsHandlerFactory::get());
-  add_category("formfac", "Form factors", "", cepgen::FormFactorsFactory::get());
-  add_category("strfun", "Structure functions", "", cepgen::StructureFunctionsFactory::get());
-  add_category(
-      "sigrat", "Longitudinal/transverse cross section ratio parameterisations", "", cepgen::SigmaRatiosFactory::get());
-  add_category("partmap", "Partons generation algorithm", "", cepgen::PartonsPhaseSpaceGeneratorFactory::get());
-  add_category("psmap", "Phase space mapper", "", cepgen::PhaseSpaceGeneratorFactory::get());
-  add_category("collflux", "Collinear parton flux modelling", "", cepgen::CollinearFluxFactory::get());
-  add_category("ktflux", "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
-  add_category("alphaem", "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());
-  add_category("alphas", "Strong coupling evolution", "", cepgen::AlphaSFactory::get());
-  add_category("integr", "Integrator algorithms", "", cepgen::IntegratorFactory::get());
+  add_category("formfac"s, "Form factors", "", cepgen::FormFactorsFactory::get());
+  add_category("strfun"s, "Structure functions", "", cepgen::StructureFunctionsFactory::get());
+  add_category("sigrat"s,
+               "Longitudinal/transverse cross section ratio parameterisations",
+               "",
+               cepgen::SigmaRatiosFactory::get());
+  add_category("partmap"s, "Partons generation algorithm", "", cepgen::PartonsPhaseSpaceGeneratorFactory::get());
+  add_category("psmap"s, "Phase space mapper", "", cepgen::PhaseSpaceGeneratorFactory::get());
+  add_category("collflux"s, "Collinear parton flux modelling", "", cepgen::CollinearFluxFactory::get());
+  add_category("ktflux"s, "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
+  add_category("alphaem"s, "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());
+  add_category("alphas"s, "Strong coupling evolution", "", cepgen::AlphaSFactory::get());
+  add_category("integr"s, "Integrator algorithms", "", cepgen::IntegratorFactory::get());
   add_category("func", "Functional parsers", "", cepgen::FunctionalFactory::get());
-  add_category("rndgen", "Random number generators", "", cepgen::RandomGeneratorFactory::get());
+  add_category("rndgen"s, "Random number generators", "", cepgen::RandomGeneratorFactory::get());
   add_category("drawer", "Drawing tools", "", cepgen::DrawerFactory::get());
-  add_category("evtgen", "Event generation algorithms", "", cepgen::GeneratorWorkerFactory::get());
-  add_category("evtimp", "Event import algorithms", "", cepgen::EventImporterFactory::get());
-  add_category("evtmod", "Event modification algorithms", "", cepgen::EventModifierFactory::get());
-  add_category("evtout", "Event export modules", "", cepgen::EventExporterFactory::get());
+  add_category("evtgen"s, "Event generation algorithms", "", cepgen::GeneratorWorkerFactory::get());
+  add_category("evtimp"s, "Event import algorithms", "", cepgen::EventImporterFactory::get());
+  add_category("evtmod"s, "Event modification algorithms", "", cepgen::EventModifierFactory::get());
+  add_category("evtout"s, "Event export modules", "", cepgen::EventExporterFactory::get());
   add_category("docs", "Documentation generator modules", "", cepgen::DocumentationGeneratorFactory::get());
 }
 

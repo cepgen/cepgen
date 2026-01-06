@@ -26,8 +26,9 @@
 
 using namespace cepgen;
 
-GridParameters::GridParameters(size_t mbin, size_t ndim) : mbin_(mbin), inv_mbin_(1. / mbin_), num_dimensions_(ndim) {
-  coord_t coordinate(ndim, 0);
+GridParameters::GridParameters(size_t m_bin, size_t num_dimensions)
+    : mbin_(m_bin), inv_mbin_(1. / mbin_), num_dimensions_(num_dimensions) {
+  coord_t coordinate(num_dimensions, 0);
   for (size_t i = 0; i < static_cast<size_t>(std::pow(mbin_, num_dimensions_)); ++i) {  // build and populate the grid
     generateCoordinates(coordinate, i);
     coordinates_.emplace_back(coordinate);

@@ -28,13 +28,14 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 Hist1D::Hist1D(const ParametersList& params)
     : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
-  if (const auto& x_bins = params.get<std::vector<double> >("xbins"); x_bins.size() > 1)
+  if (const auto& x_bins = params.get<std::vector<double> >("xbins"s); x_bins.size() > 1)
     buildFromBins(x_bins);
   else if (const auto& xrange = params.get<Limits>("xrange"); xrange.valid())
-    buildFromRange(params.get<int>("nbins") > 0 ? params.get<int>("nbins") : params.get<int>("nbinsX"), xrange);
+    buildFromRange(params.get<int>("nbins"s) > 0 ? params.get<int>("nbins"s) : params.get<int>("nbinsX"s), xrange);
   else
     throw CG_FATAL("Hist1D") << "Failed to build a 1D histogram with user parameters: " << params << ".";
 }
@@ -60,6 +61,18 @@ Hist1D::Hist1D(const Hist1D& oth)
       hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
       underflow_(oth.underflow_),
       overflow_(oth.overflow_) {}
+
+ParametersDescription Hist1D::description() {
+  auto desc = ParametersDescription();
+  desc.add("name"s, ""s).setDescription("Histogram filename-safe name");
+  desc.add("title"s, ""s).setDescription("Histogram title/description");
+  desc.add("log"s, false).setDescription("Plot logarithmic axis?");
+  // x-axis attributes
+  desc.add("xbins"s, std::vector<double>{}).setDescription("x-axis bins definition");
+  desc.add("nbinsX"s, 25).setDescription("Bins multiplicity for x-axis");
+  desc.add("xrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+  return desc;
+}
 
 void Hist1D::buildFromBins(const std::vector<double>& bins) {
   if (bins.size() < 1)
@@ -88,6 +101,8 @@ void Hist1D::buildFromRange(size_t num_bins, const Limits& range) {
   CG_DEBUG("Hist1D:buildFromRange") << "Booking a 1D histogram with " << s("bin", num_bins, true) << " in range "
                                     << range << ".";
 }
+
+bool Hist1D::empty() const { return integral(true) == 0.; }
 
 void Hist1D::clear() {
   CG_ASSERT(hist_);

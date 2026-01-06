@@ -28,12 +28,13 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 Hist2D::Hist2D(const ParametersList& params)
     : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
-  const auto &x_bins = params.get<std::vector<double> >("xbins"), &y_bins = params.get<std::vector<double> >("ybins");
-  const auto &x_range = params.get<Limits>("xrange"), &y_range = params.get<Limits>("yrange");
-  const auto &num_bins_x = params.get<int>("nbinsX"), &num_bins_y = params.get<int>("nbinsY");
+  const auto &x_bins = params.get<std::vector<double> >("xbins"s), &y_bins = params.get<std::vector<double> >("ybins"s);
+  const auto &x_range = params.get<Limits>("xrange"s), &y_range = params.get<Limits>("yrange"s);
+  const auto &num_bins_x = params.get<int>("nbinsX"s), &num_bins_y = params.get<int>("nbinsY"s);
   if (x_bins.size() > 1 && y_bins.size() > 1)
     buildFromBins(x_bins, y_bins);
   else if (x_range.valid() && y_range.valid() && num_bins_x > 1 && num_bins_y > 1)
@@ -50,7 +51,7 @@ Hist2D::Hist2D(size_t num_bins_x,
                const std::string& title)
     : Drawable(name, title) {
   if (num_bins_x == 0 || num_bins_y == 0)
-    throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
+    throw CG_ERROR("Hist2D") << "Number of bins must be strictly positive!";
   buildFromRange(num_bins_x, xrange, num_bins_y, y_range);
 }
 
@@ -60,7 +61,7 @@ Hist2D::Hist2D(const std::vector<double>& x_bins,
                const std::string& title)
     : Drawable(name, title) {
   if (x_bins.empty() || y_bins.empty())
-    throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
+    throw CG_ERROR("Hist2D") << "Number of bins must be strictly positive!";
   buildFromBins(x_bins, y_bins);
 }
 
@@ -70,6 +71,15 @@ Hist2D::Hist2D(const Hist2D& oth)
       hist_(gsl_histogram2d_clone(oth.hist_.get())),
       hist_w2_(gsl_histogram2d_clone(oth.hist_w2_.get())),
       out_of_range_values_(oth.out_of_range_values_) {}
+
+ParametersDescription Hist2D::description() {
+  auto desc = Hist1D::description();
+  // y-axis attributes
+  desc.add("ybins"s, std::vector<double>{}).setDescription("y-axis bins definition");
+  desc.add("nbinsY"s, 50).setDescription("Bins multiplicity for y-axis");
+  desc.add("yrange"s, Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+  return desc;
+}
 
 void Hist2D::buildFromBins(const std::vector<double>& x_bins, const std::vector<double>& y_bins) {
   if (x_bins.size() < 1 || y_bins.size() < 1)
@@ -103,6 +113,8 @@ void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_
                                     << " in range " << xrange << " and " << s("bin", num_bins_y, true) << " in range "
                                     << y_range << ".";
 }
+
+bool Hist2D::empty() const { return integral(true) == 0.; }
 
 void Hist2D::clear() {
   CG_ASSERT(hist_);
@@ -152,7 +164,7 @@ void Hist2D::add(Hist2D oth, double scaling) {
   CG_ASSERT(oth.hist_);
   CG_ASSERT(oth.hist_w2_);
   if (oth.integral(true) == 0.) {
-    CG_WARNING("Hist1D:add") << "Other histogram is empty.";
+    CG_WARNING("Hist2D:add") << "Other histogram is empty.";
     return;
   }
   const double scl = std::pow(oth.integral(), -2);
@@ -185,7 +197,7 @@ Limits Hist2D::binRangeX(size_t bin) const {
   CG_ASSERT(hist_);
   Limits range;
   if (const auto ret = gsl_histogram2d_get_xrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
-    throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
+    throw CG_ERROR("Hist2D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
   return range;
 }
 
@@ -208,7 +220,7 @@ Limits Hist2D::binRangeY(size_t bin) const {
   CG_ASSERT(hist_);
   Limits range;
   if (const auto ret = gsl_histogram2d_get_yrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
-    throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
+    throw CG_ERROR("Hist2D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
   return range;
 }
 

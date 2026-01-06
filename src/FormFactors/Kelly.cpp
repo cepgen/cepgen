@@ -52,8 +52,8 @@ namespace cepgen::formfac {
       return num / den;
     }
     void eval() override {
-      const auto ta = tau(q2_);
-      setGEGM(computeFF(ta, ae_, be_), MU * computeFF(ta, am_, bm_));
+      const auto tau_value = tau(q2_);
+      setGEGM(computeFF(tau_value, ae_, be_), MU * computeFF(tau_value, am_, bm_));
     }
 
     const std::vector<double> ae_, be_, am_, bm_;

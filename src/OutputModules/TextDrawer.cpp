@@ -32,14 +32,14 @@ using namespace cepgen;
 using namespace cepgen::utils;
 using namespace std::string_literals;
 
-class TextDrawer : public Drawer {
+class TextDrawer final : public Drawer {
 public:
   explicit TextDrawer(const ParametersList& params)
       : Drawer(params),
         CHAR('*'),
         ERR_CHAR('-'),
         NEG_CHAR('-'),
-        MARKERS_CHAR("o.#@"),
+        MARKERS_CHAR("o+*#@."),
         VALUES_CHAR(" .:oO0@%#"),
         width_(std::max(5lu, steerAs<int, size_t>("width"))),
         colourise_(steer<bool>("colourise")) {}
@@ -52,7 +52,7 @@ public:
     return desc;
   }
 
-  inline const TextDrawer& draw(const Graph1D& graph, const Mode& mode) const override {
+  const TextDrawer& draw(const Graph1D& graph, const Mode& mode) const override {
     CG_LOG.log([this, &graph, &mode](auto& log) {
       if (!graph.name().empty())
         log << "plot of \"" << graph.name() << "\"\n";
@@ -60,7 +60,7 @@ public:
     });
     return *this;
   }
-  inline const TextDrawer& draw(const Graph2D& graph, const Mode& mode) const override {
+  const TextDrawer& draw(const Graph2D& graph, const Mode& mode) const override {
     CG_LOG.log([this, &graph, &mode](auto& log) {
       if (!graph.name().empty())
         log << "plot of \"" << graph.name() << "\"\n";
@@ -68,8 +68,55 @@ public:
     });
     return *this;
   }
-  const TextDrawer& draw(const Hist1D&, const Mode&) const override;
-  const TextDrawer& draw(const Hist2D&, const Mode&) const override;
+  const TextDrawer& draw(const Hist1D& hist, const Mode& mode) const override {
+    CG_LOG.log([this, &hist, &mode](auto& log) {
+      if (!hist.name().empty())
+        log << "plot of \"" << hist.name() << "\"\n";
+      drawValues(log.stream(), hist, hist.axis(), mode, colourise_);
+      const double bin_width = hist.range().range() / hist.nbins();
+      log << "\t"
+          << "bin width=" << s("unit", bin_width, true) << ", "
+          << "mean=" << hist.mean() << ", "
+          << "std.dev.=" << hist.rms() << "\n\t"
+          << "integral.=" << hist.integral();
+      if (hist.underflow() > 0ull)
+        log << ", underflow: " << hist.underflow();
+      if (hist.overflow() > 0ull)
+        log << ", overflow: " << hist.overflow();
+    });
+    return *this;
+  }
+  const TextDrawer& draw(const Hist2D& hist, const Mode& mode) const override {
+    CG_LOG.log([this, &hist, &mode](auto& log) {
+      if (!hist.name().empty())
+        log << "plot of \"" << hist.name() << "\"\n";
+      Drawable::dual_axis_t axes;
+      for (size_t bin_x = 0; bin_x < hist.nbinsX(); ++bin_x) {
+        const auto& range_x = hist.binRangeX(bin_x);
+        auto& axis_x = axes[Drawable::coord_t{
+            range_x.x(0.5), 0.5 * range_x.range(), format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
+        for (size_t bin_y = 0; bin_y < hist.nbinsY(); ++bin_y) {
+          const auto& range_y = hist.binRangeY(bin_y);
+          axis_x[Drawable::coord_t{range_y.x(0.5), 0.5 * range_y.range(), format("%+g", range_y.min())}] =
+              hist.value(bin_x, bin_y);
+        }
+      }
+      drawValues(log.stream(), hist, axes, mode, colourise_);
+      log << "\t"
+          << " x-axis: "
+          << "bin width=" << s("unit", hist.rangeX().range() / hist.nbinsX(), true) << ", "
+          << "mean=" << hist.meanX() << ","
+          << "st.dev.=" << hist.rmsX() << "\n\t"
+          << " y-axis: "
+          << "bin width=" << s("unit", hist.rangeY().range() / hist.nbinsY(), true) << ", "
+          << "mean=" << hist.meanY() << ","
+          << "st.dev.=" << hist.rmsY() << ",\n\t"
+          << " integral=" << hist.integral();
+      if (const auto& content = hist.outOfRange(); content.total() > 0)
+        log << ", outside range (in/overflow):\n" << content;
+    });
+    return *this;
+  }
 
   const TextDrawer& draw(const DrawableColl&,
                          const std::string& name = "",
@@ -87,7 +134,7 @@ private:
   const char CHAR, ERR_CHAR, NEG_CHAR;
   const std::string MARKERS_CHAR, VALUES_CHAR;
 
-  inline static std::string delatexify(const std::string& tok) { return replaceAll(tok, {{"$", ""}}); }
+  static std::string delatexify(const std::string& tok) { return replaceAll(tok, {{"$", ""}}); }
 
   /// Sorting helper for the axis metadata container
   struct map_elements {
@@ -106,57 +153,6 @@ const std::array<Colour, 7> TextDrawer::kColours = {
     Colour::red, Colour::cyan, Colour::blue, Colour::magenta, Colour::green, Colour::yellow, Colour::reset};
 
 const std::string TextDrawer::kEmptyLabel = "E M P T Y ";
-
-const TextDrawer& TextDrawer::draw(const Hist1D& hist, const Mode& mode) const {
-  CG_LOG.log([this, &hist, &mode](auto& log) {
-    if (!hist.name().empty())
-      log << "plot of \"" << hist.name() << "\"\n";
-    drawValues(log.stream(), hist, hist.axis(), mode, colourise_);
-    const double bin_width = hist.range().range() / hist.nbins();
-    log << "\t"
-        << "bin width=" << s("unit", bin_width, true) << ", "
-        << "mean=" << hist.mean() << ", "
-        << "std.dev.=" << hist.rms() << "\n\t"
-        << "integral.=" << hist.integral();
-    if (hist.underflow() > 0ull)
-      log << ", underflow: " << hist.underflow();
-    if (hist.overflow() > 0ull)
-      log << ", overflow: " << hist.overflow();
-  });
-  return *this;
-}
-
-const TextDrawer& TextDrawer::draw(const Hist2D& hist, const Mode& mode) const {
-  CG_LOG.log([this, &hist, &mode](auto& log) {
-    if (!hist.name().empty())
-      log << "plot of \"" << hist.name() << "\"\n";
-    Drawable::dual_axis_t axes;
-    for (size_t bin_x = 0; bin_x < hist.nbinsX(); ++bin_x) {
-      const auto& range_x = hist.binRangeX(bin_x);
-      auto& axis_x = axes[Drawable::coord_t{
-          range_x.x(0.5), 0.5 * range_x.range(), format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
-      for (size_t bin_y = 0; bin_y < hist.nbinsY(); ++bin_y) {
-        const auto& range_y = hist.binRangeY(bin_y);
-        axis_x[Drawable::coord_t{range_y.x(0.5), 0.5 * range_y.range(), format("%+g", range_y.min())}] =
-            hist.value(bin_x, bin_y);
-      }
-    }
-    drawValues(log.stream(), hist, axes, mode, colourise_);
-    log << "\t"
-        << " x-axis: "
-        << "bin width=" << s("unit", hist.rangeX().range() / hist.nbinsX(), true) << ", "
-        << "mean=" << hist.meanX() << ","
-        << "st.dev.=" << hist.rmsX() << "\n\t"
-        << " y-axis: "
-        << "bin width=" << s("unit", hist.rangeY().range() / hist.nbinsY(), true) << ", "
-        << "mean=" << hist.meanY() << ","
-        << "st.dev.=" << hist.rmsY() << ",\n\t"
-        << " integral=" << hist.integral();
-    if (const auto& content = hist.outOfRange(); content.total() > 0)
-      log << ", outside range (in/overflow):\n" << content;
-  });
-  return *this;
-}
 
 const TextDrawer& TextDrawer::draw(const DrawableColl& objects,
                                    const std::string& name,
@@ -252,12 +248,10 @@ const TextDrawer& TextDrawer::draw(const DrawableColl& objects,
 void TextDrawer::drawValues(
     std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
   const std::string sep(17, ' ');
-  const double max_value =
-                   std::max_element(axis.begin(), axis.end(), map_elements())->second * (mode & Mode::logy ? 5. : 1.2),
-               min_value = std::min_element(axis.begin(), axis.end(), map_elements())->second;
-  const double log_min_value = std::log(std::max(min_value, 1.e-10)),
-               log_max_value = std::log(std::min(max_value, 1.e+10));
-  const auto values_range = Limits{min_value, max_value}, log_values_range = Limits{log_min_value, log_max_value};
+  const auto values_range = Limits{std::min_element(axis.begin(), axis.end(), map_elements())->second,
+                                   std::max_element(axis.begin(), axis.end(), map_elements())->second *
+                                       (mode & Mode::logy ? 5. : 1.2)},
+             log_values_range = values_range.compute(std::log).truncate({-10., 10.});
   if (!dr.yAxis().label().empty()) {
     const auto y_label = delatexify(dr.yAxis().label());
     os << sep;
@@ -265,14 +259,15 @@ void TextDrawer::drawValues(
       os << std::string(length, ' ');
     os << y_label << "\n";
   }
-  os << sep << format("%-5.2f ", mode & Mode::logy ? std::exp(log_min_value) : min_value) << std::setw(width_ - 11)
-     << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
-     << format("%5.2e", mode & Mode::logy ? std::exp(log_max_value) : max_value) << "\n"
+  os << sep << format("%-5.2f ", mode & Mode::logy ? std::exp(log_values_range.min()) : values_range.min())
+     << std::setw(width_ - 11) << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
+     << format("%5.2e", mode & Mode::logy ? std::exp(log_values_range.max()) : values_range.max()) << "\n"
      << sep << std::string(width_ + 2, '.');  // abscissa axis
   size_t idx = 0;
+  const auto empty_plot = dr.empty();
   for (const auto& [coordinates, value] : axis) {
     const auto left_label = coordinates.label.empty() ? format("%17g", coordinates.value) : coordinates.label;
-    if (min_value == max_value) {  // empty plot; display the "EMPTY" banner
+    if (empty_plot) {  // empty plot; display the "EMPTY" banner
       os << "\n" << left_label << ":";
       if (idx == axis.size() / 2) {
         std::string padding;
@@ -286,24 +281,27 @@ void TextDrawer::drawValues(
       size_t i_value = 0ull, i_uncertainty = 0ull;
       {
         if (mode & Mode::logy) {  // log scale
-          i_value = std::ceil(width_ *
-                              (value > 0. && max_value > 0. ? std::max(std::log(value) / log_values_range, 0.) : 0.));
-          i_uncertainty = std::ceil(
-              width_ * (value < max_value ? std::max(std::log(value.uncertainty()) / log_values_range, 0.) : 0.));
-        } else if (max_value > 0.) {  // linear scale
+          i_value = std::ceil(
+              width_ * (value > 0. && values_range.max() > 0. ? std::max(std::log(value) / log_values_range, 0.) : 0.));
+          i_uncertainty = std::ceil(width_ * (value < values_range.max()
+                                                  ? std::max(std::log(value.uncertainty()) / log_values_range, 0.)
+                                                  : 0.));
+        } else if (values_range.max() > 0.) {  // linear scale
           i_value = std::ceil(width_ * (value / values_range));
           i_uncertainty = std::ceil(width_ * (value.uncertainty() / values_range.range()));
         }
       }
       os << "\n"
-         << left_label << ":" << (i_value > i_uncertainty ? std::string(i_value - i_uncertainty, ' ') : "")
-         << (i_uncertainty > 0 ? std::string(i_uncertainty, ERR_CHAR) : "")
-         << (effects ? boldify(std::string(1, CHAR)) : std::string(1, CHAR));
-      if (const auto padding = width_ - i_value - 1; i_uncertainty > 0 && padding > 0)
-        os << std::string(std::min(padding, i_uncertainty), ERR_CHAR);
-      if (const auto padding = width_ - i_value - i_uncertainty - 1; padding > 0)
+         << left_label << ":" << (i_value > i_uncertainty ? std::string(i_value - i_uncertainty, ' ') : ""s)
+         << (i_uncertainty > 0 ? std::string(i_uncertainty, ERR_CHAR) : ""s)
+         << (effects ? boldify(std::string{CHAR}) : std::string{CHAR});
+      if (const ssize_t padding = width_ - i_value - 1; i_uncertainty > 0 && padding > 0)
+        os << std::string(std::min(static_cast<size_t>(padding), i_uncertainty), ERR_CHAR);
+      if (const ssize_t padding = width_ - i_value - i_uncertainty - 1; padding > 0)
         os << std::string(padding, ' ');
-      os << ": " << format("%6.2e +/- %6.2e", value, value.uncertainty());
+      os << ": "
+         << (mode & Mode::logy ? format("% 6.2e +/- %6.2e", value, value.uncertainty())
+                               : format("% 6f +/- %6f", value, value.uncertainty()));
     }
     ++idx;
   }
@@ -318,7 +316,7 @@ void TextDrawer::drawValues(
   if (!dr.yAxis().label().empty()) {
     const auto y_label = delatexify(dr.yAxis().label());
     os << sep;
-    if (const auto length = 2. + width_ - y_label.size(); length > 0)
+    if (const auto length = 2 + width_ - y_label.size(); length > 0)
       os << std::string(length, ' ');
     os << y_label << "\n";
   }
@@ -343,9 +341,10 @@ void TextDrawer::drawValues(
      << format("%17s", delatexify(dr.xAxis().label()).c_str())
      << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
   size_t idx = 0;
+  const auto empty_plot = dr.empty();
   for (const auto& [x_coordinate, y_values] : axes) {
     os << "\n" << (x_coordinate.label.empty() ? format("%16g ", x_coordinate.value) : x_coordinate.label) << ":";
-    if (min_val == max_val) {
+    if (empty_plot) {  // empty plot; display the "EMPTY" banner
       if (idx == axes.size() / 2) {
         std::string padding;
         if (const auto padding_length = (width_ - kEmptyLabel.size()) / 2; padding_length > 0)
@@ -403,7 +402,7 @@ void TextDrawer::drawValues(
      << delatexify(dr.yAxis().label()) << "\n\t"
      << "(scale: \"" << VALUES_CHAR << "\", ";
   for (size_t i = 0; i < kColours.size(); ++i)
-    os << (effects ? colourise("*", kColours.at(i)) : "") << (i == 0 ? "|" : "");
+    os << (effects ? colourise("*", kColours.at(i)) : ""s) << (i == 0 ? "|" : ""s);
   os << ")\n";
 }
 REGISTER_DRAWER("text", TextDrawer);

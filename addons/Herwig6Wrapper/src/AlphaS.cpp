@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,15 +21,17 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::herwig6 {
   class AlphaS final : public cepgen::Coupling {
   public:
     explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), mode_(steer<int>("mode")) {
       if (mode_ < 1 || mode_ > 3)
         throw CG_FATAL("herwig6:AlphaS") << "Invalid mode steered: should be between 1 and 3, got " << mode_ << ".";
-      hwpram_.ncolo = steer<int>("ncolo");
-      hwpram_.qcdlam = steer<double>("qcdlam");
-      hwpram_.qcdl5 = steer<double>("qcdl5");
+      hwpram_.ncolo = steer<int>("ncolo"s);
+      hwpram_.qcdlam = steer<double>("qcdlam"s);
+      hwpram_.qcdl5 = steer<double>("qcdl5"s);
       hwualf(0, 0.);
     }
 
@@ -42,9 +44,9 @@ namespace cepgen::herwig6 {
           .allow(2, "ratio of mode-1 with 5-flavour beta with Lambda=QCDL3")
           .allow(3, "one-loop with 5-flavour beta and Lambda=QCDL3")
           .setDescription("running mode");
-      desc.add("ncolo", hwpram_.ncolo).setDescription("number of colours to consider");
-      desc.add("qcdlam", hwpram_.qcdlam).setDescription("5-flavour Lambda_MS-bar at large x/z");
-      desc.add("qcdl5", hwpram_.qcdl5).setDescription("5-flavour Lambda_MC");
+      desc.add("ncolo"s, hwpram_.ncolo).setDescription("number of colours to consider");
+      desc.add("qcdlam"s, hwpram_.qcdlam).setDescription("5-flavour Lambda_MS-bar at large x/z");
+      desc.add("qcdl5"s, hwpram_.qcdl5).setDescription("5-flavour Lambda_MC");
       return desc;
     }
 

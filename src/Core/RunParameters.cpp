@@ -78,7 +78,7 @@ RunParameters& RunParameters::operator=(RunParameters param) {
   return *this;
 }
 
-void RunParameters::initialiseModules() {
+void RunParameters::initialiseModules() const {
   // prepare the event modifications algorithms for event generation
   for (const auto& modifier : evt_modifiers_)
     modifier->initialise(*this);
@@ -270,10 +270,10 @@ namespace cepgen {
     dump_cuts(cuts.central);
     if (cuts.central_particles.size() > 0) {
       os << std::setw(wt) << utils::boldify(">>> per-particle cuts:") << "\n";
-      for (const auto& [pdg_id, cuts] : cuts.central_particles) {
+      for (const auto& [pdg_id, particle_cuts] : cuts.central_particles) {
         os << " * all single " << std::setw(wt - 3) << static_cast<PDG::Id>(pdg_id) << "\n";
-        for (const auto& lim : cuts.parameters().keysOf<Limits>())
-          if (const auto& limit = cuts.parameters().get<Limits>(lim); limit.valid())
+        for (const auto& lim : particle_cuts.parameters().keysOf<Limits>())
+          if (const auto& limit = particle_cuts.parameters().get<Limits>(lim); limit.valid())
             os << "   - " << std::setw(wt - 5) << cuts::Central::description().get(lim).description() << limit << "\n";
       }
     }
@@ -306,7 +306,7 @@ ParametersDescription RunParameters::Generation::description() {
   desc.add("maxgen"s, 0).setDescription("Number of events to generate");
   desc.add("printEvery"s, 10'000).setDescription("Printing frequency for the events content");
   desc.add("targetLumi"s, -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
-  desc.add("symmetrise"s, false).setDescription("Are events to be symmetrised wrt beam collinear axis");
+  desc.add("symmetrise"s, false).setDescription("Are events to be symmetric wrt beam collinear axis");
   desc.add("numThreads"s, 1).setDescription("Number of threads to use for event generation");
   desc.add("numPoints"s, 100);
   return desc;

@@ -34,7 +34,7 @@ namespace cepgen::formfac {
   struct PointLikeScalar final : PointLike {
     explicit PointLikeScalar(const ParametersList& params) : PointLike(params, 1., 0.) {}
     static ParametersDescription description() {
-      auto desc = Parameterisation::description();
+      auto desc = PointLike::description();
       desc.setDescription("Point-like scalar");
       return desc;
     }
@@ -43,9 +43,9 @@ namespace cepgen::formfac {
   struct PointLikeFermion final : PointLike {
     explicit PointLikeFermion(const ParametersList& params) : PointLike(params, 1., 1.) {}
     static ParametersDescription description() {
-      auto desc = Parameterisation::description();
+      auto desc = PointLike::description();
       desc.setDescription("Point-like fermion");
-      desc.addAs<pdgid_t>("pdgId", PDG::electron);
+      desc.addAs<int>("pdgId", PDG::electron);
       return desc;
     }
   };

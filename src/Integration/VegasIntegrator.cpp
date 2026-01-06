@@ -191,7 +191,7 @@ private:
 
   /// Trivial deleter for the Vegas integrator state
   struct gsl_monte_vegas_deleter {
-    inline void operator()(gsl_monte_vegas_state* state) const { gsl_monte_vegas_free(state); }
+    void operator()(gsl_monte_vegas_state* state) const { gsl_monte_vegas_free(state); }
   };
 
   /// A Vegas integrator state for integration (optional) and/or "treated" event generation

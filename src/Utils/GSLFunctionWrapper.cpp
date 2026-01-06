@@ -38,7 +38,7 @@ std::unique_ptr<gsl_function> GSLFunctionWrapper::build(const FunctionWrapper& f
 }
 
 double GSLFunctionWrapper::eval(double x, void* params) {
-  auto* wrapper = reinterpret_cast<GSLFunctionWrapper*>(params);
+  const auto* wrapper = static_cast<GSLFunctionWrapper*>(params);
   if (wrapper->object_)
     return wrapper->function_wrapper_(x, wrapper->object_);
   if (!wrapper->params_.empty())

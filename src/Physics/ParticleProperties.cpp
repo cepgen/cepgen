@@ -27,8 +27,7 @@ using namespace std::string_literals;
 
 ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredObject(params) {
   charges.reserve(4);
-  (*this)
-      .add("pdgid", pdgid)
+  add("pdgid"s, pdgid)
       .add("name", name)
       .add("description", human_name)
       .add("colours", colours)
@@ -38,8 +37,8 @@ ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredOb
       .add("fermion", fermion);
 }
 
-ParticleProperties::ParticleProperties(pdgid_t _pdgid,
-                                       const std::string& pname,
+ParticleProperties::ParticleProperties(pdgid_t _pdg_id,
+                                       const std::string& _name,
                                        const std::string& _description,
                                        int _colours,
                                        double _mass,
@@ -47,8 +46,8 @@ ParticleProperties::ParticleProperties(pdgid_t _pdgid,
                                        const std::vector<int>& _charges,
                                        bool _fermion)
     : ParticleProperties(ParametersList()
-                             .set("pdgid", _pdgid)
-                             .set("name", pname)
+                             .set("pdgid"s, _pdg_id)
+                             .set("name", _name)
                              .set("description", _description)
                              .set("colours", _colours)
                              .set("mass", _mass)
@@ -67,7 +66,7 @@ short ParticleProperties::integerCharge() const {
 
 ParametersDescription ParticleProperties::description() {
   auto desc = ParametersDescription();
-  desc.addAs<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
+  desc.addAs<pdgid_t>("pdgid"s, 0).setDescription("PDG unique identifier");
   desc.add("name", "n/a"s).setDescription("particle computer-readable name");
   desc.add("description", "n/a"s).setDescription("particle human-readable name");
   desc.add("colours", 0).setDescription("colour factor");
@@ -81,7 +80,7 @@ ParametersDescription ParticleProperties::description() {
 namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << (prop.name.empty() ? "unnamed" : prop.name) << "{"
-              << "pdgid=" << prop.pdgid << ",desc=" << prop.human_name << ",colours=" << prop.colours
+              << "pdgid="s << prop.pdgid << ",desc=" << prop.human_name << ",colours=" << prop.colours
               << ",mass=" << prop.mass << ",width=" << prop.width << ",charges={" << utils::merge(prop.charges, ", ")
               << "}" << (prop.fermion ? ",fermion" : "") << "}";
   }

@@ -50,16 +50,16 @@ public:
     int res{GSL_SUCCESS};
     double val, val_unc;
     const double step_size = h > 0. ? h : h_;
-    auto gfunc = GSLFunctionWrapper::build(func);
+    auto gsl_function = GSLFunctionWrapper::build(func);
     switch (mode_) {
       case Mode::central:
-        res = gsl_deriv_central(gfunc.get(), x, step_size, &val, &val_unc);
+        res = gsl_deriv_central(gsl_function.get(), x, step_size, &val, &val_unc);
         break;
       case Mode::forward:
-        res = gsl_deriv_forward(gfunc.get(), x, step_size, &val, &val_unc);
+        res = gsl_deriv_forward(gsl_function.get(), x, step_size, &val, &val_unc);
         break;
       case Mode::backward:
-        res = gsl_deriv_backward(gfunc.get(), x, step_size, &val, &val_unc);
+        res = gsl_deriv_backward(gsl_function.get(), x, step_size, &val, &val_unc);
         break;
     }
     if (res != GSL_SUCCESS)

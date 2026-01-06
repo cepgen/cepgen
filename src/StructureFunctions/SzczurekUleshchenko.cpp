@@ -22,11 +22,9 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Message.h"
 
-namespace {
-  extern "C" {
-  extern void grv95lo_(float&, float&, float&, float&, float&, float&, float&, float&);
-  }
-}  // namespace
+extern "C" {
+extern void grv95lo_(float&, float&, float&, float&, float&, float&, float&, float&);
+}
 
 namespace cepgen::strfun {
   /// Szczurek and Uleshchenko modelling of \f$F_2\f$ based on GRV parton content \cite Szczurek:1999wp

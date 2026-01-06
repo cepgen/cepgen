@@ -33,6 +33,7 @@
 
 using namespace cepgen;
 using namespace cepgen::utils;
+using namespace std::string_literals;
 
 class GSL1DIntegrator final : public Integrator {
 public:
@@ -45,8 +46,8 @@ public:
         alpha_(steer<double>("alpha")),
         beta_(steer<double>("beta")),
         limit_(steerAs<int, size_t>("limit")),
-        epsabs_(steer<double>("epsabs")),
-        epsrel_(steer<double>("epsrel")) {}
+        absolute_uncertainty_(steer<double>("epsabs"s)),
+        relative_uncertainty_(steer<double>("epsrel"s)) {}
 
   static ParametersDescription description() {
     auto desc = Integrator::description();
@@ -58,8 +59,8 @@ public:
     desc.add("alpha", 0.).setDescription("alpha parameter for the fixed type integration");
     desc.add("beta", 0.).setDescription("alpha parameter for the fixed type integration");
     desc.add("limit", 1000).setDescription("maximum number of sub-intervals to build");
-    desc.add("epsabs", 0.).setDescription("desired absolute error limit");
-    desc.add("epsrel", 0.1).setDescription("desired relative error limit");
+    desc.add("epsabs"s, 0.).setDescription("desired absolute error limit");
+    desc.add("epsrel"s, 0.1).setDescription("desired relative error limit");
     return desc;
   }
 
@@ -131,23 +132,39 @@ private:
       res = gsl_integration_fixed(wrp, &result, workspace.get());
     } else if (mode_ == Mode::QNG) {
       size_t neval;
-      res = gsl_integration_qng(wrp, range.min(), range.max(), epsabs_, epsrel_, &result, &error, &neval);
+      res = gsl_integration_qng(
+          wrp, range.min(), range.max(), absolute_uncertainty_, relative_uncertainty_, &result, &error, &neval);
     } else {
       std::unique_ptr<gsl_integration_workspace, void (*)(gsl_integration_workspace*)> workspace(
           gsl_integration_workspace_alloc(limit_), gsl_integration_workspace_free);
       if (mode_ == Mode::QAG) {
         int key = GSL_INTEG_GAUSS41;
-        res = gsl_integration_qag(
-            wrp, range.min(), range.max(), epsabs_, epsrel_, limit_, key, workspace.get(), &result, &error);
+        res = gsl_integration_qag(wrp,
+                                  range.min(),
+                                  range.max(),
+                                  absolute_uncertainty_,
+                                  relative_uncertainty_,
+                                  limit_,
+                                  key,
+                                  workspace.get(),
+                                  &result,
+                                  &error);
       } else if (mode_ == Mode::QAGS)
-        res = gsl_integration_qags(
-            wrp, range.min(), range.max(), epsabs_, epsrel_, limit_, workspace.get(), &result, &error);
+        res = gsl_integration_qags(wrp,
+                                   range.min(),
+                                   range.max(),
+                                   absolute_uncertainty_,
+                                   relative_uncertainty_,
+                                   limit_,
+                                   workspace.get(),
+                                   &result,
+                                   &error);
       else if (mode_ == Mode::QAWC)
         res = gsl_integration_qawc(const_cast<gsl_function*>(wrp),
                                    range.min(),
                                    range.max(),
-                                   epsabs_,
-                                   epsrel_,
+                                   absolute_uncertainty_,
+                                   relative_uncertainty_,
                                    0.,
                                    limit_,
                                    workspace.get(),
@@ -170,7 +187,7 @@ private:
   const int nodes_;
   const double alpha_, beta_;
   const size_t limit_;
-  const double epsabs_, epsrel_;
+  const double absolute_uncertainty_, relative_uncertainty_;
 };
 
 REGISTER_INTEGRATOR("gsl", GSL1DIntegrator);

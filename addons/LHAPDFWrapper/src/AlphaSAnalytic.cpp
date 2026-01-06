@@ -56,7 +56,7 @@ namespace cepgen::lhapdf {
     const std::unique_ptr<LHAPDF::AlphaS_Analytic> alphas_analytic_;
   };
 }  // namespace cepgen::lhapdf
-using AlphaSLHAPDFAnalytic = cepgen::lhapdf::AlphaSAnalytic;
-REGISTER_ALPHAS_MODULE("lhapdfAnalytic", AlphaSLHAPDFAnalytic);
+using AlphaS_LHAPDFAnalytic = cepgen::lhapdf::AlphaSAnalytic;
+REGISTER_ALPHAS_MODULE("lhapdfAnalytic", AlphaS_LHAPDFAnalytic);
 
 #endif

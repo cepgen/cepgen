@@ -63,7 +63,7 @@ StreamCollector::~StreamCollector() {
 #endif
     if (bytes_read > 0) {
       buffer[bytes_read] = 0;
-      captured_stream_ += buffer.data();
+      captured_stream_ += std::string{buffer.data()};
     } else if (bytes_read < 0) {
       fd_blocked = (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR);
       if (fd_blocked)

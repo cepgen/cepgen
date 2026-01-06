@@ -213,7 +213,7 @@ namespace cepgen::strfun {
       setW2(sy_sf_->W2(args_.xbj, args_.q2));
     } else {
       const auto sigma = sigma_grid_.eval({mx});
-      double sgp = sigma[0];  // cross section value at MX
+      double sgp = sigma.at(0);  // cross section value at MX
 
       if (mode_ == Mode::RealAndFitNonRes && mx > 1.5)
         non_resonant_ = true;

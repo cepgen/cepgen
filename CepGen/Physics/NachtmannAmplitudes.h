@@ -41,10 +41,10 @@ namespace cepgen {
     /// Helper container to handle all kinematics variables computation once
     class Kinematics {
     public:
-      explicit Kinematics(double mw2, double shat, double that, double uhat);
+      explicit Kinematics(double mw2, double s_hat, double t_hat, double u_hat);
       bool operator!=(const Kinematics&) const;
       friend std::ostream& operator<<(std::ostream&, const Kinematics&);
-      static Kinematics fromScosTheta(double shat, double cos_theta, double mw2);
+      static Kinematics fromSCosTheta(double shat, double cos_theta, double mw2);
 
       // base variables
       const double shat{0.}, that{0.}, uhat{0.};
@@ -91,7 +91,7 @@ namespace cepgen {
     std::complex<double> amplitudeSM(const Kinematics&, const HelicityStates&) const;
     std::complex<double> amplitudeW(const Kinematics&, const HelicityStates&) const;
     std::complex<double> amplitudeWbar(const Kinematics&, const HelicityStates&) const;
-    std::complex<double> amplitudephiW(const Kinematics&, const HelicityStates&) const;
+    std::complex<double> amplitudePhiW(const Kinematics&, const HelicityStates&) const;
     std::complex<double> amplitudeWB(const Kinematics&, const HelicityStates&) const;
     std::complex<double> amplitudeWbarB(const Kinematics&, const HelicityStates&) const;
   };

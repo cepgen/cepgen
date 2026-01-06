@@ -71,9 +71,9 @@ Process& Process::operator=(const Process& proc) {
   CG_DEBUG("Process").log([&](auto& log) {
     log << "Process " << name_ << " cloned with " << utils::s("integration variable", mapped_variables_.size(), true)
         << ":";
-    for (const auto& var : mapped_variables_)
-      log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
-          << ").";
+    for (const auto& variable : mapped_variables_)
+      log << "\n\t" << variable.index << ") " << variable.description << " (type: " << variable.type
+          << ", limits: " << variable.limits << ").";
     if (event_)
       log << "\n\t" << *event_;
   });
@@ -145,48 +145,52 @@ void Process::dumpVariables(std::ostream* os) const {
     CG_LOG << ss.str();
 }
 
-Process& Process::defineVariable(
-    double& out, const Mapping& type, const Limits& lim, const std::string& name, const std::string& descr) {
-  if (lim.min() == lim.max()) {
-    if (lim.hasMin()) {
-      out = compute_value(lim.min(), type);
-      CG_DEBUG("Process:defineVariable") << "Quantity " << descr << " is set to be constant with a value " << out
+Process& Process::defineVariable(double& out,
+                                 const Mapping& mapping_type,
+                                 const Limits& limits,
+                                 const std::string& name,
+                                 const std::string& _description) {
+  if (limits.min() == limits.max()) {
+    if (limits.hasMin()) {
+      out = compute_value(limits.min(), mapping_type);
+      CG_DEBUG("Process:defineVariable") << "Quantity " << _description << " is set to be constant with a value " << out
                                          << ".";
       return *this;
-    } else
-      throw CG_FATAL("Process:defineVariable")
-          << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
+    }
+    throw CG_FATAL("Process:defineVariable") << "The limits for '" << _description << "' (" << limits
+                                             << ") could not be retrieved from the user configuration.";
   }
 
   double jacob_weight = 1.;  // initialise the local weight for this variable
-  switch (type) {
+  switch (mapping_type) {
     case Mapping::linear:
     case Mapping::exponential:
-      jacob_weight = lim.range();
+      jacob_weight = limits.range();
       break;
     case Mapping::square:
-      jacob_weight = 2. * lim.range();
+      jacob_weight = 2. * limits.range();
       break;
     case Mapping::power_law:
-      jacob_weight = log(lim.max() / lim.min());
+      jacob_weight = log(limits.max() / limits.min());
       break;
   }
   const auto var_desc =
-      (!descr.empty() ? descr : (!name.empty() ? name : utils::format("var%z", mapped_variables_.size())));
-  mapped_variables_.emplace_back(MappingVariable{name, var_desc, lim, out, type, mapped_variables_.size()});
+      (!_description.empty() ? _description
+                             : (!name.empty() ? name : utils::format("var%z", mapped_variables_.size())));
+  mapped_variables_.emplace_back(MappingVariable{name, var_desc, limits, out, mapping_type, mapped_variables_.size()});
   point_coord_.emplace_back(0.);
   base_jacobian_ *= jacob_weight;
-  CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable " << mapped_variables_.size()
-                                     << ".\n\t"
-                                     << "Allowed range for integration: " << lim << ".\n\t"
-                                     << "Variable integration mode: " << type << ".\n\t"
+  CG_DEBUG("Process:defineVariable") << "\n\t" << _description << " has been mapped to variable "
+                                     << mapped_variables_.size() << ".\n\t"
+                                     << "Allowed range for integration: " << limits << ".\n\t"
+                                     << "Variable integration mode: " << mapping_type << ".\n\t"
                                      << "Weight in the Jacobian: " << jacob_weight << ".";
   return *this;
 }
 
 double Process::variableValue(size_t i, double x) const {
-  const auto& var = mapped_variables_.at(i);
-  return compute_value(var.limits.x(x), var.type);
+  const auto& variable = mapped_variables_.at(i);
+  return compute_value(variable.limits.x(x), variable.type);
 }
 
 double Process::generateVariables() const {
@@ -217,12 +221,12 @@ double Process::generateVariables() const {
         jacobian *= var.limits.x(xv);
       } break;
       case Mapping::power_law: {
-        const double y = var.limits.max() / var.limits.min();
-        var.value = var.limits.min() * std::pow(y, xv);
+        const double radical = var.limits.max() / var.limits.min();
+        var.value = var.limits.min() * std::pow(radical, xv);
         jacobian *= var.value;
       } break;
     }
-    CG_DEBUG_LOOP("Process:vars") << "\n\tvariable " << var.index << std::left << std::setw(60)
+    CG_DEBUG_LOOP("Process:vars") << "\n\t" << "variable " << var.index << std::left << std::setw(60)
                                   << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range "
                                   << std::setw(20) << var.limits << " has value " << std::setw(20) << var.value
                                   << " (x=" << point_coord_.at(var.index) << std::right << ")";
@@ -330,8 +334,8 @@ void Process::initialise() {
     CG_DEBUG("Process:initialise").log([this, &p1, &p2](auto& log) {
       log << "Kinematics successfully set!\n"
           << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
-          << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-          << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.\n";
+          << "  p1=" << p1 << ",\t" << "mass=" << p1.mass() << " GeV\n"
+          << "  p2=" << p2 << ",\t" << "mass=" << p2.mass() << " GeV.\n";
       dumpVariables(&log.stream());
     });
     clearEvent();

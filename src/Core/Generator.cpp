@@ -101,9 +101,9 @@ double Generator::computePoint(const std::vector<double>& coordinates) {
 }
 
 void Generator::computeXsection(double& cross_section, double& err) {
-  const auto xsec = computeXsection();
-  cross_section = xsec;
-  err = xsec.uncertainty();
+  const auto computed_cross_section = computeXsection();
+  cross_section = computed_cross_section;
+  err = computed_cross_section.uncertainty();
 }
 
 Value Generator::computeXsection() {

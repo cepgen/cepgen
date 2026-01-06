@@ -40,7 +40,7 @@ public:
 
   static ParametersDescription description() {
     auto desc = KTFlux::description();
-    desc.setDescription("Nucl. inel. photon emission");
+    desc.setDescription("Nuclear inel. photon emission");
     desc.add("structureFunctions", StructureFunctionsFactory::get().describeParameters("LUXLike"));
     return desc;
   }
@@ -56,8 +56,8 @@ public:
       return 0.;
     }
     const auto q2 = utils::kt::q2(x, kt2, mass2(), mx2), q2min = q2 - kt2 / (1. - x);
-    const auto xbj = utils::xBj(q2, mass2(), mx2), qnorm = 1. - q2min / q2;
-    return alpha_over_pi_ * sf_->F2(xbj, q2) * (xbj / q2) * qnorm * qnorm * (1. - x) / q2;
+    const auto xbj = utils::xBj(q2, mass2(), mx2), q_norm = 1. - q2min / q2;
+    return alpha_over_pi_ * sf_->F2(xbj, q2) * (xbj / q2) * q_norm * q_norm * (1. - x) / q2;
   }
 
 protected:
@@ -68,7 +68,7 @@ struct BudnevInelasticNucleonKTFlux final : public InelasticNucleonKTFlux {
   using InelasticNucleonKTFlux::InelasticNucleonKTFlux;
   static ParametersDescription description() {
     auto desc = InelasticNucleonKTFlux::description();
-    desc.setDescription("Nucl. inel. photon emission (Budnev flux)");
+    desc.setDescription("Nuclear inel. photon emission (Budnev flux)");
     return desc;
   }
   double fluxMX2(double x, double kt2, double mx2) const override {
@@ -79,8 +79,8 @@ struct BudnevInelasticNucleonKTFlux final : public InelasticNucleonKTFlux {
       return 0.;
     }
     const auto q2 = utils::kt::q2(x, kt2, mass2(), mx2), q2min = q2 - kt2 / (1. - x);
-    const auto xbj = utils::xBj(q2, mass2(), mx2), qnorm = 1. - q2min / q2;
-    const double f_D = sf_->F2(xbj, q2) * (xbj / q2) * (1. - x) * qnorm;
+    const auto xbj = utils::xBj(q2, mass2(), mx2), q_norm = 1. - q2min / q2;
+    const double f_D = sf_->F2(xbj, q2) * (xbj / q2) * (1. - x) * q_norm;
     const double f_C = sf_->F1(xbj, q2) * 2. / q2;
     return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
   }

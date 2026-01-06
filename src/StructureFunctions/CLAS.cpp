@@ -76,7 +76,7 @@ namespace cepgen::strfun {
     };
 
     void eval() override {
-      const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_), w = sqrt(w2);
+      const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_), w = std::sqrt(w2);
       if (w < mx_min_)
         return;
       const auto rb = resbkg(args_.q2, w);
@@ -95,7 +95,7 @@ namespace cepgen::strfun {
     /// \return \f$F_{2}^{N}\f$
     double f2slac(double xbj, double q2) const;
     Parameters mod_params_;
-    static constexpr double COEFF = 6.08974;
+    static constexpr double COEFFICIENT = 6.08974;
     double mpi0_;  ///< Neutral pion mass
   };
 
@@ -200,66 +200,67 @@ namespace cepgen::strfun {
 
     double f2 = 0.;
     for (unsigned short i = 0; i < 5; ++i)
-      f2 += mod_params_.c_slac[i] * pow(1. - xs, i);
+      f2 += mod_params_.c_slac[i] * std::pow(1. - xs, i);
 
     if (mod_params_.mode == Parameters::deuteron && xbj > 0.)
-      f2 /= (1. - exp(-7.70 * (1. / xbj - 1. + mp2_ / q2)));
+      f2 /= (1. - std::exp(-7.70 * (1. / xbj - 1. + mp2_ / q2)));
 
-    return f2 * pow(1. - xs, 3) / xsxb;
+    return f2 * std::pow(1. - xs, 3) / xsxb;
   }
 
   std::pair<double, double> CLAS::resbkg(double q2, double w) const {
-    const double mpi02 = mpi0_ * mpi0_;
+    const double sq_mpi0 = mpi0_ * mpi0_;
 
     if (w < mx_min_)
-      return std::make_pair(0., 0.);
+      return {0., 0.};
     if (w > 4.)
-      return std::make_pair(1., 0.);
+      return {1., 0.};
 
     const double w2 = w * w;
 
-    double qs = pow(w2 + mp2_ - mpi02, 2) - 4. * mp2_ * w2;
+    double qs = std::pow(w2 + mp2_ - sq_mpi0, 2) - 4. * mp2_ * w2;
     if (qs <= 0.)
-      return std::make_pair(1., 0.);
-    qs = 0.5 * sqrt(qs) / w;
+      return {1., 0.};
+    qs = 0.5 * std::sqrt(qs) / w;
 
     const double omega = 0.5 * (w2 + q2 - mp2_) * inv_mp_;
     const double xn = 0.5 * q2 * inv_mp_ / omega;
 
-    const double bkg2 =
-        (w > mod_params_.b[3]) ? exp(-mod_params_.b[2] * (w2 - mod_params_.b[3] * mod_params_.b[3])) : 1.;
+    const double background2 =
+        w > mod_params_.b[3] ? std::exp(-mod_params_.b[2] * (w2 - mod_params_.b[3] * mod_params_.b[3])) : 1.;
 
-    double f2bkg =
-        (mod_params_.b[0]) * (1. - exp(-mod_params_.b[1] * (w - mx_min_))) + (1. - mod_params_.b[0]) * (1. - bkg2);
-    f2bkg *= (1. + (1. - f2bkg) * (mod_params_.x[0] + mod_params_.x[1] * pow(xn - mod_params_.x[2], 2)));
+    double f2_background = mod_params_.b[0] * (1. - std::exp(-mod_params_.b[1] * (w - mx_min_))) +
+                           (1. - mod_params_.b[0]) * (1. - background2);
+    f2_background *=
+        1. + (1. - f2_background) * (mod_params_.x[0] + mod_params_.x[1] * std::pow(xn - mod_params_.x[2], 2));
 
-    double etab = 1., etad = 1.;
+    double eta_b = 1., eta_d = 1.;
     if (mod_params_.mode != Parameters::deuteron && q2 <= 2. && w <= 2.5) {
-      etab = 1. - 2.5 * q2 * exp(-12.5 * q2 * q2 - 50. * (w - 1.325) * (w - 1.325));
-      etad = 1. + 2.5 * q2 * exp(-12.5 * q2 * q2);
+      eta_b = 1. - 2.5 * q2 * std::exp(-12.5 * q2 * q2 - 50. * (w - 1.325) * (w - 1.325));
+      eta_d = 1. + 2.5 * q2 * std::exp(-12.5 * q2 * q2);
     }
-    f2bkg *= etab;
+    f2_background *= eta_b;
 
-    double f2resn = 0.;
+    double f2_resonance = 0.;
 
     unsigned short i = 0;
-    for (const auto& res : mod_params_.resonances) {
-      const double ai = (i == 0) ? etad * (res.amplitude + q2 * std::min(0., mod_params_.alpha + mod_params_.beta * q2))
-                                 : res.amplitude;
-      const double dmi = (i == 2) ? res.mass * (1. + mod_params_.mu / (1. + mod_params_.mup * q2)) : res.mass;
-      double qs0 = pow(dmi * dmi + mp2_ - mpi02, 2) - 4. * mp2_ * dmi * dmi;
+    for (const auto& [amplitude, mass, width, angular_momentum] : mod_params_.resonances) {
+      const double ai =
+          i == 0 ? eta_d * (amplitude + q2 * std::min(0., mod_params_.alpha + mod_params_.beta * q2)) : amplitude;
+      const double dmi = i == 2 ? mass * (1. + mod_params_.mu / (1. + mod_params_.mup * q2)) : mass;
+      double qs0 = std::pow(dmi * dmi + mp2_ - sq_mpi0, 2) - 4. * mp2_ * dmi * dmi;
       if (qs0 <= 0.)
         break;
-      qs0 = 0.5 * sqrt(qs0) / dmi;
-      int ji = 2 * res.angular_momentum;
-      const double dg =
-          0.5 * res.width * pow(qs / qs0, ji + 1) * (1. + pow(COEFF * qs0, ji)) / (1. + pow(COEFF * qs, ji));
-      f2resn += ai * dg / ((w - dmi) * (w - dmi) + dg * dg);
+      qs0 = 0.5 * std::sqrt(qs0) / dmi;
+      int ji = 2 * angular_momentum;
+      const double dg = 0.5 * width * std::pow(qs / qs0, ji + 1) * (1. + pow(COEFFICIENT * qs0, ji)) /
+                        (1. + std::pow(COEFFICIENT * qs, ji));
+      f2_resonance += ai * dg / ((w - dmi) * (w - dmi) + dg * dg);
       ++i;
     }
-    f2resn *= 0.5 * (1. - mod_params_.b[0]) * bkg2 * inv_mp_ * M_1_PI;
+    f2_resonance *= 0.5 * (1. - mod_params_.b[0]) * background2 * inv_mp_ * M_1_PI;
 
-    return std::make_pair(f2bkg, f2resn);
+    return std::make_pair(f2_background, f2_resonance);
   }
 }  // namespace cepgen::strfun
 using cepgen::strfun::CLAS;

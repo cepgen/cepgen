@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <cmath>
 
 #include "CepGen/Event/Event.h"
@@ -26,6 +25,7 @@
 
 using namespace cepgen;
 using namespace cepgen::cuts;
+using namespace std::string_literals;
 
 Central::Central() : SteeredObject(ParametersList{}) {}
 
@@ -37,17 +37,17 @@ Central::Central(const ParametersList& params) : SteeredObject(params) {
       .add("rapidity", rapidity_single)
       .add("energy", energy_single)
       .add("mass", mass_single)
-      .add("ptsum", pt_sum)
-      .add("etasum", eta_sum)
-      .add("energysum", energy_sum)
-      .add("invmass", mass_sum)
-      .add("ptdiff", pt_diff)
-      .add("dphi", phi_diff)
-      .add("rapiditydiff", rapidity_diff);
-  if (params.has<Limits>("phiptdiff")) {
-    CG_WARNING("Central") << "\"phiptdiff\" parameter is deprecated! "
-                          << "Please use \"phidiff\" instead.";
-    params.fill("phiptdiff", phi_diff);  // legacy
+      .add("ptsum"s, pt_sum)
+      .add("etasum"s, eta_sum)
+      .add("energysum"s, energy_sum)
+      .add("invmass"s, mass_sum)
+      .add("ptdiff"s, pt_diff)
+      .add("dphi"s, phi_diff)
+      .add("rapiditydiff"s, rapidity_diff);
+  if (params.has<Limits>("phiptdiff"s)) {
+    CG_WARNING("Central") << "'phiptdiff' parameter is deprecated! "s
+                          << "Please use 'phidiff' instead."s;
+    params.fill("phiptdiff"s, phi_diff);  // legacy
   }
 }
 
@@ -80,13 +80,13 @@ ParametersDescription Central::description() {
   desc.add("rapidity", Limits{}).setDescription("Single particle rapidity");
   desc.add("energy", Limits{}).setDescription("Single particle energy (GeV)");
   desc.add("mass", Limits{}).setDescription("Single particle mass (GeV/c^2)");
-  desc.add("ptsum", Limits{}).setDescription("System pt (GeV/c)");
-  desc.add("etasum", Limits{}).setDescription("System eta");
-  desc.add("energysum", Limits{}).setDescription("System energy (GeV)");
-  desc.add("invmass", Limits{}).setDescription("System mass (GeV/c^2)");
-  desc.add("ptdiff", Limits{}).setDescription("System D(pt) (GeV/c)");
-  desc.add("dphi", Limits{}).setDescription("System D(phi) (rad)");
-  desc.add("rapiditydiff", Limits{}).setDescription("System D(Y)");
+  desc.add("ptsum"s, Limits{}).setDescription("System pt (GeV/c)");
+  desc.add("etasum"s, Limits{}).setDescription("System eta");
+  desc.add("energysum"s, Limits{}).setDescription("System energy (GeV)");
+  desc.add("invmass"s, Limits{}).setDescription("System mass (GeV/c^2)");
+  desc.add("ptdiff"s, Limits{}).setDescription("System D(pt) (GeV/c)");
+  desc.add("dphi"s, Limits{}).setDescription("System D(phi) (rad)");
+  desc.add("rapiditydiff"s, Limits{}).setDescription("System D(Y)");
   return desc;
 }
 
@@ -167,6 +167,6 @@ ParametersDescription Remnants::description() {
   auto desc = ParametersDescription();
   desc.add("mx", Limits{MX_MIN, 1.e3}).setDescription("Diffractive mass (GeV/c^2)");
   desc.add("yj", Limits{}).setDescription("Diffractive jet rapidity");
-  desc.add("xi", Limits{}).setDescription("Longit.fract.mom. loss (\"xi\")");
+  desc.add("xi", Limits{}).setDescription("Longit.fract.mom. loss ('xi')"s);
   return desc;
 }
