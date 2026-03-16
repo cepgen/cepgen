@@ -30,10 +30,10 @@ struct KMRGluonKTFlux final : KTFlux {
     desc.setDescription("Proton inelastic gluon emission (KMR flux)");
     return desc;
   }
-  double fluxMX2(double x, double kt2, double mx2) const override {
+  double fluxQ2(double x, double kt2, double q2) const override {
     if (!x_range_.contains(x, true))
       return 0.;
-    return kmr::GluonGrid::get()(x, kt2, mx2);
+    return kmr::GluonGrid::get()(x, kt2, q2);
   }
   spdgid_t partonPdgId() const override { return PDG::gluon; }
   bool fragmenting() const override { return false; }
