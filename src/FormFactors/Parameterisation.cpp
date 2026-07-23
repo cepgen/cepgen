@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ using namespace cepgen::formfac;
 
 Parameterisation::Parameterisation(const ParametersList& params)
     : NamedModule(params),
-      pdg_id_(steer<int>("pdgId")),
+      pdg_id_(steerAs<int, spdgid_t>("pdgId")),
       mass2_(std::pow(PDG::get().mass(pdg_id_), 2)),
       mp_(PDG::get().mass(PDG::proton)),
       mp2_(mp_ * mp_) {}
@@ -47,7 +47,7 @@ const FormFactors& Parameterisation::operator()(double q2) {
 ParametersDescription Parameterisation::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Unnamed form factors parameterisation");
-  desc.addAs<pdgid_t>("pdgId", PDG::proton);
+  desc.addAs<int, spdgid_t>("pdgId", PDG::proton);
   return desc;
 }
 
