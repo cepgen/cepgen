@@ -413,6 +413,13 @@ namespace cepgen {
         perror("SetLegendY1");
       leg_y1_ = y;
     }
+    /// Set the vertical size of the legend object
+    /// \note To be called before the first legend entry is added
+    inline void SetLegendHeight(double y) {
+      if (leg_)
+        perror("SetLegendHeight");
+      leg_height_ = y;
+    }
     /// Add one new entry to the legend object
     inline void AddLegendEntry(const TObject* obj, const std::string& title, Option_t* option = "lpf") {
       if (!leg_)
@@ -436,21 +443,11 @@ namespace cepgen {
       if (top_label_)
         top_label_->Draw();
       if (leg_) {
-        if (
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 28, 0)
-            TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())
-#elif ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
-            TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_)
-#else
-            true
-#endif
-        ) {
-          leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
-          leg_->SetX1(leg_x1_);
-          leg_->SetX2(leg_x1_ + leg_width_);
-          leg_->SetY1(leg_y1_);
-          leg_->SetY2(leg_y1_ + leg_height_);
-        }
+        leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
+        leg_->SetX1(leg_x1_);
+        leg_->SetX2(leg_x1_ + leg_width_);
+        leg_->SetY1(leg_y1_);
+        leg_->SetY2(leg_y1_ + leg_height_);
         leg_->Draw();
       }
       for (const auto& extension : extensions)
