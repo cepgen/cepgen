@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace cepgen::utils {
     /// Progress bar constructor
     /// \param[in] total Total number of steps before completion
     /// \param[in] period Periodicity of ticks refreshing
-    explicit ProgressBar(size_t total, size_t period = 10);
+    explicit ProgressBar(size_t total, size_t period = 10, size_t extra_bar_length = 40);
     ~ProgressBar();
 
     void reset();  ///< Reset the progress bar to its initial state
@@ -44,10 +44,9 @@ namespace cepgen::utils {
     const size_t total_;                  ///< Total number of iterations expected
     const size_t period_;                 ///< Period at which an iteration is reported
     const size_t bar_length_;             ///< Total number of ticks
+    const size_t extra_bar_length_;       ///< Size of the additional info in the progress bar
     const std::string bar_pattern_;       ///< Characters to use for the bar
     const bool enabled_;                  ///< Is the progress bar enabled?
-
-    const size_t extra_bar_length_{40};  ///< Size of the additional info in the progress bar
 
     bool timer_enabled_{false};  ///< Do we also track the time?
     mutable bool ended_{false};  ///< Has the counting stopped?

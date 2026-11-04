@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,11 +26,12 @@
 
 using namespace cepgen::utils;
 
-ProgressBar::ProgressBar(size_t total, size_t period)
+ProgressBar::ProgressBar(size_t total, size_t period, size_t extra_bar_length)
     : timer_(new Timer),
       total_(total),
       period_(period),
       bar_length_(std::stoi(env::get("COLUMNS", "60")) - 10),
+      extra_bar_length_(extra_bar_length),
       bar_pattern_(bar_length_, '='),
       enabled_(env::get("CG_CI").empty() && Logger::get().isTTY()) {}
 
