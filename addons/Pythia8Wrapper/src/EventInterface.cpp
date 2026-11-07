@@ -16,13 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGenPythia8/EventInterface.h"
+
+#include <algorithm>
+#include <map>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Value.h"
-#include "CepGenPythia8/EventInterface.h"
 
 namespace cepgen::pythia8 {
   /// Convert a CepGen particle momentum into its Pythia 8 counterpart
@@ -101,75 +105,209 @@ namespace cepgen::pythia8 {
     }
   }
 
+  bool EventInterface::feedEventForHadronisation(const Event& ev) {
+    if (!rndm_)
+      throw CG_FATAL("pythia8:EventInterface:feedEventForHadronisation")
+          << "No random number engine set for the struck quark flavour selection.";
+    const double scale = ev(Particle::Role::Intermediate)[0].momentum().mass();
+    setProcess(0, 1., scale, ev.metadata("alphaEM"), ev.metadata("alphaS"));
+    cm_mom_ = Momentum();  // everything is fed in the laboratory frame: no (un)boosting
+
+    struct Side {
+      Particle::Role in_beam, out_beam, parton;
+      bool inelastic;
+    };
+    const std::array<Side, 2> sides{
+        {{Particle::Role::IncomingBeam1, Particle::Role::OutgoingBeam1, Particle::Role::Parton1, inel1_},
+         {Particle::Role::IncomingBeam2, Particle::Role::OutgoingBeam2, Particle::Role::Parton2, inel2_}}};
+    std::array<Pythia8::Vec4, 2> mom_in, mom_out;
+    std::array<int, 2> pdg_in{0, 0}, pdg_out{0, 0}, colour{0, 0};
+    std::array<double, 2> x{1., 1.}, mass_in{0., 0.}, mass_out{0., 0.};
+    unsigned short colour_index = MIN_COLOUR_INDEX;
+
+    for (size_t i = 0; i < 2; ++i) {
+      const auto& side = sides.at(i);
+      const auto &beam = ev.oneWithRole(side.in_beam), &parton = ev.oneWithRole(side.parton),
+                 &outgoing = ev.oneWithRole(side.out_beam);
+      incoming_cg_ids_[i] = beam.id();
+      const auto mom_beam = momToVec4(beam.momentum()), mom_parton = momToVec4(parton.momentum());
+      if (!side.inelastic) {  // unresolved hadron: the whole beam enters, the intact hadron (p - q) leaves
+        dissociated_cg_ids_[i] = -1;
+        pdg_in[i] = beam.integerPdgId();
+        pdg_out[i] = outgoing.integerPdgId();
+        mom_in[i] = mom_beam;
+        mom_out[i] = momToVec4(outgoing.momentum());
+        mass_in[i] = beam.momentum().mass();
+        mass_out[i] = outgoing.momentum().mass();
+        continue;
+      }
+      // dissociated beam: massless quark k = x P collinear to the beam, struck quark k - q left on-shell (massless)
+      //   (k - q)^2 = 0  =>  x = q^2 / (2 E_b (q^0 - s q_z)), with s the beam direction
+      dissociated_cg_ids_[i] = outgoing.id();
+      const double sign = mom_beam.pz() > 0. ? +1. : -1., e_beam = mom_beam.e();
+      const double denominator = 2. * e_beam * (mom_parton.e() - sign * mom_parton.pz());
+      if (denominator >= 0.)
+        return false;
+      x[i] = mom_parton.m2Calc() / denominator;
+      if (x[i] <= 0. || x[i] >= 1.) {
+        CG_DEBUG("pythia8:EventInterface:feedEventForHadronisation")
+            << "Invalid struck quark momentum fraction for beam " << i + 1 << ": x=" << x[i] << ".";
+        return false;
+      }
+      pdg_in[i] = pdg_out[i] = pickStruckQuark(beam.integerPdgId());
+      colour[i] = colour_index++;
+      mom_in[i] = Pythia8::Vec4(0., 0., sign * x[i] * e_beam, x[i] * e_beam);
+      mom_out[i] = mom_in[i] - mom_parton;
+    }
+
+    setIdX(pdg_in[0], pdg_in[1], x[0], x[1]);
+    setPdf(pdg_in[0], pdg_in[1], x[0], x[1], scale, 0., 0., false);
+
+    const auto add_vec4 = [this](
+                              int pdg, int status, int moth1, int moth2, int col, const Pythia8::Vec4& mom, double m) {
+      const auto lha_id = sizePart();
+      addParticle(pdg,
+                  status,
+                  moth1,
+                  moth2,
+                  pdg > 0 ? col : 0,
+                  pdg > 0 ? 0 : col,
+                  mom.px(),
+                  mom.py(),
+                  mom.pz(),
+                  mom.e(),
+                  m,
+                  0.,
+                  9.);
+      return lha_id;
+    };
+
+    // incoming legs (all of them collinear to their respective beam)
+    std::array<unsigned short, 2> lha_in{0, 0};
+    for (size_t i = 0; i < 2; ++i) {
+      lha_in[i] = add_vec4(pdg_in[i], -1, 0, 0, colour[i], mom_in[i], mass_in[i]);
+      if (sides.at(i).inelastic)
+        lha_forced_[lha_in[i]] = {sides.at(i).parton, incoming_cg_ids_[i], Particle::Status::Incoming};
+      else
+        addCorresp(lha_in[i], incoming_cg_ids_[i]);
+    }
+    // outgoing beam-side legs (carrying the photons' kT and virtuality)
+    for (size_t i = 0; i < 2; ++i) {
+      const auto lha_out = add_vec4(pdg_out[i], 1, lha_in[0], lha_in[1], colour[i], mom_out[i], mass_out[i]);
+      if (sides.at(i).inelastic)
+        lha_forced_[lha_out] = {sides.at(i).out_beam, dissociated_cg_ids_[i], Particle::Status::Fragmented};
+      else
+        addCorresp(lha_out, ev.oneWithRole(sides.at(i).out_beam).id());
+    }
+
+    // central system
+    const unsigned short central_colour = colour_index++;
+    for (const auto& p : ev(Particle::Role::CentralSystem)) {
+      range_t colours = {0, 0};
+      if (PDG::get().has(p.pdgId()) && PDG::get().colours(p.pdgId()) > 1) {
+        if (p.integerPdgId() > 0)  // particle
+          colours.first = central_colour;
+        else  // anti-particle
+          colours.second = central_colour;
+      }
+      addCepGenParticle(p, p.status() == Particle::Status::Resonance ? 2 : 1, {lha_in[0], lha_in[1]}, colours);
+    }
+    return true;
+  }
+
+  int EventInterface::pickStruckQuark(long beam_pdg_id) const {
+    // photon couples to the quark charge: P(q) ~ n_q(valence) * e_q^2
+    //   proton (uud): u 8/9, d 1/9 ; neutron (udd): u 2/3, d 1/3
+    const auto abs_pdg = std::labs(beam_pdg_id);
+    double prob_up = 8. / 9.;
+    if (abs_pdg == 2112)
+      prob_up = 2. / 3.;
+    else if (abs_pdg != 2212)
+      CG_WARNING("pythia8:EventInterface:pickStruckQuark")
+          << "Beam with PDG id " << beam_pdg_id << " is not a nucleon. Assuming a proton valence content.";
+    const int quark = rndm_->flat() < prob_up ? 2 : 1;
+    return beam_pdg_id > 0 ? quark : -quark;
+  }
+
   void EventInterface::updateEvent(const Pythia8::Event& pyevt, Event& ev, double& weight) const {
-    pyevt.list();
-    std::map<unsigned short, unsigned short> pyid_vs_cgid{{1, 5}, {2, 6}};  // keep it ordered...
-    for (auto& py_cg : lha_cg_corresp_)
-      pyid_vs_cgid[py_cg.first + 2 /* Pythia adds the two incoming beam particles to event content */] = py_cg.second;
-    if (pyevt.size() <= (int)lha_cg_corresp_.size() + 3) {
-      CG_WARNING("pythia6:EventInterface:updateEvent")
+    // Pythia event record: 0 = two-beam system, 1/2 = incoming beams, then the LHA entries (k -> k + 2),
+    // then everything produced by Pythia (resonance decays, beam remnants, showers, hadrons)
+    std::map<int, int> py_cg;  // Pythia index -> CepGen id
+    for (const auto& [lha_id, cg_id] : lha_cg_corresp_)
+      py_cg[lha_id + 2] = cg_id;
+    if (pyevt.size() < sizePart() + 2) {
+      CG_WARNING("pythia8:EventInterface:updateEvent")
           << "Failed to update the event with (possibly invalid) Pythia output.";
       return;
     }
-    // 0 = two-beam system
-    // 1 = incoming beam 1
-    // 2 = incoming beam 2
-    for (int i = lha_cg_corresp_.size() + 3; i < pyevt.size(); ++i) {  // 1st loop to add particles contents
+    const auto is_beam_side = [](const Particle::Role& role) {
+      return role == Particle::Role::OutgoingBeam1 || role == Particle::Role::OutgoingBeam2;
+    };
+    for (int i = 3; i < pyevt.size(); ++i) {
       const auto& pypart = pyevt.at(i);
-      checkPDGid(pypart);
-      auto& cgpart = ev.addParticle(Particle::Role::Intermediate).get();
-      cgpart.setStatus(Particle::Status::DebugResonance);
-      cgpart.setIntegerPdgId(pypart.id());
-      cgpart.setMomentum(vec4ToMom(pypart.p()).lorentzBoost(cm_mom_));
-      pyid_vs_cgid[i] = cgpart.id();
-    }
-    for (const auto& py_cg : pyid_vs_cgid) {  // 2nd loop to establish parentage
-      const auto& pypart = pyevt.at(py_cg.first);
-      auto& cgpart = ev[py_cg.second];
-      if (pyid_vs_cgid.count(pypart.mother1()) > 0)
-        cgpart.addMother(ev[pyid_vs_cgid.at(pypart.mother1())]);
-      if (pyid_vs_cgid.count(pypart.mother2()) > 0)
-        cgpart.addMother(ev[pyid_vs_cgid.at(pypart.mother2())]);
-      if (cgpart.role() == Particle::Role::Intermediate) {  // invalid role ; need to update from parentage
-        if (const auto& moths = cgpart.mothers(); !moths.empty()) {
-          const auto moth_role = ev[*moths.begin()].role();  // we only account for the first mother
-          if (pypart.status() == -61) {                      // intermediate partons
-            if (moth_role == Particle::Role::OutgoingBeam1) {
-              cgpart.setRole(Particle::Role::Parton1);
-              ev.clearMothers(cgpart);  // patch to set incoming beam as only mother
-              cgpart.addMother(ev[Particle::Role::IncomingBeam1][0]);
-            } else if (moth_role == Particle::Role::OutgoingBeam2) {
-              cgpart.setRole(Particle::Role::Parton2);
-              ev.clearMothers(cgpart);  // patch to set incoming beam as only mother
-              cgpart.addMother(ev[Particle::Role::IncomingBeam2][0]);
-            }
-            cgpart.setStatus(Particle::Status::Incoming);
-          } else
-            cgpart.setRole(moth_role);  // child inherits its parent's role
-        }
-      }
-      if (cgpart.status() == Particle::Status::DebugResonance) {  // fix whatever status we can fix
-        if (pypart.isResonance()) {
-          if (cgpart.role() == Particle::Role::CentralSystem && pypart.status() < 0)
+      if (auto it = py_cg.find(i); it != py_cg.end()) {  // particle already in the CepGen event
+        auto& cgpart = ev[it->second];
+        if (cgpart.role() == Particle::Role::CentralSystem && pypart.status() < 0) {
+          if (pypart.isResonance()) {  // resonance decayed by Pythia; apply branching ratio for this decay
             weight *= pypart.particleDataEntry().pickChannel().bRatio();
-          cgpart.setStatus(Particle::Status::Resonance);
-        } else if (pypart.status() > 0)
-          cgpart.setStatus(Particle::Status::FinalState);
+            cgpart.setStatus(Particle::Status::Resonance);
+          } else
+            cgpart.setStatus(Particle::Status::Propagator);  // e.g. recoiler copied by the shower
+        }
+        continue;
       }
+      checkPDGid(pypart);
+      Particle::Role role{Particle::Role::UnknownRole};
+      std::vector<int> cg_mothers;
+      auto non_final_status = Particle::Status::Propagator;
+      if (const auto it_forced = lha_forced_.find(i - 2); i - 2 < sizePart() && it_forced != lha_forced_.end()) {
+        // incoming or struck quark of a dissociated beam
+        role = it_forced->second.role;
+        cg_mothers.emplace_back(it_forced->second.cg_mother);
+        non_final_status = it_forced->second.status;
+      } else if (const auto moth1 = pypart.mother1(); moth1 == 1 || moth1 == 2) {
+        // directly attached to a Pythia beam: initiator copy or beam remnant
+        const size_t side = moth1 - 1;
+        if (pypart.status() == -61 || pypart.status() == -21) {
+          role = side == 0 ? Particle::Role::Parton1 : Particle::Role::Parton2;
+          cg_mothers.emplace_back(incoming_cg_ids_.at(side));
+          non_final_status = Particle::Status::Incoming;
+        } else {
+          role = side == 0 ? Particle::Role::OutgoingBeam1 : Particle::Role::OutgoingBeam2;
+          cg_mothers.emplace_back(dissociated_cg_ids_.at(side) >= 0 ? dissociated_cg_ids_.at(side)
+                                                                    : incoming_cg_ids_.at(side));
+          non_final_status = Particle::Status::Fragmented;
+        }
+      } else {  // child inherits its (first) mother's role
+        for (const auto& moth : {pypart.mother1(), pypart.mother2()})
+          if (moth > 0 && py_cg.count(moth) > 0 &&
+              std::find(cg_mothers.begin(), cg_mothers.end(), py_cg.at(moth)) == cg_mothers.end())
+            cg_mothers.emplace_back(py_cg.at(moth));
+        if (!cg_mothers.empty())
+          role = ev[cg_mothers.front()].role();
+        if (is_beam_side(role))
+          non_final_status = Particle::Status::Fragmented;
+      }
+      auto& cgpart = ev.addParticle(role).get();
+      cgpart.setIntegerPdgId(pypart.id());
+      cgpart.setMomentum(vec4ToMom(pypart.p()), true);
+      cgpart.setStatus(pypart.isFinal()       ? Particle::Status::FinalState
+                       : pypart.isResonance() ? Particle::Status::Resonance
+                                              : non_final_status);
+      const auto cg_id = cgpart.id();
+      py_cg[i] = cg_id;
+      for (const auto& moth_id : cg_mothers)
+        ev[cg_id].addMother(ev[moth_id]);
     }
-    ev.updateRoles();  // update all newly-reassigned roles after 2nd loop
-    // post-fix to set outgoing diffractive systems as fragmented
-    if (inel1_)
-      if (auto& diffx = ev[Particle::Role::OutgoingBeam1][0].get(); !diffx.daughters().empty())
-        diffx.setStatus(Particle::Status::Fragmented);
-    if (inel2_)
-      if (auto& diffy = ev[Particle::Role::OutgoingBeam2][0].get(); !diffy.daughters().empty())
-        diffy.setStatus(Particle::Status::Fragmented);
+    for (const auto& diff_id : dissociated_cg_ids_)  // outgoing diffractive systems are now fragmented
+      if (diff_id >= 0 && !ev[diff_id].daughters().empty())
+        ev[diff_id].setStatus(Particle::Status::Fragmented);
   }
 
   void EventInterface::setProcess(int id, double cross_section, double q2_scale, double alpha_qed, double alpha_qcd) {
     LHAup::setProcess(id, cross_section, q2_scale, alpha_qed, alpha_qcd);
     lha_cg_corresp_.clear();
+    lha_forced_.clear();
   }
 
   unsigned short EventInterface::lhaId(unsigned short cg_id) const {

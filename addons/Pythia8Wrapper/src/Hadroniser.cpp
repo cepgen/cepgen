@@ -16,13 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Physics/Hadroniser.h"
+
 #include <unordered_map>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Value.h"
@@ -93,9 +94,10 @@ namespace cepgen::pythia8 {
 #endif
     const auto& kin = runParameters().kinematics();
 
+    cg_evt_->setRandomEngine(&pythia_->rndm);
+    // incoming legs are fed collinear to the beams, and all photon kT is carried by outgoing legs: no need for
+    // relaxed energy-momentum/mass checks; a primordial kT would boost the hard system (and the central system)
     pythia_->settings.flag("BeamRemnants:primordialKT", false);
-    pythia_->settings.parm("Check:epTolErr", 1.);
-    pythia_->settings.parm("Check:mTolErr", 1.);
     pythia_->settings.parm("Beams:idA", (long)kin.incomingBeams().positive().integerPdgId());
     pythia_->settings.parm("Beams:idB", (long)kin.incomingBeams().negative().integerPdgId());
     // specify we will be using a LHA input
@@ -119,28 +121,19 @@ namespace cepgen::pythia8 {
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
     pythia_->settings.flag("PartonLevel:ISR", false);
     pythia_->settings.flag("PartonLevel:FSR", false);
-    switch (kin.incomingBeams().mode()) {
-      case mode::Kinematics::ElasticElastic: {
-        pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
-        pythia_->settings.flag("PartonLevel:MPI", false);
-      } break;
-      case mode::Kinematics::InelasticElastic: {
-        pythia_->settings.mode("BeamRemnants:unresolvedHadron", 2);
-        pythia_->settings.flag("PartonLevel:MPI", false);
-      } break;
-      case mode::Kinematics::ElasticInelastic: {
-        pythia_->settings.mode("BeamRemnants:unresolvedHadron", 1);
-        pythia_->settings.flag("PartonLevel:MPI", false);
-      } break;
-      case mode::Kinematics::InelasticInelastic:
-      default: {
-        pythia_->settings.mode("BeamRemnants:unresolvedHadron", 0);
-      } break;
-    }
+    // photon exchanges are colourless: no MPI (and no rapidity gap filling) whatever the beams treatment
+    pythia_->settings.flag("PartonLevel:MPI", false);
+    // elastic beams are unresolved: the whole hadron enters the hard process, and leaves it intact (p - q);
+    // dissociated beams are resolved: a struck quark leaves, and BeamRemnants builds the colour-connected diquark
+    const bool el1 = kin.incomingBeams().positive().elastic(), el2 = kin.incomingBeams().negative().elastic();
+    pythia_->settings.mode("BeamRemnants:unresolvedHadron", (el1 ? 1 : 0) + (el2 ? 2 : 0));
+#if PYTHIA_VERSION_INTEGER >= 8307 && PYTHIA_VERSION_INTEGER < 8310
+    CG_WARNING("pythia8:Hadroniser") << "The BeamRemnants:unresolvedHadron option is known to have no effect\n\t"
+                                     << "in Pythia 8.307-8.309 (fixed in 8.310). Elastic beams will be mistreated.";
+#endif
 #else
-    CG_WARNING("pythia8:Hadroniser") << "Beam remnants framework for this version of Pythia "
-                                     << "(" << utils::format("%.3f", pythia_->settings.parm("Pythia:versionNumber"))
-                                     << ")\n\t"
+    CG_WARNING("pythia8:Hadroniser") << "Beam remnants framework for this version of Pythia " << "("
+                                     << utils::format("%.3f", pythia_->settings.parm("Pythia:versionNumber")) << ")\n\t"
                                      << "does not support mixing of unresolved hadron states.\n\t"
                                      << "The proton remnants output might hence be wrong.\n\t"
                                      << "Please update the Pythia version or disable this part.";
@@ -150,8 +143,8 @@ namespace cepgen::pythia8 {
                                        << "expected to be decayed. Please check that this is fully intended.";
 
     if (!pythia_->init())
-      throw CG_FATAL("pythia8:Hadroniser") << "Failed to initialise the Pythia8 core!\n\t"
-                                           << "See the message above for more details.";
+      throw CG_FATAL("pythia8:Hadroniser")
+          << "Failed to initialise the Pythia8 core!\n\t" << "See the message above for more details.";
 
     if (debug_lhef_)
       cg_evt_->initLHEF();
@@ -176,7 +169,8 @@ namespace cepgen::pythia8 {
       initialise();
     }
 
-    cg_evt_->feedEvent(ev);  // convert our event into a custom LHA format
+    if (!cg_evt_->feedEventForHadronisation(ev))  // convert our event into a custom LHA format
+      return false;
     if (debug_lhef_ && !fast)
       cg_evt_->eventLHEF();
 
@@ -192,11 +186,10 @@ namespace cepgen::pythia8 {
     CG_DEBUG("pythia8:Hadroniser") << "Pythia8 hadronisation performed successfully.\n\t"
                                    << "Number of trials: " << num_hadr_trials << "/" << max_trials_ << ".\n\t"
                                    << "Particles multiplicity: " << ev.particles().size() << " → "
-                                   << pythia_->event.size() << ".\n\t"
-                                   << "  indices offset: " << offset_ << ".";
+                                   << pythia_->event.size() << ".\n\t" << "  indices offset: " << offset_ << ".";
 
     cg_evt_->updateEvent(pythia_->event, ev, weight);  // update the event content with Pythia's output
-    CG_LOG << "Event updated to:\n" << ev;
+    CG_DEBUG("pythia8:Hadroniser") << "Event updated to:\n" << ev;
     return true;
   }
 }  // namespace cepgen::pythia8

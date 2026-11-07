@@ -21,8 +21,10 @@
 
 #include <Pythia8/Pythia.h>
 
+#include <array>
 #include <unordered_map>
 
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Momentum.h"
 
 namespace cepgen {
@@ -48,7 +50,16 @@ namespace cepgen::pythia8 {
     /// Feed a new CepGen event to this conversion object
     /// \param[in] ev CepGen event to be fed
     void feedEvent(const Event& ev);
+    /// Feed a new CepGen event in a layout suited for Pythia's beam remnants handling
+    /// \note Every incoming leg is collinear to its beam and the photons' kT/virtuality is carried by the outgoing
+    ///   legs: the intact proton (p - q) for an elastic beam (unresolved hadron), or a struck quark (x P - q) for a
+    ///   dissociated beam, the remainder of which is built by Pythia's BeamRemnants as a colour-connected diquark.
+    /// \param[in] ev CepGen event to be fed
+    /// \return false if the kinematics cannot be mapped (e.g. x >= 1 for a dissociated beam)
+    bool feedEventForHadronisation(const Event& ev);
     void updateEvent(const Pythia8::Event&, Event& ev, double& weight) const;
+    /// Random number engine used for the struck quark flavour selection
+    inline void setRandomEngine(Pythia8::Rndm* rndm) { rndm_ = rndm; }
 
     /// Set the cross section for a given process
     /// \param[in] id Process identifier
@@ -93,6 +104,18 @@ namespace cepgen::pythia8 {
 
   private:
     range_t findMothers(const Event& ev, const Particle& p) const;
+    /// Pick the flavour of the quark struck by the photon in a dissociated beam (charge-weighted valence content)
+    int pickStruckQuark(long beam_pdg_id) const;
+    /// LHA particles without a CepGen counterpart, to be created when updating the event
+    struct ForcedParticle {
+      Particle::Role role;      ///< role to give to the CepGen particle
+      int cg_mother;            ///< CepGen identifier of its mother
+      Particle::Status status;  ///< status if not final in Pythia
+    };
+    std::unordered_map<unsigned short, ForcedParticle> lha_forced_;
+    std::array<int, 2> dissociated_cg_ids_{-1, -1};  ///< CepGen ids of the dissociated systems (if any)
+    std::array<int, 2> incoming_cg_ids_{-1, -1};     ///< CepGen ids of the incoming beams
+    Pythia8::Rndm* rndm_{nullptr};                   // borrowed
     const double mp_, mp2_;
     bool store_remnants_{false};
     bool inel1_{false}, inel2_{false};
