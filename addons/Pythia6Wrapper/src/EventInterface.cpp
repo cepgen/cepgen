@@ -179,7 +179,7 @@ void EventInterface::run() {
 }
 
 std::pair<short, short> EventInterface::pickPartonsContent() const {
-  if (const auto random_quarks = random_generator_->uniformInt(0, 9); random_quarks < 1)
+  if (const auto random_quarks = random_generator_->uniformInt(0, 8); random_quarks < 1)
     return {PDG::down, 2203};  // (d,uu1)
   else if (random_quarks < 5)
     return {PDG::up, 2101};  // (u,ud0)
