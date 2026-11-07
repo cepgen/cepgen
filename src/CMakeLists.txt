@@ -12,7 +12,8 @@ file(GLOB phys_sources
         FormFactors/*.cpp
         PartonFluxes/*.cpp
         Physics/*.cpp
-        StructureFunctions/*.cpp)
+        StructureFunctions/*.cpp
+        SurvivalFactors/*.cpp)
 file(GLOB proc_sources
         Process/*.cpp
         Process/*.f)

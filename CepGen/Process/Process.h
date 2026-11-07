@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/SurvivalFactor.h"
+#include "CepGen/SurvivalFactors/SurvivalFactor.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
 /// Location for all physics processes to be generated
@@ -176,8 +176,8 @@ namespace cepgen::proc {
     double t2_{-1.};       ///< Second parton virtuality
     double x1_{0.};        ///< First parton fractional momentum
     double x2_{0.};        ///< Second parton fractional momentum
-    std::unique_ptr<Coupling> alpha_em_;  ///< Electromagnetic running coupling algorithm
-    std::unique_ptr<Coupling> alpha_s_;   ///< Strong running coupling algorithm
+    std::unique_ptr<Coupling> alpha_em_;               ///< Electromagnetic running coupling algorithm
+    std::unique_ptr<Coupling> alpha_s_;                ///< Strong running coupling algorithm
     std::unique_ptr<SurvivalFactor> survival_factor_;  ///< Gap survival factor modelling (if any)
     /// Handler to a variable mapped by this process
     struct MappingVariable {

@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_SurvivalFactor_h
-#define CepGen_Physics_SurvivalFactor_h
+#ifndef CepGen_SurvivalFactors_SurvivalFactor_h
+#define CepGen_SurvivalFactors_SurvivalFactor_h
 
 #include "CepGen/Modules/NamedModule.h"
 
