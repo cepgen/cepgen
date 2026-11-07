@@ -48,7 +48,7 @@ namespace cepgen::survival {
       desc.add("expression", "1."s).setDescription("mathematical expression of the survival factor");
       desc.add("variables", std::vector<std::string>{"m(4)"})
           .setDescription("event variables (event browser syntax) used in the expression");
-      desc.add("functionalEngine", "ExprTk"s).setDescription("functional parser to use");
+      desc.add("functionalEngine", "root"s).setDescription("functional parser to use");
       return desc;
     }
 
