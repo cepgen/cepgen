@@ -30,6 +30,7 @@
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
+#include "CepGen/Physics/SurvivalFactor.h"
 #include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
@@ -60,6 +61,7 @@ namespace cepgen {
   template class ModuleFactory<proc::Process>;
   template class ModuleFactory<sigrat::Parameterisation>;
   template class ModuleFactory<strfun::Parameterisation>;
+  template class ModuleFactory<SurvivalFactor>;
   template class ModuleFactory<utils::Functional>;
   template class ModuleFactory<utils::RandomGenerator>;
 }  // namespace cepgen
