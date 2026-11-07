@@ -104,9 +104,12 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
   if (const auto* survival_factor = process_->survivalFactor(); survival_factor) {
     const auto survival = (*survival_factor)(*event);
     static const Limits allowed_sf_range{0., 1.};
-    if (!allowed_sf_range.contains(survival))
+    static bool warning_has_fired = false;
+    if (!warning_has_fired && !allowed_sf_range.contains(survival)) {
       CG_WARNING("ProcessIntegrand") << "Survival factor value " << survival << " is outside the " << allowed_sf_range
                                      << " range.";
+      warning_has_fired = true;
+    }
     if (!utils::positive(survival))
       return 0.;
     weight *= survival;
