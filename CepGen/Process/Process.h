@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/SurvivalFactors/SurvivalFactor.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
 /// Location for all physics processes to be generated
@@ -55,6 +56,9 @@ namespace cepgen::proc {
     double weight(const std::vector<double>&);      ///< Compute the weight for a phase-space point
     void dumpPoint(std::ostream* = nullptr) const;  ///< Dump the coordinate of the phase-space point being evaluated
     void dumpVariables(std::ostream* = nullptr) const;  ///< List all variables handled by this generic process
+
+    /// Gap survival factor modelling, if any (applied on the event content at the integrand level)
+    inline const SurvivalFactor* survivalFactor() const { return survival_factor_.get(); }
 
     inline size_t ndim() const { return mapped_variables_.size(); }  ///< Number of dimensions to perform integration
 
@@ -172,8 +176,9 @@ namespace cepgen::proc {
     double t2_{-1.};       ///< Second parton virtuality
     double x1_{0.};        ///< First parton fractional momentum
     double x2_{0.};        ///< Second parton fractional momentum
-    std::unique_ptr<Coupling> alpha_em_;  ///< Electromagnetic running coupling algorithm
-    std::unique_ptr<Coupling> alpha_s_;   ///< Strong running coupling algorithm
+    std::unique_ptr<Coupling> alpha_em_;               ///< Electromagnetic running coupling algorithm
+    std::unique_ptr<Coupling> alpha_s_;                ///< Strong running coupling algorithm
+    std::unique_ptr<SurvivalFactor> survival_factor_;  ///< Gap survival factor modelling (if any)
     /// Handler to a variable mapped by this process
     struct MappingVariable {
       std::string name;         ///< Variable name for debugging
