@@ -415,8 +415,7 @@ ParametersDescription Process::description() {
       .setDescription("e-m coupling evolution algorithm");
   desc.add("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
       .setDescription("strong coupling evolution algorithm");
-  desc.add("survivalFactor", ParametersDescription{})
-      .setDescription("gap survival factor modelling (none by default)");
+  desc.add("survivalFactor", ParametersDescription{}).setDescription("gap survival factor modelling (none by default)");
   desc.add("hasEvent", true).setDescription("does the process carry an event definition");
   desc.add("kinematics", Kinematics::description());
   return desc;
