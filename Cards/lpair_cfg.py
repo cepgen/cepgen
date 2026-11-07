@@ -11,6 +11,12 @@ process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
         pair = PDG.muon,
+        #--- example of a gap survival factor rescaling (none by default; illustrative values only)
+        #survivalFactor = cepgen.Module('grid1D', path = 'survival_vs_mgg.dat', variable = 'm(4)'),
+        #survivalFactor = cepgen.Module('functional',
+        #    expression = 'exp(-0.002*m(4))',  # m(4): two-photon system mass
+        #    variables = ['m(4)'],
+        #),
     ),
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),

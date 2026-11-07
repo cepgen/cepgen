@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
+#include "CepGen/Modules/SurvivalFactorFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
@@ -297,6 +298,14 @@ void Process::initialise() {
     alpha_em_ = AlphaEMFactory::get().build(alpha_em);
   if (const auto& alpha_s = steer<ParametersList>("alphaS"); !alpha_s.empty())
     alpha_s_ = AlphaSFactory::get().build(alpha_s);
+  // build the gap survival factor modelling (if any)
+  if (const auto& survival = steer<ParametersList>("survivalFactor"); survival.hasName()) {
+    if (!event_)
+      throw CG_FATAL("Process:initialise")
+          << "A gap survival factor modelling was requested, but this process does not carry an event content.";
+    survival_factor_ = SurvivalFactorFactory::get().build(survival);
+    CG_DEBUG("Process:initialise") << "Gap survival factor modelling: " << survival_factor_->name() << ".";
+  }
 
   const auto& p1 = kin_.incomingBeams().positive().momentum();
   const auto& p2 = kin_.incomingBeams().negative().momentum();
@@ -406,6 +415,7 @@ ParametersDescription Process::description() {
       .setDescription("e-m coupling evolution algorithm");
   desc.add("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
       .setDescription("strong coupling evolution algorithm");
+  desc.add("survivalFactor", ParametersDescription{}).setDescription("gap survival factor modelling (none by default)");
   desc.add("hasEvent", true).setDescription("does the process carry an event definition");
   desc.add("kinematics", Kinematics::description());
   return desc;

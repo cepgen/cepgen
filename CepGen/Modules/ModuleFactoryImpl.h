@@ -35,6 +35,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/SurvivalFactors/SurvivalFactor.h"
 #include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/Drawer.h"
@@ -60,6 +61,7 @@ namespace cepgen {
   template class ModuleFactory<proc::Process>;
   template class ModuleFactory<sigrat::Parameterisation>;
   template class ModuleFactory<strfun::Parameterisation>;
+  template class ModuleFactory<SurvivalFactor>;
   template class ModuleFactory<utils::Functional>;
   template class ModuleFactory<utils::RandomGenerator>;
 }  // namespace cepgen

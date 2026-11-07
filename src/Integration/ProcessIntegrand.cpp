@@ -100,6 +100,20 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
   process_->setKinematics();           // fill in the process' Event object
   auto* event = process_->eventPtr();  // prepare the event content
 
+  // apply the gap survival factor on the event as built by the process (before any modification algorithm)
+  if (const auto* survival_factor = process_->survivalFactor(); survival_factor) {
+    const auto survival = (*survival_factor)(*event);
+    static const Limits allowed_sf_range{0., 1.};
+    if (!allowed_sf_range.contains(survival))
+      CG_WARNING("ProcessIntegrand") << "Survival factor value " << survival << " is outside the " << allowed_sf_range
+                                     << " range.";
+    if (!utils::positive(survival))
+      return 0.;
+    weight *= survival;
+    if (storage_)
+      event->metadata["survivalFactor"] = survival;
+  }
+
   // once kinematics variables computed, can apply taming functions
   for (const auto& taming_function : run_parameters_->tamingFunctions())
     if (const auto val = (*taming_function)(bws_.get(*event, taming_function->variables().at(0))) != 0.)
