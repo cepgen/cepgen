@@ -119,17 +119,18 @@ double FactorisedProcess::computeWeight() {
 }
 
 void FactorisedProcess::fillKinematics() {
-  // parton systems
-  event().oneWithRole(Particle::Role::Parton1).setMomentum(pA() - pX(), true);
-  event().oneWithRole(Particle::Role::Parton2).setMomentum(pB() - pY(), true);
-
   if (symmetrise_ && random_generator_->uniformInt(0, 1) == 1) {  // symmetrise the el-in and in-el cases
     std::swap(pX(), pY());
     std::swap(q1(), q2());
     std::swap(pc(0), pc(1));
-    for (auto* momentum : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
+    for (auto* momentum : {&q1(), &q2(), &pX(), &pY()})
       momentum->mirrorZ();
+    for (size_t i = 0; i < phase_space_generator_->central().size(); ++i)  // loop over all central particles
+      pc(i).mirrorZ();
   }
+  // parton systems
+  event().oneWithRole(Particle::Role::Parton1).setMomentum(pA() - pX(), true);
+  event().oneWithRole(Particle::Role::Parton2).setMomentum(pB() - pY(), true);
   if (store_alphas_) {  // add couplings to metadata
     const auto two_parton_mass = (q1() + q2()).mass();
     event().metadata["alphaEM"] = alphaEM(two_parton_mass);
@@ -178,7 +179,7 @@ bool FactorisedProcess::validatedBeamKinematics() {
   const auto invariant_mass = (q1() + q2()).mass();
   // define a window in central system invariant mass
   if (!kinematics().cuts().central.mass_sum.contains(invariant_mass))
-    return 0.;
+    return false;
 
   // impose additional conditions for energy-momentum conservation
   if (!kinematics().incomingBeams().positive().elastic() && x2() * s() - invariant_mass - q2().p2() <= mX2())
