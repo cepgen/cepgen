@@ -119,9 +119,26 @@ typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_c
       const grid_point_t ext_2 = ext_12 * (1. - c_d[1]) + ext_22 * c_d[1];
       out = ext_1 * (1. - c_d[2]) + ext_2 * c_d[2];
     } break;
-    default:
-      throw CG_FATAL("GridHandler") << "Unsupported number of dimensions: " << N << ".\n\t"
-                                    << "Please contact the developers to add such a new feature.";
+    default: {  // generic multilinear interpolation over the 2^D corners of the hypercube enclosing the coordinate
+      coord_t before(D), after(D), corner(D);
+      findIndices(coord, before, after);
+      coord_t c_d(D);
+      for (size_t i = 0; i < D; ++i)
+        c_d[i] = (after[i] != before[i]) ? (coord.at(i) - before[i]) / (after[i] - before[i]) : 0.;
+      for (size_t mask = 0; mask < (1ul << D); ++mask) {
+        double weight = 1.;
+        for (size_t i = 0; i < D; ++i) {
+          const bool upper = (mask >> i) & 1;
+          corner[i] = upper ? after[i] : before[i];
+          weight *= upper ? c_d[i] : 1. - c_d[i];
+        }
+        if (weight == 0.)
+          continue;
+        const auto& ext = values_raw_.at(corner);
+        for (size_t i = 0; i < N; ++i)
+          out[i] += weight * ext[i];
+      }
+    } break;
   }
   return out;
 }
@@ -347,6 +364,9 @@ typename GridHandler<D, N>::grid_point_t GridHandler<D, N>::grid_point_t::operat
 namespace cepgen {  // template specialisation for the few cases handled
   template class GridHandler<1, 1>;
   template class GridHandler<1, 2>;
+  template class GridHandler<2, 1>;
   template class GridHandler<2, 2>;
   template class GridHandler<3, 1>;
+  template class GridHandler<4, 1>;
+  template class GridHandler<5, 1>;
 }  // namespace cepgen
