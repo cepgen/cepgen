@@ -264,7 +264,8 @@ namespace cepgen {
           ratios.emplace_back(ratio);
         }
       }
-      pads_.at(1)->SetLogy(false);
+      auto& ratio_pad = pads_.at(1);
+      ratio_pad->SetLogy(false);
       hs->Draw("nostack");
       if (x_min == x_max) {
         x_min = denominator->GetXaxis()->GetXmin();
@@ -285,9 +286,14 @@ namespace cepgen {
       hst->GetYaxis()->SetLabelSize(15);
       if (y_min != y_max)
         hst->GetYaxis()->SetRangeUser(y_min, y_max);
-      else
-        hst->GetYaxis()->SetRangeUser(TMath::Max(-0.65, hst->GetYaxis()->GetXmin()),
-                                      TMath::Min(2.65, hst->GetYaxis()->GetXmax()));
+      else if (ratio_y_range_min_ != ratio_y_range_max_) {
+        printf("%g:%g\n", ratio_y_range_min_, ratio_y_range_max_);
+        hs->SetMinimum(ratio_y_range_min_);
+        hs->SetMaximum(ratio_y_range_max_);
+        ratio_pad->Update();
+      } else
+        hst->GetYaxis()->SetRangeUser(TMath::Max(kMinRatioYRange, hst->GetMinimum()),
+                                      TMath::Min(kMaxRatioYRange, hst->GetMaximum()));
       denominator->GetXaxis()->SetTitle("");
       TCanvas::cd(1);
       return ratios;
@@ -345,10 +351,12 @@ namespace cepgen {
       mg->GetYaxis()->SetTitle("Ratio");
       mg->GetYaxis()->SetLabelSize(15);
       if (y_min != y_max)
-        mg->GetYaxis()->SetRangeUser(y_min, y_max);
+        mg->SetMinimum(y_min), mg->SetMaximum(y_max);
+      else if (ratio_y_range_min_ != ratio_y_range_max_)
+        mg->SetMinimum(ratio_y_range_min_), mg->SetMaximum(ratio_y_range_max_);
       else
-        mg->GetYaxis()->SetRangeUser(TMath::Max(-0.65, mg->GetYaxis()->GetXmin()),
-                                     TMath::Min(2.65, mg->GetYaxis()->GetXmax()));
+        mg->SetMinimum(TMath::Max(kMinRatioYRange, mg->GetYaxis()->GetXmin())),
+            mg->SetMaximum(TMath::Min(kMaxRatioYRange, mg->GetYaxis()->GetXmax()));
       denominator->GetXaxis()->SetTitle("");
       TLine l;
       l.SetLineWidth(1);
@@ -413,6 +421,17 @@ namespace cepgen {
         perror("SetLegendY1");
       leg_y1_ = y;
     }
+    /// Set the vertical size of the legend object
+    /// \note To be called before the first legend entry is added
+    inline void SetLegendHeight(double y) {
+      if (leg_)
+        perror("SetLegendHeight");
+      leg_height_ = y;
+    }
+    inline void SetRatioPlotYRange(double ymin, double ymax) {
+      ratio_y_range_min_ = ymin;
+      ratio_y_range_max_ = ymax;
+    }
     /// Add one new entry to the legend object
     inline void AddLegendEntry(const TObject* obj, const std::string& title, Option_t* option = "lpf") {
       if (!leg_)
@@ -436,21 +455,11 @@ namespace cepgen {
       if (top_label_)
         top_label_->Draw();
       if (leg_) {
-        if (
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 28, 0)
-            TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())
-#elif ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
-            TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_)
-#else
-            true
-#endif
-        ) {
-          leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
-          leg_->SetX1(leg_x1_);
-          leg_->SetX2(leg_x1_ + leg_width_);
-          leg_->SetY1(leg_y1_);
-          leg_->SetY2(leg_y1_ + leg_height_);
-        }
+        leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
+        leg_->SetX1(leg_x1_);
+        leg_->SetX2(leg_x1_ + leg_width_);
+        leg_->SetY1(leg_y1_);
+        leg_->SetY2(leg_y1_ + leg_height_);
         leg_->Draw();
       }
       for (const auto& extension : extensions)
@@ -553,10 +562,13 @@ namespace cepgen {
       return (hist->GetXaxis()->GetXmax() - hist->GetXaxis()->GetXmin()) / hist->GetXaxis()->GetNbins();
     }
 
+    static constexpr double kMinRatioYRange = -0.65, kMaxRatioYRange = 2.65;
+
     const bool ratio_{false};
     std::string leg_mode_{"rt"};
     double leg_x1_{0.15}, leg_y1_{0.75};
     double leg_width_{0.45}, leg_height_{0.15};
+    double ratio_y_range_min_{-1.}, ratio_y_range_max_{-1.};
     std::unique_ptr<TLegend> leg_{nullptr};
     std::unique_ptr<ROOTPaveText> top_label_{nullptr};
     std::vector<std::unique_ptr<TObject> > grb_obj_{};

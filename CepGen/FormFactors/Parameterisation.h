@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace cepgen::formfac {
 
     virtual const FormFactors& operator()(double /*q2*/);      ///< Compute all form factors for a given \f$Q^2\f$ value
     inline virtual bool fragmenting() const { return false; }  ///< Will the nucleon survive the exchange?
-    pdgid_t pdgId() const { return pdg_id_; }                  ///< Incoming particle's PDG identifier
+    spdgid_t pdgId() const { return pdg_id_; }                 ///< Incoming particle's PDG identifier
 
   protected:
     static constexpr double MU = 2.792847337;  ///< Proton magnetic moment
@@ -47,10 +47,10 @@ namespace cepgen::formfac {
     void setFEFM(double fe, double fm);  ///< Set the electromagnetic form factors
     void setGEGM(double ge, double gm);  ///< Set the Sachs form factors
 
-    const pdgid_t pdg_id_;  ///< Incoming beam
-    const double mass2_;    ///< Incoming beam squared mass
-    const double mp_;       ///< Proton mass, in GeV/c\f$^2\f$
-    const double mp2_;      ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+    const spdgid_t pdg_id_;  ///< Incoming beam
+    const double mass2_;     ///< Incoming beam squared mass
+    const double mp_;        ///< Proton mass, in GeV/c\f$^2\f$
+    const double mp2_;       ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
     double q2_{-1.};    ///< Virtuality at which the form factors are evaluated
     FormFactors ff_{};  ///< Last form factors computed

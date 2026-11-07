@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2025  Laurent Forthomme
+ *  Copyright (C) 2020-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
@@ -72,6 +74,13 @@ bool GeneratorWorker::storeEvent() const {
   for (const auto& event_exporter : run_params_->eventExportersSequence())
     if (!(*event_exporter << event))
       return false;
+  if (run_params_->generation().printEvery() > 0 &&
+      run_params_->numGeneratedEvents() % run_params_->generation().printEvery() == 0)
+    CG_INFO("GeneratorWorker:store") << "[" << std::setw(2)
+                                     << std::floor(run_params_->numGeneratedEvents() * 100. /
+                                                   run_params_->generation().maxGen())
+                                     << "%] Generated event " << run_params_->numGeneratedEvents() << " / "
+                                     << run_params_->generation().maxGen() << ".";
   const_cast<RunParameters*>(run_params_)->addGenerationTime(event.metadata("time:total"));
   return true;
 }
