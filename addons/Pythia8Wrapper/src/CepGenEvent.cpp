@@ -57,9 +57,9 @@ void CepGenEvent::setCrossSection(int id, double cross_section, double cross_sec
   //listInit();
 }
 
-void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
+void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type, double event_weight) {
   const double scale = ev(cepgen::Particle::Role::Intermediate)[0].momentum().mass();
-  setProcess(0, 1., scale, ev.metadata("alphaEM"), ev.metadata("alphaS"));
+  setProcess(0, event_weight, scale, ev.metadata("alphaEM"), ev.metadata("alphaS"));
 
   const auto &part1 = ev(cepgen::Particle::Role::Parton1)[0], &part2 = ev(cepgen::Particle::Role::Parton2)[0];
   const auto &op1 = ev(cepgen::Particle::Role::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::Role::OutgoingBeam2)[0];
