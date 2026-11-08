@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2024  Laurent Forthomme
+ *  Copyright (C) 2016-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,18 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Physics/Hadroniser.h"
-
 #include <unordered_map>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Value.h"
 #include "CepGenPythia8/EventInterface.h"
+
+using namespace std::string_literals;
 
 namespace cepgen::pythia8 {
   /// Interface to the Pythia8 hadronisation algorithm
@@ -52,11 +53,9 @@ namespace cepgen::pythia8 {
     inline static ParametersDescription description() {
       auto desc = cepgen::hadr::Hadroniser::description();
       desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
-      desc.add<bool>("correctCentralSystem", false)
-          .setDescription("correct any discrepancy of the kinematics of the central system?");
-      desc.add<bool>("debugLHEF", false).setDescription("dump each event into a debugging LHEF file?");
-      desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
-          .setDescription("Pythia configuration backup output filename");
+      desc.add("correctCentralSystem", false).setDescription("correct central system kinematics if required");
+      desc.add("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
+      desc.add("outputConfig", "last_pythia_config.cmd"s).setDescription("last Pythia configuration snapshot filename");
       return desc;
     }
 

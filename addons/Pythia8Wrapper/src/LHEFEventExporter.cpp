@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2025  Laurent Forthomme
+ *  Copyright (C) 2016-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
@@ -58,8 +59,8 @@ namespace cepgen::pythia8 {
     ~LHEFEventExporter() override {
       if (lhaevt_)
         lhaevt_->closeLHEF(false);  // we do not want to rewrite the init block
-      if (gzip_)
 #ifdef GZIP_BIN
+      if (gzip_)
         utils::Caller::call({GZIP_BIN, "-f", filename_});
 #endif
     }
