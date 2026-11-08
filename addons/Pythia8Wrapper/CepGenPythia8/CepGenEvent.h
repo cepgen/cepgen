@@ -44,7 +44,9 @@ namespace Pythia8 {
     /// Feed a new CepGen event to this conversion object
     /// \param[in] ev CepGen event to be fed
     /// \param[in] type Type of storage
-    void feedEvent(const cepgen::Event& ev, const Type& type);
+    /// \param[in] event_weight Weight associated to this event in the LHA record
+    void feedEvent(const cepgen::Event& ev, const Type& type, double event_weight = 1.);
+    inline void setWeightedEvents() { setStrategy(4); }  ///< Events have a mean weight equal to the cross-section
     /// Set the cross-section for a given process
     /// \param[in] id Process identifier
     /// \param[in] cross_section Process cross-section, in pb

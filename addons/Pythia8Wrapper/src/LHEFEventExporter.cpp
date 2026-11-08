@@ -95,12 +95,14 @@ namespace cepgen::pythia8 {
 
     bool operator<<(const Event& ev) override {
       cepgen_event_->feedEvent(compress_event_ ? ev : ev.compress(),
-                               Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
+                               Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants,
+                               static_cast<double>(cross_section_) * ev.metadata("weight"));
       pythia_->next();
       cepgen_event_->eventLHEF();
       return true;
     }
     void setCrossSection(const Value& cross_section) override {
+      cross_section_ = cross_section;
       cepgen_event_->setCrossSection(0, cross_section, cross_section.uncertainty());
     }
 
@@ -110,6 +112,7 @@ namespace cepgen::pythia8 {
     const bool compress_event_;
     std::string filename_;
     bool gzip_{false};
+    Value cross_section_{};  ///< Process cross-section, in pb
   };
 }  // namespace cepgen::pythia8
 using Pythia8LHEFEventExporter = cepgen::pythia8::LHEFEventExporter;
