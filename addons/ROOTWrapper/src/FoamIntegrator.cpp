@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,95 +24,111 @@
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
+#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
-namespace cepgen {
-  /// Foam general-purpose integration algorithm
-  /// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
-  class FoamIntegrator final : public Integrator, public TFoamIntegrand {
-  public:
-    explicit FoamIntegrator(const ParametersList& params) : Integrator(params) {}
+using namespace cepgen;
+using namespace std::string_literals;
 
-    static ParametersDescription description() {
-      auto desc = Integrator::description();
-      desc.setDescription("FOAM general purpose MC integrator");
-      desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("root"));
-      desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
-      desc.add<int>("nCells", 1000);
-      desc.add<int>("nSampl", 200);
-      desc.add<int>("nBin", 8);
-      desc.add<int>("EvPerBin", 25);
-      desc.add<int>("verbose", 0).setDescription("Verbosity level");
-      return desc;
-    }
+/// Foam integration algorithm
+/// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
+class FoamIntegrator final : public Integrator, public TFoamIntegrand {
+public:
+  explicit FoamIntegrator(const ParametersList& params)
+      : Integrator(params),
+        random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"s))) {}
 
-    Value integrate(Integrand& integrand) override {
-      integrand_ = &integrand;
-      std::unique_ptr<TFoam> foam(new TFoam("Foam"));
-      CG_DEBUG("Integrator:integrate") << "FOAM integrator built\n\t"
-                                       << "Version: " << foam->GetVersion() << ".";
-      foam->SetPseRan(rnd_gen_->engine<TRandom>());
-      foam->SetnCells(steer<int>("nCells"));
-      foam->SetnSampl(steer<int>("nSampl"));
-      foam->SetnBin(steer<int>("nBin"));
-      foam->SetEvPerBin(steer<int>("EvPerBin"));
-      foam->SetChat(std::max(verbosity_, 0));
-      foam->SetRho(this);
-      foam->SetkDim(integrand_->size());
-      Integrator::checkLimits(*integrand_);
-      coord_.resize(integrand_->size());
-      foam->Initialize();
-      std::unique_ptr<utils::ProcessVariablesAnalyser> analyser;
-      if (integrand.hasProcess())
-        analyser.reset(new utils::ProcessVariablesAnalyser(dynamic_cast<ProcessIntegrand&>(integrand).process(),
-                                                           ParametersList{}));
-      const auto num_calls = steer<int>("nCalls");
-      for (int i = 0; i < num_calls; ++i) {
-        foam->MakeEvent();
-        if (analyser)
-          analyser->feed(foam->GetMCwt() / num_calls);
-      }
+  static ParametersDescription description() {
+    auto desc = Integrator::description();
+    desc.setDescription("FOAM general purpose MC integrator");
+    desc.add("randomGenerator"s, RandomGeneratorFactory::get().describeParameters("root"));
+    desc.add("nCalls"s, 100'000).setDescription("number of calls for the cell evaluation");
+    desc.add("nCells"s, 1000).setDescription("number of allocated number of cells");
+    desc.add("nSampl"s, 200).setDescription("number of MC events in the cell MC exploration");
+    desc.add("nBin"s, 8).setDescription("number of bins in edge-histogram in cell exploration");
+    desc.add("OptRej"s, 1)
+        .allow(0, "weighted events")
+        .allow(1, "unweighted events")
+        .setDescription("MC events weight determination type");
+    desc.add("OptDrive"s, 2).setDescription("maximum weight reduction (1 for variance reduction)");
+    desc.add("MaxWtRej"s, 1.1).setDescription("maximum weight used to get unweighted MC events");
+    desc.add("EvPerBin"s, 25)
+        .setDescription("maximum number of the effective wt=1 events/bin (0 deactivates this option)");
+    return desc;
+  }
+
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+    integrand_ = &integrand;
+    range_ = range;
+    const auto foam = std::make_unique<TFoam>("Foam");
+    CG_DEBUG("Integrator:integrate") << "FOAM integrator built\n\t"
+                                     << "Version: " << foam->GetVersion() << ".";
+    foam->SetPseRan(random_generator_->engine<TRandom>());
+    foam->SetnCells(steer<int>("nCells"s));
+    foam->SetnSampl(steer<int>("nSampl"s));
+    foam->SetnBin(steer<int>("nBin"s));
+    foam->SetOptRej(steer<int>("OptRej"s));
+    foam->SetOptDrive(steer<int>("OptDrive"s));
+    foam->SetMaxWtRej(steer<double>("MaxWtRej"s));
+    foam->SetEvPerBin(steer<int>("EvPerBin"s));
+    foam->SetChat(std::max(verbosity_, 0));
+    foam->SetRho(this);
+    foam->SetkDim(integrand_->size());
+    foam->Initialize();
+    std::unique_ptr<utils::ProcessVariablesAnalyser> analyser;
+    if (integrand.hasProcess())
+      analyser.reset(
+          new utils::ProcessVariablesAnalyser(dynamic_cast<ProcessIntegrand&>(integrand).process(), ParametersList{}));
+    const auto num_calls = steer<int>("nCalls");
+    // launch integration
+    for (int i = 0; i < num_calls; ++i) {
+      foam->MakeEvent();
       if (analyser)
-        analyser->analyse();
-      //--- launch integration
-      double norm, err;
-      foam->Finalize(norm, err);
-
-      double result, abs_error;
-      foam->GetIntegMC(result, abs_error);
-      for (const auto& lim : limits_) {
-        result *= lim.range();
-        abs_error *= lim.range();
-      }
-      const auto res = Value{result, abs_error};
-
-      CG_DEBUG("FoamIntegrator").log([&](auto& log) {
-        double eps = 5.e-4, avewt, wtmax, sigma;
-        foam->GetWtParams(eps, avewt, wtmax, sigma);
-        const double ncalls = foam->GetnCalls();
-        const double effic = wtmax > 0 ? avewt / wtmax : 0.;
-        log << "Result: " << res << "\n\t"
-            << "Relative error: " << res.relativeUncertainty() * 100. << "%\n\t"
-            << "Dispersion/<wt> = " << sigma << ", <wt> = " << avewt << ", <wt>/wtmax = " << effic << ",\n\t"
-            << " for epsilon = " << eps << "\n\t"
-            << " nCalls (initialisation only)= " << ncalls << ".";
-      });
-      return res;
+        analyser->feed(foam->GetMCwt() / num_calls);
     }
+    if (analyser)
+      analyser->analyse();
+    double norm, err;
+    foam->Finalize(norm, err);
 
-    /// Compute the weight for a given phase space point
-    inline double Density(int ndim, double* x) override {
-      if (!integrand_)
-        throw CG_FATAL("FoamDensity") << "Integrand object not yet initialised!";
-      for (int i = 0; i < ndim; ++i)
-        coord_[i] = limits_.at(i).x(x[i]);
-      return integrand_->eval(coord_);
+    double result, abs_error;
+    foam->GetIntegMC(result, abs_error);
+    for (const auto& lim : range) {
+      result *= lim.range();
+      abs_error *= lim.range();
     }
+    const auto res = Value{result, abs_error};
 
-  private:
-    Integrand* integrand_{nullptr};
-    std::vector<double> coord_;
-  };
-}  // namespace cepgen
+    CG_DEBUG("FoamIntegrator").log([&](auto& log) {
+      double eps = 5.e-4, average_event_weight, maximum_weight, sigma;
+      foam->GetWtParams(eps, average_event_weight, maximum_weight, sigma);
+      const double num_function_calls = foam->GetnCalls();
+      const double efficiency = maximum_weight > 0 ? average_event_weight / maximum_weight : 0.;
+      log << "Result: " << res << "\n\t"
+          << "Relative error: " << res.relativeUncertainty() * 100. << "%\n\t"
+          << "Dispersion/<wt> = " << sigma << ", <wt> = " << average_event_weight << ", <wt>/wtmax = " << efficiency
+          << ",\n\t"
+          << " for epsilon = " << eps << "\n\t"
+          << " nCalls (initialisation only)= " << num_function_calls << ".";
+    });
+    return res;
+  }
+
+  /// Compute the weight for a given phase space point
+  double Density(int num_dimensions, double* coordinates) override {
+    if (!integrand_)
+      throw CG_FATAL("FoamDensity") << "Integrand object not yet initialised!";
+    std::vector<double> vec_coordinates;
+    for (int i = 0; i < num_dimensions; ++i)
+      vec_coordinates.emplace_back(range_.at(i).x(coordinates[i]));
+    return integrand_->eval(vec_coordinates);
+  }
+
+private:
+  const std::unique_ptr<utils::RandomGenerator> random_generator_;
+  Integrand* integrand_{nullptr};
+  std::vector<Limits> range_;
+};
 REGISTER_INTEGRATOR("Foam", FoamIntegrator);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,12 +52,12 @@ namespace cepgen {
     //----- particles adders
 
     /// \brief Set the information on one particle in the process
-    /// \param[in] part The Particle object to insert or modify in the event
-    /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-    ParticleRef addParticle(Particle& part, bool replace = false);
+    /// \param[in] particle The Particle object to insert or modify in the event
+    /// \param[in] replace Do we replace the particle if already present in the event, or do we append another particle with the same role?
+    ParticleRef addParticle(Particle& particle, bool replace = false);
     /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
     /// \param[in] role The role the particle will play in the process
-    /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
+    /// \param[in] replace Do we replace the particle if already present in the event, or do we append another particle with the same role?
     ParticleRef addParticle(Particle::Role role, bool replace = false);
 
     //----- particles retrievers
@@ -66,7 +66,7 @@ namespace cepgen {
     bool empty() const;                                       ///< Is the particles map empty?
     Particles particles() const;                              ///< Vector of all particles in the event
     Particles stableParticles() const;                        ///< Vector of all stable particles in the event
-    Particles stableParticlesWithRole(Particle::Role) const;  ///< Vector of all stable particles of a given role
+    Particles stableParticlesWithRole(Particle::Role) const;  ///< Vector of all stable particles with a given role
     ParticlesMap& map() { return particles_; }                ///< Internal particles map retrieval operator
 
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
@@ -102,32 +102,32 @@ namespace cepgen {
     //----- general particles information retriever
 
     /// List of all parent Particle object for this given particle
-    /// \param[in] part The particle for which the mother particles have to be retrieved
-    Particles mothers(const Particle& part) const;
+    /// \param[in] particle The particle for which the mother particles have to be retrieved
+    Particles mothers(const Particle& particle) const;
     /// List of all parent Particle object for this given particle
-    /// \param[in] part The particle for which the mother particles have to be retrieved
-    ParticlesRefs mothers(const Particle& part);
+    /// \param[in] particle The particle for which the mother particles have to be retrieved
+    ParticlesRefs mothers(const Particle& particle);
     /// Remove all mothers from a given particle (also affects the mothers' filiation)
-    void clearMothers(Particle& part);
+    void clearMothers(Particle& particle);
     /// List of all the daughters from a particle
-    /// \param[in] part The particle for which the daughter particles have to be retrieved
-    Particles daughters(const Particle& part) const;
+    /// \param[in] particle The particle for which the daughter particles have to be retrieved
+    Particles children(const Particle& particle) const;
     /// List of all the daughters from a particle
-    /// \param[in] part The particle for which the daughter particles have to be retrieved
-    ParticlesRefs daughters(const Particle& part);
+    /// \param[in] particle The particle for which the daughter particles have to be retrieved
+    ParticlesRefs children(const Particle& particle);
     /// List all the stable daughters of a particle in this event
-    Particles stableDaughters(const Particle& part, bool recursive = false) const;
+    Particles stableChildren(const Particle& particle, bool recursive = false) const;
     /// List all the stable daughters of a particle in this event
-    ParticlesRefs stableDaughters(const Particle& part, bool recursive = false);
+    ParticlesRefs stableChildren(const Particle& particle, bool recursive = false);
     /// Remove all daughters from a given particle (also affects the daughters' parentage)
-    void clearDaughters(Particle& part);
+    void clearChildren(Particle& particle);
     /// List of roles defined for the given event (really process-dependant for the central system)
     ParticleRoles roles() const;
 
     /// Collection of key -> value pairs storing event metadata
     struct EventMetadata : std::unordered_map<std::string, float> {
       EventMetadata();
-      /// Retrieve the metadata value associated to a key
+      /// Retrieve the metadata value associated with a key
       float operator()(const std::string& key) const { return count(key) > 0 ? at(key) : -1.; }
     };
     /// List of auxiliary information

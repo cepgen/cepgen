@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,115 +23,113 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 
-namespace cepgen {
-  /// Base class for all coherent, elastic kt-dependent photon emission from nucleons modellings
-  class ElasticNucleonKTFlux : public KTFlux {
-  public:
-    explicit ElasticNucleonKTFlux(const ParametersList& params)
-        : KTFlux(params), ff_(FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))) {
-      if (!ff_)
-        throw CG_FATAL("ElasticNucleonKTFlux")
-            << "Elastic kT flux requires a modelling of electromagnetic form factors!";
-    }
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = KTFlux::description();
-      desc.setDescription("Nucl. el. photon emission");
-      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
-      return desc;
-    }
-    bool fragmenting() const override final { return false; }
-    double mass2() const override { return mp2_; }
-    pdgid_t partonPdgId() const override { return PDG::photon; }
+/// Base class for all coherent, elastic kt-dependent photon emission from beam modellings
+class ElasticKTFlux : public KTFlux {
+public:
+  explicit ElasticKTFlux(const ParametersList& params)
+      : KTFlux(params), form_factors_(FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))) {
+    if (!form_factors_)
+      throw CG_FATAL("ElasticKTFlux") << "Elastic kT flux requires a modelling of electromagnetic form factors!";
+  }
 
-    double fluxMX2(double x, double kt2, double) const override {
-      if (!x_range_.contains(x))
-        return 0.;
-      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
-      const double qnorm = 1. - q2min / q2;
-      const auto& formfac = (*ff_)(q2);
-      return prefactor_ * formfac.FE * qnorm * qnorm / q2;
-    }
+  static ParametersDescription description() {
+    auto desc = KTFlux::description();
+    desc.setDescription("Elastic photon emission");
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
+    return desc;
+  }
+  bool fragmenting() const final { return false; }
+  double mass2() const override { return mp2_; }
+  spdgid_t partonPdgId() const override { return PDG::photon; }
 
-  protected:
-    const std::unique_ptr<formfac::Parameterisation> ff_;  ///< elastic form factors modelling
-  };
+  double fluxMX2(double x, double kt2, double) const override {
+    if (!x_range_.contains(x))
+      return 0.;
+    const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
+    const double q_norm = 1. - q2min / q2;
+    const auto& form_fac = (*form_factors_)(q2);
+    return alpha_over_pi_ * form_fac.FE * q_norm * q_norm / q2;
+  }
 
-  /// Budnev coherent photon emission from a nucleon
-  struct BudnevElasticNucleonKTFlux : public ElasticNucleonKTFlux {
-    using ElasticNucleonKTFlux::ElasticNucleonKTFlux;
-    static ParametersDescription description() {
-      auto desc = ElasticNucleonKTFlux::description();
-      desc.setDescription("Nucl. el. photon emission (Budnev flux)");
-      return desc;
-    }
-    double fluxMX2(double x, double kt2, double) const override final {
-      if (!x_range_.contains(x))
-        return 0.;
-      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
-      const double qnorm = 1. - q2min / q2;
-      const auto& formfac = (*ff_)(q2);
-      const double f_D = formfac.FE * (1. - x) * qnorm;
-      const double f_C = formfac.FM;
-      return prefactor_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
-    }
-  };
+protected:
+  const std::unique_ptr<formfac::Parameterisation> form_factors_;  ///< elastic form factors modelling
+};
 
-  /// Budnev coherent photon emission from a lepton beam
-  class BudnevElasticLeptonKTFlux final : public BudnevElasticNucleonKTFlux {
-  public:
-    explicit BudnevElasticLeptonKTFlux(const ParametersList& params)
-        : BudnevElasticNucleonKTFlux(params), ml2_(std::pow(PDG::get().mass(steer<pdgid_t>("pdgId")), 2)) {}
-    static ParametersDescription description() {
-      auto desc = BudnevElasticNucleonKTFlux::description();
-      desc.setDescription("Lepton el. photon emission (Budnev flux)");
-      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
-      desc.add<pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
-      return desc;
-    }
-    double mass2() const override { return ml2_; }
+/// Budnev coherent photon emission from a beam particle
+struct BudnevElasticKTFlux : ElasticKTFlux {
+  using ElasticKTFlux::ElasticKTFlux;
+  static ParametersDescription description() {
+    auto desc = ElasticKTFlux::description();
+    desc.setDescription("Elastic photon emission (Budnev)");
+    return desc;
+  }
+  double fluxMX2(double x, double kt2, double) const final {
+    if (!x_range_.contains(x))
+      return 0.;
+    const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x), q_norm = 1. - q2min / q2;
+    const auto& form_fac = (*form_factors_)(q2);
+    const double f_D = form_fac.FE * (1. - x) * q_norm;
+    const double f_C = form_fac.FM;
+    return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
+  }
+};
 
-  private:
-    const double ml2_;
-  };
+/// Budnev coherent photon emission from a lepton beam
+class BudnevElasticLeptonKTFlux final : public BudnevElasticKTFlux {
+public:
+  explicit BudnevElasticLeptonKTFlux(const ParametersList& params)
+      : BudnevElasticKTFlux(params), ml2_(std::pow(PDG::get().mass(form_factors_->pdgId()), 2)) {
+    CG_DEBUG("BudnevElasticLeptonKTFlux")
+        << "Elastic kt-dependent parton-from-lepton initialised. Lepton: " << form_factors_->pdgId()
+        << " (m=" << std::sqrt(ml2_) << " GeV).";
+  }
+  static ParametersDescription description() {
+    auto desc = BudnevElasticKTFlux::description();
+    desc.setDescription("Lepton elastic photon emission (Budnev)");
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
+    return desc;
+  }
+  double mass2() const override { return ml2_; }
 
-  /// Photon emission from heavy ion
-  class ElasticHeavyIonKTFlux final : public ElasticNucleonKTFlux {
-  public:
-    explicit ElasticHeavyIonKTFlux(const ParametersList& params)
-        : ElasticNucleonKTFlux(params),
-          hi_(HeavyIon::fromPdgId(steer<pdgid_t>("heavyIon"))),
-          mass2_(hi_.mass() * hi_.mass()) {
-      CG_DEBUG("ElasticHeavyIonKTFlux") << "KT-factorised elastic photon-from-HI flux evaluator built for HI=" << hi_
-                                        << ", (mass=" << hi_.mass()
-                                        << "), electromagnetic form factors: " << ff_->parameters() << ".";
-    }
+private:
+  const double ml2_;
+};
 
-    static ParametersDescription description() {
-      auto desc = ElasticNucleonKTFlux::description();
-      desc.setDescription("HI el. photon emission");
-      desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
-      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
-      return desc;
-    }
+/// Photon emission from heavy ion
+class ElasticHeavyIonKTFlux final : public ElasticKTFlux {
+public:
+  explicit ElasticHeavyIonKTFlux(const ParametersList& params)
+      : ElasticKTFlux(params), hi_(HeavyIon::fromPdgId(form_factors_->pdgId())), mass2_(hi_.mass() * hi_.mass()) {
+    CG_DEBUG("ElasticHeavyIonKTFlux") << "KT-factorised elastic photon-from-HI flux evaluator built for HI=" << hi_
+                                      << ", (mass=" << hi_.mass()
+                                      << "), electromagnetic form factors: " << form_factors_->parameters() << ".";
+  }
 
-    double mass2() const override { return mass2_; }
+  static ParametersDescription description() {
+    auto desc = ElasticKTFlux::description();
+    desc.setDescription("HI elastic photon emission");
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
+    return desc;
+  }
 
-    double fluxMX2(double x, double kt2, double mx2) const override {
-      const auto z = static_cast<unsigned short>(hi_.Z);
-      return z * z * ElasticNucleonKTFlux::fluxMX2(x, kt2, mx2);
-    }
+  double mass2() const override { return mass2_; }
 
-  private:
-    const HeavyIon hi_;
-    const double mass2_;
-  };
-}  // namespace cepgen
+  double fluxMX2(double x, double kt2, double mx2) const override {
+    const auto z = static_cast<unsigned short>(hi_.Z);
+    return z * z * ElasticKTFlux::fluxMX2(x, kt2, mx2);
+  }
 
-REGISTER_KT_FLUX("Elastic", 0, ElasticNucleonKTFlux);
-REGISTER_KT_FLUX("BudnevElastic", 10, BudnevElasticNucleonKTFlux);
+private:
+  const HeavyIon hi_;
+  const double mass2_;
+};
+REGISTER_KT_FLUX("Elastic", 0, ElasticKTFlux);
+REGISTER_KT_FLUX("BudnevElastic", 10, BudnevElasticKTFlux);
 REGISTER_KT_FLUX("BudnevElasticLepton", 12, BudnevElasticLeptonKTFlux);
 REGISTER_KT_FLUX("ElasticHeavyIon", 100, ElasticHeavyIonKTFlux);

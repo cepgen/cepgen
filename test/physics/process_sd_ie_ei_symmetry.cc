@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include "CepGen/Utils/Timer.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   double num_sigma, chi2;
@@ -45,14 +46,14 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .addOptionalArgument("plotter,t", "type of plotter to use", &plotter, "")
       .addOptionalArgument("chi2,x", "chi2 value cut for histograms compatibility test", &chi2, 1.)
-      .addOptionalArgument("subleading-test", "also enable the subleading pt eta test?", &sublead_test, false)
+      .addOptionalArgument("subleading-test", "also enable the sub-leading pt eta test?", &sublead_test, false)
       .parse();
 
-  cepgen::utils::Timer tmr;
+  [[maybe_unused]] cepgen::utils::Timer timer;
   cepgen::Generator gen;
   gen.runParameters().integrator().setName(integrator);
 
-  cepgen::utils::AbortHandler ah;
+  [[maybe_unused]] cepgen::utils::AbortHandler abort_handler;
 
   auto pkin =
       cepgen::ParametersList()
@@ -67,12 +68,12 @@ int main(int argc, char* argv[]) {
       cepgen::ProcessFactory::get().build(proc_name, cepgen::ParametersList().set<int>("pair", 13)));
   cepgen::Value cs_ei, cs_ie;
 
-  auto h_eta_lead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ei", "el-inel"),
-       h_eta_lead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ie", "inel-el"),
-       h_eta_sublead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ei", "el-inel"),
-       h_eta_sublead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ie", "inel-el"),
-       h_mdiff_ei = cepgen::utils::Hist1D(50, {0., 1000.}, "mdiff_ei", "el-inel"),
-       h_mdiff_ie = cepgen::utils::Hist1D(50, {0., 1000.}, "mdiff_ie", "inel-el");
+  auto h_eta_lead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ei"s, "el-inel"s),
+       h_eta_lead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ie"s, "inel-el"s),
+       h_eta_sublead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ei"s, "el-inel"s),
+       h_eta_sublead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ie"s, "inel-el"s),
+       h_mdiff_ei = cepgen::utils::Hist1D(50, {0., 1000.}, "mdiff_ei"s, "el-inel"s),
+       h_mdiff_ie = cepgen::utils::Hist1D(50, {0., 1000.}, "mdiff_ie"s, "inel-el"s);
 
   {  // elastic-inelastic
     pkin.set<int>("mode", 2);
@@ -110,25 +111,26 @@ int main(int argc, char* argv[]) {
         h_mdiff_ie.fill(evt(cepgen::Particle::Role::OutgoingBeam1).at(0).momentum().mass());
       });
   }
-  CG_TEST_VALUES(cs_ei, cs_ie, num_sigma, "el-inel == inel-el");
+  CG_TEST_VALUES(cs_ei, cs_ie, num_sigma, "el-inel == inel-el"s);
 
   size_t ndf;
   CG_TEST(h_eta_lead_ei.chi2test(h_eta_lead_ie, ndf) / ndf > chi2, "leading lepton eta");
   if (sublead_test)
-    CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > chi2, "subleading lepton eta");
+    CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > chi2, "sub-leading lepton eta");
   CG_TEST(h_mdiff_ei.chi2test(h_mdiff_ie, ndf) / ndf < 1.5 * chi2, "diffractive system mass");
 
   if (!plotter.empty()) {
     auto plt = cepgen::DrawerFactory::get().build(plotter);
-    plt->draw({&h_eta_lead_ie, &h_eta_lead_ei},
-              "leading_eta",
-              "leading lepton $\\eta$",
-              cepgen::utils::Drawer::Mode::nostack);
-    plt->draw({&h_eta_sublead_ie, &h_eta_sublead_ei},
-              "subleading_eta",
-              "subleading lepton $\\eta$",
-              cepgen::utils::Drawer::Mode::nostack);
-    plt->draw({&h_mdiff_ie, &h_mdiff_ei}, "mdiff", "diffractive system mass", cepgen::utils::Drawer::Mode::nostack);
+    (void)plt->draw({&h_eta_lead_ie, &h_eta_lead_ei},
+                    "leading_eta",
+                    "leading lepton $\\eta$",
+                    cepgen::utils::Drawer::Mode::nostack);
+    (void)plt->draw({&h_eta_sublead_ie, &h_eta_sublead_ei},
+                    "sub-leading_eta",
+                    "sub-leading lepton $\\eta$",
+                    cepgen::utils::Drawer::Mode::nostack);
+    (void)plt->draw(
+        {&h_mdiff_ie, &h_mdiff_ei}, "mdiff", "diffractive system mass", cepgen::utils::Drawer::Mode::nostack);
   }
 
   CG_TEST_SUMMARY;

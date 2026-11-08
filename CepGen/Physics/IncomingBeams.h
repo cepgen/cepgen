@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ namespace cepgen {
     inline Beam& negative() { return neg_beam_; }              ///< Reference to the negative-z beam information
 
     inline const ParametersList& structureFunctions() const { return strfun_; }  ///< Structure functions parameters
-    void setStructureFunctions(int, int);  ///< Set the integer-type of structure functions evaluator to build
+    void setStructureFunctions(int, int) const;  ///< Set the integer-type of structure functions evaluator to build
 
     void setSqrtS(double);  ///< Set the incoming beams centre of mass energy (in GeV)
     double s() const;       ///< Incoming beams squared centre of mass energy (in GeV^2)

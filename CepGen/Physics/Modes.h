@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen::mode {
     InelasticInelastic = 4  ///< proton-proton double-dissociative case
   };
   /// Human-readable format of a process mode (elastic/dissociative parts)
-  std::ostream& operator<<(std::ostream&, const cepgen::mode::Kinematics&);
+  std::ostream& operator<<(std::ostream&, const Kinematics&);
 }  // namespace cepgen::mode
 
 #endif

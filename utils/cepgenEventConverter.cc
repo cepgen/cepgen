@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ int main(int argc, char* argv[]) {
 
   auto params = cepgen::RunParameters{};
 
-  auto reader = cepgen::EventImporterFactory::get().build(input_file);
+  const auto reader = cepgen::EventImporterFactory::get().build(input_file);
   reader->initialise(params);
-  auto writer = cepgen::EventExporterFactory::get().build(output_file);
+  const auto writer = cepgen::EventExporterFactory::get().build(output_file);
   writer->initialise(params);
 
   writer->setCrossSection(reader->crossSection());

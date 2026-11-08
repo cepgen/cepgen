@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2014-2024  Laurent Forthomme
+ *  Copyright (C) 2014-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,10 +42,9 @@ namespace cepgen {
     inline const CutsList& cuts() const { return cuts_; }  ///< Phase space cuts
 
   private:
-    /// Beam/primary particle's kinematics
-    IncomingBeams incoming_beams_{ParametersList()};
-    CutsList cuts_{ParametersList()};  ///< Phase space cuts
-    pdgids_t minimum_final_state_;
+    IncomingBeams incoming_beams_{ParametersList()};  ///< Beam/primary particle's kinematics
+    CutsList cuts_{ParametersList()};                 ///< Phase space cuts
+    pdgids_t minimum_final_state_;                    ///< Minimum list of particle ids to find in the final state
   };
 }  // namespace cepgen
 

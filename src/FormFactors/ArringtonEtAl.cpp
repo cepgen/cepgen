@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #include <cmath>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 
@@ -51,23 +52,25 @@ namespace cepgen::formfac {
           a_m_ = {-1.436, 1.196, 0.210};
           b_m_ = {9.721, 0., 0., 9.623, 11.817};
           break;
+        default:
+          throw CG_FATAL("ArringtonEtAl") << "Invalid parameterisation mode: " << mode_ << ".";
       }
     }
 
     inline static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Arrington et al.");
-      desc.add<int>("mode", 0)
-          .setDescription("Parameterisation mode")
+      desc.add("mode", 0)
           .allow(0, "original")
           .allow(1, "fit of quoted Ge+dGe values")
           .allow(2, "fit of quoted Ge-dGe values")
-          .allow(3, "fit of quoted Ge values");
+          .allow(3, "fit of quoted Ge values")
+          .setDescription("Parameterisation mode");
       return desc;
     }
 
   private:
-    inline void eval() override {
+    void eval() override {
       const double tau_val = tau(q2_);
 
       double num_e = 1., den_e = 1.;

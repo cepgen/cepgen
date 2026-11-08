@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "CepGen/Physics/Coupling.h"
 
 namespace cepgen::apfelpp {
-  class AlphaS final : public cepgen::Coupling {
+  class AlphaS final : public Coupling {
   public:
     explicit AlphaS(const ParametersList& params)
         : cepgen::Coupling(params),
@@ -43,25 +43,24 @@ namespace cepgen::apfelpp {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("APFEL++ alpha(S) evolution algorithm");
-      desc.add<bool>("useTabulated", true).setDescription("use the tabulated, fast values interpolator?");
-      desc.add<double>("alphaSref", 0.118);
-      desc.add<double>("muQCDref", 91.1876);
-      desc.add<std::vector<double> >("quarkThresholds", {0., 0., 0., M_SQRT2, 4.5, 175.});
-      desc.add<int>("order", 2)
-          .setDescription("QCD perturbative evolution order")
+      desc.add("useTabulated", true).setDescription("use the tabulated, fast values interpolator?");
+      desc.add("alphaSref", 0.118);
+      desc.add("muQCDref", 91.1876);
+      desc.add("quarkThresholds", std::vector{0., 0., 0., M_SQRT2, 4.5, 175.});
+      desc.add("order", 2)
           .allow(0, "LO")
           .allow(1, "NLO")
           .allow(2, "NNLO")
-          .allow(3, "NNNLO");
+          .allow(3, "NNNLO")
+          .setDescription("QCD perturbative evolution order");
 
       auto tab_desc = ParametersDescription();
-      tab_desc.add<int>("numValues", 100).setDescription("number of values evaluated to build the interpolation");
-      tab_desc.add<Limits>("Qrange", {0.9, 1001.}).setDescription("Q range for the interpolation");
-      tab_desc.add<int>("order", 3).setDescription("interpolation order");
-      tab_desc.add<double>("Lambda", 0.25)
-          .setDescription("Lambda parameter in the tabulation function (ln(ln(Q^2/Lambda^2))");
+      tab_desc.add("numValues", 100).setDescription("number of values evaluated to build the interpolation");
+      tab_desc.add("Qrange", Limits{0.9, 1001.}).setDescription("Q range for the interpolation");
+      tab_desc.add("order", 3).setDescription("interpolation order");
+      tab_desc.add("Lambda", 0.25).setDescription("Lambda parameter in the tabulation function (ln(ln(Q^2/Lambda^2))");
       desc.add("tabulatedParameters", tab_desc);
       return desc;
     }

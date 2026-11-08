@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::utils {
   template <typename T>
   class YODADrawer : public Drawer {
@@ -51,9 +53,9 @@ namespace cepgen::utils {
     static ParametersDescription description() {
       auto desc = Drawer::description();
       desc.setDescription("YODA/AIDA plotting utility");
-      desc.add<std::string>("filename", "plots.yoda");
-      desc.add<bool>("compress", false).setDescription("use libz compression?");
-      desc.add<int>("precision", 6).setDescription("precision of numerical quantities in output");
+      desc.add("filename", "plots.yoda"s);
+      desc.add("compress", false).setDescription("use libz compression?");
+      desc.add("precision", 6).setDescription("precision of numerical quantities in output");
       return desc;
     }
 

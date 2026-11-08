@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,13 +21,12 @@
 
 #include <set>
 
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Hasher.h"
 
 namespace cepgen {
-  typedef std::set<int> ParticlesIds;  ///< A set of integer-type particle identifiers
+  using ParticlesIds = std::set<int>;  ///< A set of integer-type particle identifiers
 
   /// Kinematic information for one particle
   class Particle {
@@ -65,8 +64,8 @@ namespace cepgen {
     /// Build using the role of the particle in the process and its PDG id
     /// \param[in] role Role of the particle in the process
     /// \param[in] id PDG identifier
-    /// \param[in] st Current status
-    explicit Particle(Role role = Role::UnknownRole, pdgid_t id = 0, Status st = Status::Undefined);
+    /// \param[in] status Current status
+    explicit Particle(Role role = Role::UnknownRole, pdgid_t id = 0, Status status = Status::Undefined);
 
     bool operator<(const Particle&) const;   ///< Comparison operator (from unique identifier)
     bool operator==(const Particle&) const;  ///< Equality operator
@@ -91,10 +90,10 @@ namespace cepgen {
       role_ = role;
       return *this;
     }
-    inline Status status() const { return (Status)status_; }  ///< Particle status
+    inline Status status() const { return static_cast<Status>(status_); }  ///< Particle status
     /// Set the particle decay/stability status
     inline Particle& setStatus(Status status) {
-      status_ = (int)status;
+      status_ = static_cast<int>(status);
       return *this;
     }
     /// Set the particle decay/stability status
@@ -105,77 +104,73 @@ namespace cepgen {
 
     /// Set the PDG identifier (along with the particle's electric charge)
     /// \param[in] pdg PDG identifier
-    /// \param[in] ch Electric charge (0, 1, or -1)
-    Particle& setPdgId(pdgid_t pdg, short ch = 0);
+    /// \param[in] charge_factor Electric charge (0, 1, or -1)
+    Particle& setPdgId(pdgid_t pdg, short charge_factor = 0);
     pdgid_t pdgId() const;  ///< Retrieve the objectified PDG identifier
     /// Set the PDG identifier (along with the particle's electric charge)
     /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
     Particle& setIntegerPdgId(long pdg_id);
     long integerPdgId() const;  ///< Retrieve the integer value of the PDG identifier
 
-    inline float helicity() const { return helicity_; }  ///< Particle's helicity
-    /// Set the helicity of the particle
-    inline Particle& setHelicity(float heli) {
-      helicity_ = heli;
-      return *this;
-    }
+    inline float polarisation() const { return polarisation_; }  ///< Particle's longitudinal polarisation
+    Particle& setPolarisation(float);                            ///< Set the longitudinal polarisation of the particle
 
     inline Momentum& momentum() { return momentum_; }  ///< Retrieve the momentum object associated with this particle
     /// Retrieve the momentum object associated with this particle
     inline const Momentum& momentum() const { return momentum_; }
-    /// Associate a momentum object to this particle
+    /// Associate a momentum object with this particle
     /// \param[in] off_shell allow the 4-momentum mass to compensate for E-p balance?
     Particle& setMomentum(const Momentum&, bool off_shell = false);
-    /// Set the 3- or 4-momentum associated to the particle
+    /// Set the 3- or 4-momentum associated with the particle
     /// \param[in] px Momentum along the \f$x\f$-axis, in GeV/c
     /// \param[in] py Momentum along the \f$y\f$-axis, in GeV/c
     /// \param[in] pz Momentum along the \f$z\f$-axis, in GeV/c
-    /// \param[in] e Energy, in GeV
-    Particle& setMomentum(double px, double py, double pz, double e = -1.);
-    /// Set the 4-momentum associated to the particle
+    /// \param[in] energy Energy, in GeV
+    Particle& setMomentum(double px, double py, double pz, double energy = -1.);
+    /// Set the 4-momentum associated with the particle
     /// \param[in] p 4-momentum
     inline Particle& setMomentum(double p[4]) { return setMomentum(p[0], p[1], p[2], p[3]); }
     bool valid() const;  ///< Is this particle a valid particle which can be used for kinematic computations?
 
     // --- particle relations
 
-    inline bool primary() const { return mothers_.empty(); }      ///< Is this particle a primary particle?
-    Particle& addMother(Particle& part);                          ///< Set the mother particle
-    inline ParticlesIds mothers() const { return mothers_; }      ///< Identifier to the mother particles
-    inline ParticlesIds& mothers() { return mothers_; }           ///< Identifier to the mother particles
-    Particle& addDaughter(Particle& part);                        ///< Add a decay product
-    inline ParticlesIds daughters() const { return daughters_; }  ///< Identifiers list of all daughter particles
-    inline ParticlesIds& daughters() { return daughters_; }       ///< Identifiers list of all daughter particles
+    inline bool primary() const { return mothers_.empty(); }    ///< Is this particle a primary particle?
+    Particle& addMother(Particle& mother_particle);             ///< Set the mother particle
+    inline ParticlesIds mothers() const { return mothers_; }    ///< Identifier to the mother particles
+    inline ParticlesIds& mothers() { return mothers_; }         ///< Identifier to the mother particles
+    Particle& addChild(Particle& child_particle);               ///< Add a decay product
+    inline ParticlesIds children() const { return children_; }  ///< Identifiers list of all child particles
+    inline ParticlesIds& children() { return children_; }       ///< Identifiers list of all child particles
 
     // --- global particle information extraction
 
     friend std::ostream& operator<<(std::ostream&, const Particle&);  ///< Human-readable dump of particle information
 
   protected:
-    int id_{-1};                          ///< Unique identifier in an event
-    bool antiparticle_{false};            ///< Are we dealing with the particle or antiparticle?
-    Momentum momentum_;                   ///< Momentum properties handler
-    float helicity_{0.};                  ///< Helicity
-    Role role_{Role::UnknownRole};        ///< Role in the process
-    int status_{(int)Status::Undefined};  ///< Decay/stability status
-    ParticlesIds mothers_;                ///< List of mother particles
-    ParticlesIds daughters_;              ///< List of daughter particles
-    pdgid_t pdg_id_{(pdgid_t)0};          ///< PDG id
+    int id_{-1};                                       ///< Unique identifier in an event
+    bool antiparticle_{false};                         ///< Are we dealing with the particle or antiparticle?
+    Momentum momentum_;                                ///< Momentum properties handler
+    float polarisation_{0.};                           ///< Longitudinal particle polarisation (between -1 and 1)
+    Role role_{Role::UnknownRole};                     ///< Role in the process
+    int status_{static_cast<int>(Status::Undefined)};  ///< Decay/stability status
+    ParticlesIds mothers_{};                           ///< List of mother particles
+    ParticlesIds children_{};                          ///< List of child particles
+    pdgid_t pdg_id_{0};                                ///< PDG id
   };
 
   // --- particle containers
 
-  typedef std::reference_wrapper<Particle> ParticleRef;  ///< Reference to a Particle object
-  typedef std::vector<Particle> Particles;               ///< List of Particle objects
-  typedef std::vector<ParticleRef> ParticlesRefs;        ///< List of references to Particle objects
-  typedef std::vector<Particle::Role> ParticleRoles;     ///< List of particles' roles
+  using ParticleRef = std::reference_wrapper<Particle>;  ///< Reference to a Particle object
+  using Particles = std::vector<Particle>;               ///< List of Particle objects
+  using ParticlesRefs = std::vector<ParticleRef>;        ///< List of references to Particle objects
+  using ParticleRoles = std::vector<Particle::Role>;     ///< List of particles' roles
 
   /// Map between a particle's role and its associated Particle object
   class ParticlesMap : public std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > {
   public:
     ParticlesMap() = default;
     ParticlesMap(const ParticlesMap&);             ///< Copy constructor
-    ParticlesMap& operator=(const ParticlesMap&);  ///, Assignment operator
+    ParticlesMap& operator=(const ParticlesMap&);  ///< Assignment operator
     ~ParticlesMap() = default;
   };
 }  // namespace cepgen

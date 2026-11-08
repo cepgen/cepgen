@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,9 +39,22 @@ namespace cepgen::utils {
     return std::sqrt(x + y + z);
   }
 
-  double fastSqrtSqDiff(double x, double y) {
+  double fastSqrtSqDiff(double x, double y, Normalise normalise) {
     if (std::fabs(x) == std::fabs(y))
       return 0.;
-    return std::sqrt((x + y) * (x - y));
+    if (const auto square = (x + y) * (x - y); normalise == Normalise::yes && square < 0.)
+      return -std::sqrt(-square);
+    else
+      return std::sqrt(square);
+  }
+
+  double fastSqrtSqDiff(double x, double y, double z, Normalise normalise) {
+    if (std::fabs(x) == std::fabs(y))
+      return 0.;
+    z *= z;
+    if (const auto square = (x + y) * (x - y) - z; normalise == Normalise::yes && square < 0.)
+      return -std::sqrt(-square);
+    else
+      return std::sqrt(square);
   }
 }  // namespace cepgen::utils

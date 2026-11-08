@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,8 +28,7 @@ namespace cepgen::hadr {
   /// \date January 2014
   class Hadroniser : public EventModifier {
   public:
-    /// Default constructor for an undefined hadroniser
-    explicit Hadroniser(const ParametersList&);
+    explicit Hadroniser(const ParametersList&);  ///< Default constructor for an undefined hadroniser
 
     static ParametersDescription description();
 

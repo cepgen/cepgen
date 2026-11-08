@@ -31,11 +31,11 @@ namespace cepgen {
 
     virtual bool ktFactorised() const { return false; }  ///< Is the flux parton kT-dependent?
     virtual bool fragmenting() const = 0;                ///< Is initiator particle fragmenting after parton emission?
-    virtual pdgid_t partonPdgId() const = 0;             ///< Parton PDG identifier
+    virtual spdgid_t partonPdgId() const = 0;            ///< Parton PDG identifier
     virtual double mass2() const = 0;                    ///< Initiator particle squared mass (in \f${\rm GeV}^2/c^4\f$)
 
   protected:
-    const double prefactor_;
+    const double alpha_over_pi_;
     const double mp_, mp2_;
     const Limits x_range_{0., 1.};
   };

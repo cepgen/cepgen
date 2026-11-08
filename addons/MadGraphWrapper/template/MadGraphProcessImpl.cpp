@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,26 +22,27 @@
 
 #include "CPPProcess.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/Momentum.h"
 #include "CepGen/Utils/Caller.h"
 #include "CepGen/Utils/Math.h"
-#include "CepGenMadGraph/MadGraphProcess.h"
-#include "CepGenMadGraph/MadGraphProcessFactory.h"
+#include "CepGenMadGraph/Process.h"
+#include "CepGenMadGraph/ProcessFactory.h"
 
 using namespace cepgen;
 
-class MadGraphProcessImpl : public MadGraphProcess {
+class MadGraphProcessImpl : public mg5amc::Process {
 public:
-  explicit MadGraphProcessImpl(const ParametersList& params) : MadGraphProcess(params), proc_(new CPPProcess) {
+  explicit MadGraphProcessImpl(const ParametersList& params) : mg5amc::Process(params), proc_(new CPPProcess) {
     CG_DEBUG("MadGraphProcessImpl") << "Process considered: " << proc_->name() << ". "
                                     << "Incoming particles: " << incoming_pdgids_
                                     << ", outgoing system: " << central_pdgids_ << ".";
   }
 
   static ParametersDescription description() {
-    auto desc = MadGraphProcess::description();
+    auto desc = mg5amc::Process::description();
     desc.setDescription("XXX_PROC_DESCRIPTION_XXX");
-    desc.add<std::vector<int> >("incomingSystem", {XXX_PART1_XXX, XXX_PART2_XXX});
-    desc.add<std::vector<int> >("outgoingSystem", {XXX_OUT_PART_XXX});
+    desc.add("incomingSystem", std::vector<int>{XXX_PART1_XXX, XXX_PART2_XXX});
+    desc.add("outgoingSystem", std::vector<int>{XXX_OUT_PART_XXX});
     return desc;
   }
 

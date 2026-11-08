@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,26 +37,26 @@ namespace cepgen {
   class GeneratorWorker : public SteeredObject<GeneratorWorker> {
   public:
     explicit GeneratorWorker(const ParametersList&);  ///< Book memory slots and structures for the generator
-    virtual ~GeneratorWorker();
+    ~GeneratorWorker() override;
 
     static ParametersDescription description();
 
     void setRunParameters(const RunParameters*);  ///< Specify the runtime parameters
-    void setIntegrator(const Integrator* integ);  ///< Specify the integrator instance handled by the mother generator
+    void setIntegrator(const Integrator*);        ///< Specify the integrator instance handled by the mother generator
 
     /// Launch the event generation
-    /// \param[in] num_events Number of events to generate
+    /// \param[in] num_events Events multiplicity to generate
     /// \param[in] callback The callback function applied on every event generated
-    void generate(size_t num_events, const std::function<void(const proc::Process&)>&);
+    void generate(size_t num_events, const std::function<void(const proc::Process&)>& callback);
 
-    inline ProcessIntegrand& integrand() { return *integrand_; }  ///< Function evaluator
+    inline ProcessIntegrand& integrand() const { return *integrand_; }  ///< Function evaluator
 
     virtual void initialise() = 0;  ///< Initialise the generation parameters
     virtual bool next() = 0;        ///< Generate a single event
 
   protected:
     /// Store the event in the output file
-    /// \return A boolean stating whether or not the event was successfully saved
+    /// \return A boolean stating whether the event was successfully saved
     bool storeEvent() const;
 
     // NOT owned

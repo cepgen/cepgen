@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #ifndef CepGen_Integration_Integrand_h
 #define CepGen_Integration_Integrand_h
 
-#include <cstddef>  // size_t
 #include <vector>
 
 namespace cepgen {
@@ -27,14 +26,11 @@ namespace cepgen {
   class Integrand {
   public:
     Integrand() = default;
-    virtual ~Integrand() {}
+    virtual ~Integrand() = default;
 
-    /// Compute the integrand for a given coordinates set
-    virtual double eval(const std::vector<double>&) = 0;
-    /// Phase space dimension
-    virtual size_t size() const = 0;
-    /// Does this integrand also contain a process object?
-    virtual bool hasProcess() const { return false; }
+    virtual double eval(const std::vector<double>&) = 0;  ///< Compute the integrand for a given coordinates set
+    virtual size_t size() const = 0;                      ///< Phase space dimension
+    virtual bool hasProcess() const { return false; }     ///< Does this integrand also contain a process object?
   };
 }  // namespace cepgen
 

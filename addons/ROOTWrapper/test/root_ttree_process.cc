@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "CepGenRoot/ROOTTreeInfo.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   bool keep_file;
@@ -52,12 +53,12 @@ int main(int argc, char* argv[]) {
     auto& pars = gen.runParameters();
     pars.setProcess(cepgen::ProcessFactory::get().build(proc_name));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
-                                                  .set<vector<int> >("pdgIds", {2212, 2212})
-                                                  .set<double>("sqrtS", 13.6e3)
-                                                  .set<int>("mode", 1)
-                                                  .set<double>("ptmin", 25.));
+                                                  .set("pdgIds"s, std::vector{2212, 2212})
+                                                  .set("sqrtS"s, 13.6e3)
+                                                  .set("mode"s, 1)
+                                                  .set("ptmin"s, 25.));
     pars.addEventExporter(cepgen::EventExporterFactory::get().build(
-        "root_tree", cepgen::ParametersList().set<string>("filename", tmp_filename)));
+        "root_tree"s, cepgen::ParametersList().set("filename", tmp_filename)));
     gen.generate(num_gen);
     cross_sec = gen.crossSection();
     cross_sec_unc = gen.crossSectionError();

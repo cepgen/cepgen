@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,31 +20,30 @@
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGenPython/ConfigWriter.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::python {
   /// Python modules documentation generator
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Mar 2024
-  class DocumentationGenerator final : public cepgen::utils::DocumentationGenerator {
+  class DocumentationGenerator final : public utils::DocumentationGenerator {
   public:
     explicit DocumentationGenerator(const ParametersList& params)
-        : cepgen::utils::DocumentationGenerator(params), writer_(params_) {}
+        : utils::DocumentationGenerator(params), writer_(params_) {}
 
     static ParametersDescription description() {
-      auto desc = cepgen::utils::DocumentationGenerator::description();
+      auto desc = utils::DocumentationGenerator::description();
       desc.setDescription("Python modules documentation generator");
       desc += ConfigWriter::description();
-      desc.add<std::string>("filename", "output.py").setDescription("Python output filename");
-      desc.add<bool>("camelCaseModuleNames", true);
+      desc.add("filename", ""s).setDescription("Python output filename");
+      desc.add("camelCaseModuleNames", true);
       return desc;
     }
 
     std::string describe() override {
-      for (const auto& cat : categories_) {
-        if (cat.second.modules.empty())
-          continue;
-        for (const auto& mod : cat.second.modules)
-          writer_ << mod.second;
-      }
+      for (const auto& [name, category] : categories_)
+        for (const auto& [module_name, description] : category.modules)
+          writer_ << description;
       return writer_();
     }
 
@@ -52,5 +51,5 @@ namespace cepgen::python {
     ConfigWriter writer_;
   };
 }  // namespace cepgen::python
-using cepgen::python::DocumentationGenerator;
-REGISTER_DOCUMENTATION_GENERATOR("python", DocumentationGenerator);
+using PythonDocumentationGenerator = cepgen::python::DocumentationGenerator;
+REGISTER_DOCUMENTATION_GENERATOR("python", PythonDocumentationGenerator);

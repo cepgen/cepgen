@@ -92,10 +92,10 @@ namespace cepgen::python {
     inline ObjectPtr operator()(Args&&... args) {
       return call(tuple(std::make_tuple(std::forward<Args>(args)...)));  // new
     }
-    /// Call a python function with a tuple of arguments
-    ObjectPtr call(const ObjectPtr&) const;
-    /// Retrieve the attribute from a python object
-    ObjectPtr attribute(const std::string&) const;
+    template <typename T>
+    ObjectPtr call(const T&) const;                 ///< Call a python function with a single argument
+    ObjectPtr call(const ObjectPtr&) const;         ///< Call a python function with a tuple of arguments
+    ObjectPtr attribute(const std::string&) const;  ///< Retrieve the attribute from a python object
   };
 }  // namespace cepgen::python
 

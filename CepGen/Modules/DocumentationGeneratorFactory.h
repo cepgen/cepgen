@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a documentation generator to the list of handled modules
-#define REGISTER_DOCUMENTATION_GENERATOR(name, obj)                                        \
-  namespace cepgen {                                                                       \
-    struct BUILDERNM(obj) {                                                                \
-      BUILDERNM(obj)() { DocumentationGeneratorFactory::get().registerModule<obj>(name); } \
-    };                                                                                     \
-    static const BUILDERNM(obj) gDogGen##obj;                                              \
-  }                                                                                        \
+#define REGISTER_DOCUMENTATION_GENERATOR(name, obj)                                           \
+  namespace cepgen {                                                                          \
+    struct BUILDER_NAME(obj) {                                                                \
+      BUILDER_NAME(obj)() { DocumentationGeneratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                        \
+    static const BUILDER_NAME(obj) gDogGen##obj;                                              \
+  }                                                                                           \
   static_assert(true, "")
 
 namespace cepgen {

@@ -1,5 +1,6 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
+from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator
 #from Config.logger_cfi import logger
 #logger.enabledModules += ('MadGraphProcess.eval',)
@@ -15,6 +16,7 @@ process = kt.process.clone('mg5_aMC',
         mode = cepgen.ProcessMode.ElasticElastic,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
@@ -29,13 +31,5 @@ process = kt.process.clone('mg5_aMC',
 #--- events generation
 generator.numEvents = 10000
 
-text = cepgen.Module('text',  # histogramming/ASCII output capability
-    #variables = ['nev', 'm(4)', 'tgen'],
-    histVariables={
-        'm(4)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
-        'pt(4)': cepgen.Parameters(xrange=(0., 25.), nbins=10, log=True),
-        'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 250.), yrange=(0., 250.), log=True)
-    }
-)
 dump = cepgen.Module('dump', printEvery = generator.printEvery)
-output = cepgen.Sequence(text, dump)
+output = cepgen.Sequence(dump)

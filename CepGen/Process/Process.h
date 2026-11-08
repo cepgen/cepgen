@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,11 +19,13 @@
 #ifndef CepGen_Process_Process_h
 #define CepGen_Process_Process_h
 
+#include <cmath>
+
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/SurvivalFactors/SurvivalFactor.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
-#include "CepGen/Utils/RandomGenerator.h"
 
 /// Location for all physics processes to be generated
 namespace cepgen::proc {
@@ -34,7 +36,7 @@ namespace cepgen::proc {
   public:
     explicit Process(const ParametersList&);
     Process(const Process&);  ///< Copy constructor for a user process
-    virtual ~Process() = default;
+    ~Process() override = default;
     Process& operator=(const Process&);  ///< Assignment operator
 
     static ParametersDescription description();
@@ -54,6 +56,9 @@ namespace cepgen::proc {
     double weight(const std::vector<double>&);      ///< Compute the weight for a phase-space point
     void dumpPoint(std::ostream* = nullptr) const;  ///< Dump the coordinate of the phase-space point being evaluated
     void dumpVariables(std::ostream* = nullptr) const;  ///< List all variables handled by this generic process
+
+    /// Gap survival factor modelling, if any (applied on the event content at the integrand level)
+    inline const SurvivalFactor* survivalFactor() const { return survival_factor_.get(); }
 
     inline size_t ndim() const { return mapped_variables_.size(); }  ///< Number of dimensions to perform integration
 
@@ -108,8 +113,6 @@ namespace cepgen::proc {
     inline double inverseS() const { return inv_s_; }        ///< Inverse two-beam squared centre of mass energy
     inline double inverseSqrtS() const { return inv_sqs_; }  ///< Inverse two-beam centre of mass energy
 
-    utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
-
   protected:
     virtual void addEventContent() = 0;         ///< Set the incoming and outgoing state to be expected in the process
     inline virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
@@ -133,15 +136,15 @@ namespace cepgen::proc {
     /// Register a variable to be handled and populated whenever a new phase space point weight is to be calculated.
     /// \note To be run once per generation (before any point computation)
     /// \param[out] out Reference to the variable to be mapped
-    /// \param[in] type Type of mapping to apply
-    /// \param[in] lim Integration limits
+    /// \param[in] mapping_type Type of mapping to apply
+    /// \param[in] limits Integration limits
     /// \param[in] name Computer-readable variable name
-    /// \param[in] description Human-readable description of the variable
+    /// \param[in] _description Human-readable description of the variable
     Process& defineVariable(double& out,
-                            const Mapping& type,
-                            const Limits& lim,
+                            const Mapping& mapping_type,
+                            const Limits& limits,
                             const std::string& name,
-                            const std::string& description = "");
+                            const std::string& _description = "");
     /// Retrieve the physical value for one variable
     double variableValue(size_t i, double x) const;
 
@@ -156,8 +159,6 @@ namespace cepgen::proc {
 
     double alphaEM(double q) const;  ///< Compute the electromagnetic running coupling algorithm at a given scale
     double alphaS(double q) const;   ///< Compute the strong coupling algorithm at a given scale
-
-    std::unique_ptr<utils::RandomGenerator> rnd_gen_;  ///< Process-local random number generator engine
 
     inline const std::vector<double>& lastCoordinates() const { return point_coord_; }  ///< Last coordinates fed
 
@@ -175,8 +176,9 @@ namespace cepgen::proc {
     double t2_{-1.};       ///< Second parton virtuality
     double x1_{0.};        ///< First parton fractional momentum
     double x2_{0.};        ///< Second parton fractional momentum
-    std::unique_ptr<Coupling> alphaem_;  ///< Electromagnetic running coupling algorithm
-    std::unique_ptr<Coupling> alphas_;   ///< Strong running coupling algorithm
+    std::unique_ptr<Coupling> alpha_em_;               ///< Electromagnetic running coupling algorithm
+    std::unique_ptr<Coupling> alpha_s_;                ///< Strong running coupling algorithm
+    std::unique_ptr<SurvivalFactor> survival_factor_;  ///< Gap survival factor modelling (if any)
     /// Handler to a variable mapped by this process
     struct MappingVariable {
       std::string name;         ///< Variable name for debugging
@@ -193,7 +195,7 @@ namespace cepgen::proc {
     std::unique_ptr<Event> event_;      ///< Event object tracking all information on all particles in the system
     friend class utils::ProcessVariablesAnalyser;
   };
-  typedef std::unique_ptr<Process> ProcessPtr;  ///< Helper typedef for a Process unique pointer
+  using ProcessPtr = std::unique_ptr<Process>;  ///< Helper for a Process unique pointer
 }  // namespace cepgen::proc
 
 #endif

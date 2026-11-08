@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,13 @@
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
   cepgen::ParametersList plist;
-  plist.set<string>("name", "laurenteron");
+  plist.set<string>("name", "laurenteron"s);
 
   cepgen::ParticleProperties prop(plist);
   CG_TEST_EQUAL(prop.name, plist.get<string>("name"), "custom particle name");

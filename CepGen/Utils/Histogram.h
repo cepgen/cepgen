@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,11 +27,9 @@
 #include <memory>
 #include <set>
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Utils/Drawable.h"
 
-namespace cepgen {
-  class ParametersList;
-}
 namespace cepgen::utils {
   class RandomGenerator;
   /// Generic container for binned distributions
@@ -57,9 +55,9 @@ namespace cepgen::utils {
     /// \param[in] mode type of extraction (low/high/low-high)
     /// \param[in] num_bins total number of bins
     /// \param[in] bins_extractor method used to extract range of one single bin
-    std::set<double> extractBins(BinMode mode,
-                                 size_t num_bins,
-                                 const std::function<Limits(size_t)>& bins_extractor) const;
+    static std::set<double> extractBins(BinMode mode,
+                                        size_t num_bins,
+                                        const std::function<Limits(size_t)>& bins_extractor);
   };
 
   /// 1D histogram container
@@ -72,6 +70,9 @@ namespace cepgen::utils {
     explicit Hist1D(const std::vector<double>& bins, const std::string& name = "", const std::string& title = "");
     Hist1D(const Hist1D&);  ///< Copy constructor
 
+    static ParametersDescription description();
+
+    bool empty() const override;
     void clear() override;
     void fill(double x, double weight = 1.);  ///< Increment the histogram with one value
     void add(Hist1D, double scaling = 1.);    ///< Bin-to-bin addition of another histogram to this one
@@ -102,7 +103,7 @@ namespace cepgen::utils {
     inline size_t underflow() const { return underflow_; }
     inline size_t overflow() const { return overflow_; }
 
-    bool isHist1D() const override final { return true; }
+    bool isHist1D() const final { return true; }
 
   private:
     void buildFromBins(const std::vector<double>&);
@@ -111,13 +112,13 @@ namespace cepgen::utils {
     struct gsl_histogram_deleter {
       void operator()(gsl_histogram* h) const { gsl_histogram_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
+    using gsl_histogram_ptr = std::unique_ptr<gsl_histogram, gsl_histogram_deleter>;
     gsl_histogram_ptr hist_, hist_w2_;
     size_t underflow_{0ull}, overflow_{0ull};
     struct gsl_histogram_pdf_deleter {
       void operator()(gsl_histogram_pdf* h) const { gsl_histogram_pdf_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram_pdf, gsl_histogram_pdf_deleter> gsl_histogram_pdf_ptr;
+    using gsl_histogram_pdf_ptr = std::unique_ptr<gsl_histogram_pdf, gsl_histogram_pdf_deleter>;
     mutable gsl_histogram_pdf_ptr pdf_;
   };
 
@@ -139,6 +140,9 @@ namespace cepgen::utils {
                     const std::string& title = "");
     Hist2D(const Hist2D&);  ///< Copy constructor
 
+    static ParametersDescription description();
+
+    bool empty() const override;
     void clear() override;
     void fill(double x, double y, double weight = 1.);  ///< Fill the histogram with one value
     /// Fill the histogram with one value
@@ -168,7 +172,7 @@ namespace cepgen::utils {
     double maximum() const override;
     double integral(bool = false) const override;
 
-    struct contents_t : public std::array<size_t, 8> {
+    struct contents_t : std::array<size_t, 8> {
       contents_t() { std::fill(begin(), end(), 0ull); }
       size_t total() const;
       friend std::ostream& operator<<(std::ostream&, const contents_t&);
@@ -188,7 +192,7 @@ namespace cepgen::utils {
     };
     const contents_t& outOfRange() const { return out_of_range_values_; }
 
-    bool isHist2D() const override final { return true; }
+    bool isHist2D() const final { return true; }
 
   private:
     void buildFromBins(const std::vector<double>&, const std::vector<double>&);
@@ -197,13 +201,13 @@ namespace cepgen::utils {
     struct gsl_histogram2d_deleter {
       void operator()(gsl_histogram2d* h) const { gsl_histogram2d_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
+    using gsl_histogram2d_ptr = std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter>;
     gsl_histogram2d_ptr hist_, hist_w2_;
     contents_t out_of_range_values_;
     struct gsl_histogram2d_pdf_deleter {
       void operator()(gsl_histogram2d_pdf* h) const { gsl_histogram2d_pdf_free(h); }
     };
-    typedef std::unique_ptr<gsl_histogram2d_pdf, gsl_histogram2d_pdf_deleter> gsl_histogram2d_pdf_ptr;
+    using gsl_histogram2d_pdf_ptr = std::unique_ptr<gsl_histogram2d_pdf, gsl_histogram2d_pdf_deleter>;
     mutable gsl_histogram2d_pdf_ptr pdf_;
   };
 }  // namespace cepgen::utils

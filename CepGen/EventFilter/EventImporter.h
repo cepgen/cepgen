@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ namespace cepgen {
   /// \date Dec 2022
   class EventImporter : public EventHandler {
   public:
-    explicit EventImporter(const ParametersList& params) : EventHandler(params) {}
+    using EventHandler::EventHandler;
 
     static ParametersDescription description() {
       auto desc = EventHandler::description();
@@ -40,7 +40,7 @@ namespace cepgen {
     const Value& crossSection() const { return cross_section_; }  ///< Process cross-section and uncertainty, in pb
 
   protected:
-    /// Specify the process cross section and uncertainty, in pb
+    /// Specify the process cross-section and uncertainty, in pb
     void setCrossSection(const Value& cross_section) { cross_section_ = cross_section; }
 
   private:

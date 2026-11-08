@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ namespace {
             "__call__", +[](const cepgen::sigrat::Parameterisation& par, double xbj, double q2) {
               double unc{0.};
               const auto sig_rat = par(xbj, q2, unc);
-              return std_vector_to_py_tuple(std::vector<double>{sig_rat, unc});
+              return std_vector_to_py_tuple(std::vector{sig_rat, unc});
             });
 
     EXPOSE_FACTORY(cepgen::SigmaRatiosFactory,

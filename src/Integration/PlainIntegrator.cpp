@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,46 +21,45 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
-namespace cepgen {
-  /// Plain integration algorithm randomly sampling points in the phase space
-  class PlainIntegrator final : public GSLIntegrator {
-  public:
-    explicit PlainIntegrator(const ParametersList& params)
-        : GSLIntegrator(params), ncvg_(steer<int>("numFunctionCalls")) {}
+using namespace cepgen;
 
-    static ParametersDescription description() {
-      auto desc = GSLIntegrator::description();
-      desc.setDescription("Plain (trial/error) integrator");
-      desc.add<int>("numFunctionCalls", 50'000);
-      return desc;
-    }
+/// Plain integration algorithm randomly sampling points in the phase space
+class PlainIntegrator final : public GSLIntegrator {
+public:
+  explicit PlainIntegrator(const ParametersList& params)
+      : GSLIntegrator(params), num_function_calls_(steer<int>("numFunctionCalls")) {}
 
-    Value integrate(Integrand& integrand) override {
-      setIntegrand(integrand);
+  static ParametersDescription description() {
+    auto desc = GSLIntegrator::description();
+    desc.setDescription("Plain (trial/error) integrator");
+    desc.add("numFunctionCalls", 50'000).setDescription("number of function calls per phase space point evaluation");
+    return desc;
+  }
 
-      //--- launch integration
-      std::unique_ptr<gsl_monte_plain_state, decltype(&gsl_monte_plain_free)> pln_state(
-          gsl_monte_plain_alloc(gsl_function_->dim), gsl_monte_plain_free);
-      double result, absolute_error;
-      if (int res = gsl_monte_plain_integrate(gsl_function_.get(),
-                                              &x_low_[0],
-                                              &x_high_[0],
-                                              gsl_function_->dim,
-                                              ncvg_,
-                                              rnd_gen_->engine<gsl_rng>(),
-                                              pln_state.get(),
-                                              &result,
-                                              &absolute_error);
-          res != GSL_SUCCESS)
-        throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
-                                               << "GSL error: " << gsl_strerror(res) << ".";
+  Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+    prepare(integrand, range);
+    // launch integration
+    const std::unique_ptr<gsl_monte_plain_state, decltype(&gsl_monte_plain_free)> plain_state(
+        gsl_monte_plain_alloc(gsl_function_->dim), gsl_monte_plain_free);
+    double result, absolute_error;
+    if (const auto res = gsl_monte_plain_integrate(gsl_function_.get(),
+                                                   x_low_.data(),
+                                                   x_high_.data(),
+                                                   gsl_function_->dim,
+                                                   num_function_calls_,
+                                                   random_generator_->engine<gsl_rng>(),
+                                                   plain_state.get(),
+                                                   &result,
+                                                   &absolute_error);
+        res != GSL_SUCCESS)
+      throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
+                                             << "GSL error: " << gsl_strerror(res) << ".";
+    return Value{result, absolute_error};
+  }
 
-      return Value{result, absolute_error};
-    }
-
-  private:
-    const int ncvg_;
-  };
-}  // namespace cepgen
+private:
+  const int num_function_calls_;
+};
 REGISTER_INTEGRATOR("plain", PlainIntegrator);

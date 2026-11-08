@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "CepGenPython/ObjectPtr.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 #define TEST_TYPE(type, object)                            \
   {                                                        \
@@ -38,18 +39,15 @@ int main(int argc, char* argv[]) {
   cepgen::python::Environment env(cepgen::ParametersList{});
   TEST_TYPE(bool, true)
   TEST_TYPE(bool, false)
-  TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€ 🐗"))
+  TEST_TYPE(string, "Héhéhé, test @ ünıc0d€ 🐗"s)
   TEST_TYPE(cepgen::Limits, cepgen::Limits(-2., 3.1))
-  TEST_TYPE(
-      cepgen::ParametersList,
-      cepgen::ParametersList()
-          .set<int>("foo", 42)
-          .set<double>("bar", M_PI)
-          .set<std::string>("baz", "héhé")
-          .set<bool>("flag", true)
-          .set<cepgen::ParametersList>(
-              "plist",
-              cepgen::ParametersList().set<int>("foo", 10).set<double>("bar", 42.42).set<std::string>("baz", "hîhî")))
+  TEST_TYPE(cepgen::ParametersList,
+            cepgen::ParametersList()
+                .set("foo", 42)
+                .set("bar", M_PI)
+                .set("baz", "héhé"s)
+                .set("flag", true)
+                .set("plist", cepgen::ParametersList().set("foo", 10).set("bar", 42.42).set("baz", "hîhî"s)))
 
   CG_TEST_SUMMARY;
 }

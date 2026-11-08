@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,19 +25,15 @@
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Version.h"
 
-using namespace cepgen;
-
 namespace cepgen::pythia8 {
-  class Drawer : public cepgen::utils::Drawer {
+  class Drawer final : public utils::Drawer {
   public:
-    explicit Drawer(const ParametersList& params)
-        : cepgen::utils::Drawer(params), hist_plot_(steer<bool>("histPlot")) {}
+    explicit Drawer(const ParametersList& params) : utils::Drawer(params), hist_plot_(steer<bool>("histPlot")) {}
 
     static ParametersDescription description() {
-      auto desc = cepgen::utils::Drawer::description();
+      auto desc = utils::Drawer::description();
       desc.setDescription("Pythia 8 plotter");
-      desc.add<bool>("histPlot", true)
-          .setDescription("write Python code that can generate a PDF file with the spectra?");
+      desc.add("histPlot", true).setDescription("write Python code that can generate a PDF file with the spectra?");
       return desc;
     }
 
@@ -80,10 +76,8 @@ namespace cepgen::pythia8 {
           if (!first_histogram)
             first_histogram = hist;
           histograms.emplace_back(convert(*hist, mode));
-        } else {
-          CG_WARNING("pythia8:Drawer:draw") << "Multiplotter only supports 1D histograms.";
-          continue;
-        }
+        } else
+          CG_WARNING("pythia8:Drawer:draw") << "Multi-plotter only supports 1D histograms.";
       if (histograms.empty())
         return *this;
       if (!first_histogram)

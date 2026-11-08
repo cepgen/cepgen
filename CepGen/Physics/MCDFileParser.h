@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@ namespace pdg {
   class MCDFileParser {
   public:
     MCDFileParser() = default;
-    /// Parse an external MCD file and retrieve all particles definition
-    static void parse(const std::string& path);
+    static void parse(const std::string& path);  ///< Parse an external MCD file and retrieve all particles definition
 
   private:
     static constexpr size_t PDG_BEG = 1, PDG_END = 33;
@@ -40,4 +39,3 @@ namespace pdg {
 }  // namespace pdg
 
 #endif
-

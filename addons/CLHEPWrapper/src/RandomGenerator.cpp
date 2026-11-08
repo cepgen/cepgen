@@ -45,6 +45,8 @@
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::clhep {
   class RandomGenerator : public utils::RandomGenerator {
   public:
@@ -85,8 +87,7 @@ namespace cepgen::clhep {
     static ParametersDescription description() {
       auto desc = utils::RandomGenerator::description();
       desc.setDescription("CLHEP random number generator engine");
-      desc.add<std::string>("type", "HepJamesRandom")
-          .setDescription("random number engine")
+      desc.add("type", "HepJamesRandom"s)
           .allow("HepJamesRandom")
           .allow("RandEngine")
           .allow("DRand48Engine")
@@ -99,7 +100,8 @@ namespace cepgen::clhep {
           .allow("RanshiEngine")
           .allow("DualRand")
           .allow("TripleRand")
-          .allow("NonRandomEngine");
+          .allow("NonRandomEngine")
+          .setDescription("random number engine");
       return desc;
     }
 

@@ -11,13 +11,11 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 project(CepGen)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
-include(CepGenVersion)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
-option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
 option(CMAKE_BUILD_UTILS "Build miscellaneous utilities" ON)
 option(CMAKE_COVERAGE "Generate code coverage" OFF)
 
@@ -71,13 +69,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CEPGEN_PATH ${PROJECT_SOURCE_DIR})
 set(CEPGEN_CORE_EXT dl)
-set(CEPGEN_LIBRARIES CepGen)
-set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 set(CEPGEN_UNSTABLE_TESTS)
+set(CEPGEN_EXTRA_LIBRARIES)
 
 include(UseEnvironment)
 include(BuildUtils)
+include(FindVersion)
+cepgen_find_version(CepGen_VERSION git_branch git_hash)
 include_directories(${PROJECT_SOURCE_DIR})
 
 #----- enable fortran for external libraries linking
@@ -124,10 +123,14 @@ if(CMAKE_BUILD_CORE)
   endif()
   export(PACKAGE CepGen)
 endif()
+configure_file(cmake/FindCepGen.cmake.in cmake/FindCepGen.cmake @ONLY)
 
 #----- installation rules
 install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/FindCepGen.cmake
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake
   COMPONENT lib)
 install(DIRECTORY CepGen
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}

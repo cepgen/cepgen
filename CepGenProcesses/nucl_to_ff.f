@@ -60,7 +60,7 @@ c     =================================================================
 c     =================================================================
 c     quarks production
 c     =================================================================
-      double precision t_max,amu2
+      double precision t_max,amu2,amu
 
 c     =================================================================
 c     at initialisation, retrieve a few user-defined parameters
@@ -109,9 +109,9 @@ c     go to energy of Nucleus = A*inp in order that generator puts out
 c     proper momenta in LAB frame
 c     =================================================================
 
-      inp_A = inp1*a_nuc1
+      inp_A = dabs(inp1)*a_nuc1
       am_A = am_p*a_nuc1
-      inp_B = inp2*a_nuc2
+      inp_B = dabs(inp2)*a_nuc2
       am_B = am_p*a_nuc2
 
 c     =================================================================
@@ -158,7 +158,8 @@ c     a window in final state transverse momentum
 c     =================================================================
 
       if(iptsum) then
-        if(ptsum.lt.ptsum_min.or.ptsum.gt.ptsum_max) return
+        if((ptsum_min.ge.0).and.(ptsum.lt.ptsum_min)) return
+        if((ptsum_max.ge.0).and.(ptsum.gt.ptsum_max)) return
       endif
 
 c     =================================================================
@@ -178,8 +179,8 @@ c     =================================================================
       pt2 = sqrt(pt2x**2+pt2y**2)
 
       if(ipt) then
-        if(pt1.lt.pt_min.or.pt2.lt.pt_min) return
-        if(pt_max.gt.0d0.and.(pt2.gt.pt_max.or.pt2.gt.pt_max)) return
+        if((pt_min.gt.0d0).and.(pt1.lt.pt_min.or.pt2.lt.pt_min)) return
+        if((pt_max.gt.0d0).and.(pt1.gt.pt_max.or.pt2.gt.pt_max)) return
       endif
 
       amt1 = dsqrt(pt1**2+am_l**2)
@@ -195,8 +196,8 @@ c     a window in final state invariant mass
 c     =================================================================
 
       if(iinvm) then
-        if(invm.lt.invm_min) return
-        if(invm_max.gt.0d0.and.invm.gt.invm_max) return
+        if((invm_min.gt.0d0).and.(invm.lt.invm_min)) return
+        if((invm_max.gt.0d0).and.(invm.gt.invm_max)) return
       endif
 
 c     =================================================================
@@ -442,15 +443,17 @@ c     first parton coupling
 c     =================================================================
       t_max = max(amt1,amt2)**2
       amu2 = max(eps12,t_max)
+      amu = dsqrt(amu2)
       if(iflux1.eq.21) then ! at least one gluon exchanged
-        coupling = coupling * 4.d0*pi*CepGen_alphaS(dsqrt(amu2))/2.d0
+        coupling = coupling * 4.d0*pi*CepGen_alphaS('pegasus',amu)/2.d0
       else ! photon exchange
-        coupling = coupling * 4.d0*pi*CepGen_alphaEM(dsqrt(amu2))*q_l**2
+        coupling = coupling * 4.d0*pi*
+     &                               CepGen_alphaEM('fixed',amu)*q_l**2
       endif
 c     =================================================================
 c     second parton coupling
 c     =================================================================
-      coupling = coupling * 4.d0*pi*CepGen_alphaEM(dsqrt(amu2))
+      coupling = coupling * 4.d0*pi*CepGen_alphaEM('fixed', amu)
      &         * q_l**2 ! photon exchange
 
 c     =================================================================
@@ -462,8 +465,8 @@ c     =================================================================
 
       aintegral = (2.d0*pi)*1.d0/(16.d0*pi**2*(x1*x2*s)**2) * amat2
      &          * coupling
-     &          * (1.d0/4.d0) * units
-     &          * 0.5d0 * 4.0d0 / (4.d0*pi)
+     &          * (1.d0/4.d0)
+     &          * 0.5d0 / (4.d0*pi)
 
 c     *****************************************************************
 c     =================================================================

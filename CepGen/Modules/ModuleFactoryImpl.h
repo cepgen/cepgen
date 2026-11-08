@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
@@ -36,6 +35,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/SurvivalFactors/SurvivalFactor.h"
 #include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/Drawer.h"
@@ -55,13 +55,13 @@ namespace cepgen {
   template class ModuleFactory<formfac::Parameterisation>;
   template class ModuleFactory<GeneratorWorker>;
   template class ModuleFactory<Integrator>;
-  template class ModuleFactory<AnalyticIntegrator>;
   template class ModuleFactory<KTFlux>;
   template class ModuleFactory<PartonsPhaseSpaceGenerator>;
   template class ModuleFactory<PhaseSpaceGenerator>;
   template class ModuleFactory<proc::Process>;
   template class ModuleFactory<sigrat::Parameterisation>;
   template class ModuleFactory<strfun::Parameterisation>;
+  template class ModuleFactory<SurvivalFactor>;
   template class ModuleFactory<utils::Functional>;
   template class ModuleFactory<utils::RandomGenerator>;
 }  // namespace cepgen

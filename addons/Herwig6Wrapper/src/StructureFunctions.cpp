@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,17 +31,16 @@ namespace cepgen::herwig6 {
       initialise();
       auto desc = strfun::Parameterisation::description();
       desc.setDescription("Herwig 6 structure functions evaluator");
-      desc.add<int>("idhad", 73)
-          .setDescription("type of hadron")
+      desc.add("idhad", 73)
           .allow(30, "pi-")
           .allow(38, "pi+")
           .allow(59, "photon")
           .allow(73, "proton")
           .allow(75, "neutron")
           .allow(91, "antiproton")
-          .allow(93, "antineutron");
-      desc.add<int>("nset", 8)
-          .setDescription("structure functions set")
+          .allow(93, "antineutron")
+          .setDescription("type of hadron");
+      desc.add("nset", 8)
           .allow(1, "Duke & Owens set 1 (for soft/hard glue)")
           .allow(2, "Duke & Owens set 2 (for soft/hard glue)")
           .allow(3, "Eichten & al. set 1 (nucleons only)")
@@ -49,7 +48,8 @@ namespace cepgen::herwig6 {
           .allow(5, "Owens set 1.1")
           .allow(6, "MRST98LO (central alpha(S)/gluon)")
           .allow(7, "MRST98LO (higher gluon)")
-          .allow(8, "MRST98LO (average of central and higher gluon)");
+          .allow(8, "MRST98LO (average of central and higher gluon)")
+          .setDescription("structure functions set");
       return desc;
     }
 

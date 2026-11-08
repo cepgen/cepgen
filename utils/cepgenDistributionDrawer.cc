@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
       var.second->fill(browser.get(ev, var.first));
   });
 
-  // normalise to cross section
+  // normalise to cross-section
   for (auto& var : h_var_hist)
     var.second->normalise(mg.crossSection() / num_events);
 

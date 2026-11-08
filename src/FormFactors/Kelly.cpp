@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ namespace cepgen::formfac {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Kelly");
-      desc.add<std::vector<double> >("aE", {1., -0.24});
-      desc.add<std::vector<double> >("bE", {10.98, 12.82, 21.97});
-      desc.add<std::vector<double> >("aM", {1., 0.12});
-      desc.add<std::vector<double> >("bM", {10.97, 18.86, 6.55});
+      desc.add("aE", std::vector{1., -0.24});
+      desc.add("bE", std::vector{10.98, 12.82, 21.97});
+      desc.add("aM", std::vector{1., 0.12});
+      desc.add("bM", std::vector{10.97, 18.86, 6.55});
       return desc;
     }
 
@@ -52,8 +52,8 @@ namespace cepgen::formfac {
       return num / den;
     }
     void eval() override {
-      const auto ta = tau(q2_);
-      setGEGM(computeFF(ta, ae_, be_), MU * computeFF(ta, am_, bm_));
+      const auto tau_value = tau(q2_);
+      setGEGM(computeFF(tau_value, ae_, be_), MU * computeFF(tau_value, am_, bm_));
     }
 
     const std::vector<double> ae_, be_, am_, bm_;

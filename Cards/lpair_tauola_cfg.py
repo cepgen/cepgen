@@ -1,8 +1,8 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator as _gen
-from Config.Hadronisation.tauola_cfi import tauola
 #from Config.timer_cfi import timer # enable timing framework
+from EventModifiers.tauola_cfi import tauola
 
 
 process = cepgen.Module('lpair',

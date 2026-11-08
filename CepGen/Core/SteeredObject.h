@@ -36,14 +36,13 @@
 
 namespace cepgen {
   /// Base user-steerable object
-  /// \tparam T the type of object to be steered (using its T::description() static member)
+  /// \tparam T Object steered (using its T::description() static member)
   template <typename T>
   class SteeredObject : public Steerable {
   public:
-    /// Build a module
-    inline SteeredObject() : Steerable(T::description().parameters()) {}
-    explicit inline SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
-    virtual ~SteeredObject() = default;
+    SteeredObject() : Steerable(T::description().parameters()) {}  ///< Build a module
+    explicit SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
+    ~SteeredObject() override = default;
 
     /// Equality operator
     inline bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
@@ -59,7 +58,7 @@ namespace cepgen {
 #undef __TYPE_ENUM
       return Steerable::parameters();
     }
-    virtual inline void setParameters(const ParametersList& params) override {
+    inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
       Steerable::setParameters(params);

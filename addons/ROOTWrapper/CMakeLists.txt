@@ -1,5 +1,5 @@
 #--- searching for ROOT
-find_package(ROOT COMPONENTS Hist MathCore)
+find_package(ROOT COMPONENTS Hist MathCore OPTIONAL_COMPONENTS Foam)
 if(NOT ROOT_FOUND)
   return()
 endif()
@@ -19,22 +19,19 @@ file(GLOB root_sources src/ROOT*.cpp
                        src/RandomGenerator.cpp)
 
 #--- FOAM integrator
-if(CMAKE_BUILD_FOAM)
-  find_package(ROOT COMPONENTS Hist MathCore Foam)
-  list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
-  if(${_idx} GREATER -1)
-    file(GLOB foam_sources src/Foam*.cpp)
-  endif()
+if("${ROOT_LIBRARIES}" MATCHES "^?(Foam)?$")
+  file(GLOB foam_sources src/Foam*.cpp)
 endif()
 
 #----- build the object
-cepgen_build(CepGenRoot SOURCES ${root_sources} ${foam_sources}
-    EXT_LIBS ${ROOT_LIBRARIES}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS}
+cepgen_build(CepGenRoot
+    SOURCES ${root_sources} ${foam_sources}
+    LIBRARIES ${ROOT_LIBRARIES}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS}
     TESTS test/*.cc
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS "${ROOT_CXX_FLAGS}"
-    INSTALL_COMPONENT root)
+    COMPONENT root)
 cpack_add_component(root
     DISPLAY_NAME "CepGen ROOT wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ROOT library"

@@ -3,6 +3,8 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
 
+using namespace std::string_literals;
+
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
@@ -11,14 +13,14 @@ int main(int argc, char* argv[]) {
     explicit TestModule(const cepgen::ParametersList& params) : SteeredObject(params) {}
     static cepgen::ParametersDescription description() {
       cepgen::ParametersDescription desc("test_module");
-      desc.add<int>("foo", 42);
+      desc.add("foo", 42);
       {
         cepgen::ParametersDescription submodule_description("test_submodule");
-        submodule_description.add<double>("bar", 42.42);
-        submodule_description.add<std::string>("bat", "man").setDescription("What is in a 'bat'?");
+        submodule_description.add("bar", 42.42);
+        submodule_description.add("bat", "man"s).setDescription("What is in a 'bat'?");
         desc.add("sub_module_params", submodule_description).setDescription("A sub-collection of parameters");
       }
-      desc.add<std::string>("baz", "forty-two").setDescription("A beautiful 'baz' name");
+      desc.add("baz", "forty-two"s).setDescription("A beautiful 'baz' name");
       return desc;
     }
   };

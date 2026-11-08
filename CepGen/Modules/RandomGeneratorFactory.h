@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,20 +21,21 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic random number generator definition to the list of handled modules
-#define REGISTER_RANDOM_GENERATOR(name, obj)                                        \
-  namespace cepgen {                                                                \
-    struct BUILDERNM(obj) {                                                         \
-      BUILDERNM(obj)() { RandomGeneratorFactory::get().registerModule<obj>(name); } \
-    };                                                                              \
-    static const BUILDERNM(obj) gRndGen##obj;                                       \
-  }                                                                                 \
+/// Add a random number generator definition to the list of handled modules
+#define REGISTER_RANDOM_GENERATOR(name, obj)                                           \
+  namespace cepgen {                                                                   \
+    struct BUILDER_NAME(obj) {                                                         \
+      BUILDER_NAME(obj)() { RandomGeneratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                 \
+    static const BUILDER_NAME(obj) gRndGen##obj;                                       \
+  }                                                                                    \
   static_assert(true, "")
 
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  namespace utils {
-    class RandomGenerator;
-  }
   /// A random number generator algorithms factory
   DEFINE_FACTORY(RandomGeneratorFactory, utils::RandomGenerator, "Random number generator factory");
 }  // namespace cepgen

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,39 +24,44 @@
 #include "CepGen/Utils/FunctionWrapper.h"
 
 namespace cepgen::root {
-  class Derivator : public utils::Derivator {
+  class Derivator final : public utils::Derivator {
   public:
     explicit Derivator(const ParametersList& params) : utils::Derivator(params), order_(steer<int>("order")) {}
 
     static ParametersDescription description() {
       auto desc = utils::Derivator::description();
       desc.setDescription("ROOT derivation algorithm (Richardson's extrapolation method)");
-      desc.add<int>("order", 1).setDescription("order of the derivation");
+      desc.add("order", 1).setDescription("order of the derivation");
       return desc;
     }
 
     /// Evaluate the derivative of a function at a given value
-    /// \param[in] func function to derive
-    /// \param[in] x coordinate
-    /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-    double derivate(const utils::FunctionWrapper& func, double x, double h) const override {
-      auto rfunc = TF1(
+    /// \param[in] function Function to derive
+    /// \param[in] x_coordinate Coordinate
+    /// \param[in] step_size (Optional) step size; if not provided, will use default algorithm value
+    Value derivate(const utils::FunctionWrapper& function, double x_coordinate, double step_size) const override {
+      const auto root_function = TF1(
           "cepgen_functional",
-          [&func](double vars[1], double* pars) { return func(vars[0], static_cast<void*>(pars)); },
+          [&function](double vars[1], double* pars) { return function(vars[0], static_cast<void*>(pars)); },
           0.,
           1.,
           0);
-      const auto epsilon = h < 0. ? h_ : h;
+      const auto epsilon = step_size < 0. ? h_ : step_size;
+      double value;
       switch (order_) {
         case 1:
-          return rfunc.Derivative(x, nullptr, epsilon);
+          value = root_function.Derivative(x_coordinate, nullptr, epsilon);
+          break;
         case 2:
-          return rfunc.Derivative2(x, nullptr, epsilon);
+          value = root_function.Derivative2(x_coordinate, nullptr, epsilon);
+          break;
         case 3:
-          return rfunc.Derivative3(x, nullptr, epsilon);
+          value = root_function.Derivative3(x_coordinate, nullptr, epsilon);
+          break;
         default:
           throw CG_FATAL("root:Derivator") << "Invalid derivation order requested: " << order_ << ".";
       }
+      return Value{value, root_function.DerivativeError()};
     }
 
   private:

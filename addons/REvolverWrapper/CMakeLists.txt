@@ -7,7 +7,8 @@ if(NOT REVOLVER)
 endif()
 
 #----- build the object
-cepgen_build(CepGenREvolver SOURCES src/*.cpp
-    EXT_LIBS ${REVOLVER}
-    EXT_HEADERS ${REVOLVER_INCLUDE}
-    INSTALL_COMPONENT revolver)
+cepgen_build(CepGenREvolver
+    SOURCES src/*.cpp
+    LIBRARIES ${REVOLVER}
+    INCLUDES ${REVOLVER_INCLUDE}
+    COMPONENT revolver)

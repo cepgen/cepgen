@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
-  class PolarisationState : public SteeredObject<PolarisationState> {
+  class PolarisationState final : public SteeredObject<PolarisationState> {
   public:
     explicit PolarisationState(const ParametersList&);
 
@@ -30,17 +30,18 @@ namespace cepgen {
 
     enum class Mode { invalid = -1, full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
     friend std::ostream& operator<<(std::ostream&, const Mode&);
-    typedef std::vector<int> Polarisation;
-    typedef std::pair<Polarisation, Polarisation> Polarisations;
 
-    const Mode& mode() const { return mode_; }
-    const Polarisations& polarisations() const { return pol_; }
+    using Polarisation = std::vector<int>;                        ///< list of polarisation states
+    using Polarisations = std::pair<Polarisation, Polarisation>;  ///< polarisation for a pair of particles
+
+    const Mode& mode() const { return mode_; }                   ///< polarisation mode
+    const Polarisations& polarisations() const { return pol_; }  ///< list of polarisation states
 
   private:
-    static Polarisations computePolarisations(const Mode&);
+    static Polarisations computePolarisations(const Mode&);  ///< fill the polarisation states according to a mode
 
-    const Mode mode_;
-    const Polarisations pol_;
+    const Mode mode_;          ///< list of polarisation modes
+    const Polarisations pol_;  ///< list of polarisation states
   };
 }  // namespace cepgen
 

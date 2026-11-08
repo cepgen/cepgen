@@ -2,10 +2,10 @@ name: Build
 
 on:
   push:
-    branches: master
+    branches: main
     tags:
   pull_request:
-    branches: master
+    branches: main
   workflow_call:
 
 env:
@@ -21,7 +21,7 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: 'MadGraph fetch'
@@ -37,28 +37,30 @@ jobs:
       run: |
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
+              -DCMAKE_INSTALL_PREFIX=/Package/install \
               -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -DCMAKE_BUILD_TESTS=ON \
-              -DCMAKE_BUILD_FOAM=ON \
+              -DCMAKE_BUILD_UTILS=ON \
               -DMADGRAPH_BIN=/Package/mg5amcnlo-${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
 
     - name: 'Build environment'
       run: |
         cmake --build ${{ env.CEPGEN_PATH }}
         cmake --build ${{ env.CEPGEN_PATH }} -- package
+        cmake --build ${{ env.CEPGEN_PATH }} -- install
     - name: 'Compress environment'
       run: |
         touch environment.tar.gz
-        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/.cmake,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package
+        tar cvfz environment.tar.gz --exclude={*.tar.gz,*.root,*.o,*.pyc,*.swp,*/CMakeFiles,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package
 
     - name: 'Upload environment artifact'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: build-env
         path: environment.tar.gz
 
     - name: 'Upload packages artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: package-env
         path: /Package/cepgen-*.rpm
@@ -70,9 +72,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -91,9 +93,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -107,7 +109,7 @@ jobs:
     - name: 'Compress environment'
       run: tar cvfz benchmark-environment.tar.gz /Package/*.html
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: benchmark-env
         path: benchmark-environment.tar.gz
@@ -119,9 +121,9 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora40'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: build-env
     - name: 'Uncompress environment'
@@ -136,7 +138,37 @@ jobs:
       run: |
         tar cvfz validation-environment.tar.gz ${{ env.CEPGEN_PATH }}/validation/
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: validation-env
         path: validation-environment.tar.gz
+
+  skimming:
+    needs:
+      - test
+      - validation
+      - benchmark
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora40'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v7
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v8
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar xvfz environment.tar.gz -C /
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: 'Compress environment'
+      run: |
+        tar cvfz install-environment.tar.gz /Package/src /Package/addons /Package/install
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v7
+      with:
+        name: install-env
+        path: install-environment.tar.gz
+    - uses: geekyeggo/delete-artifact@v6
+      with:
+        name: build-env

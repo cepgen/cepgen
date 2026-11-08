@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,22 +22,21 @@
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
-  /// Alias for the integer-like particle PDG id
-  typedef unsigned long long pdgid_t;
-  typedef std::vector<pdgid_t> pdgids_t;
-  typedef long long spdgid_t;
-  typedef std::vector<spdgid_t> spdgids_t;
+  using pdgid_t = unsigned long long;       ///< Alias for the integer-like particle PDG id
+  using pdgids_t = std::vector<pdgid_t>;    ///< Alias for a collection of particles PDG ids
+  using spdgid_t = long long;               ///< Alias for a signed particle PDG id (adding charge information)
+  using spdgids_t = std::vector<spdgid_t>;  ///< Alias for a collection of particles signed PDG ids
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties final : SteeredObject<ParticleProperties> {
     explicit ParticleProperties(const ParametersList&);
-    explicit ParticleProperties(pdgid_t pdgid = 0ull,  // PDG::invalid
-                                const std::string& name = "",
-                                const std::string& description = "",
+    explicit ParticleProperties(pdgid_t _pdg_id = 0ull,  // PDG::invalid
+                                const std::string& _name = "",
+                                const std::string& _description = "",
                                 int colours = -1,
-                                double mass = -1.,
-                                double width = -1.,
-                                const std::vector<int>& charges = {},
-                                bool fermion = false);
+                                double _mass = -1.,
+                                double _width = -1.,
+                                const std::vector<int>& _charges = {},
+                                bool _fermion = false);
 
     static ParametersDescription description();
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #define LHAPDF_GE_6 1
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen::lhapdf {
   /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
   class AlphaS final : public Coupling {
@@ -43,8 +45,8 @@ namespace cepgen::lhapdf {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
-      desc.add<std::string>("pdfSet", "cteq66");
-      desc.add<int>("pdfMember", 0);
+      desc.add("pdfSet", "cteq66"s);
+      desc.add("pdfMember", 0);
       return desc;
     }
 
@@ -62,5 +64,5 @@ namespace cepgen::lhapdf {
 #endif
   };
 }  // namespace cepgen::lhapdf
-using AlphaSLHAPDF = cepgen::lhapdf::AlphaS;
-REGISTER_ALPHAS_MODULE("lhapdf", AlphaSLHAPDF);
+using AlphaS_LHAPDF = cepgen::lhapdf::AlphaS;
+REGISTER_ALPHAS_MODULE("lhapdf", AlphaS_LHAPDF);

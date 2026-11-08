@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,14 +41,13 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Bodek, Kang, and Xu");
-      desc.add<std::vector<double> >(
-          "constants",
-          {1.0741163,  0.75531124,  3.3506491,    1.7447015,    3.5102405, 1.040004,    1.2299128, 0.10625394,
-           0.48132786, 1.5101467,   0.081661975,  0.65587179,   1.7176216, 0.12551987,  0.7473379, 1.953819,
-           0.19891522, -0.17498537, 0.0096701919, -0.035256748, 3.5185207, -0.59993696, 4.7615828, 0.41167589});
-      desc.add<std::vector<int> >("spins", {1, 2, 3, 2});
-      desc.add<double>("r", 0.18);
-      desc.add<double>("q0", 1.);
+      desc.add("constants", std::vector{1.0741163,    0.75531124,   3.3506491,  1.7447015,   3.5102405,   1.040004,
+                                        1.2299128,    0.10625394,   0.48132786, 1.5101467,   0.081661975, 0.65587179,
+                                        1.7176216,    0.12551987,   0.7473379,  1.953819,    0.19891522,  -0.17498537,
+                                        0.0096701919, -0.035256748, 3.5185207,  -0.59993696, 4.7615828,   0.41167589});
+      desc.add("spins", std::vector{1, 2, 3, 2});
+      desc.add("r", 0.18);
+      desc.add("q0", 1.);
       return desc;
     }
 
@@ -73,8 +72,6 @@ namespace cepgen::strfun {
       return wp * ww * q2 / gi;
     }
     double bodek(double w, double q2) const {
-      constexpr size_t NRES = 4, NBKG = 5;
-
       if (w <= mp_)
         return 0.;
       const auto w2 = w * w;
@@ -100,31 +97,33 @@ namespace cepgen::strfun {
 
       const auto BBKG = b1 + b2, BRES = constants_.at(1) + b2;
 
-      auto ressum = 0.;
-      for (size_t i = 0; i < NRES; ++i) {
-        const size_t index = i * 3 + 1 + NBKG;
+      auto resonances_sum = 0.;
+      for (size_t i = 0; i < NUM_RESONANCES; ++i) {
+        const size_t index = i * 3 + 1 + NUM_BACKGROUND;
         auto ram = constants_.at(index), rma = constants_.at(index + 1), rwd = constants_.at(index + 2);
         if (i == 0)
           ram += constants_.at(17) * q2 + constants_.at(18) * q2 * q2;
         if (i == 2)
           rma *= (1. + constants_.at(19) / (1. + constants_.at(20) * q2));
-        const auto qstarn = std::sqrt(std::max(0., std::pow((w2 + mp2_ - pi_em_sq_) / (2. * w), 2.) - mp2_));
-        const auto qstar0 =
+        const auto q_star_n = std::sqrt(std::max(0., std::pow((w2 + mp2_ - pi_em_sq_) / (2. * w), 2.) - mp2_));
+        const auto q_star_0 =
             std::sqrt(std::max(0., std::pow((rma * rma - mp2_ + pi_em_sq_) / (2. * rma), 2.) - pi_em_sq_));
-        if (qstar0 <= 1.e-10)
+        if (q_star_0 <= 1.e-10)
           continue;
 
-        const auto term = prefactor_ * qstarn, term0 = prefactor_ * qstar0;
+        const auto term = prefactor_ * q_star_n, term0 = prefactor_ * q_star_0;
         const size_t j = 2 * spins_.at(i);
-        const auto gamres =
+        const auto gamma_resonance =
             0.5 * (rwd * std::pow(term / term0, j + 1) * (1. + std::pow(term0, j)) / (1. + std::pow(term, j)));
-        const auto brwig = M_1_PI * gamres / (std::pow(w - rma, 2.) + std::pow(gamres, 2.));
-        ressum += 0.5 * ram * brwig * inv_mp_;
+        const auto breit_wigner = M_1_PI * gamma_resonance / (std::pow(w - rma, 2.) + std::pow(gamma_resonance, 2.));
+        resonances_sum += 0.5 * ram * breit_wigner * inv_mp_;
       }
 
-      return BBKG * (1. + (1. - BBKG) * xpx) + ressum * (1. - BRES);
+      return BBKG * (1. + (1. - BBKG) * xpx) + resonances_sum * (1. - BRES);
     }
     static constexpr double prefactor_ = 6.08974;
+    static constexpr size_t NUM_RESONANCES = 4, NUM_BACKGROUND = 5;
+
     const std::vector<double> constants_;
     const double pi_em_sq_;
     const std::vector<int> spins_;

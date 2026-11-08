@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,35 +20,33 @@
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventHandler.h"
 
-namespace cepgen {
-  EventHandler::EventHandler(const ParametersList& params) : NamedModule(params) {}
+using namespace cepgen;
 
-  EventHandler::~EventHandler() {
-    CG_DEBUG("EventHandler") << "Destructor called for '" << name_ << "' event handler.";
-  }
+EventHandler::EventHandler(const ParametersList& params) : NamedModule(params) {}
 
-  ParametersDescription EventHandler::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed event handler");
-    return desc;
-  }
+EventHandler::~EventHandler() { CG_DEBUG("EventHandler") << "Destructor called for '" << name_ << "' event handler."; }
 
-  void EventHandler::initialise(const RunParameters& params) {
-    if (initialised_)
-      CG_WARNING("EventHandler:initialise") << "Event handler '" << name_ << "' was already initialised.";
-    run_params_ = &params;
-    initialise();
-    initialised_ = true;
-  }
+ParametersDescription EventHandler::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("Unnamed event handler");
+  return desc;
+}
 
-  const RunParameters& EventHandler::runParameters() const {
-    if (!run_params_)
-      throw CG_FATAL("EventHandler:runParameters") << "Run parameters not yet initialised.";
-    return *run_params_;
-  }
+void EventHandler::initialise(const RunParameters& params) {
+  if (initialised_)
+    CG_WARNING("EventHandler:initialise") << "Event handler '" << name_ << "' was already initialised.";
+  run_params_ = &params;
+  initialise();
+  initialised_ = true;
+}
 
-  void* EventHandler::enginePtr() {
-    throw CG_FATAL("EventHandler:enginePtr")
-        << "No engine object declared for event handler with name '" << name_ << "'.";
-  }
-}  // namespace cepgen
+const RunParameters& EventHandler::runParameters() const {
+  if (!run_params_)
+    throw CG_FATAL("EventHandler:runParameters") << "Run parameters not yet initialised.";
+  return *run_params_;
+}
+
+void* EventHandler::enginePtr() {
+  throw CG_FATAL("EventHandler:enginePtr")
+      << "No engine object declared for event handler with name '" << name_ << "'.";
+}

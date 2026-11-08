@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen::formfac {
@@ -32,9 +33,8 @@ namespace cepgen::formfac {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Standard dipole");
-      desc.add<pdgid_t>("pdgId", PDG::proton);
-      desc.add<double>("scale", 0.71)
-          .setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
+      desc.addAs<int>("pdgId", PDG::proton);
+      desc.add("scale", 0.71).setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
       return desc;
     }
 
@@ -59,7 +59,7 @@ namespace cepgen::formfac {
     static ParametersDescription description() {
       auto desc = StandardDipole::description();
       desc.setDescription("Heavy ion dipole");
-      desc.addAs<pdgid_t, HeavyIon>("pdgId", HeavyIon::Pb());
+      desc.addAs<int>("pdgId", HeavyIon::Pb());
       return desc;
     }
 

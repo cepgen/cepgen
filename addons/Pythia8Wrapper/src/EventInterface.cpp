@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGenPythia8/EventInterface.h"
-
 #include <algorithm>
 #include <map>
 
@@ -27,6 +25,7 @@
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Value.h"
+#include "CepGenPythia8/EventInterface.h"
 
 namespace cepgen::pythia8 {
   /// Convert a CepGen particle momentum into its Pythia 8 counterpart
@@ -300,7 +299,7 @@ namespace cepgen::pythia8 {
         ev[cg_id].addMother(ev[moth_id]);
     }
     for (const auto& diff_id : dissociated_cg_ids_)  // outgoing diffractive systems are now fragmented
-      if (diff_id >= 0 && !ev[diff_id].daughters().empty())
+      if (diff_id >= 0 && !ev[diff_id].children().empty())
         ev[diff_id].setStatus(Particle::Status::Fragmented);
   }
 

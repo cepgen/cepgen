@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,133 +29,139 @@
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
-namespace cepgen {
-  ProcessIntegrand::ProcessIntegrand(const proc::Process& proc) : params_(new RunParameters), tmr_(new utils::Timer) {
-    setProcess(proc);
+using namespace cepgen;
+
+ProcessIntegrand::ProcessIntegrand(const proc::Process& process)
+    : run_parameters_(new RunParameters), timer_(new utils::Timer) {
+  setProcess(process);
+}
+
+ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters)
+    : run_parameters_(run_parameters), timer_(new utils::Timer) {
+  if (!run_parameters_)
+    throw CG_FATAL("ProcessIntegrand") << "Invalid runtime parameters specified.";
+  if (!run_parameters_->hasProcess())
+    throw CG_FATAL("ProcessIntegrand") << "No process defined in runtime parameters.";
+  setProcess(run_parameters_->process());
+}
+
+size_t ProcessIntegrand::size() const { return process().ndim(); }
+
+void ProcessIntegrand::setProcess(const proc::Process& original_process) {
+  process_ = original_process.clone();  // each integrand object has its own clone of the process
+  // NOTE: kinematics is already set by the process copy constructor
+  process().kinematics().setParameters(
+      original_process.kinematics().parameters());  // override default kinematics with the one defined in mother process
+  CG_DEBUG("ProcessIntegrand:setProcess")
+      << "New '" << process().name() << "' process cloned from '" << original_process.name()
+      << "' process. New kinematics: " << process().kinematics().parameters() << ".";
+
+  // first-run preparation
+  CG_DEBUG("ProcessIntegrand:setProcess").log([this](auto& log) {
+    log << "Run started for " << process().name() << " process " << std::hex << dynamic_cast<void*>(process_.get())
+        << std::dec << ".\n\t";
+    const auto& beams = process().kinematics().incomingBeams();
+    log << "Process mode considered: " << beams.mode() << "\n\t"
+        << "  positive-z beam: " << beams.positive() << "\n\t"
+        << "  negative-z beam: " << beams.negative();
+    if (!beams.structureFunctions().empty())
+      log << "\n\t  structure functions: " << beams.structureFunctions();
+    process().dumpVariables(&log.stream());
+  });
+  process().initialise();
+
+  CG_DEBUG("ProcessIntegrand:setProcess")
+      << "Process integrand defined for dimension-" << size() << " process '" << process().name() << "'.";
+}
+
+proc::Process& ProcessIntegrand::process() {
+  if (!process_)
+    throw CG_FATAL("ProcessIntegrand:process") << "Process was not properly cloned!";
+  return *process_;
+}
+
+const proc::Process& ProcessIntegrand::process() const {
+  if (!process_)
+    throw CG_FATAL("ProcessIntegrand:process") << "Process was not properly cloned!";
+  return *process_;
+}
+
+double ProcessIntegrand::eval(const std::vector<double>& x) {
+  CG_TICKER(const_cast<RunParameters*>(run_parameters_)->timeKeeper());
+  timer_->reset();  // start the timer
+
+  process().clearEvent();
+  auto weight = process().weight(x);  // specify the phase space point to probe and calculate weight
+  if (!utils::positive(weight))       // invalidate any unphysical behaviour
+    return 0.;
+
+  if (!process_->hasEvent())  // speed up the integration process if no event is to be generated
+    return weight;
+  process_->setKinematics();           // fill in the process' Event object
+  auto* event = process_->eventPtr();  // prepare the event content
+
+  // apply the gap survival factor on the event as built by the process (before any modification algorithm)
+  if (const auto* survival_factor = process_->survivalFactor(); survival_factor) {
+    const auto survival = (*survival_factor)(*event);
+    static const Limits allowed_sf_range{0., 1.};
+    static bool warning_has_fired = false;
+    if (!warning_has_fired && !allowed_sf_range.contains(survival)) {
+      CG_WARNING("ProcessIntegrand") << "Survival factor value " << survival << " is outside the " << allowed_sf_range
+                                     << " range.";
+      warning_has_fired = true;
+    }
+    if (!utils::positive(survival))
+      return 0.;
+    weight *= survival;
+    if (storage_)
+      event->metadata["survivalFactor"] = survival;
   }
 
-  ProcessIntegrand::ProcessIntegrand(const RunParameters* params) : params_(params), tmr_(new utils::Timer) {
-    if (!params_)
-      throw CG_FATAL("ProcessIntegrand") << "Invalid runtime parameters specified.";
-    if (!params_->hasProcess())
-      throw CG_FATAL("ProcessIntegrand") << "No process defined in runtime parameters.";
-    setProcess(params_->process());
-  }
-
-  size_t ProcessIntegrand::size() const { return process().ndim(); }
-
-  void ProcessIntegrand::setProcess(const proc::Process& proc) {
-    //--- each integrand object has its own clone of the process
-    process_ = proc.clone();  // note: kinematics is already set by the process copy constructor
-    // override default kinematics with the one defined in mother process
-    process().kinematics().setParameters(proc.kinematics().parameters());
-    CG_DEBUG("ProcessIntegrand:setProcess")
-        << "New '" << process().name() << "' process cloned from '" << proc.name()
-        << "' process. New kinematics: " << process().kinematics().parameters() << ".";
-
-    //--- first-run preparation
-    CG_DEBUG("ProcessIntegrand:setProcess").log([this](auto& dbg) {
-      dbg << "Run started for " << process().name() << " process " << std::hex << (void*)process_.get() << std::dec
-          << ".\n\t";
-      const auto& beams = process().kinematics().incomingBeams();
-      dbg << "Process mode considered: " << beams.mode() << "\n\t"
-          << "  positive-z beam: " << beams.positive() << "\n\t"
-          << "  negative-z beam: " << beams.negative();
-      if (!beams.structureFunctions().empty())
-        dbg << "\n\t  structure functions: " << beams.structureFunctions();
-      process().dumpVariables(&dbg.stream());
-    });
-    process().initialise();
-
-    CG_DEBUG("ProcessIntegrand:setProcess")
-        << "Process integrand defined for dimension-" << size() << " process '" << process().name() << "'.";
-  }
-
-  proc::Process& ProcessIntegrand::process() {
-    if (!process_)
-      throw CG_FATAL("ProcessIntegrand:process") << "Process was not properly cloned!";
-    return *process_;
-  }
-
-  const proc::Process& ProcessIntegrand::process() const {
-    if (!process_)
-      throw CG_FATAL("ProcessIntegrand:process") << "Process was not properly cloned!";
-    return *process_;
-  }
-
-  double ProcessIntegrand::eval(const std::vector<double>& x) {
-    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
-
-    //--- start the timer
-    tmr_->reset();
-    process().clearEvent();
-
-    //--- specify the phase space point to probe and calculate weight
-    auto weight = process().weight(x);
-
-    //--- invalidate any unphysical behaviour
-    if (!utils::positive(weight))
+  // once kinematics variables computed, can apply taming functions
+  for (const auto& taming_function : run_parameters_->tamingFunctions())
+    if (const auto val = (*taming_function)(bws_.get(*event, taming_function->variables().at(0))) != 0.)
+      weight *= val;
+    else
       return 0.;
 
-    //--- speed up the integration process if no event is to be generated
-    if (!process_->hasEvent())
-      return weight;
+  if (storage_)
+    event->metadata["time:generation"] = timer_->elapsed();  // pure CepGen part of the event generation
 
-    process_->setKinematics();           // fill in the process' Event object
-    auto* event = process_->eventPtr();  // prepare the event content
-
-    // once kinematics variables computed, can apply taming functions
-    for (const auto& tam : params_->tamingFunctions())
-      if (const auto val = (*tam)(bws_.get(*event, tam->variables().at(0))) != 0.)
-        weight *= val;
-      else
+  {  // run all event modification algorithms
+    double branching_ratio = -1.;
+    for (auto& event_modifier : run_parameters_->eventModifiersSequence()) {
+      if (!event_modifier->run(*event, branching_ratio, !storage_) || branching_ratio == 0.)
         return 0.;
-
-    if (storage_)
-      event->metadata["time:generation"] = tmr_->elapsed();  // pure CepGen part of the event generation
-
-    {  // trigger all event modification algorithms
-      double br = -1.;
-      const auto fast_mode = !storage_;
-      for (auto& mod : params_->eventModifiersSequence()) {
-        if (!mod->run(*event, br, fast_mode) || br == 0.)
-          return 0.;
-        weight *= br;  // branching fraction for all decays
-      }
+      weight *= branching_ratio;  // branching fraction for all decays
     }
-    {  // apply cuts on final state system (after event modification algorithms)
-      const auto& kin = process_->kinematics();
-      // (polish your cuts, as this might be very time-consuming...)
-      if (!kin.cuts().central.contain((*event)(Particle::Role::CentralSystem)))
-        return 0.;
-      if (!kin.cuts().central_particles.empty())
-        for (const auto& part : (*event)(Particle::Role::CentralSystem)) {
-          // retrieve all cuts associated to this final state particle in the central system
-          if (kin.cuts().central_particles.count(part.pdgId()) > 0 &&
-              !kin.cuts().central_particles.at(part.pdgId()).contain({part}))
-            return 0.;
-        }
-      if (!kin.incomingBeams().positive().elastic() &&
-          !kin.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam1), event))
-        return 0.;
-      if (!kin.incomingBeams().negative().elastic() &&
-          !kin.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam2), event))
-        return 0.;
-
-      if (storage_) {
-        // add generation metadata to the event
-        event->metadata["weight"] = weight;
-        event->metadata["time:total"] = tmr_->elapsed();
-      }
-
-      CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
-                                        << "Generation time: " << event->metadata("time:generation") * 1.e3 << " ms\n\t"
-                                        << "Total time (gen+hadr+cuts): " << event->metadata("time:total") * 1.e3
-                                        << " ms";
-
-      // a bit of debugging information
-      CG_DEBUG_LOOP("ProcessIntegrand") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
-    }
-    return weight;
   }
-}  // namespace cepgen
+  const auto& kinematics = process_->kinematics();
+  if (!kinematics.cuts().central.contain((*event)(Particle::Role::CentralSystem)))
+    // apply cuts on final state system (after event modification algorithms)
+    // (polish your cuts, as this might be very time-consuming...)
+    return 0.;
+  for (const auto& part : (*event)(Particle::Role::CentralSystem))
+    // retrieve all cuts associated to this final state particle in the central system
+    if (kinematics.cuts().central_particles.count(part.pdgId()) > 0 &&
+        !kinematics.cuts().central_particles.at(part.pdgId()).contain({part}))
+      return 0.;
+  if (!kinematics.incomingBeams().positive().elastic() &&
+      !kinematics.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam1), event))
+    return 0.;
+  if (!kinematics.incomingBeams().negative().elastic() &&
+      !kinematics.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam2), event))
+    return 0.;
+
+  if (storage_) {  // add generation metadata to the event
+    event->metadata["weight"] = weight;
+    event->metadata["time:total"] = timer_->elapsed();
+  }
+
+  CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << dynamic_cast<void*>(process_.get()) << std::dec
+                                    << "]\n\t"
+                                    << "functional value for dimension-" << x.size() << " point " << x << ": " << weight
+                                    << ".\n\t"
+                                    << "Generation time: " << event->metadata("time:generation") * 1.e3 << " ms\n\t"
+                                    << "Total time (gen+mod+cuts): " << event->metadata("time:total") * 1.e3 << " ms";
+  return weight;
+}

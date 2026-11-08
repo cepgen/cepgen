@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,20 +22,20 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a central phase space generator to the list of handled modules
-#define REGISTER_PHASE_SPACE_GENERATOR(name, obj)                                       \
-  namespace cepgen {                                                                    \
-    struct BUILDERNM(obj) {                                                             \
-      BUILDERNM(obj)() { PhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \
-    };                                                                                  \
-    static const BUILDERNM(obj) gPhaseSpaceGen##obj;                                    \
-  }                                                                                     \
+#define REGISTER_PHASE_SPACE_GENERATOR(name, obj)                                          \
+  namespace cepgen {                                                                       \
+    struct BUILDER_NAME(obj) {                                                             \
+      BUILDER_NAME(obj)() { PhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                     \
+    static const BUILDER_NAME(obj) gPhaseSpaceGen##obj;                                    \
+  }                                                                                        \
   static_assert(true, "")
 
 namespace cepgen {
   class PhaseSpaceGenerator;
   /// A phase space mapping algorithms factory
   DEFINE_FACTORY(BasePhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
-  struct PhaseSpaceGeneratorFactory : public BasePhaseSpaceGeneratorFactory {
+  struct PhaseSpaceGeneratorFactory final : BasePhaseSpaceGeneratorFactory {
     static PhaseSpaceGeneratorFactory& get();
     std::unique_ptr<PhaseSpaceGenerator> build(const ParametersList&) const override;
   };

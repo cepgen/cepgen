@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,22 +22,22 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic collinear parton flux evaluator builder definition
-#define REGISTER_COLLINEAR_FLUX(name, obj)                                        \
-  namespace cepgen {                                                              \
-    struct BUILDERNM(obj) {                                                       \
-      BUILDERNM(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
-    };                                                                            \
-    static const BUILDERNM(obj) gCollinearFlux##obj;                              \
-  }                                                                               \
+#define REGISTER_COLLINEAR_FLUX(name, obj)                                           \
+  namespace cepgen {                                                                 \
+    struct BUILDER_NAME(obj) {                                                       \
+      BUILDER_NAME(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
+    };                                                                               \
+    static const BUILDER_NAME(obj) gCollinearFlux##obj;                              \
+  }                                                                                  \
   static_assert(true, "")
 /// Add a generic KT-factorised flux evaluator builder definition
-#define REGISTER_KT_FLUX(name, id, obj)                                                       \
-  namespace cepgen {                                                                          \
-    struct BUILDERNM(obj) {                                                                   \
-      BUILDERNM(obj)() { KTFluxFactory::get().addIndex(id, name).registerModule<obj>(name); } \
-    };                                                                                        \
-    static const BUILDERNM(obj) gKTFlux##obj;                                                 \
-  }                                                                                           \
+#define REGISTER_KT_FLUX(name, id, obj)                                                          \
+  namespace cepgen {                                                                             \
+    struct BUILDER_NAME(obj) {                                                                   \
+      BUILDER_NAME(obj)() { KTFluxFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                           \
+    static const BUILDER_NAME(obj) gKTFlux##obj;                                                 \
+  }                                                                                              \
   static_assert(true, "")
 
 namespace cepgen {
@@ -55,10 +55,10 @@ namespace cepgen {
       return instance;
     }
 
-    ParametersDescription describeParameters(const std::string& name,
-                                             const ParametersList& params = ParametersList()) const;
-    bool elastic(const ParametersList&) const;     ///< Is the beam modelling elastic?
-    int partonPdgId(const ParametersList&) const;  ///< Type of parton exchanged
+    static ParametersDescription describeParameters(const std::string& name,
+                                                    const ParametersList& params = ParametersList());
+    static bool elastic(const ParametersList&);           ///< Is the beam modelling elastic?
+    static long long partonPdgId(const ParametersList&);  ///< Type of parton exchanged
   };
 }  // namespace cepgen
 

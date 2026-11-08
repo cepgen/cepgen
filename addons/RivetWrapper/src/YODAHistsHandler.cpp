@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Value.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
   /// Handler for the generic YODA file output
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -61,8 +63,6 @@ namespace cepgen {
     bool operator<<(const Event&) override;
 
   private:
-    void initialise() override {}
-
     std::ofstream file_;
     std::vector<std::pair<std::string, YODA::Histo1D> > hists1d_;
     std::vector<std::pair<std::vector<std::string>, YODA::Histo2D> > hists2d_;
@@ -181,14 +181,14 @@ namespace cepgen {
   ParametersDescription YODAHistsHandler<T>::description() {
     auto desc = EventExporter::description();
     desc.setDescription("YODA histograms/profiles file output module");
-    desc.add<std::string>("filename", "output.yoda").setDescription("Output filename");
+    desc.add("filename", "output.yoda"s).setDescription("Output filename");
     auto var_desc = ParametersDescription();
-    var_desc.add<int>("nbins", 0);
-    var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
-    var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
-    var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
-    var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
-    var_desc.add<bool>("profile", false);
+    var_desc.add("nbins", 0);
+    var_desc.add("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
+    var_desc.add("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+    var_desc.add("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
+    var_desc.add("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+    var_desc.add("profile", false);
     desc.addParametersDescriptionVector("variables", var_desc);
     return desc;
   }

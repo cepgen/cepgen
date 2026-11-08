@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2024  Laurent Forthomme
+ *  Copyright (C) 2016-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen {
     explicit EventExporter(const ParametersList&);
 
     virtual void setCrossSection(const Value&) {}  ///< Specify the cross-section value, in pb
-    inline void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }  ///< Set event number
+    inline void setEventNumber(unsigned long long event_number) { event_num_ = event_number; }  ///< Set event number
 
     virtual bool operator<<(const Event&) = 0;  ///< Writer operator
 

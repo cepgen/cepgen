@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,13 +21,13 @@
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Utils/Filesystem.h"
 
-namespace cepgen {
-  CardsHandlerFactory& CardsHandlerFactory::get() {
-    static CardsHandlerFactory instance;
-    return instance;
-  }
+using namespace cepgen;
 
-  std::unique_ptr<card::Handler> CardsHandlerFactory::buildFromFilename(const std::string& filename) const {
-    return build(utils::fileExtension(filename));
-  }
-}  // namespace cepgen
+CardsHandlerFactory& CardsHandlerFactory::get() {
+  static CardsHandlerFactory instance;
+  return instance;
+}
+
+std::unique_ptr<card::Handler> CardsHandlerFactory::buildFromFilename(const std::string& filename) const {
+  return build(utils::fileExtension(filename));
+}

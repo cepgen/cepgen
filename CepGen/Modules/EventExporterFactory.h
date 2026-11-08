@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generic export module definition to the factory
-#define REGISTER_EXPORTER(name, obj)                                              \
-  namespace cepgen {                                                              \
-    struct BUILDERNM(obj) {                                                       \
-      BUILDERNM(obj)() { EventExporterFactory::get().registerModule<obj>(name); } \
-    };                                                                            \
-    static const BUILDERNM(obj) gIO##obj;                                         \
-  }                                                                               \
+#define REGISTER_EXPORTER(name, obj)                                                 \
+  namespace cepgen {                                                                 \
+    struct BUILDER_NAME(obj) {                                                       \
+      BUILDER_NAME(obj)() { EventExporterFactory::get().registerModule<obj>(name); } \
+    };                                                                               \
+    static const BUILDER_NAME(obj) gIO##obj;                                         \
+  }                                                                                  \
   static_assert(true, "")
 
 namespace cepgen {

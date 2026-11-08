@@ -32,10 +32,10 @@ using namespace std;
 using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
-  vector<string> fluxes_names;
+  vector<string> fluxes_names, labels;
   int num_points;
   double kt2, mx, q2;
-  string output_file, plotter;
+  string output_file, plotter, title;
   bool logx, logy, draw_grid, normalised, ratio_plot;
   cepgen::Limits x_range, y_range;
 
@@ -57,6 +57,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .addOptionalArgument("normalised", "plot xf(x) instead of f(x)", &normalised, false)
+      .addOptionalArgument("title", "customised title for figure", &title, ""s)
+      .addOptionalArgument("labels", "customised labels for series", &labels, vector<string>{})
       .parse();
 
   const bool plot_vs_q2 = (q2 >= 0.);
@@ -67,9 +69,13 @@ int main(int argc, char* argv[]) {
 
   vector<std::unique_ptr<cepgen::KTFlux> > fluxes;
   vector<cepgen::utils::Graph1D> graph_flux;
-  for (const auto& flux : fluxes_names) {
-    fluxes.emplace_back(cepgen::KTFluxFactory::get().build(flux));
-    graph_flux.emplace_back(flux, cepgen::KTFluxFactory::get().describe(flux));
+  {
+    size_t i = 0;
+    for (const auto& flux : fluxes_names) {
+      fluxes.emplace_back(cepgen::KTFluxFactory::get().build(flux));
+      graph_flux.emplace_back(flux, i < labels.size() ? labels.at(i) : cepgen::KTFluxFactory::get().describe(flux));
+      ++i;
+    }
   }
 
   ofstream out(output_file);
@@ -107,19 +113,16 @@ int main(int argc, char* argv[]) {
     cepgen::utils::DrawableColl coll;
 
     for (auto& gr : graph_flux) {
-      gr.xAxis().setLabel("$\\xi$");
-      gr.yAxis().setLabel("$"s + (normalised ? "\\xi\\varphi" : "\\varphi") + "(\\xi, " +
-                          (plot_vs_q2 ? "Q^{2}" : "M_{X}") + ", k_{T}^{2})$");
+      gr.xAxis().setLabel("$x$");
+      gr.yAxis().setLabel(
+          "$"s + (normalised ? "x\\varphi" : "\\varphi") + "(x, " +
+          (plot_vs_q2 ? cepgen::utils::format("Q^{2} = %g GeV^{2}", q2) : cepgen::utils::format("M_{X} = %g GeV", mx)) +
+          cepgen::utils::format(", k_{T}^{2} = %g GeV^{2})$", kt2));
       if (y_range.valid())
         gr.yAxis().setRange(y_range);
       coll.emplace_back(&gr);
     }
-    plt->draw(coll,
-              "comp_partonflux",
-              (plot_vs_q2 ? cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2)
-                          : cepgen::utils::format("$M_{X}$ = %g GeV", mx)) +
-                  ", " + cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2),
-              dm);
+    plt->draw(coll, "comp_partonflux", title, dm);
   }
 
   return 0;

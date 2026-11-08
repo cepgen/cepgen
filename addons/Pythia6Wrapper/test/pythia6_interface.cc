@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
 
-  for (auto pdgid : {2212, 11, 13, 22}) {
+  for (const auto& pdgid : {2212, 2112, 11, 13, 15, 22}) {
     ostringstream os;
     os << cepgen::PDG::get()(pdgid).name << "/" << cepgen::pythia6::pyname(pdgid);
     CG_TEST_EQUIV(cepgen::pythia6::pymass(pdgid), cepgen::PDG::get().mass(pdgid), os.str() + " mass");

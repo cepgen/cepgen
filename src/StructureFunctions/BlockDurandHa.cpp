@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,13 +59,13 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Block-Durand-Ha (continuum)");
-      desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
-      desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
-      desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
-      desc.add<double>("n", 11.49);
-      desc.add<double>("Lambda", 2.430);
-      desc.add<double>("mu2", 2.82);
-      desc.add<double>("m2", 0.753);
+      desc.add("a", std::vector{8.205e-4, -5.148e-2, -4.725e-3});
+      desc.add("b", std::vector{2.217e-3, 1.244e-2, 5.958e-4});
+      desc.add("c", std::vector{0.255e0, 1.475e-1});
+      desc.add("n", 11.49);
+      desc.add("Lambda", 2.430);
+      desc.add("mu2", 2.82);
+      desc.add("m2", 0.753);
       return desc;
     }
 

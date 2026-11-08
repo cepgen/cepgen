@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,23 +22,23 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add an electromagnetic coupling evolution algorithm
-#define REGISTER_ALPHAEM_MODULE(name, obj)                                  \
-  namespace cepgen {                                                        \
-    struct BUILDERNM(obj) {                                                 \
-      BUILDERNM(obj)() { AlphaEMFactory::get().registerModule<obj>(name); } \
-    };                                                                      \
-    static const BUILDERNM(obj) gAlphaEM##obj;                              \
-  }                                                                         \
+#define REGISTER_ALPHAEM_MODULE(name, obj)                                     \
+  namespace cepgen {                                                           \
+    struct BUILDER_NAME(obj) {                                                 \
+      BUILDER_NAME(obj)() { AlphaEMFactory::get().registerModule<obj>(name); } \
+    };                                                                         \
+    static const BUILDER_NAME(obj) gAlphaEM##obj;                              \
+  }                                                                            \
   static_assert(true, "")
 
 /// Add a strong coupling evolution algorithm
-#define REGISTER_ALPHAS_MODULE(name, obj)                                  \
-  namespace cepgen {                                                       \
-    struct BUILDERNM(obj) {                                                \
-      BUILDERNM(obj)() { AlphaSFactory::get().registerModule<obj>(name); } \
-    };                                                                     \
-    static const BUILDERNM(obj) gAlphaS##obj;                              \
-  }                                                                        \
+#define REGISTER_ALPHAS_MODULE(name, obj)                                     \
+  namespace cepgen {                                                          \
+    struct BUILDER_NAME(obj) {                                                \
+      BUILDER_NAME(obj)() { AlphaSFactory::get().registerModule<obj>(name); } \
+    };                                                                        \
+    static const BUILDER_NAME(obj) gAlphaS##obj;                              \
+  }                                                                           \
   static_assert(true, "")
 
 namespace cepgen {

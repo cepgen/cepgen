@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@
 #include "CepGen/Physics/Coupling.h"
 
 namespace cepgen::apfelpp {
-  class AlphaEM final : public cepgen::Coupling {
+  class AlphaEM final : public Coupling {
   public:
     explicit AlphaEM(const ParametersList& params)
-        : cepgen::Coupling(params),
+        : Coupling(params),
           alpha_em_(steer<double>("alphaQEDref"),
                     steer<double>("muQEDref"),
                     steer<std::vector<double> >("quarkThresholds"),
@@ -37,16 +37,16 @@ namespace cepgen::apfelpp {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+      auto desc = Coupling::description();
       desc.setDescription("APFEL++ alpha(EM) evolution algorithm");
-      desc.add<double>("alphaQEDref", 1. / 128);
-      desc.add<double>("muQEDref", 91.1876);
-      desc.add<std::vector<double> >("quarkThresholds", {0., 0., 0., M_SQRT2, 4.5, 175.});
-      desc.add<std::vector<double> >("leptonThresholds", {0., 0., 1.777});
-      desc.add<int>("order", 0)
-          .setDescription("QED evolution order")
+      desc.add("alphaQEDref", 1. / 128);
+      desc.add("muQEDref", 91.1876);
+      desc.add("quarkThresholds", std::vector{0., 0., 0., M_SQRT2, 4.5, 175.});
+      desc.add("leptonThresholds", std::vector{0., 0., 1.777});
+      desc.add("order", 0)
           .allow(0, "leading order")
-          .allow(1, "next-to-leading order");
+          .allow(1, "next-to-leading order")
+          .setDescription("QED evolution order");
       return desc;
     }
 

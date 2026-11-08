@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,19 +22,20 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a drawing utility
-#define REGISTER_DRAWER(name, obj)                                         \
-  namespace cepgen {                                                       \
-    struct BUILDERNM(obj) {                                                \
-      BUILDERNM(obj)() { DrawerFactory::get().registerModule<obj>(name); } \
-    };                                                                     \
-    static const BUILDERNM(obj) gDrawer##obj;                              \
-  }                                                                        \
+#define REGISTER_DRAWER(name, obj)                                            \
+  namespace cepgen {                                                          \
+    struct BUILDER_NAME(obj) {                                                \
+      BUILDER_NAME(obj)() { DrawerFactory::get().registerModule<obj>(name); } \
+    };                                                                        \
+    static const BUILDER_NAME(obj) gDrawer##obj;                              \
+  }                                                                           \
   static_assert(true, "")
 
+namespace cepgen::utils {
+  class Drawer;
+}  // namespace cepgen::utils
+
 namespace cepgen {
-  namespace utils {
-    class Drawer;
-  }
   /// A plotting utilities factory
   DEFINE_FACTORY(DrawerFactory, utils::Drawer, "Drawing utility factory");
 }  // namespace cepgen

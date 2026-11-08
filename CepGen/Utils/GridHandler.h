@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,12 +42,11 @@ namespace cepgen {
   template <size_t D, size_t N = 1>
   class GridHandler {
   public:
-    typedef std::vector<double> coord_t;     ///< Coordinates container
-    typedef std::array<double, N> values_t;  ///< Value(s) at a given coordinate
-
-  public:
     explicit GridHandler(const GridType& grid_type);  ///< Build a grid interpolator from a grid type
     virtual ~GridHandler() = default;
+
+    using coord_t = std::vector<double>;     ///< Coordinates container
+    using values_t = std::array<double, N>;  ///< Value(s) at a given coordinate
 
     values_t eval(const coord_t& in_coords) const;  ///< Interpolate a point to a given coordinate
 
@@ -63,13 +62,13 @@ namespace cepgen {
     const GridType grid_type_;                ///< Type of interpolation for the grid members
     std::map<coord_t, values_t> values_raw_;  ///< List of coordinates and associated value(s) in the grid
     /// Grid interpolation accelerator
-    std::vector<std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel*)> > accel_;
+    std::vector<std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel*)> > accelerators_;
     std::vector<std::unique_ptr<gsl_spline, void (*)(gsl_spline*)> > splines_1d_;  ///< Splines for linear interpolations
 #ifdef GSL_VERSION_ABOVE_2_1
     /// Splines for bilinear interpolations
     std::vector<std::unique_ptr<gsl_spline2d, void (*)(gsl_spline2d*)> > splines_2d_;
 #endif
-    std::array<coord_t, D> coords_;                    ///< Coordinates building up the grid
+    std::array<coord_t, D> coordinates_;               ///< Coordinates building up the grid
     std::array<std::unique_ptr<double[]>, N> values_;  ///< Values for all points in the grid
 
   private:
@@ -80,7 +79,7 @@ namespace cepgen {
       grid_point_t operator*(double c) const;
       grid_point_t operator+(const grid_point_t& rhs) const;
     };
-    bool init_{false};  ///< Has the extrapolator been initialised?
+    bool initialised_{false};  ///< Has the extrapolator been initialised?
   };
 }  // namespace cepgen
 

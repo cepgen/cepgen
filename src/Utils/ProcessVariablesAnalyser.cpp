@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,40 +23,35 @@
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
-namespace cepgen::utils {
-  ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, const ParametersList& params)
-      : SteeredObject(params), proc_(proc) {
-    for (const auto& var : proc_.mapped_variables_)
-      if (auto hist = steer<ParametersList>(var.name); !hist.empty())
-        hists_.insert(std::make_pair(var.name, new Hist1D(hist.set<std::string>("name", var.name))));
-      else
-        hists_.insert(std::make_pair(var.name,
-                                     new Hist1D(ParametersList()
-                                                    .set<std::string>("name", var.name)
-                                                    .set<int>("nbinsX", 50)
-                                                    .set<Limits>("xrange", var.limits))));
-  }
+using namespace cepgen;
+using namespace cepgen::utils;
+using namespace std::string_literals;
 
-  void ProcessVariablesAnalyser::feed(double weight) {
-    for (const auto& var : proc_.mapped_variables_)
-      if (hists_.count(var.name))
-        hists_.at(var.name)->fill(var.value, weight);
-  }
+ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, const ParametersList& params)
+    : SteeredObject(params), proc_(proc), drawer_(DrawerFactory::get().build(steer<ParametersList>("drawer"s))) {
+  for (const auto& var : proc_.mapped_variables_)
+    if (auto hist = steer<ParametersList>(var.name); !hist.empty())
+      hists_.insert(std::make_pair(var.name, new Hist1D(hist.set("name", var.name))));
+    else
+      hists_.insert(std::make_pair(
+          var.name, new Hist1D(ParametersList().set("name"s, var.name).set("nbinsX"s, 50).set("xrange"s, var.limits))));
+}
 
-  void ProcessVariablesAnalyser::analyse() {
-    auto drawer = DrawerFactory::get().build(steer<ParametersList>("drawer"));
-    for (const auto& var : hists_)
-      (void)drawer->draw(*var.second);
-  }
+void ProcessVariablesAnalyser::feed(double weight) const {
+  for (const auto& var : proc_.mapped_variables_)
+    if (hists_.count(var.name))
+      hists_.at(var.name)->fill(var.value, weight);
+}
 
-  ParametersDescription ProcessVariablesAnalyser::description() {
-    auto desc = ParametersDescription();
-    ParametersDescription hist_desc;
-    hist_desc.add<std::vector<double> >("xbins", {}).setDescription("x-axis bins definition");
-    hist_desc.add<int>("nbinsX", 25).setDescription("Bins multiplicity for x-axis");
-    hist_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
-    desc.addParametersDescriptionVector("histVariables", hist_desc, {}).setDescription("Histogram definition");
-    desc.add<ParametersDescription>("drawer", DrawerFactory::get().describeParameters("root"));
-    return desc;
-  }
-}  // namespace cepgen::utils
+void ProcessVariablesAnalyser::analyse() const {
+  for (const auto& [variable_name, histogram] : hists_)
+    (void)drawer_->draw(*histogram);
+}
+
+ParametersDescription ProcessVariablesAnalyser::description() {
+  auto desc = ParametersDescription();
+  desc.addParametersDescriptionVector("histVariables", Hist1D::description(), {})
+      .setDescription("Histogram definition");
+  desc.add("drawer", DrawerFactory::get().describeParameters("root"));
+  return desc;
+}

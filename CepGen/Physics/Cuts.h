@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ namespace cepgen::cuts {
   };
 
   /// Initial parton-like particles phase space cuts
-  struct Initial final : public SteeredObject<Initial> {
+  struct Initial final : SteeredObject<Initial> {
     explicit Initial(const ParametersList&);
 
     static ParametersDescription description();
@@ -66,7 +66,7 @@ namespace cepgen::cuts {
   };
 
   /// Outgoing beam remnant-like particles phase space cuts
-  struct Remnants final : public SteeredObject<Remnants> {
+  struct Remnants final : SteeredObject<Remnants> {
     explicit Remnants(const ParametersList&);
 
     static ParametersDescription description();

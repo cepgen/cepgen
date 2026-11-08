@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@
 
 #include "CepGen/Utils/Limits.h"
 
-/// Looper over the list of parameters containers handled by the ParametersList object
+/// Looper over the list of parameter containers handled by the ParametersList object
 /// \note This can be edited to add an extra handled collection to this steering utility
 ///   e.g. add __TYPE_ENUM(typename,      // any C/C++ type name
-///                        map_variable,  // ParametersList object private attribute
+///                        map_variable,  // ParametersList object attribute
 ///                        "human-readable name of parameter")
 ///        to the following list.
 #define REGISTER_CONTENT_TYPE                                            \
@@ -47,25 +47,24 @@
   __TYPE_ENUM(std::vector<std::vector<double> >, vec_vec_dbl_values_, "vvfloat")
 
 namespace cepgen {
-  const char* const MODULE_NAME = "mod_name";  ///< Indexing key for the module name
+  const auto MODULE_NAME = "mod_name";  ///< Indexing key for the module name
   /// Parameters container
   class ParametersList {
-  private:
     /// Retrieve the default argument for a given variable type
     template <typename T>
     struct default_arg {
-      static inline T get() { return T(); }  ///< Default variable argument
+      static T get() { return T(); }  ///< Default variable argument
     };
 
   public:
     ParametersList() = default;
     ParametersList(const ParametersList&);  ///< Copy constructor
-    ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
+    ~ParametersList() = default;  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
 
-    bool hasName() const;                                 ///< Does the parameters list have a name key?
-    std::string name(const std::string& def = "") const;  ///< Retrieve the module name if any
-    ParametersList& setName(const std::string&);          ///< Set the module name
+    bool hasName() const;                                           ///< Does the parameters' list have a name key?
+    std::string name(const std::string& default_value = "") const;  ///< Retrieve the module name if any
+    ParametersList& setName(const std::string&);                    ///< Set the module name
 
     bool operator==(const ParametersList&) const;                                  ///< Equality operator
     bool operator!=(const ParametersList& oth) const { return !operator==(oth); }  ///< Inequality operator
@@ -80,32 +79,32 @@ namespace cepgen {
     /// Erase a parameter with key
     /// \return Number of key-indexed values erased
     size_t erase(const std::string&);
-    /// Erase a typed parameter with key
+    /// Erase a typed parameter with the key
     /// \return Number of key-indexed values erased
     template <typename T>
     size_t erase(const std::string&);
 
     /// Fill a variable with the key content if exists
-    /// \param[in] key Unique key for parameter
-    /// \param[out] value Object/variable to be filled with parameter value
+    /// \param[in] key Unique key for the parameter
+    /// \param[out] value Object/variable to fill with parameter value
     template <typename T>
-    inline const ParametersList& fill(const std::string& key, T& value) const {
+    const ParametersList& fill(const std::string& key, T& value) const {
       if (has<T>(key))
         value = get<T>(key);
       return *this;
     }
     /// Get a parameter value
-    /// \param[in] key Unique key for parameter
-    /// \param[in] def Default parameters value if parameter is not contained
+    /// \param[in] key Unique key for the parameter
+    /// \param[in] def Default parameters values if parameter is not contained
     template <typename T>
     T get(const std::string& key, const T& def = default_arg<T>::get()) const;
     /// Get a recast parameter value
-    /// \tparam T Base type of the parameter
+    /// \tparam T Base parameter type
     /// \tparam U Type to recast the parameter into
-    /// \param[in] key Unique key for parameter
-    /// \param[in] def Default parameters value if parameter is not contained
+    /// \param[in] key Unique key for the parameter
+    /// \param[in] def Default parameters values if parameter is not contained
     template <typename T, typename U>
-    inline U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
+    U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
       return static_cast<U>(get<T>(key, static_cast<T>(def)));
     }
     /// Reference to a parameter value
@@ -115,17 +114,17 @@ namespace cepgen {
     template <typename T>
     ParametersList& set(const std::string&, const T&);  ///< Set a parameter value
     /// Set a recast parameter value
-    /// \tparam T Base type of the parameter
+    /// \tparam T Base parameter type
     /// \tparam U Type to recast the parameter into
-    /// \param[in] key Unique key for parameter
+    /// \param[in] key Unique key for the parameter
     /// \param[in] value Value to set the parameter
     template <typename T, typename U>
-    inline ParametersList& setAs(const std::string& key, const U& value) {
+    ParametersList& setAs(const std::string& key, const U& value) {
       return set<T>(key, static_cast<T>(value));
     }
     ParametersList& rename(const std::string&, const std::string&);  ///< Rename the key to a parameter value
     ParametersList& operator+=(const ParametersList& oth);           ///< Concatenate two parameters containers
-    ParametersList operator+(const ParametersList& oth) const;       ///< Concatenation of two parameters containers
+    ParametersList operator+(const ParametersList& other) const;     ///< Concatenation of two-parameter containers
     bool empty() const;                                              ///< Is the list empty?
 
     template <typename T>
@@ -134,18 +133,18 @@ namespace cepgen {
     /// \param[in] name_key Include the name variable?
     std::vector<std::string> keys(bool name_key = true) const;
     /// Get a string-converted version of a value
-    /// \param[in] key Unique key for parameter
+    /// \param[in] key Unique key for the parameter
     /// \param[in] wrap Encapsulate the value with type()
     std::string getString(const std::string& key, bool wrap = false) const;
     /// Get a string-converted version of the module name if any
     /// \param[in] wrap Encapsulate the value with type()
     inline std::string getNameString(bool wrap = false) const { return getString(MODULE_NAME, wrap); }
-    std::string serialise() const;  ///< Serialise a parameters collection into a parseable string
+    std::string serialise() const;  ///< Serialise a parameter collection into a parseable string
 
     friend std::ostream& operator<<(std::ostream&,
-                                    const ParametersList&);  ///< Human-readable version of a parameters container
-    const ParametersList& print(std::ostream&) const;        ///< Debugging-like printout of a parameters container
-    std::string print(bool compact = false) const;           ///< Normal printout of a parameters container
+                                    const ParametersList&);  ///< Human-readable version of a parameter container
+    const ParametersList& print(std::ostream&) const;        ///< Debugging-like printout of a parameter container
+    std::string print(bool compact = false) const;           ///< Normal printout of a parameter container
 
   private:
     std::map<std::string, ParametersList> param_values_;

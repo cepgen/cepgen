@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen::apfel {
-  class AlphaS final : public cepgen::Coupling {
+  class AlphaS final : public Coupling {
   public:
-    explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), q_range_(steer<Limits>("qrange")) {
+    explicit AlphaS(const ParametersList& params) : Coupling(params), q_range_(steer<Limits>("qrange")) {
       APFEL::SetPerturbativeOrder(steer<int>("order"));
       APFEL::SetPoleMasses(PDG::get().mass(4), PDG::get().mass(5), PDG::get().mass(6));
       APFEL::InitializeAPFEL();
@@ -37,9 +37,9 @@ namespace cepgen::apfel {
     static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("APFEL alpha(S) evolution algorithm");
-      desc.add<bool>("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
-      desc.add<int>("order", 2).setDescription("QCD perturbative evolution order");
-      desc.add<Limits>("qrange", {1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
+      desc.add("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
+      desc.add("order", 2).setDescription("QCD perturbative evolution order");
+      desc.add("qrange", Limits{1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
       return desc;
     }
 

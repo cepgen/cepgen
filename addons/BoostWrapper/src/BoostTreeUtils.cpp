@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2020-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,9 @@ namespace boost::cepgen {
     return out;
   }
 
-  pt::ptree pack(const ::cepgen::ParametersDescription& pdesc) { return pack(pdesc.parameters()); }
+  pt::ptree pack(const ::cepgen::ParametersDescription& parameters_description) {
+    return pack(parameters_description.parameters());
+  }
 
   pt::ptree pack(const ::cepgen::ParametersList& params) {
     pt::ptree out;
@@ -119,22 +121,22 @@ namespace boost::cepgen {
   }
 
   ::cepgen::ParametersList unpack(const pt::ptree& tree) {
-    ::cepgen::ParametersList out;
+    ::cepgen::ParametersList out{};
     if (tree.empty())
       return out;
     for (const auto& it : tree) {
       try {  // this might be a vector
         if (it.first.empty())
           try {  // try to parse as a parameters list
-            out.operator[]<std::vector<::cepgen::ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
-          } catch (const boost::exception&) {
+            out.operator[]<std::vector<::cepgen::ParametersList>>(DAUGHTER_KEY).emplace_back(unpack(it.second));
+          } catch (const exception&) {
             try {  // try to parse as a float
-              out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
-            } catch (const boost::exception&) {
+              out.operator[]<std::vector<double>>(DAUGHTER_KEY).emplace_back(it.second.get_value<double>());
+            } catch (const exception&) {
               try {  // try to parse as an integer
-                out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
-              } catch (const boost::exception&) {  // does not work, must be a string
-                out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
+                out.operator[]<std::vector<int>>(DAUGHTER_KEY).emplace_back(it.second.get_value<int>());
+              } catch (const exception&) {  // does not work, must be a string
+                out.operator[]<std::vector<std::string>>(DAUGHTER_KEY).emplace_back(it.second.get_value<std::string>());
               }
             }
           }
@@ -143,15 +145,15 @@ namespace boost::cepgen {
       } catch (const ::cepgen::Exception&) {
         if (it.second.get_value<std::string>().find('.') != std::string::npos)
           try {  // try to parse float if contains a '.'
-            out.set<double>(it.first, it.second.get_value<double>());
-          } catch (const boost::exception&) {  // does not work as a float, must be a string
-            out.set<std::string>(it.first, it.second.get_value<std::string>());
+            out.set(it.first, it.second.get_value<double>());
+          } catch (const exception&) {  // does not work as a float, must be a string
+            out.set(it.first, it.second.get_value<std::string>());
           }
         else
           try {  //  try to parse integer
-            out.set<int>(it.first, it.second.get_value<int>());
-          } catch (const boost::exception&) {  // does not work as an integer, must be a string
-            out.set<std::string>(it.first, it.second.get_value<std::string>());
+            out.set(it.first, it.second.get_value<int>());
+          } catch (const exception&) {  // does not work as an integer, must be a string
+            out.set(it.first, it.second.get_value<std::string>());
           }
       }
     }
@@ -166,17 +168,16 @@ namespace boost::cepgen {
       ::cepgen::Limits lim;
       plist.fill<double>(MIN_KEY, lim.min());
       plist.fill<double>(MAX_KEY, lim.max());
-      base.set<::cepgen::Limits>(name, lim);
+      base.set(name, lim);
     }
     //--- then check if daughter is a vector; if true, skip one hierarchy level
-    else if (plist.has<std::vector<int>>(DAUGH_KEY))
-      base.set<std::vector<int>>(name, plist.get<std::vector<int>>(DAUGH_KEY));
-    else if (plist.has<std::vector<double>>(DAUGH_KEY)) {
-      auto vec = plist.get<std::vector<double>>(DAUGH_KEY);
-      base.set<std::vector<double>>(name, vec);
-    } else if (plist.has<std::vector<std::string>>(DAUGH_KEY))
-      base.set<std::vector<std::string>>(name, plist.get<std::vector<std::string>>(DAUGH_KEY));
+    else if (plist.has<std::vector<int>>(DAUGHTER_KEY))
+      base.set(name, plist.get<std::vector<int>>(DAUGHTER_KEY));
+    else if (plist.has<std::vector<double>>(DAUGHTER_KEY))
+      base.set(name, plist.get<std::vector<double>>(DAUGHTER_KEY));
+    else if (plist.has<std::vector<std::string>>(DAUGHTER_KEY))
+      base.set(name, plist.get<std::vector<std::string>>(DAUGHTER_KEY));
     else
-      base.set<::cepgen::ParametersList>(name, plist);
+      base.set(name, plist);
   }
 }  // namespace boost::cepgen

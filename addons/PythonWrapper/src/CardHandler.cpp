@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,29 +55,31 @@ namespace cepgen::python {
   public:
     /// Read a standard configuration card
     explicit CardHandler(const ParametersList& params)
-        : Handler(params), env_(new Environment(params_)), plist_(params_.operator[]<ParametersList>("parsed")) {}
+        : Handler(params), plist_(params_.operator[]<ParametersList>("parsed")) {}
 
     CardHandler& parseFile(const std::string& file) override {
       const auto filename = pythonPath(file);
-      env_->setProgramName(filename);
-      auto cfg = ObjectPtr::importModule(filename) /* new */;
-      if (!cfg)
+      Environment environment(params_);
+      environment.setProgramName(filename);
+      if (const auto cfg = ObjectPtr::importModule(filename) /* new */; cfg)
+        parseParameters(cfg);
+      else
         throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
                        << " (parsed from '" << file << "').";
-      parseParameters(cfg);
       parse();
       return *this;
     }
     CardHandler& parseCommands(const std::vector<std::string>& str) override {
       const std::string name = "Cards.Core";
-      env_->setProgramName(name);
-      auto cfg = ObjectPtr::defineModule(name, utils::merge(str, "\n")) /* new */;
-      if (!cfg)
+      Environment environment(params_);
+      environment.setProgramName(name);
+      if (const auto cfg = ObjectPtr::defineModule(name, utils::merge(str, "\n")) /* new */; cfg)
+        parseParameters(cfg);
+      else
         throw PY_ERROR << "Failed to parse a configuration string:\n"
                        << std::string(80, '-') << "\n"
                        << str << "\n"
                        << std::string(80, '-');
-      parseParameters(cfg);
       parse();
       return *this;
     }
@@ -85,8 +87,8 @@ namespace cepgen::python {
     static ParametersDescription description() {
       auto desc = Handler::description();
       desc.setDescription("Python 2/3 cards parser");
-      desc.add<int>("debugging", 0).setDescription("debugging level");
-      desc.add<int>("verbosity", 0).setDescription("verbosity level");
+      desc.add("debugging", 0).setDescription("debugging level");
+      desc.add("verbosity", 0).setDescription("verbosity level");
       return desc;
     }
 
@@ -122,7 +124,7 @@ namespace cepgen::python {
     }
     void parse() {
       // logging module
-      auto logging = plist_.get<ParametersList>("logger");
+      const auto logging = plist_.get<ParametersList>("logger");
       utils::Logger::get().setLevel(logging.getAs<int, utils::Logger::Level>("level", utils::Logger::get().level()));
       utils::Logger::get().setExtended(logging.get<bool>("extended", utils::Logger::get().extended()));
       for (const auto& log_mod : logging.get<std::vector<std::string> >("enabledModules"))
@@ -164,19 +166,19 @@ namespace cepgen::python {
 
       // process definition
       if (auto process = plist_.get<ParametersList>("process"); !process.empty()) {
-        auto& pkin = process.operator[]<ParametersList>("kinematics");
+        auto& kinematics_parameters = process.operator[]<ParametersList>("kinematics");
         {  // remove extra layer of 'processParameters' and move it to the main process parameters block
           process += process.get<ParametersList>("processParameters");
           process.erase("processParameters");
           if (process.has<int>("mode")) {  // move the kinematics mode from process to the main kinematics block
-            pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
+            kinematics_parameters.set("mode", static_cast<int>(process.getAs<int, mode::Kinematics>("mode")));
             process.erase("mode");
           }
         }
         {  // remove extra layers of 'inKinematics' and 'outKinematics' and move them to the main kinematics block
-          pkin += process.get<ParametersList>("inKinematics");
+          kinematics_parameters += process.get<ParametersList>("inKinematics");
           process.erase("inKinematics");
-          pkin += process.get<ParametersList>("outKinematics");
+          kinematics_parameters += process.get<ParametersList>("outKinematics");
           process.erase("outKinematics");
         }
         if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator"); pkgen.name().empty())
@@ -189,16 +191,16 @@ namespace cepgen::python {
 
       // generation parameters
       runParameters()->integrator() += plist_.get<ParametersList>("integrator");
-      if (auto pgen = plist_.get<ParametersList>("generator"); !pgen.empty()) {
+      if (const auto pgen = plist_.get<ParametersList>("generator"); !pgen.empty()) {
         runParameters()->generation().setParameters(plist_.get<ParametersList>("generator"));
-        if (auto maxgen = pgen.get<int>("numEvents", -1); maxgen > 0)
-          runParameters()->generation().setMaxGen(maxgen);
+        if (const auto num_events = pgen.get<int>("numEvents", -1); num_events > 0)
+          runParameters()->generation().setMaxGen(num_events);
       }
 
       // event modification algorithms / hadronisers
-      auto parse_evtmod_module = [&](const ParametersList& mod) {
+      auto parse_event_modifier_parameters = [&](const ParametersList& mod) {
         runParameters()->addModifier(EventModifierFactory::get().build(mod));
-        auto h = runParameters()->eventModifiersSequence().rbegin()->get();
+        const auto h = runParameters()->eventModifiersSequence().rbegin()->get();
         // split the configuration into a pre-initialisation and a post-initialisation of the module parts
         h->readStrings(mod.get<std::vector<std::string> >("preConfiguration"));
         h->initialise(*runParameters());
@@ -206,10 +208,10 @@ namespace cepgen::python {
           h->readStrings(mod.get<std::vector<std::string> >(block));
       };
       if (const auto had = plist_.get<ParametersList>("hadroniser"); !had.empty())  // hadronisation algorithms (legacy)
-        parse_evtmod_module(had);
+        parse_event_modifier_parameters(had);
       for (const auto& mod :
            plist_.get<std::vector<ParametersList> >("eventSequence"))  // event modification algorithms
-        parse_evtmod_module(mod);
+        parse_event_modifier_parameters(mod);
 
       // output modules
       for (const auto& mod : plist_.get<std::vector<ParametersList> >("output"))
@@ -219,9 +221,8 @@ namespace cepgen::python {
       ConfigWriter writer(ParametersList().set("filename", filename));
       writer << *runParameters();
     }
-    std::unique_ptr<Environment> env_;
     ParametersList& plist_;
   };
 }  // namespace cepgen::python
-using cepgen::python::CardHandler;
-REGISTER_CARD_HANDLER(".py", CardHandler);
+using PythonCardHandler = cepgen::python::CardHandler;
+REGISTER_CARD_HANDLER(".py", PythonCardHandler);

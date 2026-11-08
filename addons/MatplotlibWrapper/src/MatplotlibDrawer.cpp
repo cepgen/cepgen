@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace cepgen::utils {
     static ParametersDescription description() {
       auto desc = Drawer::description();
       desc.setDescription("Matplotlib plotter");
-      desc.add<bool>("tight", false).setDescription("use a compact layout with minimal margins");
+      desc.add("tight", false).setDescription("use a compact layout with minimal margins");
       return desc;
     }
 

@@ -66,5 +66,20 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUAL(A.row(1), new_line, "line ref.assignment");
   }
 
+  {  // matrix slicing
+    const auto A = Matrix{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    const auto A_subset1 = A.subset(1, 2, 2, 3);
+    CG_TEST_EQUAL((double)A_subset1, 6, "matrix scalar subset");
+    const auto A_subset2 = A.subset(0, 0, 1, 3);
+    const auto res1 = Vector{1, 2, 3}.transpose();
+    CG_TEST_EQUAL(A_subset2, res1, "matrix vector subset");
+    const auto A_subset3 = A.subset(0, 0, 3, 1);
+    const auto res2 = Vector{1, 4, 7};
+    CG_TEST_EQUAL(A_subset3, res2, "matrix transp.vector subset");
+    const auto A_subset4 = A.subset(0, 0, 2, 2);
+    const auto res3 = Matrix{{1, 2}, {4, 5}};
+    CG_TEST_EQUAL(A_subset4, res3, "matrix matrix subset");
+  }
+
   return 0;
 }

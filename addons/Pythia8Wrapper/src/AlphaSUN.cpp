@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,35 +26,38 @@
 namespace cepgen::pythia8 {
   class AlphaSUN final : public Coupling {
   public:
-    explicit AlphaSUN(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaSUN) {
-      const auto nCHV = steer<int>("Ngauge"), alphaHVorder = nCHV > 1 ? steer<int>("alphaOrder") : 0;
+    explicit AlphaSUN(const ParametersList& params) : Coupling(params), alpha_s_(new Pythia8::AlphaSUN) {
+      const auto num_gauge = steer<int>("Ngauge"), alpha_hv_order = num_gauge > 1 ? steer<int>("alphaOrder") : 0;
       if (steer<bool>("setLambda")) {
         lambda_ = steer<double>("Lambda");
-        alphas_->initLambda(nCHV, steer<int>("nFlav"), alphaHVorder, lambda_);
+        alpha_s_->initLambda(num_gauge, steer<int>("nFlav"), alpha_hv_order, lambda_);
       } else {
-        alphas_->initAlpha(
-            nCHV, steer<int>("nFlav"), alphaHVorder, steer<double>("alphaFSR"), steer<double>("alphaFSRrefScale"));
-        lambda_ = alphas_->Lambda();
+        alpha_s_->initAlpha(num_gauge,
+                            steer<int>("nFlav"),
+                            alpha_hv_order,
+                            steer<double>("alphaFSR"),
+                            steer<double>("alphaFSRrefScale"));
+        lambda_ = alpha_s_->Lambda();
       }
     }
 
-    inline static ParametersDescription description() {
-      auto desc = cepgen::Coupling::description();
+    static ParametersDescription description() {
+      auto desc = Coupling::description();
       desc.setDescription("Pythia8 modelling of alpha(S) running in SU(N) model");
-      desc.add<int>("Ngauge", 1);
-      desc.add<int>("nFlav", 1);
-      desc.add<int>("alphaOrder", 0);
-      desc.add<bool>("setLambda", false);
-      desc.add<double>("Lambda", 0.4);
-      desc.add<double>("alphaFSR", 0.1);
-      desc.add<double>("alphaFSRrefScale", 91.188);
+      desc.add("Ngauge", 1);
+      desc.add("nFlav", 1);
+      desc.add("alphaOrder", 0);
+      desc.add("setLambda", false);
+      desc.add("Lambda", 0.4);
+      desc.add("alphaFSR", 0.1);
+      desc.add("alphaFSRrefScale", 91.188);
       return desc;
     }
 
-    inline double operator()(double q) const override { return alphas_->alpha(q * q); }
+    double operator()(double q) const override { return alpha_s_->alpha(q * q); }
 
   private:
-    const std::unique_ptr<Pythia8::AlphaSUN> alphas_;
+    const std::unique_ptr<Pythia8::AlphaSUN> alpha_s_;
     double lambda_{0.};
   };
 }  // namespace cepgen::pythia8

@@ -1,19 +1,20 @@
 #--- searching for Cuba
-find_path(CUBA_INCLUDE tools HINTS $ENV{CUBA_DIR})
-find_library(CUBA cuba HINTS $ENV{CUBA_DIR})
+find_path(CUBA_INCLUDE_DIR cuba.h HINTS $ENV{CUBA_DIR})
+find_library(CUBA_LIBRARY cuba HINTS $ENV{CUBA_DIR})
 # Cuba must be compiled with fPIC, i.e.
 # ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
 
-if(NOT CUBA)
+if(NOT CUBA_LIBRARY OR NOT CUBA_INCLUDE_DIR)
   return()
 endif()
 
 #----- build the object
-cepgen_build(CepGenCuba SOURCES src/*.cpp
-    EXT_LIBS ${CUBA}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${CUBA_INCLUDE}
+cepgen_build(CepGenCuba
+    SOURCES src/*.cpp
+    LIBRARIES ${CUBA_LIBRARY}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${CUBA_INCLUDE_DIR}
     PROPERTY POSITION_INDEPENDENT_CODE ON
-    INSTALL_COMPONENT cuba)
+    COMPONENT cuba)
 install(DIRECTORY CepGenCuba
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT cuba)

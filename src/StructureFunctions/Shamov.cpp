@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,14 +31,14 @@ namespace cepgen::strfun {
       auto desc = Parameterisation::description();
       desc.setDescription("Shamov (hybrid, soft)");
       desc.addAs<int, Mode>("mode", Mode::RealResAndNonRes).setDescription("sub-structure functions choice");
-      desc.add<int>("fitModel", 2);
-      desc.add<double>("q20", 0.65 /* 0.36 */)
+      desc.add("fitModel", 2);
+      desc.add("q20", 0.65 /* 0.36 */)
           .setDescription("first parameter for non-resonant gamma-p cross section q^2 dependence");
-      desc.add<double>("rPower", 0.71 /* 0.52 */)
+      desc.add("rPower", 0.71 /* 0.52 */)
           .setDescription("second parameter for non-resonant gamma-p cross section q^2 dependence");
-      desc.add<double>("gm0", 1.).setDescription("scaling factor for the magnetic form factor template fit");
-      desc.add<double>("gmb", 0.984).setDescription("exponential parameter for the magnetic form factor template fit");
-      desc.add<double>("lowQ2", 1.e-7);
+      desc.add("gm0", 1.).setDescription("scaling factor for the magnetic form factor template fit");
+      desc.add("gmb", 0.984).setDescription("exponential parameter for the magnetic form factor template fit");
+      desc.add("lowQ2", 1.e-7);
       return desc;
     }
 
@@ -148,17 +148,17 @@ namespace cepgen::strfun {
 
     const enum class Mode {
       SuriYennie = 0,  ///< Suri & Yennie
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence as for Delta(1232)
       RealRes = 1,
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence: resonant contribution as for Delta(1232),
       /// non-resonant contribution according to S&Y
       RealResAndNonRes = 2,
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence according to S&Y
       RealAndSuriYennieNonRes = 3,
-      /// real photon cross section for q^2=0,
+      /// real photon cross-section for q^2=0,
       /// q^2 dependence: resonant contribution as for Delta(1232),
       /// some fit for non-resonant contribution
       RealAndFitNonRes = 4
@@ -213,7 +213,7 @@ namespace cepgen::strfun {
       setW2(sy_sf_->W2(args_.xbj, args_.q2));
     } else {
       const auto sigma = sigma_grid_.eval({mx});
-      double sgp = sigma[0];  // cross section value at MX
+      double sgp = sigma.at(0);  // cross section value at MX
 
       if (mode_ == Mode::RealAndFitNonRes && mx > 1.5)
         non_resonant_ = true;

@@ -24,6 +24,8 @@ namespace cepgen::utils {
   double xBj(double q2, double mp2, double mx2);        ///< Compute Bjorken x from virtuality/diffractive mass
   double q2(double xbj, double mp2, double mx2);        ///< Compute the virtuality from Bjorken x/diffractive mass
   double energyFromW(double w, double mp2, double m2);  ///< Compute energy from mass and emitted mass
+  /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
+  double tau(double xbj, double q2, double mp2);
 }  // namespace cepgen::utils
 
 namespace cepgen::utils::kt {

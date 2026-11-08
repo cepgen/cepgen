@@ -36,6 +36,7 @@ namespace cepgen::strfun {
     /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
     friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
 
+    virtual bool hasW1W2() const { return false; }  ///< provides modelling for W_1/W_2?
     /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
     inline const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
@@ -46,6 +47,7 @@ namespace cepgen::strfun {
 
     double F2(double xbj, double q2);  ///< Transverse structure function
     double FL(double xbj, double q2);  ///< Longitudinal structure function
+    double FT(double xbj, double q2);  ///< Transverse structure function
     double W1(double xbj, double q2);  ///< Longitudinal form factor
     double W2(double xbj, double q2);
     double FE(double xbj, double q2);  ///< Electric proton form factor
@@ -91,14 +93,11 @@ namespace cepgen::strfun {
     Parameterisation& setFE(double fe);
     Parameterisation& setFM(double fm);
 
-    /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
-    double tau(double xbj, double q2) const;
     /// Dimensionless variable \f$\gamma^2=1+\frac{4x_{\rm Bj}^2 m_p^2}{Q^2}=1+\tau\f$
     double gamma2(double xbj, double q2) const;
     double nu(double xbj, double q2) const;
 
   private:
-    bool has_w1_w2_;
     /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
     const std::unique_ptr<sigrat::Parameterisation> r_ratio_;
 

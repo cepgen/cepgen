@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,26 +27,26 @@ namespace cepgen {
   class Event;
 }
 namespace cepgen::utils {
-  /**
-     * \brief A user-friendly browser for the Event content
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
+  /// A user-friendly browser for the Event content
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2019
   class EventBrowser {
   public:
     EventBrowser() = default;
-    /// Get/compute a variable value
-    double get(const Event& ev, const std::string& var) const;
+    double get(const Event& event, const std::string& variable_name) const;  ///< Get/compute a variable value
 
   private:
-    /// Retrieve a named variable from a particle
-    double variable(const Event&, const Particle&, const std::string&) const;
-    /// Retrieve a named variable from a two-particle system
-    double variable(const Event&, const Particle&, const Particle&, const std::string&) const;
-    /// Retrieve a named variable from the whole event
-    static double variable(const Event&, const std::string&);
+    double variable(const Event&, const Particle&, const std::string&) const;  ///< Retrieve a particle variable
+    double variable(const Event&,
+                    const Particle&,
+                    const Particle&,
+                    const std::string&) const;                 ///< Retrieve a two-particle variable
+    static double variable(const Event&, const std::string&);  ///< Retrieve a whole event variable
 
-    static const std::regex rgx_select_id_, rgx_select_id2_, rgx_select_role_, rgx_select_role2_;
+    static const std::regex rgx_select_id_;
+    static const std::regex rgx_select_id2_;
+    static const std::regex rgx_select_role_;
+    static const std::regex rgx_select_role2_;
     static constexpr double INVALID_OUTPUT = -999.;
 
     //--- auxiliary helper maps

@@ -5,11 +5,12 @@ if(NOT BASES)
 endif()
 
 #----- build the object
-cepgen_build(CepGenBases SOURCES src/*.cpp
-    EXT_LIBS ${BASES}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}
+cepgen_build(CepGenBases
+    SOURCES src/*.cpp
+    LIBRARIES ${BASES}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}
     PROPERTY POSITION_INDEPENDENT_CODE ON
-    INSTALL_COMPONENT bases)
+    COMPONENT bases)
 install(DIRECTORY CepGenBases
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT bases)

@@ -34,7 +34,7 @@ namespace cepgen::utils {
   struct Hasher<T, true> {
     /// Hash a structure-indexed table
     inline size_t operator()(const T& t) {
-      typedef typename std::underlying_type<T>::type enumType;
+      using enumType = typename std::underlying_type<T>::type;
       return std::hash<enumType>()(static_cast<enumType>(t));
     }
   };

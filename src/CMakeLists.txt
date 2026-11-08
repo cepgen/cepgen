@@ -12,7 +12,8 @@ file(GLOB phys_sources
         FormFactors/*.cpp
         PartonFluxes/*.cpp
         Physics/*.cpp
-        StructureFunctions/*.cpp)
+        StructureFunctions/*.cpp
+        SurvivalFactors/*.cpp)
 file(GLOB proc_sources
         Process/*.cpp
         Process/*.f)
@@ -42,20 +43,19 @@ endif()
 
 #----- build the objects
 
-include(FindVersion)
 add_version_definition(${core_sources})
 
 cepgen_build(CepGen
         SOURCES ${core_sources} ${phys_sources} ${proc_sources}
-        EXT_LIBS ${CEPGEN_CORE_EXT}
-        INSTALL_COMPONENT lib)
+        LIBRARIES ${CEPGEN_CORE_EXT}
+        COMPONENT lib)
 
 file(GLOB exec_sources *.cc)
-message(STATUS "Executables will be linked against ${CEPGEN_LIBRARIES}")
+message(STATUS "Executables will be linked against CepGen core library")
 foreach(exec_src ${exec_sources})
   get_filename_component(exec_bin ${exec_src} NAME_WE)
   add_executable(${exec_bin} ${exec_src})
-  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
+  target_link_libraries(${exec_bin} CepGen)
   install(TARGETS ${exec_bin} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib)
 endforeach()
 

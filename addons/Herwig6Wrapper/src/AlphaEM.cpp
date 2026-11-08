@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::herwig6 {
   class AlphaEM final : public cepgen::Coupling {
   public:
@@ -31,7 +33,7 @@ namespace cepgen::herwig6 {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("Herwig6 modelling of alpha(EM) running");
       initialise();
-      desc.add<double>("alphem", hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
+      desc.add("alphem"s, hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
       return desc;
     }
 

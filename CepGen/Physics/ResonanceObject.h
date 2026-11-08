@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ namespace cepgen {
     double photonWidth(const KinematicsBlock&) const;   ///< virtual photon width
 
     /// Branching ratios container for resonance decay into single, double pion or eta states
-    const struct BranchingRatios : SteeredObject<BranchingRatios> {
+    const struct BranchingRatios final : SteeredObject<BranchingRatios> {
       explicit BranchingRatios(const ParametersList&);
 
       static ParametersDescription description();

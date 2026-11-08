@@ -28,7 +28,8 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR})
 
 #----- build the object
-cepgen_build(CepGenMatplotlib SOURCES src/*.cpp
-    EXT_LIBS ${matplotlib_cpp_LIBRARIES} ${Python_LIBRARIES}
-    EXT_HEADERS ${matplotlib_cpp_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
-    INSTALL_COMPONENT matplotlib)
+cepgen_build(CepGenMatplotlib
+    SOURCES src/*.cpp
+    LIBRARIES ${matplotlib_cpp_LIBRARIES} ${Python_LIBRARIES}
+    INCLUDES ${matplotlib_cpp_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
+    COMPONENT matplotlib)

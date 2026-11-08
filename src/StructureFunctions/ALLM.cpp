@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Abramowicz, Levin, Levy, and Maor (continuum)");
-      desc.add<ParametersDescription>("pomeronTrajectory", Trajectory::description());
-      desc.add<ParametersDescription>("reggeonTrajectory", Trajectory::description());
-      desc.add<double>("m02", 0.).setDescription("effective photon squared mass (in GeV^2)");
-      desc.add<double>("mp2", 0.).setDescription("effective pomeron squared mass (in GeV^2)");
-      desc.add<double>("mr2", 0.).setDescription("effective reggeon squared mass (in GeV^2)");
-      desc.add<double>("q02", 0.);
-      desc.add<double>("lambda2", 0.).setDescription("squared QCD scale (in GeV^2");
+      desc.add("pomeronTrajectory", Trajectory::description());
+      desc.add("reggeonTrajectory", Trajectory::description());
+      desc.add("m02", 0.).setDescription("effective photon squared mass (in GeV^2)");
+      desc.add("mp2", 0.).setDescription("effective pomeron squared mass (in GeV^2)");
+      desc.add("mr2", 0.).setDescription("effective reggeon squared mass (in GeV^2)");
+      desc.add("q02", 0.);
+      desc.add("lambda2", 0.).setDescription("squared QCD scale (in GeV^2");
       return desc;
     }
 
@@ -61,9 +61,9 @@ namespace cepgen::strfun {
 
       static ParametersDescription description() {
         auto desc = ParametersDescription();
-        desc.add<std::vector<double> >("a", {0., 0., 0.});
-        desc.add<std::vector<double> >("b", {0., 0., 0.});
-        desc.add<std::vector<double> >("c", {0., 0., 0.});
+        desc.add("a", std::vector{0., 0., 0.});
+        desc.add("b", std::vector{0., 0., 0.});
+        desc.add("c", std::vector{0., 0., 0.});
         return desc;
       }
 
@@ -103,15 +103,11 @@ namespace cepgen::strfun {
       std::vector<double> a_, b_, c_;
     };
     Trajectory pomeron_, reggeon_;
-    /// Effective photon squared mass
-    double m02_;
-    /// Effective pomeron squared mass
-    double mpom2_;
-    /// Effective reggeon squared mass
-    double mreg2_;
+    double m02_;    ///< Effective photon squared mass
+    double mpom2_;  ///< Effective pomeron squared mass
+    double mreg2_;  ///< Effective reggeon squared mass
     double q02_;
-    /// Squared QCD scale
-    double lambda2_;
+    double lambda2_;  ///< Squared QCD scale
   };
 
   ALLM::ALLM(const ParametersList& params)
@@ -152,75 +148,75 @@ namespace cepgen::strfun {
   //---------------------------------------------------------------------------------------------
 
   /// Pre-HERA data fit (694 data points)
-  struct ALLM91 final : public ALLM {
+  struct ALLM91 final : ALLM {
     using ALLM::ALLM;
     static ParametersDescription description() {
       auto desc = ALLM::description();
       desc.setDescription("ALLM91 (continuum, pre-HERA 694 points fit)");
       ParametersDescription pom_params;
-      pom_params.add<std::vector<double> >("a", {-0.04503, -0.36407, 8.17091});
-      pom_params.add<std::vector<double> >("b", {0.49222, 0.52116, 3.5515});
-      pom_params.add<std::vector<double> >("c", {0.26550, 0.04856, 1.04682});
+      pom_params.add("a", std::vector{-0.04503, -0.36407, 8.17091});
+      pom_params.add("b", std::vector{0.49222, 0.52116, 3.5515});
+      pom_params.add("c", std::vector{0.26550, 0.04856, 1.04682});
       desc.add("pomeronTrajectory", pom_params);
       ParametersDescription reg_params;
-      reg_params.add<std::vector<double> >("a", {0.60408, 0.17353, 1.61812});
-      reg_params.add<std::vector<double> >("b", {1.26066, 1.83624, 0.81141});
-      reg_params.add<std::vector<double> >("c", {0.67639, 0.49027, 2.66275});
+      reg_params.add("a", std::vector{0.60408, 0.17353, 1.61812});
+      reg_params.add("b", std::vector{1.26066, 1.83624, 0.81141});
+      reg_params.add("c", std::vector{0.67639, 0.49027, 2.66275});
       desc.add("reggeonTrajectory", reg_params);
-      desc.add<double>("m02", 0.30508);
-      desc.add<double>("mp2", 10.676);
-      desc.add<double>("mr2", 0.20623);
-      desc.add<double>("q02", 0.27799);
-      desc.add<double>("lambda2", 0.06527);
+      desc.add("m02", 0.30508);
+      desc.add("mp2", 10.676);
+      desc.add("mr2", 0.20623);
+      desc.add("q02", 0.27799);
+      desc.add("lambda2", 0.06527);
       return desc;
     }
   };
 
   /// Fixed target and HERA photoproduction total cross-sections (1356 points)
-  struct ALLM97 final : public ALLM {
+  struct ALLM97 final : ALLM {
     using ALLM::ALLM;
     static ParametersDescription description() {
       auto desc = ALLM::description();
       desc.setDescription("ALLM97 (continuum, FT/HERA photoprod. tot.x-s 1356 points fit)");
       ParametersDescription pom_params;
-      pom_params.add<std::vector<double> >("a", {-0.0808, -0.44812, 1.1709});
-      pom_params.add<std::vector<double> >("b", {0.36292, 1.8917, 1.8439});
-      pom_params.add<std::vector<double> >("c", {0.28067, 0.22291, 2.1979});
+      pom_params.add("a", std::vector{-0.0808, -0.44812, 1.1709});
+      pom_params.add("b", std::vector{0.36292, 1.8917, 1.8439});
+      pom_params.add("c", std::vector{0.28067, 0.22291, 2.1979});
       desc.add("pomeronTrajectory", pom_params);
       ParametersDescription reg_params;
-      reg_params.add<std::vector<double> >("a", {0.58400, 0.37888, 2.6063});
-      reg_params.add<std::vector<double> >("b", {0.01147, 3.7582, 0.49338});
-      reg_params.add<std::vector<double> >("c", {0.80107, 0.97307, 3.4924});
+      reg_params.add("a", std::vector{0.58400, 0.37888, 2.6063});
+      reg_params.add("b", std::vector{0.01147, 3.7582, 0.49338});
+      reg_params.add("c", std::vector{0.80107, 0.97307, 3.4924});
       desc.add("reggeonTrajectory", reg_params);
-      desc.add<double>("m02", 0.31985);
-      desc.add<double>("mp2", 49.457);
-      desc.add<double>("mr2", 0.15052);
-      desc.add<double>("q02", 0.52544);
-      desc.add<double>("lambda2", 0.06526);
+      desc.add("m02", 0.31985);
+      desc.add("mp2", 49.457);
+      desc.add("mr2", 0.15052);
+      desc.add("q02", 0.52544);
+      desc.add("lambda2", 0.06526);
       return desc;
     }
   };
 
-  struct HHTALLM final : public ALLM {
+  struct HHTALLM final : ALLM {
     using ALLM::ALLM;
     static ParametersDescription description() {
       auto desc = ALLM::description();
       desc.setDescription("HHT (continuum)");
       ParametersDescription pom_params;
-      pom_params.add<std::vector<double> >("a", {-0.835, -0.446, 10.6});
-      pom_params.add<std::vector<double> >("b", {-45.8, 55.7, -0.031});
-      pom_params.add<std::vector<double> >("c", {0.412, 0.164, 17.7});
+      pom_params.add("a", std::vector{-0.835, -0.446, 10.6});
+      pom_params.add("b", std::vector{-45.8, 55.7, -0.031});
+      pom_params.add("c", std::vector{0.412, 0.164, 17.7});
       desc.add("pomeronTrajectory", pom_params);
       ParametersDescription reg_params;
-      reg_params.add<std::vector<double> >("a", {0.706, 0.185, -16.4});
-      reg_params.add<std::vector<double> >("b", {-1.29, 4.51, 1.16});
-      reg_params.add<std::vector<double> >("c", {-1.04, 2.97, 0.163});
+      reg_params.add("a", std::vector{0.706, 0.185, -16.4});
+      reg_params.add("b", std::vector{-1.29, 4.51, 1.16});
+      reg_params.add("c", std::vector{-1.04, 2.97, 0.163});
       desc.add("reggeonTrajectory", reg_params);
-      desc.add<double>("m02", 0.446);
-      desc.add<double>("mp2", 74.2);
-      desc.add<double>("mr2", 29.3);
-      desc.add<double>("q02", 4.74e-5);
-      desc.add<double>("lambda2", 2.2e-8);
+      desc.add("m02", 0.446);
+      desc.add("mp2", 74.2);
+      desc.add("mr2", 29.3);
+      desc.add("q02", 4.74e-5);
+      desc.add("lambda2", 2.2e-8);
       return desc;
     }
   };
@@ -231,20 +227,20 @@ namespace cepgen::strfun {
       auto desc = ALLM::description();
       desc.setDescription("HHT_FT (continuum)");
       ParametersDescription pom_params;
-      pom_params.add<std::vector<double> >("a", {-0.075, -0.470, 9.2});
-      pom_params.add<std::vector<double> >("b", {-0.477, 54.0, 0.073});
-      pom_params.add<std::vector<double> >("c", {0.356, 0.171, 18.6});
+      pom_params.add("a", std::vector{-0.075, -0.470, 9.2});
+      pom_params.add("b", std::vector{-0.477, 54.0, 0.073});
+      pom_params.add("c", std::vector{0.356, 0.171, 18.6});
       desc.add("pomeronTrajectory", pom_params);
       ParametersDescription reg_params;
-      reg_params.add<std::vector<double> >("a", {0.882, 0.082, -8.5});
-      reg_params.add<std::vector<double> >("b", {0.339, 3.38, 1.07});
-      reg_params.add<std::vector<double> >("c", {-0.636, 3.37, -0.660});
+      reg_params.add("a", std::vector{0.882, 0.082, -8.5});
+      reg_params.add("b", std::vector{0.339, 3.38, 1.07});
+      reg_params.add("c", std::vector{-0.636, 3.37, -0.660});
       desc.add("reggeonTrajectory", reg_params);
-      desc.add<double>("m02", 0.388);
-      desc.add<double>("mp2", 50.8);
-      desc.add<double>("mr2", 0.838);
-      desc.add<double>("q02", 1.87e-5);
-      desc.add<double>("lambda2", 4.4e-9);
+      desc.add("m02", 0.388);
+      desc.add("mp2", 50.8);
+      desc.add("mr2", 0.838);
+      desc.add("q02", 1.87e-5);
+      desc.add("lambda2", 4.4e-9);
       return desc;
     }
   };
@@ -255,20 +251,20 @@ namespace cepgen::strfun {
       auto desc = ALLM::description();
       desc.setDescription("GD07p (continuum)");
       ParametersDescription pom_params;
-      pom_params.add<std::vector<double> >("a", {-0.105, -0.495, 1.29});
-      pom_params.add<std::vector<double> >("b", {-1.42, 4.51, 0.551});
-      pom_params.add<std::vector<double> >("c", {0.339, 0.127, 1.16});
+      pom_params.add("a", std::vector{-0.105, -0.495, 1.29});
+      pom_params.add("b", std::vector{-1.42, 4.51, 0.551});
+      pom_params.add("c", std::vector{0.339, 0.127, 1.16});
       desc.add("pomeronTrajectory", pom_params);
       ParametersDescription reg_params;
-      reg_params.add<std::vector<double> >("a", {0.374, 0.998, 0.775});
-      reg_params.add<std::vector<double> >("b", {2.71, 1.83, 1.26});
-      reg_params.add<std::vector<double> >("c", {0.838, 2.36, 1.77});
+      reg_params.add("a", std::vector{0.374, 0.998, 0.775});
+      reg_params.add("b", std::vector{2.71, 1.83, 1.26});
+      reg_params.add("c", std::vector{0.838, 2.36, 1.77});
       desc.add("reggeonTrajectory", reg_params);
-      desc.add<double>("m02", 0.454);
-      desc.add<double>("mp2", 30.7);
-      desc.add<double>("mr2", 0.117);
-      desc.add<double>("q02", 1.15);
-      desc.add<double>("lambda2", 0.06527);
+      desc.add("m02", 0.454);
+      desc.add("mp2", 30.7);
+      desc.add("mr2", 0.117);
+      desc.add("q02", 1.15);
+      desc.add("lambda2", 0.06527);
       return desc;
     }
   };
@@ -279,20 +275,20 @@ namespace cepgen::strfun {
       auto desc = ALLM::description();
       desc.setDescription("GD11p (continuum)");
       ParametersDescription pom_params;
-      pom_params.add<std::vector<double> >("a", {-0.11895, -0.4783, 1.353});
-      pom_params.add<std::vector<double> >("b", {1.0833, 2.656, 1.771});
-      pom_params.add<std::vector<double> >("c", {0.3638, 0.1211, 1.166});
+      pom_params.add("a", std::vector{-0.11895, -0.4783, 1.353});
+      pom_params.add("b", std::vector{1.0833, 2.656, 1.771});
+      pom_params.add("c", std::vector{0.3638, 0.1211, 1.166});
       desc.add("pomeronTrajectory", pom_params);
       ParametersDescription reg_params;
-      reg_params.add<std::vector<double> >("a", {0.3425, 1.0603, 0.5164});
-      reg_params.add<std::vector<double> >("b", {-10.408, 14.857, 0.07739});
-      reg_params.add<std::vector<double> >("c", {1.3633, 2.256, 2.209});
+      reg_params.add("a", std::vector{0.3425, 1.0603, 0.5164});
+      reg_params.add("b", std::vector{-10.408, 14.857, 0.07739});
+      reg_params.add("c", std::vector{1.3633, 2.256, 2.209});
       desc.add("reggeonTrajectory", reg_params);
-      desc.add<double>("m02", 0.5063);
-      desc.add<double>("mp2", 34.75);
-      desc.add<double>("mr2", 0.03190);
-      desc.add<double>("q02", 1.374);
-      desc.add<double>("lambda2", 0.06527);
+      desc.add("m02", 0.5063);
+      desc.add("mp2", 34.75);
+      desc.add("mr2", 0.03190);
+      desc.add("q02", 1.374);
+      desc.add("lambda2", 0.06527);
       return desc;
     }
   };

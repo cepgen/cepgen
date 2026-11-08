@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a generator worker to the list of handled modules
-#define REGISTER_GENERATOR_WORKER(name, obj)                                        \
-  namespace cepgen {                                                                \
-    struct BUILDERNM(obj) {                                                         \
-      BUILDERNM(obj)() { GeneratorWorkerFactory::get().registerModule<obj>(name); } \
-    };                                                                              \
-    static const BUILDERNM(obj) gGenWorker##obj;                                    \
-  }                                                                                 \
+#define REGISTER_GENERATOR_WORKER(name, obj)                                           \
+  namespace cepgen {                                                                   \
+    struct BUILDER_NAME(obj) {                                                         \
+      BUILDER_NAME(obj)() { GeneratorWorkerFactory::get().registerModule<obj>(name); } \
+    };                                                                                 \
+    static const BUILDER_NAME(obj) gGenWorker##obj;                                    \
+  }                                                                                    \
   static_assert(true, "")
 
 namespace cepgen {

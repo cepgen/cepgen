@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ namespace cepgen::apfelpp {
   class EvolutionStructureFunctions final : public strfun::Parameterisation {
   public:
     explicit EvolutionStructureFunctions(const ParametersList& params)
-        : strfun::Parameterisation(params),
+        : Parameterisation(params),
           apfel_grid_{{apfel::SubGrid{100, 1e-5, 3},
                        apfel::SubGrid{60, 1e-1, 3},
                        apfel::SubGrid{50, 6e-1, 3},
@@ -48,32 +48,32 @@ namespace cepgen::apfelpp {
       const auto as = [&](double mu) { return (*alpha_s_)(mu); };
       const auto fBq = [=](double q) { return apfel::ElectroWeakCharges(q, false); };  // effective charges
 
-      const auto dglap_obj = apfel::InitializeDglapObjectsQCD(apfel_grid_, thresholds);
-      auto evolved_pdfs = apfel::BuildDglap(dglap_obj, apfel::LHToyPDFs, mu0, perturb_order, as);
-      const apfel::TabulateObject<apfel::Set<apfel::Distribution> > tabulated_pdfs{*evolved_pdfs, 50, 1, 1000, 3};
+      const auto dglap_obj = InitializeDglapObjectsQCD(apfel_grid_, thresholds);
+      auto evolved_pdfs = BuildDglap(dglap_obj, apfel::LHToyPDFs, mu0, perturb_order, as);
+      const apfel::TabulateObject tabulated_pdfs{*evolved_pdfs, 50, 1, 1000, 3};
       const auto pdfs = [&](double x, double q) { return tabulated_pdfs.EvaluateMapxQ(x, q); };
 
       const auto process_dis = steer<std::string>("processDIS");
       if (process_dis == "NC") {
         const auto masses = steer<std::vector<double> >("masses");
-        const auto f2_obj = apfel::InitializeF2NCObjectsMassive(apfel_grid_, masses);
-        const auto fl_obj = apfel::InitializeFLNCObjectsMassive(apfel_grid_, masses);
-        auto f2 = apfel::BuildStructureFunctions(f2_obj, pdfs, perturb_order, as, fBq);
-        auto fl = apfel::BuildStructureFunctions(fl_obj, pdfs, perturb_order, as, fBq);
+        const auto f2_obj = InitializeF2NCObjectsMassive(apfel_grid_, masses);
+        const auto fl_obj = InitializeFLNCObjectsMassive(apfel_grid_, masses);
+        auto f2 = BuildStructureFunctions(f2_obj, pdfs, perturb_order, as, fBq);
+        auto fl = BuildStructureFunctions(fl_obj, pdfs, perturb_order, as, fBq);
         // tabulate structure functions
         f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
             [&](double q) { return f2.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
         fl_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
             [&](double q) { return fl.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
       } else if (process_dis == "CC") {
-        const auto f2p_obj = apfel::InitializeF2CCPlusObjectsZM(apfel_grid_, thresholds);
-        const auto f2m_obj = apfel::InitializeF2CCMinusObjectsZM(apfel_grid_, thresholds);
-        const auto flp_obj = apfel::InitializeFLCCPlusObjectsZM(apfel_grid_, thresholds);
-        const auto flm_obj = apfel::InitializeFLCCMinusObjectsZM(apfel_grid_, thresholds);
-        auto f2p = apfel::BuildStructureFunctions(f2p_obj, pdfs, perturb_order, as, fBq);
-        auto f2m = apfel::BuildStructureFunctions(f2m_obj, pdfs, perturb_order, as, fBq);
-        auto flp = apfel::BuildStructureFunctions(flp_obj, pdfs, perturb_order, as, fBq);
-        auto flm = apfel::BuildStructureFunctions(flm_obj, pdfs, perturb_order, as, fBq);
+        const auto f2p_obj = InitializeF2CCPlusObjectsZM(apfel_grid_, thresholds);
+        const auto f2m_obj = InitializeF2CCMinusObjectsZM(apfel_grid_, thresholds);
+        const auto flp_obj = InitializeFLCCPlusObjectsZM(apfel_grid_, thresholds);
+        const auto flm_obj = InitializeFLCCMinusObjectsZM(apfel_grid_, thresholds);
+        auto f2p = BuildStructureFunctions(f2p_obj, pdfs, perturb_order, as, fBq);
+        auto f2m = BuildStructureFunctions(f2m_obj, pdfs, perturb_order, as, fBq);
+        auto flp = BuildStructureFunctions(flp_obj, pdfs, perturb_order, as, fBq);
+        auto flm = BuildStructureFunctions(flm_obj, pdfs, perturb_order, as, fBq);
         // tabulate structure functions
         f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
             [&](double q) { return f2p.at(0).Evaluate(q) - f2m.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
@@ -83,7 +83,7 @@ namespace cepgen::apfelpp {
     }
 
     static ParametersDescription description() {
-      auto desc = strfun::Parameterisation::description();
+      auto desc = Parameterisation::description();
       desc.setDescription("APFEL++ DIS structure functions");
       desc.add("mu0", 1.3).setDescription("initial scale");
       desc.add("masses", std::vector<double>{0., 0., 0., 1.3, 4.75, 175.});

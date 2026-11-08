@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2024  Laurent Forthomme
+ *  Copyright (C) 2017-2025  Laurent Forthomme
  *                2017       Wolfgang Schaefer
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,28 +38,28 @@ namespace cepgen::strfun {
           resonances_model_(StructureFunctionsFactory::get().build(res_params_)),
           perturbative_model_(StructureFunctionsFactory::get().build(pert_params_)),
           continuum_model_(StructureFunctionsFactory::get().build(cont_params_)) {
-      CG_DEBUG("LUXlike") << "LUXlike structure functions evaluator built with:\n"
-                          << " * Q² cut:             " << q2_cut_ << " GeV²\n"
-                          << " * W² ranges:          " << w2_lim_.at(0) << " GeV² / " << w2_lim_.at(1) << " GeV²\n"
-                          << " *   resonances model: " << *resonances_model_ << "\n"
-                          << " * perturbative model: " << *perturbative_model_ << "\n"
-                          << " *    continuum model: " << *continuum_model_ << "\n"
-                          << " * higher-twist corr:  " << higher_twist_ << ".";
+      CG_DEBUG("Schaefer") << "LUX-like structure functions evaluator built with:\n"
+                           << " * Q² cut:             " << q2_cut_ << " GeV²\n"
+                           << " * W² ranges:          " << w2_lim_.at(0) << " GeV² / " << w2_lim_.at(1) << " GeV²\n"
+                           << " *   resonances model: " << *resonances_model_ << "\n"
+                           << " * perturbative model: " << *perturbative_model_ << "\n"
+                           << " *    continuum model: " << *continuum_model_ << "\n"
+                           << " * higher-twist corr:  " << higher_twist_ << ".";
       if (w2_lim_.size() < 2)
-        throw CG_FATAL("LUXlike") << "Invalid number of transition regions for W^2. Should have two, got " << w2_lim_
-                                  << ".";
+        throw CG_FATAL("Schaefer") << "Invalid number of transition regions for W^2. Should have two, got " << w2_lim_
+                                   << ".";
       inv_omega_range_ = 1. / (w2_lim_.at(1) - w2_lim_.at(0));
       if (inv_omega_range_ <= 0.)
-        throw CG_FATAL("LUXlike") << "Invalid W^2 transition regions definitions: " << w2_lim_.at(0) << " / "
-                                  << w2_lim_.at(1) << " GeV^2!";
+        throw CG_FATAL("Schaefer") << "Invalid W^2 transition regions definitions: " << w2_lim_.at(0) << " / "
+                                   << w2_lim_.at(1) << " GeV^2!";
     }
 
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("LUXlike (hybrid)");
-      desc.add<double>("Q2cut", 9.);
-      desc.add<std::vector<double> >("W2limits", {3., 4.});
-      desc.add<double>("higherTwist", 5.5);
+      desc.setDescription("LUX-like (hybrid)");
+      desc.add("Q2cut", 9.);
+      desc.add("W2limits", std::vector{3., 4.});
+      desc.add("higherTwist", 5.5);
       desc.add("resonancesSF", StructureFunctionsFactory::get().describeParameters("ChristyBosted"));
       desc.add("perturbativeSF", StructureFunctionsFactory::get().describeParameters("MSTWGrid"));
       desc.add("continuumSF", StructureFunctionsFactory::get().describeParameters("GD11p"));

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 #include "CepGen/Utils/Value.h"
 #include "CepGenRoot/ROOTTreeInfo.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::root {
   /// ROOT handler for an event tree import
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -38,24 +40,24 @@ namespace cepgen::root {
         throw CG_FATAL("root::EventImporter")
             << "Failed to load the ROOT file '" << steer<std::string>("filename") << "'.";
       run_tree_.attach(file_.get());
-      evt_tree_.attach(file_.get());
+      event_tree_.attach(file_.get());
     }
 
     static ParametersDescription description() {
       auto desc = cepgen::EventImporter::description();
       desc.setDescription("ROOT TTree importer module");
-      desc.add<std::string>("filename", "output.root").setDescription("Input filename");
+      desc.add("filename", "output.root"s).setDescription("Input filename");
       return desc;
     }
 
-    inline bool operator>>(Event& evt) override { return evt_tree_.next(evt); }
+    bool operator>>(Event& event) override { return event_tree_.next(event); }
 
   private:
-    inline void initialise() override { setCrossSection(Value{run_tree_.xsect, run_tree_.errxsect}); }
+    void initialise() override { setCrossSection(Value{run_tree_.xsect, run_tree_.errxsect}); }
 
     const std::unique_ptr<TFile> file_;
     ROOT::CepGenRun run_tree_;
-    ROOT::CepGenEvent evt_tree_;
+    ROOT::CepGenEvent event_tree_;
   };
 }  // namespace cepgen::root
 using ROOTEventImporter = cepgen::root::EventImporter;

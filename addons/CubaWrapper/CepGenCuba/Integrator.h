@@ -35,7 +35,7 @@ namespace cepgen::cuba {
     static ParametersDescription description();
     static Integrand* gIntegrand;
 
-    Value integrate(Integrand&) override;
+    Value run(Integrand&, const std::vector<Limits>&) override;
 
   protected:
     virtual Value integrate() = 0;
@@ -43,7 +43,6 @@ namespace cepgen::cuba {
     int ncomp_, nvec_;
     double epsrel_, epsabs_;
     int mineval_, maxeval_;
-    int verbose_;
   };
 
   int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/);

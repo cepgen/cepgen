@@ -13,13 +13,14 @@ find_path(DELPHES_INCLUDE NAMES modules classes HINTS $ENV{DELPHES_DIR} PATH_SUF
 find_path(DELPHES_EXT_INCLUDE NAMES ExRootAnalysis HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES external include)
 
 #----- build the object
-cepgen_build(CepGenDelphes SOURCES src/*.cpp
-    EXT_HEADERS ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE} ${ROOT_INCLUDE_DIRS}
-    EXT_LIBS ${DELPHES} ${ROOT_LIBRARIES}
+cepgen_build(CepGenDelphes
+    SOURCES src/*.cpp
+    INCLUDES ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE} ${ROOT_INCLUDE_DIRS}
+    LIBRARIES ${DELPHES} ${ROOT_LIBRARIES}
     DEFINITIONS ${ROOT_DEFINITIONS}
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS ${ROOT_CXX_FLAGS}
-    INSTALL_COMPONENT delphes)
+    COMPONENT delphes)
 cpack_add_component(delphes
     DISPLAY_NAME "CepGen Delphes wrappers library"
     DESCRIPTION "A CepGen wrapper to the Delphes utility"

@@ -8,6 +8,7 @@ if(NOT CTML_INCLUDE)
 endif()
 
 #----- build the object
-cepgen_build(CepGenCTML SOURCES src/*.cpp
-    EXT_HEADERS ${CTML_INCLUDE}
-    INSTALL_COMPONENT doc)
+cepgen_build(CepGenCTML
+    SOURCES src/*.cpp
+    INCLUDES ${CTML_INCLUDE}
+    COMPONENT doc)

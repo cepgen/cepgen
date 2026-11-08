@@ -53,6 +53,11 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("python,p", "also add python integrator?", &python_integrators, false)
       .parse();
 
+  vector<pair<string, string> > known_failures{
+      {"Naive", "python"}};  //FIXME list of tests known to fail... ideally empty...
+  if (!known_failures.empty())
+    CG_WARNING("main") << "Known tests failures: " << known_failures << ".";
+
   ankerl::nanobench::Bench bench;
   bench.title("CepGen v" + cepgen::version::tag + " (" + cepgen::version::extended + ")").epochs(num_epochs);
   for (const auto& functional_parser : functional_parsers) {
@@ -61,11 +66,15 @@ int main(int argc, char* argv[]) {
     for (const auto& integrator_name : integrators) {
       if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
         continue;
+      auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
+      if (std::find(known_failures.begin(), known_failures.end(), std::make_pair(integrator_name, functional_parser)) !=
+          known_failures.end())  // skip known failures
+        continue;
+      if (integrator->oneDimensional() && integrand.size() != 1)  // skip incompatible integrators
+        continue;
       bench.context("integrator", integrator_name)
-          .run(functional_parser + "+" + integrator_name, [&integrator_name, &integrand] {
-            auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
-            integrator->integrate(integrand);
-          });
+          .run(functional_parser + "+" + integrator_name,
+               [&integrator, &integrand] { integrator->integrate(integrand); });
     }
   }
   render_benchmark(bench, filename, outputs);

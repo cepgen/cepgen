@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,12 +42,12 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Capella et al.");
-      desc.add<double>("A", 0.1502);
-      desc.add<double>("Bu", 1.2064);
-      desc.add<double>("Bd", 0.1798);
-      desc.add<double>("alphaR", 0.4150).setDescription("Reggeon intercept");
-      desc.add<double>("delta0", 0.08).setDescription("effective intercept at Q^2=0");
-      desc.add<std::vector<double> >("coefficients", {0.2631, 0.6452, 3.5489, 1.1170});
+      desc.add("A", 0.1502);
+      desc.add("Bu", 1.2064);
+      desc.add("Bd", 0.1798);
+      desc.add("alphaR", 0.4150).setDescription("Reggeon intercept");
+      desc.add("delta0", 0.08).setDescription("effective intercept at Q^2=0");
+      desc.add("coefficients", std::vector{0.2631, 0.6452, 3.5489, 1.1170});
       return desc;
     }
 

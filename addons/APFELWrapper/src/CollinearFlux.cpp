@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Message.h"
+
+using namespace std::string_literals;
 
 namespace cepgen::apfel {
   /// Generic partonic level perturbative structure functions built from an external PDFs grid
@@ -55,18 +57,18 @@ namespace cepgen::apfel {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("APFEL coll.flux");
-      desc.add<std::string>("set", "").setDescription("LHAPDF set to use at the initial scale");
-      desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
-      desc.add<Limits>("qrange", {1., 100.})
+      desc.add("set", ""s).setDescription("LHAPDF set to use at the initial scale");
+      desc.addAs<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
+      desc.add("qrange", Limits{1., 100.})
           .setDescription("virtuality range (in GeV) for the PDFs/alphaQCD/alphaQED evolutions");
-      desc.add<int>("maxFlavourPDFs", 7)
+      desc.add("maxFlavourPDFs", 7)
           .setDescription("maximum number of flavours that the evolution of alphaQCD and alphaQED can reach");
-      desc.add<int>("perturbativeOrder", 2).setDescription("evolution perturbative order");
-      desc.add<bool>("fastEvolution", false).setDescription("toggle the fast evolution");
+      desc.add("perturbativeOrder", 2).setDescription("evolution perturbative order");
+      desc.add("fastEvolution", false).setDescription("toggle the fast evolution");
       return desc;
     }
 
-    cepgen::pdgid_t partonPdgId() const override { return parton_pdgid_; }
+    spdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
     double fluxQ2(double x, double q2) const override {
@@ -75,11 +77,11 @@ namespace cepgen::apfel {
       const auto q = std::sqrt(q2);
       if (!q_range_.contains(q))
         return 0.;
-      return prefactor_ * APFEL::xPDFxQ(parton_pdgid_, x, q);
+      return APFEL::xPDFxQ(parton_pdgid_, x, q);
     }
 
   private:
-    const pdgid_t parton_pdgid_;
+    const spdgid_t parton_pdgid_;
     const Limits q_range_;
   };
 }  // namespace cepgen::apfel

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,13 +19,16 @@
 #ifndef CepGenBases_BasesCommonBlocks_h
 #define CepGenBases_BasesCommonBlocks_h
 
+#include <array>
+#include <cstdint>
+
 extern "C" {
 void bsinit_();
 void bases_(double (*fxn)(double[]), double& s, double& sigma, double& ctime, int& it1, int& it2);
 void spinfo_(int&);
 void spring_(double (*func)(double*), int& mxtry);
 
-static constexpr size_t mxdim = 50;
+static constexpr std::size_t mxdim = 50;
 extern struct {
   std::array<double, mxdim> xl, xu;
   int ndim, nwild;

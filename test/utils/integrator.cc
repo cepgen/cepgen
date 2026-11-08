@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   if (quiet)
     CG_LOG_LEVEL(nothing);
 
-  //--- tests definition
+  // tests definition
   struct test_t {
     cepgen::FunctionalIntegrand integrand;
     double result{0.};
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
       test_t{cepgen::FunctionalIntegrand(
                  "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", {"x", "y", "z"}, func_mod),
              1.3932039296856768591842462603255});
-  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("sin(x)", {"x"}, func_mod), 2., {cepgen::Limits{0., M_PI}}});
+  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("sin(x)", {"x"}, func_mod), 2., {{0., M_PI}}});
 
   CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
@@ -70,14 +70,14 @@ int main(int argc, char* argv[]) {
   for (const auto& integrator_name : integrators) {
     if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
       continue;
-    auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
+    const auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
 
-    //--- integration part
+    // integration part
     size_t i = 0;
     for (auto& test : tests) {
-      if (!test.limits.empty())
-        integrator->setLimits(test.limits);
-      const auto res = integrator->integrate(test.integrand);
+      if (test.integrand.size() > 1 && integrator->oneDimensional())  // skip multi-dimensional integration
+        continue;                                                     // if integrator does not support it
+      const auto res = integrator->integrate(test.integrand, test.limits);
       const auto test_name = integrator_name + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
       CG_TEST_VALUES(test.result, res, num_sigma, test_name + " rel. unc. control");

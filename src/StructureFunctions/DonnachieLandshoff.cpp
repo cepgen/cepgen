@@ -38,12 +38,12 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Donnachie-Landshoff");
-      desc.add<double>("A", 0.324);
-      desc.add<double>("B", 0.098);
-      desc.add<double>("a", 0.561991692786383);
-      desc.add<double>("b", 0.011133);
-      desc.add<double>("epsilon", 0.0808);
-      desc.add<double>("deltaR", 0.5475);
+      desc.add("A", 0.324);
+      desc.add("B", 0.098);
+      desc.add("a", 0.561991692786383);
+      desc.add("b", 0.011133);
+      desc.add("epsilon", 0.0808);
+      desc.add("deltaR", 0.5475);
       return desc;
     }
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,9 +29,11 @@
 #define LHAPDF_GE_6 1
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen::strfun {
   /// Generic partonic level perturbative structure functions built from an external PDFs grid
-  class LHAPDFPartonic : public PartonicParameterisation {
+  class LHAPDFPartonic final : public PartonicParameterisation {
   public:
     /// Quarks types
     enum class Mode { full = 0, valence = 1, sea = 2 };
@@ -45,21 +47,19 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = PartonicParameterisation::description();
       desc.setDescription("LHAPDF (partonic)");
-      desc.add<std::string>("pdfSet", "cteq66").setDescription("PDF modelling to be considered");
-      desc.add<int>("pdfCode", 0);
-      desc.add<int>("pdfMember", 0);
+      desc.add("pdfSet", "cteq66"s).setDescription("PDF modelling to be considered");
+      desc.add("pdfCode", 0);
+      desc.add("pdfMember", 0);
       return desc;
     }
 
   private:
     void initialise();
     double evalxQ2(int flavour, double xbj, double q2) override;
-    /// String-type PDF identifier (default)
-    std::string pdf_set_;
-    /// Integer-type PDF identifier (if no string version is provided)
-    int pdf_code_;
-    /// PDF set used
-    int pdf_member_;
+
+    std::string pdf_set_;   ///< String-type PDF identifier (default)
+    const int pdf_code_;    ///< Integer-type PDF identifier (if no string version is provided)
+    const int pdf_member_;  ///< PDF set used
     bool initialised_{false};
 
 #ifdef LHAPDF_GE_6
@@ -74,15 +74,14 @@ namespace cepgen::strfun {
     std::string lhapdf_version, pdf_description, pdf_type;
 #ifdef LHAPDF_GE_6
     try {
-      //--- check if PDF code is set
-      if (pdf_code_ != 0) {
-        auto pdf = LHAPDF::lookupPDF(pdf_code_);
-        if (pdf.second != 0)
-          throw CG_FATAL("LHAPDFPartonic") << "Failed to retrieve PDFset with id=" << pdf_code_ << "!";
-        if (!pdf_set_.empty() && pdf_set_ != pdf.first)
-          CG_WARNING("LHAPDFPartonic") << "PDF set name changed from \"" << pdf_set_ << "\" to \"" << pdf.first
+      if (pdf_code_ != 0) {  // check if PDF code is set
+        const auto [pdf_set_name, pdf_code] = LHAPDF::lookupPDF(pdf_code_);
+        if (pdf_code != 0)
+          throw CG_FATAL("LHAPDFPartonic") << "Failed to retrieve PDF set with id=" << pdf_code_ << "!";
+        if (!pdf_set_.empty() && pdf_set_ != pdf_set_name)
+          CG_WARNING("LHAPDFPartonic") << "PDF set name changed from \"" << pdf_set_ << "\" to \"" << pdf_set_name
                                        << "\".";
-        pdf_set_ = pdf.first;
+        pdf_set_ = pdf_set_name;
       }
       lha_pdf_set_ = LHAPDF::PDFSet(pdf_set_);
       lha_pdf_set_.mkPDFs<std::unique_ptr<LHAPDF::PDF> >(pdfs_);
@@ -114,8 +113,7 @@ namespace cepgen::strfun {
   }
 
   double LHAPDFPartonic::evalxQ2(int flavour, double xbj, double q2) {
-    if (!initialised_)
-      initialise();
+    initialise();
 #ifdef LHAPDF_GE_6
     auto& member = *pdfs_[pdf_member_];
     if (!member.inPhysicalRangeXQ2(xbj, q2)) {

@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   const std::vector<short> lambdas = {-1, 0, 1};
   auto dsig_dcosth = [&integrator, &lambdas](
                          const cepgen::NachtmannAmplitudes& ampl, double shat, double costh) -> double {
-    const auto kin = cepgen::NachtmannAmplitudes::Kinematics::fromScosTheta(shat, costh, 80.379);
+    const auto kin = cepgen::NachtmannAmplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
     auto dsig = [&ampl, &kin, &lambdas](double theta1, double phi1, double theta2, double phi2) -> double {
       auto l = [](short lam, double theta, double phi) -> std::complex<double> {
         auto dp = [](double theta) -> double { return 0.5 * (1. + cos(theta)) * M_SQRT2; };
@@ -97,13 +97,12 @@ int main(int argc, char* argv[]) {
       return dsig;
     };
 
-    cepgen::FunctionIntegrand integr(4, [&dsig](const std::vector<double>& params) {
+    cepgen::FunctionIntegrand integrand(4, [&dsig](const std::vector<double>& params) {
       double theta1 = acos(params[0] * 2. - 1.), theta2 = acos(params[2] * 2. - 1.);
       double phi1 = params[1] * 2. * M_PI, phi2 = params[3] * 2. * M_PI;
       return dsig(theta1, phi1, theta2, phi2);
     });
-    auto val = integrator->integrate(integr);
-    return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * val;
+    return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * integrator->integrate(integrand);
   };
 
   for (auto i = static_cast<int>(cepgen::NachtmannAmplitudes::Mode::SM);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,12 +29,10 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// Compute the collinear flux for this x value and virtuality
-    virtual double fluxQ2(double x, double q2) const;
-    /// Compute the collinear flux for this x value and remnant mass
-    virtual double fluxMX2(double x, double mf2 = 0.) const;
+    virtual double fluxQ2(double x, double q2) const;         ///< Compute the collinear flux for an x/virtuality
+    virtual double fluxMX2(double x, double mf2 = 0.) const;  ///< Compute the collinear flux for an x/remnant mass
 
-    bool ktFactorised() const override final { return false; }
+    bool ktFactorised() const final { return false; }
   };
 }  // namespace cepgen
 

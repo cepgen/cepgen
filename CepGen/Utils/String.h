@@ -118,7 +118,7 @@ namespace cepgen::utils {
   /// Replace all occurrences of multiple texts by others
   std::string replaceAll(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
   /// Split a string according to a separation character
-  std::vector<std::string> split(const std::string&, char, bool trim = false);
+  std::vector<std::string> split(const std::string&, char, bool trim_parts = false);
   /// Merge a printable type in a single string
   template <typename T>
   inline std::string merge(const T& val, const std::string&) {
@@ -168,6 +168,11 @@ namespace cepgen::utils {
   template <class T>
   inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
     return repr<T>(vec, [](const T& xv) { return toString(xv); }, sep);
+  }
+  /// Helper to print a set of values
+  template <class T>
+  inline std::string repr(const std::set<T>& vec, const std::string& sep = ",") {
+    return repr<T>(std::vector(vec.begin(), vec.end()), sep);
   }
   std::string randomString(size_t size);      ///< Generate a random string of a given size
   std::string ltrim(const std::string& str);  ///< Trim leading spaces

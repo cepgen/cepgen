@@ -39,6 +39,7 @@ namespace cepgen::utils {
     std::set<double> xCoords() const;    ///< List of horizontal axis coordinates
     const Value& valueAt(double) const;  ///< Retrieve the value of the graph at a given coordinate
 
+    inline bool empty() const override { return values_.empty(); }
     inline bool isGraph1D() const override { return true; }
 
   private:
@@ -60,6 +61,7 @@ namespace cepgen::utils {
     std::set<double> yCoords() const;            ///< List of vertical axis coordinates
     const Value& valueAt(double, double) const;  ///< Retrieve the value of the graph at the given coordinates
 
+    inline bool empty() const override { return values_.empty(); }
     inline bool isGraph2D() const override { return true; }
 
   private:

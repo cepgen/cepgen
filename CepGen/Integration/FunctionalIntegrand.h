@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,15 +26,17 @@
 
 namespace cepgen {
   /// Wrapper to a string-built functional to be integrated
-  class FunctionalIntegrand : public Integrand {
+  class FunctionalIntegrand final : public Integrand {
   public:
-    explicit FunctionalIntegrand(const std::string&, const std::vector<std::string>&, const std::string& func_eval);
+    explicit FunctionalIntegrand(const std::string& expression,
+                                 const std::vector<std::string>& variables,
+                                 const std::string& functional_evaluator);
 
     double eval(const std::vector<double>&) override;
     size_t size() const override;
 
   private:
-    std::unique_ptr<utils::Functional> func_;
+    std::unique_ptr<utils::Functional> functional_;
   };
 }  // namespace cepgen
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@
 
 #ifndef __APPLE__
 #include <cstring>
+#else
+#include <string.h>
 #endif
 
 #ifdef __GNUG__
@@ -38,6 +40,8 @@
 
 #include <memory>
 #endif
+
+using namespace std::string_literals;
 
 namespace cepgen::utils {
   std::regex kFloatRegex("[+-]?[0-9]*\\.?[0-9]+([eEdD][+-]?[0-9]+)?", std::regex_constants::extended);
@@ -52,7 +56,7 @@ namespace cepgen::utils {
   /// String implementation of the boldification procedure
   template <>
   std::string boldify(std::string str) {
-    return colourise(str, Colour::none, Modifier::bold);
+    return colourise(std::move(str), Colour::none, Modifier::bold);
   }
 
   /// C-style character array implementation of the boldification procedure
@@ -91,17 +95,18 @@ namespace cepgen::utils {
 
   std::string parseSpecialChars(const std::string& str) {
     return replaceAll(
-        str, {{"Α", "\\Alpha"},      {"Β", "\\Beta"},      {"Χ", "\\Chi"},     {"Δ", "\\Delta"},   {"Ε", "\\Epsilon"},
-              {"Φ", "\\Phi"},        {"Γ", "\\Gamma"},     {"Η", "\\Eta"},     {"Ι", "\\Iota"},    {"Κ", "\\Kappa"},
-              {"Λ", "\\Lambda"},     {"Μ", "\\Mu"},        {"Ν", "\\Nu"},      {"Ο", "\\Omicron"}, {"Π", "\\Pi"},
-              {"Θ", "\\Theta"},      {"Ρ", "\\Rho"},       {"Σ", "\\Sigma"},   {"Τ", "\\Tau"},     {"Υ", "\\Upsilon"},
-              {"Ω", "\\Omega"},      {"Ξ", "\\Xi"},        {"Ψ", "\\Psi"},     {"Ζ", "\\Zeta"},    {"α", "\\alpha"},
-              {"β", "\\beta"},       {"χ", "\\Chi"},       {"δ", "\\delta"},   {"ε", "\\epsilon"}, {"ɸ", "\\phi"},
-              {"γ", "\\gamma"},      {"η", "\\eta"},       {"ι", "\\iota"},    {"κ", "\\kappa"},   {"λ", "\\lambda"},
-              {"μ", "\\mu"},         {"ν", "\\nu"},        {"ο", "\\omicron"}, {"π", "\\pi"},      {"θ", "\\theta"},
-              {"ρ", "\\rho"},        {"σ", "\\sigma"},     {"τ", "\\tau"},     {"υ", "\\upsilon"}, {"ω", "\\omega"},
-              {"ξ", "\\xi"},         {"ψ", "\\psi"},       {"ζ", "\\zeta"},    {"⁺", "^{+}"},      {"¯", "^{-}"},
-              {"→", "\\rightarrow"}, {"←", "\\leftarrow"}, {"↝ ", "\\leadsto"}});
+        str,
+        {{"Α", "\\Alpha"},       {"Β", "\\Beta"},       {"Χ", "\\Chi"},      {"Δ", "\\Delta"},   {"Ε", "\\Epsilon"},
+         {"Φ", "\\Phi"},         {"Γ", "\\Gamma"},      {"Η", "\\Eta"},      {"Ι", "\\Iota"},    {"Κ", "\\Kappa"},
+         {"Λ", "\\Lambda"},      {"Μ", "\\Mu"},         {"Ν", "\\Nu"},       {"Ο", "\\Omicron"}, {"Π", "\\Pi"},
+         {"Θ", "\\Theta"},       {"Ρ", "\\Rho"},        {"Σ", "\\Sigma"},    {"Τ", "\\Tau"},     {"Υ", "\\Upsilon"},
+         {"Ω", "\\Omega"},       {"Ξ", "\\Xi"},         {"Ψ", "\\Psi"},      {"Ζ", "\\Zeta"},    {"α", "\\alpha"},
+         {"β", "\\beta"},        {"χ", "\\Chi"},        {"δ", "\\delta"},    {"ε", "\\epsilon"}, {"ɸ", "\\phi"},
+         {"γ", "\\gamma"},       {"η", "\\eta"},        {"ι", "\\iota"},     {"κ", "\\kappa"},   {"λ", "\\lambda"},
+         {"μ", "\\mu"},          {"ν", "\\nu"},         {"ο", "\\omicron"},  {"π", "\\pi"},      {"θ", "\\theta"},
+         {"ρ", "\\rho"},         {"σ", "\\sigma"},      {"τ", "\\tau"},      {"υ", "\\upsilon"}, {"ω", "\\omega"},
+         {"ξ", "\\xi"},          {"ψ", "\\psi"},        {"ζ", "\\zeta"},     {"⁺", "^{+}"},      {"¯", "^{-}"},
+         {"→", "\\rightarrow"s}, {"←", "\\leftarrow"s}, {"↝ ", "\\leadsto"s}});
   }
 
   std::string sanitise(const std::string& str) {
@@ -113,7 +118,7 @@ namespace cepgen::utils {
     auto tm = *std::localtime(&now);
     char out_str[50];
     strftime(out_str, 50, fmt.c_str(), &tm);
-    return std::string(out_str);
+    return {out_str};
   }
 
   size_t replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -151,7 +156,7 @@ namespace cepgen::utils {
   template <>
   std::string toString(const std::wstring& str) {
     typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
-    std::wstring_convert<convert_type, wchar_t> converter;
+    std::wstring_convert<convert_type> converter;
     return converter.to_bytes(str);
   }
 
@@ -171,12 +176,14 @@ namespace cepgen::utils {
 
   std::wstring toWstring(const std::string& str) {
     typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
-    std::wstring_convert<convert_type, wchar_t> converter;
+    std::wstring_convert<convert_type> converter;
     return converter.from_bytes(str);
   }
 
   template <>
   std::string toString(const double& val) {
+    if (val == std::numeric_limits<double>::infinity())  // check for infinity
+      return "inf"s;
     auto out = format("%.16g", val);
     if (out.find('.') == std::string::npos && out.find('e') == std::string::npos && out.find('E') == std::string::npos)
       out += ".0";
@@ -223,8 +230,9 @@ namespace cepgen::utils {
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
+    static constexpr size_t charset_length = 26 * 2 + 10;
     auto rng = std::mt19937{std::random_device{}()};
-    auto dist = std::uniform_int_distribution{{}, std::strlen(charset) - 1};
+    auto dist = std::uniform_int_distribution{{}, charset_length - 1};
     auto output = std::string(size, '\0');
     std::generate_n(output.begin(), size, [=, &dist, &rng]() { return charset[dist(rng)]; });
     return output;
@@ -235,26 +243,24 @@ namespace cepgen::utils {
                        : format("%s%s", word.c_str(), num > 1. ? "s" : "");
   }
 
-  std::vector<std::string> split(const std::string& str, char delim, bool trim) {
-    std::vector<std::string> out;
+  std::vector<std::string> split(const std::string& str, char delim, bool trim_parts) {
     if (str.empty())
-      return out;
+      return {};
     std::string token;
     std::istringstream iss(str);
-    while (std::getline(iss, token, delim)) {
-      const auto tok = trim ? ltrim(rtrim(token)) : token;
-      if (!trim || !tok.empty())
+    std::vector<std::string> out;
+    while (std::getline(iss, token, delim))
+      if (const auto tok = trim_parts ? trim(token) : token; !trim_parts || !tok.empty())
         out.emplace_back(tok);
-    }
     return out;
   }
 
   template <typename T>
   std::string merge(const std::vector<T>& vec, const std::string& delim) {
     if (vec.empty())
-      return std::string();
+      return {};
     std::ostringstream oss;
-    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = ""s](const auto& val) mutable {
       oss << sep << val;
       sep = delim;
     });
@@ -272,9 +278,9 @@ namespace cepgen::utils {
   template <typename T>
   std::string merge(const std::vector<std::vector<T> >& vec, const std::string& delim) {
     if (vec.empty())
-      return std::string();
+      return {};
     std::ostringstream oss;
-    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+    std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = ""s](const auto& val) mutable {
       const auto mrg = merge(val, delim);
       oss << sep << mrg;
       sep = delim;
@@ -377,7 +383,7 @@ namespace cepgen::utils {
 
   std::string describeError(int error_number) {
 #ifdef __APPLE__
-    return std::to_string(errnum);
+    return std::to_string(error_number);
 #else
     char* error = strerror(error_number);
     std::string error_description;

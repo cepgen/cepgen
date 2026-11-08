@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2025  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,26 +24,28 @@
 #include "CepGenPython/Environment.h"
 #include "CepGenPython/Error.h"
 
+using namespace std::string_literals;
+
 namespace cepgen::python {
   class Integrator final : public cepgen::Integrator {
   public:
     explicit Integrator(const ParametersList& params)
         : cepgen::Integrator(params), env_(ParametersList().setName("python_integrator")) {
-      auto cfg = ObjectPtr::importModule(steer<std::string>("module"));
-      if (!cfg)
+      if (const auto cfg = ObjectPtr::importModule(steer<std::string>("module")); cfg) {
+        if (func_ = cfg.attribute("integrate"); !func_ || !PyCallable_Check(func_.get()))
+          throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
+      } else
         throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
-      if (func_ = cfg.attribute("integrate"); !func_ || !PyCallable_Check(func_.get()))
-        throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
     }
 
-    void setLimits(const std::vector<Limits>& limits) override { lims_ = ObjectPtr::make(limits); }
-
-    Value integrate(Integrand& integrand) override {
+    Value run(Integrand& integrand, const std::vector<Limits>& range) override {
+      lims_ = ObjectPtr::make(range);
       gIntegrand = &integrand;
       const auto iterations = steer<int>("iterations");
       const auto evals = steer<int>("evals");
-      PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
-      ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, ObjectPtr::make<std::string>("integrand").get()));
+      PyMethodDef python_integrand = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
+      const ObjectPtr function(
+          PyCFunction_NewEx(&python_integrand, nullptr, ObjectPtr::make<std::string>("integrand").get()));
       const auto value =
           lims_ ? func_(function.get(), static_cast<int>(integrand.size()), iterations, 1000, evals, lims_.get())
                 : func_(function.get(), static_cast<int>(integrand.size()), iterations, 1000, evals);
@@ -60,10 +62,10 @@ namespace cepgen::python {
     static ParametersDescription description() {
       auto desc = cepgen::Integrator::description();
       desc.setDescription("Python integration algorithm");
-      desc.add<std::string>("module", "IntegrationAlgos.Vegas")
+      desc.add("module", "IntegrationAlgos.Vegas"s)
           .setDescription("name of the Python module embedding the integrate() function");
-      desc.add<int>("iterations", 10);
-      desc.add<int>("evals", 1000);
+      desc.add("iterations", 10);
+      desc.add("evals", 1000);
       return desc;
     }
     static Integrand* gIntegrand;
