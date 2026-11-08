@@ -153,26 +153,27 @@ namespace cepgen {
 
   template <typename T>
   bool YODAHistsHandler<T>::operator<<(const Event& ev) {
+    const double weight = static_cast<double>(cross_section_) * ev.metadata("weight");
     // increment the corresponding histograms
     for (auto& h_var : hists1d_)
 #if defined(YODA_VERSION) && YODA_VERSION < 20000
-      h_var.second.fillBin(browser_.get(ev, h_var.first), cross_section_);
+      h_var.second.fillBin(browser_.get(ev, h_var.first), weight);
 #else
-      h_var.second.fill(browser_.get(ev, h_var.first), cross_section_);
+      h_var.second.fill(browser_.get(ev, h_var.first), weight);
 #endif
     for (auto& h_var : hists2d_)
 #if defined(YODA_VERSION) && YODA_VERSION < 20000
-      h_var.second.fillBin(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+      h_var.second.fillBin(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), weight);
 #else
-      h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+      h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), weight);
 #endif
     for (auto& h_var : profiles1d_)
-      h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+      h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), weight);
     for (auto& h_var : profiles2d_)
       h_var.second.fill(browser_.get(ev, h_var.first[0]),
                         browser_.get(ev, h_var.first[1]),
                         browser_.get(ev, h_var.first[2]),
-                        cross_section_);
+                        weight);
     weight_cnt_.fill(ev.metadata("weight"));
     return true;
   }
