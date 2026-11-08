@@ -84,7 +84,7 @@ public:
     evt->set_scale(event.oneWithRole(Particle::Role::Intermediate).momentum().mass());
     evt->set_alpha_qed(event.metadata("alphaEM"));
     evt->set_alpha_qcd(event.metadata("alphaS"));
-    evt->set_weight(1.);
+    evt->set_weight(event.metadata("weight"));
 
     unsigned short i = 0;
     const auto& parts = compress_evt_ ? event.compress().particles() : event.particles();

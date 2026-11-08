@@ -38,7 +38,7 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
   add_attribute("AlphaQCD", make_shared<DoubleAttribute>(event.metadata("alphaS")));
   add_attribute("AlphaEM", make_shared<DoubleAttribute>(event.metadata("alphaEM")));
 
-  weights().push_back(1.);  // unweighted events
+  weights().push_back(event.metadata("weight"));  // unit weight for unweighted events
 
   const FourVector origin(0., 0., 0., 0.);
   int central_system_id = 0;

@@ -55,7 +55,7 @@ namespace cepgen::hepmc3 {
       }
       auto& hepeup = lhe_output_->hepeup;
       hepeup.heprup = &lhe_output_->heprup;
-      hepeup.XWGTUP = 1.;
+      hepeup.XWGTUP = static_cast<double>(cross_section_) * cepgen_event.metadata("weight");
       hepeup.XPDWUP = std::pair<double, double>(0., 0.);
       hepeup.SCALUP = 0.;
       hepeup.AQEDUP = cepgen_event.metadata("alphaEM");
@@ -83,8 +83,11 @@ namespace cepgen::hepmc3 {
     }
 
     void setCrossSection(const Value& cross_section) override {
-      lhe_output_->heprup.XSECUP[0] = cross_section;
-      lhe_output_->heprup.XERRUP[0] = cross_section.uncertainty();
+      cross_section_ = cross_section;
+      if (!lhe_output_->heprup.XSECUP.empty()) {  // only sized once this module is initialised
+        lhe_output_->heprup.XSECUP[0] = cross_section_;
+        lhe_output_->heprup.XERRUP[0] = cross_section_.uncertainty();
+      }
     }
 
   private:
@@ -100,13 +103,15 @@ namespace cepgen::hepmc3 {
       lhe_output_->heprup.resize(1);
       lhe_output_->heprup.XMAXUP[0] = 1.;
       lhe_output_->heprup.LPRUP[0] = 1;
-      lhe_output_->heprup.XSECUP[0] = 0.;  // placeholders
-      lhe_output_->heprup.XERRUP[0] = 0.;
+      lhe_output_->heprup.XSECUP[0] = cross_section_;  // the integration is performed before this initialisation
+      lhe_output_->heprup.XERRUP[0] = cross_section_.uncertainty();
+      lhe_output_->heprup.IDWTUP = 4;  // weighted events, with mean weight equal to the cross-section
     }
 
     const std::unique_ptr<LHEF::Writer> lhe_output_;
     const bool compress_;
     bool header_initialised_{false};
+    Value cross_section_{};  ///< Process cross-section, in pb
   };
 }  // namespace cepgen::hepmc3
 using cepgen::hepmc3::LHEFEventExporter;
