@@ -76,23 +76,24 @@ public:
 
   void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
   bool operator<<(const Event& event) override {
+    const double weight = static_cast<double>(cross_section_) * event.metadata("weight");
     // increment the corresponding histograms
     for (const auto& h_var : hists1d_)
-      h_var.second->Fill(browser_.get(event, h_var.first), cross_section_);
+      h_var.second->Fill(browser_.get(event, h_var.first), weight);
     for (const auto& h_var : hists2d_)
-      h_var.second->Fill(browser_.get(event, h_var.first[0]), browser_.get(event, h_var.first[1]), cross_section_);
+      h_var.second->Fill(browser_.get(event, h_var.first[0]), browser_.get(event, h_var.first[1]), weight);
     for (const auto& h_var : hists3d_)
       h_var.second->Fill(browser_.get(event, h_var.first[0]),
                          browser_.get(event, h_var.first[1]),
                          browser_.get(event, h_var.first[2]),
-                         cross_section_);
+                         weight);
     for (const auto& h_var : profiles1d_)
-      h_var.second->Fill(browser_.get(event, h_var.first[0]), browser_.get(event, h_var.first[1]), cross_section_);
+      h_var.second->Fill(browser_.get(event, h_var.first[0]), browser_.get(event, h_var.first[1]), weight);
     for (const auto& h_var : profiles2d_)
       h_var.second->Fill(browser_.get(event, h_var.first[0]),
                          browser_.get(event, h_var.first[1]),
                          browser_.get(event, h_var.first[2]),
-                         cross_section_);
+                         weight);
     return true;
   }
 
