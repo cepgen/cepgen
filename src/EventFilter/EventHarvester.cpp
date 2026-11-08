@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventBrowser.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
@@ -62,7 +63,7 @@ public:
   ~EventHarvester() override {
     try {  // histogram printout
       for (auto& info : hists1d_) {
-        info.histogram.scale(cross_section_ / num_events_);
+        info.histogram.scale(cross_section_ / sum_weights_);
         info.histogram.setTitle(proc_name_);
         if (drawer_)
           (void)drawer_->draw(info.histogram, info.log_y ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
@@ -92,17 +93,18 @@ public:
   void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
   bool operator<<(const Event& event) override {
     // increment the corresponding histograms
+    const double weight = event.metadata("weight");
     for (auto& info : hists1d_)
-      info.histogram.fill(browser_.get(event, info.variable));
+      info.histogram.fill(browser_.get(event, info.variable), weight);
     for (auto& info : hists2d_)
-      info.histogram.fill(browser_.get(event, info.variable1), browser_.get(event, info.variable2));
-    ++num_events_;
+      info.histogram.fill(browser_.get(event, info.variable1), browser_.get(event, info.variable2), weight);
+    sum_weights_ += weight;
     return true;
   }
 
 private:
   void initialise() override {
-    num_events_ = 0ul;
+    sum_weights_ = 0.;
     proc_name_ = ProcessFactory::get().describe(runParameters().processName());
     proc_name_ +=
         ", $\\sqrt{s} =$ " + utils::format("%g TeV", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3);
@@ -111,9 +113,9 @@ private:
   const utils::EventBrowser browser_;      ///< Event string-to-quantity extraction tool
   std::unique_ptr<utils::Drawer> drawer_;  ///< Drawing utility
 
-  Value cross_section_{1., 0.};    ///< Cross-section value, in pb
-  unsigned long num_events_{0ul};  ///< Number of events processed
-  std::string proc_name_;          ///< Name of the physics process
+  Value cross_section_{1., 0.};  ///< Cross-section value, in pb
+  double sum_weights_{0.};       ///< Sum of weights of the events processed
+  std::string proc_name_;        ///< Name of the physics process
   struct Hist1DInfo {
     std::string variable;
     utils::Hist1D histogram;
