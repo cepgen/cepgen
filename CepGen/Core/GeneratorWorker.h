@@ -56,8 +56,9 @@ namespace cepgen {
 
   protected:
     /// Store the event in the output file
+    /// \param[in] weight Event weight, normalised to a unit mean (1 for unweighted events)
     /// \return A boolean stating whether the event was successfully saved
-    bool storeEvent() const;
+    bool storeEvent(double weight = 1.) const;
 
     // NOT owned
     const Integrator* integrator_{nullptr};     ///< Pointer to the mother-handled integrator instance

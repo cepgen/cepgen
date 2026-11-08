@@ -59,12 +59,13 @@ void GeneratorWorker::generate(size_t num_events, const std::function<void(const
     next();
 }
 
-bool GeneratorWorker::storeEvent() const {
+bool GeneratorWorker::storeEvent(double weight) const {
   CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
   if (!integrand_->process().hasEvent())
     return true;
 
+  integrand_->process().eventPtr()->metadata["weight"] = weight;
   const auto& event = integrand_->process().event();
   if (const auto num_events_generated = run_params_->numGeneratedEvents();
       (num_events_generated + 1) % run_params_->generation().printEvery() == 0)
