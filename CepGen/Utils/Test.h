@@ -2,6 +2,8 @@
 #define CepGen_Utils_Test_h
 
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
@@ -13,6 +15,7 @@ namespace cepgen::test {
   inline double precision = base_precision;
   inline size_t num_total = 0;
   inline size_t num_passed = 0;
+  inline bool summary_reached = false;
 }  // namespace cepgen::test
 
 #define CG_FAILED(name)                                                                                            \
@@ -21,6 +24,15 @@ namespace cepgen::test {
 #define CG_PASSED(name) CG_LOG << cepgen::utils::colourise("Passed ", cepgen::utils::Colour::green) << name << "."
 
 #define CG_TEST_DEBUG(debugging) cepgen::test::debug = debugging
+/// Turn any termination of the program before CG_TEST_SUMMARY into a test failure (e.g. a Fortran STOP statement
+/// in an external library, which exits the program with a zero status)
+#define CG_TEST_EXIT_GUARD()                                                                     \
+  std::atexit([] {                                                                               \
+    if (!cepgen::test::summary_reached) {                                                        \
+      std::fputs("Program terminated before the tests summary was reached! Failing.\n", stderr); \
+      std::_Exit(1);                                                                             \
+    }                                                                                            \
+  })
 #define CG_TEST_SET_FAILURE_TOLERANCE_RATE(tolerance) cepgen::test::failure_tolerance = tolerance
 #define CG_TEST_SET_PRECISION(precis) cepgen::test::precision = precis
 #define CG_TEST_RESET_PRECISION() cepgen::test::precision = cepgen::test::base_precision
@@ -123,6 +135,7 @@ namespace cepgen::test {
 
 #define CG_TEST_SUMMARY                                                                                            \
   {                                                                                                                \
+    cepgen::test::summary_reached = true;                                                                          \
     {                                                                                                              \
       auto col = cepgen::utils::Colour::yellow;                                                                    \
       if (cepgen::test::num_passed == cepgen::test::num_total)                                                     \
