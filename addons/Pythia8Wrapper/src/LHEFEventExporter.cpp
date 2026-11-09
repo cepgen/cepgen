@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2025  Laurent Forthomme
+ *  Copyright (C) 2016-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
@@ -79,6 +80,8 @@ namespace cepgen::pythia8 {
                               // we're physicists, what do you expect?
       cepgen_event_->addComments(oss_init.str());
       cepgen_event_->initialise(runParameters());
+      if (runParameters().weightedEvents())
+        cepgen_event_->setWeightedEvents();
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(cepgen_event_.get());
 #else
@@ -94,9 +97,10 @@ namespace cepgen::pythia8 {
     }
 
     bool operator<<(const Event& ev) override {
-      cepgen_event_->feedEvent(compress_event_ ? ev : ev.compress(),
-                               Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants,
-                               static_cast<double>(cross_section_) * ev.metadata("weight"));
+      cepgen_event_->feedEvent(
+          compress_event_ ? ev : ev.compress(),
+          Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants,
+          runParameters().weightedEvents() ? static_cast<double>(cross_section_) * ev.metadata("weight") : 1.);
       pythia_->next();
       cepgen_event_->eventLHEF();
       return true;
