@@ -78,7 +78,7 @@ namespace cepgen::mg5amc {
         throw CG_FATAL("mg5amc:ProcessBuilder")
             << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons() << ") "
             << "is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
-      if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
+      if (const auto params_card = parametersCardPath(); !params_card.empty()) {
         CG_INFO("mg5amc:ProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
         const auto unsteered_pcard = Interface::extractParamCardParameters(utils::readFile(params_card));
         CG_DEBUG("mg5amc:ProcessBuilder") << "Unsteered parameters card:\n" << unsteered_pcard;
@@ -117,6 +117,18 @@ namespace cepgen::mg5amc {
     }
 
   private:
+    /// Locate the parameters card: a file provided by the user, or the one generated along with the process
+    std::string parametersCardPath() const {
+      const fs::path card = steer<std::string>("parametersCard");
+      if (card.empty() || !steer<std::string>("lib").empty() || (fs::exists(card) && !fs::is_symlink(card)))
+        return card.string();  // trivial case: cards were found in lib directory or with user-provided path
+      const auto& standalone_path = steer<std::string>("standaloneCppPath");
+      const fs::path process_path =
+          !standalone_path.empty() ? fs::path{standalone_path} : Interface::temporaryPath(steer<std::string>("tmpDir"));
+      const auto generated_card = process_path / "Cards" / card;
+      return (fs::exists(generated_card) ? generated_card : card).string();
+    }
+
     void loadMG5Library() const {
       utils::AbortHandler();
       try {
