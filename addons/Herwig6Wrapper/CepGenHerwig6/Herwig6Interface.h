@@ -34,6 +34,15 @@ extern struct {
   int jmohep[cepgen::herwig6::NMXHEP][2], jdahep[cepgen::herwig6::NMXHEP][2];
   double phep[cepgen::herwig6::NMXHEP][5], vhep[cepgen::herwig6::NMXHEP][4];
 } hepevt_;
+/// Beam particle names
+extern struct {
+  char part1[8], part2[8];
+} hwbmch_;
+/// Beams, process and number of events
+extern struct {
+  double ebeam1, ebeam2, pbeam1, pbeam2;
+  int iproc, maxev;
+} hwproc_;
 /// Event-level bookkeeping
 extern struct {
   double avwgt, evwgt, gamwt, tlout, wbigst, wgtmax, wgtsum, wsqsum;
@@ -52,6 +61,11 @@ extern struct {
   char rname[cepgen::herwig6::NMXRES + 1][8];
   char txname[cepgen::herwig6::NMXRES + 1][2][37];
 } hwunam_;
+/// Spin correlations steering
+extern struct {
+  int ndecsy, nsearch, lrdec, lwdec, syspin, threeb, fourb;
+  char taudec[6];
+} hwdspn_;
 /// Basic parameters (and quantities derived from them)
 extern struct {
   std::array<double, 16> afch[2];
@@ -83,6 +97,8 @@ namespace cepgen::herwig6 {
   double hwuaem(double q2);
   double hwualf(int mode, double q2);
   double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam);
+  void hwuinc();             ///< Compute the parameter-dependent constants
+  void hweini();             ///< Initialise the elementary process
   void hwuine();             ///< Initialise an event
   void hwcfor();             ///< Form clusters from colour-connected partons
   void hwcdec();             ///< Decay clusters into primary hadrons

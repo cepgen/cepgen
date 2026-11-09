@@ -31,6 +31,8 @@ namespace {
   void hwsfun_(double&, double&, int&, int&, double dist[13], int&);
   double hwuaem_(double&);
   double hwualf_(int&, double&);
+  void hwuinc_();
+  void hweini_();
   void hwuine_();
   void hwcfor_();
   void hwcdec_();
@@ -63,6 +65,8 @@ namespace cepgen::herwig6 {
     hwsfun_(xbj, q2, idhad, nset, dist.data(), ibeam);
     return dist[0];
   }
+  void hwuinc() { hwuinc_(); }
+  void hweini() { hweini_(); }
   void hwuine() { hwuine_(); }
   void hwcfor() { hwcfor_(); }
   void hwcdec() { hwcdec_(); }
