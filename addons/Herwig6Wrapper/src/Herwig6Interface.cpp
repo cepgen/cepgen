@@ -31,6 +31,9 @@ namespace {
   void hwsfun_(double&, double&, int&, int&, double dist[13], int&);
   double hwuaem_(double&);
   double hwualf_(int&, double&);
+  extern struct {
+    double fshwr;
+  } hw6521_ __attribute__((weak));
   }
 }  // namespace
 
@@ -53,5 +56,10 @@ namespace cepgen::herwig6 {
     std::array<double, 13> dist;
     hwsfun_(xbj, q2, idhad, nset, dist.data(), ibeam);
     return dist[0];
+  }
+
+  bool compatibleVersion() {
+    //TODO: to be adapted with (potential) new versions and PoCs for former ones
+    return &hw6521_ != nullptr;
   }
 }  // namespace cepgen::herwig6

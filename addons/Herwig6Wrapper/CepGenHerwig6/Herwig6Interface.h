@@ -53,6 +53,7 @@ namespace cepgen::herwig6 {
   double hwuaem(double q2);
   double hwualf(int mode, double q2);
   double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam);
+  bool compatibleVersion();  ///< Is the Herwig 6 linked library version compatible with tested common block layouts?
 }  // namespace cepgen::herwig6
 
 #endif
