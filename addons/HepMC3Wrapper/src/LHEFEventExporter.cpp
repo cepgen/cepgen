@@ -106,8 +106,9 @@ namespace cepgen::hepmc3 {
       lhe_output_->heprup.LPRUP[0] = 1;
       lhe_output_->heprup.XSECUP[0] = cross_section_;  // the integration is performed before this initialisation
       lhe_output_->heprup.XERRUP[0] = cross_section_.uncertainty();
-      if (runParameters().weightedEvents())
-        lhe_output_->heprup.IDWTUP = 4;  // weighted events, with mean weight equal to the cross-section
+      lhe_output_->heprup.IDWTUP = runParameters().weightedEvents()
+                                       ? 4   // weighted events, with mean weight equal to the cross-section
+                                       : 3;  // unweighted events
     }
 
     const std::unique_ptr<LHEF::Writer> lhe_output_;
