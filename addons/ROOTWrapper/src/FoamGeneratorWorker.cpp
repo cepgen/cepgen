@@ -34,7 +34,8 @@ using namespace std::string_literals;
 /// (Institute of Nuclear Physics, Krakow, PL)
 class FoamGeneratorWorker final : public GeneratorWorker, public TFoamIntegrand {
 public:
-  explicit FoamGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {
+  explicit FoamGeneratorWorker(const ParametersList& params)
+      : GeneratorWorker(params), weighted_(steer<bool>("weighted")) {
     if (const auto& random_number_mode = steer<std::string>("rngEngine"s); random_number_mode == "Ranlux"s)
       random_number_generator_.reset(new TRandom1);
     else if (random_number_mode == "generic"s)
@@ -53,6 +54,7 @@ public:
   static ParametersDescription description() {
     auto desc = GeneratorWorker::description();
     desc.setDescription("Foam generator worker");
+    desc.add("weighted"s, false).setDescription("generate weighted events?");
     desc.add("rngEngine"s, "MersenneTwister"s)
         .allow("Ranlux"s)
         .allow("generic"s)
@@ -78,14 +80,17 @@ public:
     foam_->SetChat(std::max(steer<int>("verbosity"s), 0));
     foam_->SetRho(this);
     foam_->SetkDim(integrand_->size());
+    if (weighted_)
+      foam_->SetOptRej(0);
     foam_->Initialize();
     CG_DEBUG("FoamGeneratorWorker:build") << "FOAM integrator built\n\t"
                                           << "Version: " << foam_->GetVersion() << ".";
   }
   bool next() override {
     foam_->MakeEvent();
-    return storeEvent();
+    return storeEvent(foam_->GetMCwt());
   }
+  bool weighted() const override { return weighted_; }
 
   /// Compute the weight for a given phase space point
   double Density(int num_dimensions, double* coordinates) override {
@@ -95,6 +100,7 @@ public:
   }
 
 private:
+  const bool weighted_;
   std::unique_ptr<TFoam> foam_;
   std::unique_ptr<TRandom> random_number_generator_;
 };

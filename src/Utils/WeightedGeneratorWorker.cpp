@@ -74,6 +74,7 @@ public:
     while (weight <= 0.);
     return storeEvent(weight / mean_weight_);
   }
+  bool weighted() const final { return true; }
 
 private:
   /// Evaluate the integrand at a random point of the unit hypercube

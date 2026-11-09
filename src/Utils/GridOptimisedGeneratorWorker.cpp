@@ -91,6 +91,7 @@ public:
       ps_bin_ = UNASSIGNED_BIN;
     return storeEvent();  // return with an accepted event
   }
+  bool weighted() const final { return false; }
 
 private:
   static constexpr int UNASSIGNED_BIN = -999;  ///< Placeholder for invalid bin indexing

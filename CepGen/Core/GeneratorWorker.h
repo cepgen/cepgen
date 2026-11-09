@@ -51,8 +51,9 @@ namespace cepgen {
 
     inline ProcessIntegrand& integrand() const { return *integrand_; }  ///< Function evaluator
 
-    virtual void initialise() = 0;  ///< Initialise the generation parameters
-    virtual bool next() = 0;        ///< Generate a single event
+    virtual void initialise() = 0;      ///< Initialise the generation parameters
+    virtual bool next() = 0;            ///< Generate a single event
+    virtual bool weighted() const = 0;  ///< Are events generated cross section-weighted?
 
   protected:
     /// Store the event in the output file
