@@ -29,6 +29,7 @@ using namespace std;
 using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
+  CG_TEST_EXIT_GUARD();  // e.g. Fortran STOP statements exiting with a zero status
   string rng_name;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("random-generator,r", "type of random number generator to use", &rng_name, ""s)
