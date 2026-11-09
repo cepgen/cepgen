@@ -96,9 +96,12 @@ namespace cepgen::herwig6 {
       if (parts.size() != 2)
         throw CG_FATAL("herwig6:Hadroniser") << "Invalid parameter '" << parameter << "'. Expecting 'NAME=value'.";
       const auto name = utils::toUpper(parts.at(0));
-      if (realParameters().count(name) == 0 && integerParameters().count(name) == 0)
+      if (realParameters().count(name) > 0) {
+        settings_.set(name, std::stod(parts.at(1)));
+      } else if (integerParameters().count(name) > 0)
+        settings_.set(name, std::stoi(parts.at(1)));
+      else
         throw CG_FATAL("herwig6:Hadroniser") << "Unsupported Herwig 6 parameter: '" << parts.at(0) << "'.";
-      settings_.set(name, parts.at(1));
     }
 
     void initialise() override {
@@ -214,7 +217,17 @@ namespace cepgen::herwig6 {
         hweini();
       }
       herwigConfiguration() = configuration;
-      CG_DEBUG("herwig6:Hadroniser:initialiseHerwig") << "Herwig 6 configuration: " << herwigConfiguration() << ".";
+      CG_DEBUG("herwig6:Hadroniser:initialiseHerwig").log([this](auto& log) {
+        log << "Herwig 6 configuration: " << herwigConfiguration() << ". Fed blocks: dbl{";
+        std::string sep;
+        for (const auto& [key, value] : realParameters())
+          log << sep << key << " -> " << *value, sep = ", ";
+        sep.clear();
+        log << ", int{";
+        for (const auto& [key, value] : integerParameters())
+          log << sep << key << " -> " << *value, sep = ", ";
+        log << "}.";
+      });
       herwig_initialised_ = true;
     }
 
