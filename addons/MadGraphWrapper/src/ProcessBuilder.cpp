@@ -120,13 +120,19 @@ namespace cepgen::mg5amc {
     /// Locate the parameters card: a file provided by the user, or the one generated along with the process
     std::string parametersCardPath() const {
       const fs::path card = steer<std::string>("parametersCard");
-      if (card.empty() || !steer<std::string>("lib").empty() || (fs::exists(card) && !fs::is_symlink(card)))
+      if (card.empty() || (fs::exists(card) && !fs::is_symlink(card)))
         return card.string();  // trivial case: cards were found in lib directory or with user-provided path
+      const auto& lib_path = steer<std::string>("lib");
       const auto& standalone_path = steer<std::string>("standaloneCppPath");
-      const fs::path process_path =
-          !standalone_path.empty() ? fs::path{standalone_path} : Interface::temporaryPath(steer<std::string>("tmpDir"));
-      const auto generated_card = process_path / "Cards" / card;
-      return (fs::exists(generated_card) ? generated_card : card).string();
+      const fs::path process_path = !lib_path.empty()          ? fs::path{lib_path}.parent_path()
+                                    : !standalone_path.empty() ? fs::path{standalone_path}
+                                                               : Interface::temporaryPath(steer<std::string>("tmpDir"));
+      if (const auto generated_card = process_path / "Cards" / card; fs::exists(generated_card))
+        return card.string();
+      if (fs::exists(card))
+        return card.string();
+      throw CG_FATAL("mg5amc:ProcessBuilder") << "Failed to find the parameters card '" << card
+                                              << "' in the working directory, or in " << process_path / "Cards" << ".";
     }
 
     void loadMG5Library() const {
