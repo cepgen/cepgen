@@ -45,6 +45,13 @@ namespace {
   }
 }  // namespace
 
+extern "C" {
+// user routines Herwig expects to find at link time (HWWARN calls HWAEND before stopping)
+__attribute__((weak)) void hwabeg_() {}
+__attribute__((weak)) void hwanal_() {}
+__attribute__((weak)) void hwaend_() {}
+}
+
 namespace cepgen::herwig6 {
   void initialise() {
     static bool kInitialised = false;
