@@ -37,7 +37,10 @@ namespace HepMC3 {
     explicit CepGenEvent(const cepgen::Event&);  ///< Construct an event interface from a CepGen Event object
     explicit operator cepgen::Event() const;     ///< Extract a CepGen Event object from a HepMC3 GenEvent object
     void dump() const;                           ///< Write the event content in the standard stream
-    void merge(cepgen::Event&) const;            ///< Merge this event with another CepGen event record
+    /// Propagate the modifications of the central system (updated momenta, new particles) to a CepGen event record
+    /// \param[inout] event The CepGen event this object was built from
+    /// \return True if the two event records were compatible, and the merging was performed
+    bool merge(cepgen::Event& event) const;
 
   private:
     static constexpr double kTolerance = 1.e-6;
