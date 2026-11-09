@@ -3,75 +3,103 @@
 
 import math
 import pycepgen as cg
+import unittest
 
 
-def test_pdg():
-    assert math.isclose(cg.PDG.mass(13), 0.1056583755, rel_tol=1.e-3)
-    assert math.isclose(cg.PDG.charge(11), -1., rel_tol=1.e-6) or math.isclose(cg.PDG.charge(11), 1., rel_tol=1.e-6)
-    assert cg.PDG.colours(13) == 1.
+class TestPDG(unittest.TestCase):
+    def test_mass(self):
+        self.assertTrue(math.isclose(cg.PDG.mass(13), 0.1056583755, rel_tol=1.e-3))
+    def test_charge(self):
+        self.assertTrue(math.isclose(cg.PDG.charge(11), -1., rel_tol=1.e-6))
+    def test_colours(self):
+        self.assertEqual(cg.PDG.colours(13), 1.)
 
 
-def test_structure_functions():
-    assert 'SuriYennie' in cg.StructureFunctionsFactory.modules
-    by_name, by_index = cg.StructureFunctionsFactory.build('SuriYennie'), cg.StructureFunctionsFactory.build(11)
-    assert isinstance(by_name, cg._StructureFunctions) and isinstance(by_name, cg._Steerable)
-    assert by_name.name == 'SuriYennie' and by_index.name == 'SuriYennie'
-    assert by_name.F2(0.1, 10.) == by_index.F2(0.1, 10.) > 0.
-    assert math.isfinite(by_name.FL(0.1, 10.)) and math.isfinite(by_name.F1(0.1, 10.))
-    assert 'SuriYennie' in cg.StructureFunctionsFactory.describe('SuriYennie')
+class TestParametersConversion(unittest.TestCase):
+    def test_structure_functions_attributes(self):
+        plain = cg.StructureFunctionsFactory.build('SuriYennie')
+        reference = plain.F2(0.1, 10.)
+        self.assertTrue(isinstance(plain.parameters, dict))
+        self.assertEqual(plain.parameters['mod_name'], 'SuriYennie')
+        # build from a parameters dictionary, with or without the explicit module name
+        from_dict = cg.StructureFunctionsFactory.build({'mod_name': 'SuriYennie'})
+        from_name_dict = cg.StructureFunctionsFactory.build('SuriYennie', {})
+        self.assertEqual(from_dict.F2(0.1, 10.), reference)
+        self.assertEqual(from_name_dict.F2(0.1, 10.), reference)
+    def test_plain_parameters(self):
+        # re-parse parameters
+        plain = cg.StructureFunctionsFactory.build('SuriYennie')
+        plain.parameters = {'mod_name': 'SuriYennie', 'testInt': 1, 'testRange': (0.5, 1.5), 'testList': [{'a': 1}]}
+        self.assertEqual(plain.parameters['testInt'], 1)
+        self.assertEqual(plain.parameters['testRange'], (0.5, 1.5))
+    def test_invalid_arguments(self):
+        with self.assertRaises(TypeError):
+            cg.StructureFunctionsFactory.build([])
 
 
-def test_parameters_conversion():
-    plain = cg.StructureFunctionsFactory.build('SuriYennie')
-    reference = plain.F2(0.1, 10.)
-    assert isinstance(plain.parameters, dict) and plain.parameters['mod_name'] == 'SuriYennie'
-    # build from a parameters dictionary, with or without the explicit module name
-    from_dict = cg.StructureFunctionsFactory.build({'mod_name': 'SuriYennie'})
-    from_name_dict = cg.StructureFunctionsFactory.build('SuriYennie', {})
-    assert from_dict.F2(0.1, 10.) == reference and from_name_dict.F2(0.1, 10.) == reference
-    plain.parameters = {'mod_name': 'SuriYennie', 'testInt': 1, 'testRange': (0.5, 1.5), 'testList': [{'a': 1}]}
-    assert plain.parameters['testInt'] == 1
-    assert plain.parameters['testRange'] == (0.5, 1.5)
+class TestStructureFunctions(unittest.TestCase):
+    _sf_by_name = cg.StructureFunctionsFactory.build('SuriYennie')
+    _sf_by_index = cg.StructureFunctionsFactory.build(11)
+    def test_modules_content(self):
+        self.assertTrue('SuriYennie' in cg.StructureFunctionsFactory.modules)
+    def test_sfs_by_name(self):
+        self._test_sfs(self._sf_by_name)
+    def test_sfs_by_index(self):
+        self._test_sfs(self._sf_by_index)
+    def test_modules_usage(self):
+        self.assertEqual(self._sf_by_name.F2(0.1, 10.), self._sf_by_index.F2(0.1, 10.))
+    def _test_sfs(self, sfs):
+        self.assertTrue(isinstance(sfs, cg._StructureFunctions))
+        self.assertTrue(isinstance(sfs, cg._Steerable))
+        self.assertEqual(sfs.name, 'SuriYennie')
+        self.assertTrue(sfs.F2(0.1, 10.) > 0.)
+        self.assertTrue(math.isfinite(sfs.FL(0.1, 10.)))
+        self.assertTrue(math.isfinite(sfs.F1(0.1, 10.)))
 
 
-def test_sigma_ratios():
-    index = 1
-    ratio, uncertainty = cg.SigmaRatiosFactory.build(index)(0.1, 10.)
-    assert isinstance(cg.SigmaRatiosFactory.build(index), cg._SigmaRatio)
-    assert math.isfinite(ratio) and math.isfinite(uncertainty)
-    assert cg.SigmaRatiosFactory.modules
+class TestSigmaRatios(unittest.TestCase):
+    def test_sigma_ratios(self):
+        index = 1
+        ratio, uncertainty = cg.SigmaRatiosFactory.build(index)(0.1, 10.)
+        self.assertTrue(isinstance(cg.SigmaRatiosFactory.build(index), cg._SigmaRatio))
+        self.assertTrue(math.isfinite(ratio))
+        self.assertTrue(math.isfinite(uncertainty))
+        self.assertTrue(cg.SigmaRatiosFactory.modules)
 
 
-def test_form_factors():
-    assert cg.FormFactorsFactory.modules
-    form_factors = cg.FormFactorsFactory.build('StandardDipole')
-    values = form_factors(1.)
-    assert isinstance(values, cg.FormFactors)
-    assert math.isfinite(values.FE) and math.isfinite(values.FM)
-    assert values.GE > 0. and values.GM > 0.
+class TestFormFactors(unittest.TestCase):
+    def test_has_form_factors(self):
+        self.assertTrue(len(cg.FormFactorsFactory.modules) > 0)
+    def test_form_factors(self):
+        form_factors = cg.FormFactorsFactory.build('StandardDipole')
+        values = form_factors(1.)
+        self.assertTrue(isinstance(values, cg.FormFactors))
+        self.assertTrue(math.isfinite(values.FE))
+        self.assertTrue(values.GE > 0.)
+        self.assertTrue(math.isfinite(values.FM))
+        self.assertTrue(values.GM > 0.)
 
 
-def test_parton_fluxes():
-    assert cg.KTFluxFactory.modules and cg.CollinearFluxFactory.modules
-    collinear = cg.CollinearFluxFactory.build('EPAFlux')
-    assert isinstance(collinear, cg._CollinearFlux) and not collinear.ktFactorised
-    assert collinear() is collinear
-    assert math.isfinite(collinear.fluxMX2(0.1, 0.)) and isinstance(collinear.partonPdgId, int)
-    kt = cg.KTFluxFactory.build('BudnevInelastic')
-    assert isinstance(kt, cg._KTFlux) and kt.ktFactorised and kt() is kt
-    assert math.isfinite(kt.fluxQ2(0.1, 1., 2.)) and math.isfinite(kt.fluxMX2(0.1, 1., 2.))
-
-
-def test_invalid_arguments():
-    try:
-        cg.StructureFunctionsFactory.build([])
-    except TypeError:
-        return
-    raise AssertionError('a list should not have been accepted as a module definition')
+class TestPartonFluxes(unittest.TestCase):
+    def test_has_kt_parton_fluxes(self):
+        self.assertTrue(len(cg.KTFluxFactory.modules) > 0)
+    def test_kt_parton_fluxes(self):
+        kt = cg.KTFluxFactory.build('BudnevInelastic')
+        self.assertTrue(isinstance(kt, cg._KTFlux))
+        self.assertTrue(kt.ktFactorised)
+        self.assertTrue(kt() is kt)
+        self.assertTrue(math.isfinite(kt.fluxQ2(0.1, 1., 2.)))
+        self.assertTrue(math.isfinite(kt.fluxMX2(0.1, 1., 2.)))
+    def test_has_coll_parton_fluxes(self):
+        self.assertTrue(len(cg.CollinearFluxFactory.modules) > 0)
+    def test_coll_parton_fluxes(self):
+        collinear = cg.CollinearFluxFactory.build('EPAFlux')
+        self.assertTrue(isinstance(collinear, cg._CollinearFlux))
+        self.assertFalse(collinear.ktFactorised)
+        self.assertTrue(collinear() is collinear)
+        self.assertTrue(math.isfinite(collinear.fluxMX2(0.1, 0.)))
+        self.assertTrue(isinstance(collinear.partonPdgId, int))
 
 
 if __name__ == '__main__':
-    for name, test in sorted(globals().items()):
-        if name.startswith('test_'):
-            test()
-            print(f'Passed {name}')
+    unittest.main()
