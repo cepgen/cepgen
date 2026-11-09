@@ -39,7 +39,7 @@
 using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
-  const fs::path& workingDirectory() {
+  fs::path workingDirectory() {
     std::mt19937_64 generator(std::random_device{}() ^
                               static_cast<std::uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count()));
     for (size_t attempt = 0; attempt < 100; ++attempt)

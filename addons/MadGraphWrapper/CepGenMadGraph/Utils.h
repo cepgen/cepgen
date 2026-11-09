@@ -26,7 +26,7 @@ namespace cepgen::mg5amc {
   using ProcessParticles = std::pair<std::vector<std::string>, std::vector<std::string> >;
   /// Scratch directory unique to this program instance, so concurrent runs never share files
   /// \note The directory is created on first call, and kept after the run for later inspection or reuse
-  const fs::path& workingDirectory();
+  fs::path workingDirectory();
   /// Unpack the particles' content and role in the process from a string
   /// \param[in] process_name string, human-built process definition
   ProcessParticles unpackProcessParticles(const std::string& process_name);
