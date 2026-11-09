@@ -1,0 +1,71 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2026  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef CepGenHerwig6_DiffractiveSystemSeed_h
+#define CepGenHerwig6_DiffractiveSystemSeed_h
+
+#include <array>
+
+#include "CepGen/Physics/Momentum.h"
+
+namespace cepgen::utils {
+  class RandomGenerator;
+}
+
+namespace cepgen::herwig6 {
+  /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
+  struct DiffractiveSystemSeed {
+    /// Build the partonic content of a dissociated system
+    /// \param[in] beam Incoming beam particle momentum
+    /// \param[in] system Dissociated system momentum
+    /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (only protons and antiprotons are supported)
+    /// \param[in] rmass Herwig 6 constituent masses, indexed by Herwig identifier
+    /// \param[in] rng Random number generator
+    /// \param[in] primordial_kt RMS of the transverse momentum of the spectator relative to the beam axis, in GeV
+    static DiffractiveSystemSeed build(const Momentum& beam,
+                                       const Momentum& system,
+                                       long beam_pdg_id,
+                                       const double* rmass,
+                                       utils::RandomGenerator& rng,
+                                       double primordial_kt);
+
+    double system_mass{0.};  ///< Invariant mass of the system
+    /// Herwig 6 internal identifiers used for the beam remnants treatment
+    enum struct InternalId {
+      invalid = 0,
+      down = 1,
+      up = 2,
+      dBar = 7,
+      uBar = 8,
+      centreOfMass = 14,
+      piZero = 21,
+      proton = 73,
+      uu = 109,
+      ud0 = 110,
+      uu_bar = 115,
+      ud0_bar = 116
+    };
+    InternalId struck_id{InternalId::invalid};             ///< Herwig identifier of the struck (anti)quark
+    InternalId spectator_id{InternalId::invalid};          ///< Herwig identifier of the spectator (anti)diquark
+    double struck_mass{0.};                                ///< Constituent mass of the struck (anti)quark
+    double spectator_mass{0.};                             ///< Constituent mass of the spectator (anti)diquark
+    std::array<double, 3> spectator_momentum{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
+  };
+}  // namespace cepgen::herwig6
+
+#endif

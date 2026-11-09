@@ -35,7 +35,8 @@ namespace cepgen::constants {
   /// Conversion factor between GeV\f$^{-1}\f$ and metres
   /// i.e. \f$\hbar c\f$ in GeV\f$^{-1}\f$.
   constexpr double GEVM1_TO_M = 0.1973269804e-15;
-  constexpr double G_F = 1.1663787e-5;  ///< Fermi coupling constant, in GeV\f$^{-2}\f$
+  constexpr double G_F = 1.1663787e-5;      ///< Fermi coupling constant, in GeV\f$^{-2}\f$
+  constexpr double HBAR = 6.582119569e-25;  ///< Reduced Planck constant, in eV.s
 }  // namespace cepgen::constants
 
 #endif

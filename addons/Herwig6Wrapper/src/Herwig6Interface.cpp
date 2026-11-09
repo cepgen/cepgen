@@ -31,8 +31,26 @@ namespace {
   void hwsfun_(double&, double&, int&, int&, double dist[13], int&);
   double hwuaem_(double&);
   double hwualf_(int&, double&);
+  void hwuinc_();
+  void hweini_();
+  void hwuine_();
+  void hwcfor_();
+  void hwcdec_();
+  void hwdhad_();
+  void hwdhvy_();
+  void hwufne_();
+  extern struct {
+    double fshwr;
+  } hw6521_ __attribute__((weak));
   }
 }  // namespace
+
+extern "C" {
+// user routines Herwig expects to find at link time (HWWARN calls HWAEND before stopping)
+__attribute__((weak)) void hwabeg_() {}
+__attribute__((weak)) void hwanal_() {}
+__attribute__((weak)) void hwaend_() {}
+}
 
 namespace cepgen::herwig6 {
   void initialise() {
@@ -53,5 +71,18 @@ namespace cepgen::herwig6 {
     std::array<double, 13> dist;
     hwsfun_(xbj, q2, idhad, nset, dist.data(), ibeam);
     return dist[0];
+  }
+  void hwuinc() { hwuinc_(); }
+  void hweini() { hweini_(); }
+  void hwuine() { hwuine_(); }
+  void hwcfor() { hwcfor_(); }
+  void hwcdec() { hwcdec_(); }
+  void hwdhad() { hwdhad_(); }
+  void hwdhvy() { hwdhvy_(); }
+  void hwufne() { hwufne_(); }
+
+  bool compatibleVersion() {
+    //TODO: to be adapted with (potential) new versions and PoCs for former ones
+    return &hw6521_ != nullptr;
   }
 }  // namespace cepgen::herwig6
