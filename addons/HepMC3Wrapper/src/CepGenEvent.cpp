@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -192,6 +192,13 @@ CepGenEvent::operator cepgen::Event() const {
 
 bool CepGenEvent::merge(cepgen::Event& event) const {
   // set of sanity checks to ensure the compatibility between the HepMC and CepGen event records
+  for (const auto role : {cepgen::Particle::Role::IncomingBeam1,
+                          cepgen::Particle::Role::IncomingBeam2,
+                          cepgen::Particle::Role::Intermediate})
+    if (!event.hasRole(role) || event[role].size() != 1) {
+      CG_ERROR("HepMC3:CepGenEvent:merge") << "Event record has no unique particle with " << role << " role.";
+      return false;
+    }
   if (vertices().size() < 3) {
     CG_ERROR("HepMC3:CepGenEvent:merge") << "Failed to retrieve the three primordial vertices in event.";
     return false;
