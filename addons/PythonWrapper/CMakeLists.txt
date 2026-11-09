@@ -68,3 +68,11 @@ if(CMAKE_BUILD_UTILS)
 endif()
 
 cepgen_test_declare_unstable(python_output python_particle_mod)
+
+# Python tests
+if(CMAKE_BUILD_TESTS)
+  add_test(NAME pycepgen_module
+    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/pycepgen_module.py)
+  set_property(TEST pycepgen_module PROPERTY ENVIRONMENT
+    "CEPGEN_PATH=${PROJECT_SOURCE_DIR};PYTHONPATH=$<TARGET_FILE_DIR:pycepgen>")
+endif()
