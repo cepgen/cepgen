@@ -56,6 +56,7 @@ void Generator::clearRun() {
   CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
   worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
   CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters() << ".";
+  parameters_->setGenerator(this);
   // destroy and recreate the integrator instance
   resetIntegrator();
 
@@ -238,4 +239,10 @@ void Generator::generate(size_t num_events, const std::function<void(const Event
     if (callback)
       callback(process.event(), parameters_->numGeneratedEvents());
   });
+}
+
+const GeneratorWorker& Generator::generatorWorker() const {
+  if (!worker_)
+    throw CG_FATAL("Generator:generatorWorker") << "Generator worker was not initialised.";
+  return *worker_;
 }

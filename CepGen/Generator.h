@@ -85,6 +85,8 @@ namespace cepgen {
     /// \return the function value for the given point
     double computePoint(const std::vector<double>& coordinates);
 
+    const GeneratorWorker& generatorWorker() const;  ///< Associated generator worker (if any)
+
   private:
     void initialise();       ///< Initialise event generation
     void clearRun();         ///< Remove all references to a previous generation/run

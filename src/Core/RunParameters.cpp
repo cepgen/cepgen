@@ -19,11 +19,13 @@
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
@@ -102,6 +104,13 @@ void RunParameters::setTimeKeeper(utils::TimeKeeper* time_keeper) { timer_.reset
 void RunParameters::addGenerationTime(double generation_time) {
   total_gen_time_ += generation_time;
   num_gen_events_++;
+}
+
+bool RunParameters::weightedEvents() const {
+  if (!generator_)
+    throw CG_FATAL("RunParameters:weightedEvents")
+        << "Failed to retrieve weighted/unweighted events flag, as the generator object was not registered.";
+  return generator_->generatorWorker().weighted();
 }
 
 proc::Process& RunParameters::process() {
