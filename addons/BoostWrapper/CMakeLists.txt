@@ -29,17 +29,3 @@ cpack_add_component(boost
 install(DIRECTORY CepGenBoost
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT boost)
-
-#----- Python bindings
-
-find_package(Boost COMPONENTS system python)
-find_package(Python COMPONENTS Interpreter Development)
-if(Python_FOUND)
-  add_library(pycepgen SHARED src/PythonWrapper.cpp src/PythonUtils.cpp)
-  target_link_libraries(pycepgen CepGen ${Boost_LIBRARIES})
-  target_include_directories(pycepgen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-  file(TOUCH_NOCREATE ${CMAKE_CURRENT_BINARY_DIR}/src/__init__.py)
-  set_target_properties(pycepgen PROPERTIES PREFIX "")
-  target_include_directories(pycepgen PUBLIC ${Python_INCLUDE_DIRS})
-  install(TARGETS pycepgen DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT boost)
-endif()
