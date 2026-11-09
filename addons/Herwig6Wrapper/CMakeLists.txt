@@ -31,6 +31,8 @@ else ()
     list(APPEND HERWIG6LIB herwig6)
 endif ()
 
+enable_testing()
+
 #----- build the object
 cepgen_build(CepGenHerwig6
         SOURCES src/*.cpp
@@ -42,3 +44,4 @@ cepgen_build(CepGenHerwig6
 install(DIRECTORY CepGenHerwig6
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         COMPONENT herwig6)
+add_test(NAME herwig6_kt_hadr COMMAND ${CMAKE_BINARY_DIR}/test/generator/ktfactor_proc_hadronisation -H herwig6)
