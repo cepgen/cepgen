@@ -68,11 +68,23 @@ namespace cepgen::tauola {
             * GSL_CONST_MKSA_SPEED_OF_LIGHT                                      /* s -> m */
             * 1.e3                                                               /* m -> mm */
         );
+      // list of enabled radiation states (only propagated to TAUOLA by Tauola::initialize())
+      if (const auto& rad_states = steer<ParametersList>("radiations"); !rad_states.empty()) {
+        if (rad_states.has<bool>("enable"))
+          Tauola::setRadiation(rad_states.get<bool>("enable"));
+        if (const auto rad_cutoff = rad_states.get<double>("cutoff", 0.01); rad_cutoff > 0.)
+          Tauola::setRadiationCutOff(rad_cutoff);
+      }
+      if (Tauola::getIsTauolaIni())  // Tauola::initialize() is only effective once per process
+        CG_WARNING("TauolaFilter") << "Tauola++ was already initialised. The decaying particle, decay modes, and "
+                                      "radiation settings of this instance are ignored.";
       std::string buf;
       {
         auto sc = utils::StreamCollector(buf);
         Tauola::initialize();
       }
+      // TAUOLA decays the tau in its rest frame with its own mass; align it with the one used to generate the event
+      parmas_.amtau = static_cast<float>(PDG::get().mass(PDG::tau));
       CG_INFO("TauolaFilter") << "Tauola initialised. Output:\n" << std::string(80, '-') << buf << std::string(80, '-');
       if (!gRandomGenerator && seed_ >= 0)  // ranges from RMARIN; the last two arguments are a skip count, not seeds
         Tauola::setSeed(static_cast<int>(seed_ % 900000001ll), 0, 0);
@@ -93,13 +105,9 @@ namespace cepgen::tauola {
         pol_states.fill("W_PLUS", Tauola::spin_correlation.W_PLUS);
         pol_states.fill("W_MINUS", Tauola::spin_correlation.W_MINUS);
       }
-      // list of enabled radiation states
-      if (const auto& rad_states = steer<ParametersList>("radiations"); !rad_states.empty()) {
-        if (rad_states.has<bool>("enable"))
-          Tauola::setRadiation(rad_states.get<bool>("enable"));
-        if (const auto rad_cutoff = rad_states.get<double>("cutoff", 0.01); rad_cutoff > 0.)
-          Tauola::setRadiationCutOff(rad_cutoff);
-      }
+      if (Tauola::spin_correlation.Z0 || Tauola::spin_correlation.GAMMA)
+        CG_WARNING("TauolaFilter") << "Z/gamma* spin correlations are enabled. Tauola++ models them for an s-channel "
+                                      "fermion pair annihilation, and aborts the run for photon-initiated tau pairs.";
       // list of tau decay branching fractions
       for (const auto& br_per_mode : steer<std::vector<ParametersList> >("branchingRatios")) {
         const auto mode = br_per_mode.get<int>("mode");
@@ -144,6 +152,12 @@ namespace cepgen::tauola {
       desc.add("momentumConservationThreshold", 1.e-6).setDescription("numerical limit for momentum conservation");
       auto pol_desc = ParametersDescription();
       pol_desc.add("full", true).setDescription("switch on/off spin correlations for all mothers");
+      // Tauola++ treats a tau pair without a single mother (e.g. gamma gamma -> tau tau) as a Z decay, with the
+      // incoming photons as Born-level beams, which TAUOLA cannot handle (INITWK: WRONG IDEX, and a STOP)
+      pol_desc.add("Z0", false)
+          .setDescription("Z/gamma* -> tau tau spin correlations (only valid for s-channel fermion pair annihilation)");
+      pol_desc.add("GAMMA", false)
+          .setDescription("gamma* -> tau tau spin correlations (only valid for s-channel fermion pair annihilation)");
       desc.add("polarisations", pol_desc)
           .setDescription(
               "spin correlations; 'full' can be refined per mother with the optional booleans GAMMA, Z0, HIGGS, "
