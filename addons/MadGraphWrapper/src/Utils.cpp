@@ -40,14 +40,18 @@ using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
   fs::path workingDirectory() {
-    std::mt19937_64 generator(std::random_device{}() ^
-                              static_cast<std::uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count()));
-    for (size_t attempt = 0; attempt < 100; ++attempt)
-      if (const auto candidate = fs::temp_directory_path() / ("cepgen_mg5_aMC_" + std::to_string(generator()));
-          fs::create_directory(candidate))  // false if it already exists, hence safe against concurrent creations
-        return candidate;
-    throw CG_FATAL("MadGraphInterface:workingDirectory")
-        << "Failed to create a unique directory in " << fs::temp_directory_path() << ".";
+    static const fs::path path = []() -> fs::path {
+      std::mt19937_64 generator(
+          std::random_device{}() ^
+          static_cast<std::uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count()));
+      for (size_t attempt = 0; attempt < 100; ++attempt)
+        if (const auto candidate = fs::temp_directory_path() / ("cepgen_mg5_aMC_" + std::to_string(generator()));
+            fs::create_directory(candidate))  // false if it already exists, hence safe against concurrent creations
+          return candidate;
+      throw CG_FATAL("MadGraphInterface:workingDirectory")
+          << "Failed to create a unique directory in " << fs::temp_directory_path() << ".";
+    }();
+    return path;
   }
 
   ProcessParticles unpackProcessParticles(const std::string& process_name) {

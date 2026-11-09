@@ -128,7 +128,7 @@ namespace cepgen::mg5amc {
                                     : !standalone_path.empty() ? fs::path{standalone_path}
                                                                : Interface::temporaryPath(steer<std::string>("tmpDir"));
       if (const auto generated_card = process_path / "Cards" / card; fs::exists(generated_card))
-        return card.string();
+        return generated_card.string();
       if (fs::exists(card))
         return card.string();
       throw CG_FATAL("mg5amc:ProcessBuilder") << "Failed to find the parameters card '" << card
