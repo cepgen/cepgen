@@ -142,7 +142,10 @@ namespace cepgen::mg5amc {
           loadLibrary(lib_file);
         else {  // library must be generated from mg5_aMC directives
           const Interface interface(params_);
-          loadLibrary(interface.run());
+          const fs::path generated_lib = interface.run();
+          loadLibrary(generated_lib.string());
+          // record the process location in the steering parameters, so that it is inherited by all process clones
+          params_.set("tmpDir", generated_lib.parent_path().string());
         }
       } catch (const utils::RunAbortedException&) {
         CG_FATAL("mg5amc:ProcessBuilder") << "MadGraph_aMC process generation aborted.";
