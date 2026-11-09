@@ -34,9 +34,13 @@ namespace HepMC3 {
   /// \date Jul 2019
   class CepGenEvent final : public GenEvent {
   public:
-    explicit CepGenEvent(const cepgen::Event&);  ///< Construct an event interface from a CepGen Event object
-    explicit operator cepgen::Event() const;     ///< Extract a CepGen Event object from a HepMC3 GenEvent object
-    void dump() const;                           ///< Write the event content in the standard stream
+    /// Construct an event interface from a CepGen Event object
+    /// \param[in] event CepGen event to convert
+    /// \param[in] intermediate_line Keep the two-parton system as a single particle between the partons and the
+    ///   central system (e.g. for Photos++, which only radiates in branches with a single mother)
+    explicit CepGenEvent(const cepgen::Event& event, bool intermediate_line = false);
+    explicit operator cepgen::Event() const;  ///< Extract a CepGen Event object from a HepMC3 GenEvent object
+    void dump() const;                        ///< Write the event content in the standard stream
     /// Propagate the modifications of the central system (updated momenta, new particles) to a CepGen event record
     /// \param[inout] event The CepGen event this object was built from
     /// \return True if the two event records were compatible, and the merging was performed
@@ -45,6 +49,7 @@ namespace HepMC3 {
   private:
     static constexpr double kTolerance = 1.e-6;
     std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > cepgen_id_vs_hepmc_particle_;
+    std::shared_ptr<GenVertex> central_system_vertex_;  ///< vertex producing the central system particles
   };
 }  // namespace HepMC3
 #endif

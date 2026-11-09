@@ -37,7 +37,7 @@
 
 using namespace HepMC3;
 
-CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Units::MM) {
+CepGenEvent::CepGenEvent(const cepgen::Event& event, bool intermediate_line) : GenEvent(Units::GEV, Units::MM) {
   add_attribute("AlphaQCD", make_shared<DoubleAttribute>(event.metadata("alphaS")));
   add_attribute("AlphaEM", make_shared<DoubleAttribute>(event.metadata("alphaEM")));
 
@@ -47,6 +47,8 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
   int central_system_id = 0;
   auto vertex_beam1 = make_shared<GenVertex>(origin), vertex_beam2 = make_shared<GenVertex>(origin),
        vertex_central_system = make_shared<GenVertex>(origin);
+  // partons -> (two-parton system ->) central system
+  central_system_vertex_ = intermediate_line ? make_shared<GenVertex>(origin) : vertex_central_system;
   std::vector<GenVertexPtr> decay_vertices;  // added after the three primordial vertices, expected first by merge()
   for (const auto& cepgen_particle : event.particles()) {  // filling the particles content
     const auto& cepgen_momentum = cepgen_particle.momentum();
@@ -80,6 +82,13 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
         break;
       case cepgen::Particle::Role::Intermediate:  // skip the two-parton system and propagate the parentage
         central_system_id = cepgen_particle.id();
+        if (intermediate_line) {
+          if (hepmc_particle->pdg_id() == 0)
+            hepmc_particle->set_pdg_id(static_cast<int>(cepgen::PDG::photon));  // neutral, colourless system
+          hepmc_particle->set_generated_mass(cepgen_momentum.mass());
+          vertex_central_system->add_particle_out(hepmc_particle);
+          central_system_vertex_->add_particle_in(hepmc_particle);
+        }
         continue;
       case cepgen::Particle::Role::CentralSystem:
       default: {
@@ -90,7 +99,7 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
         if (const auto m1 = *mothers.begin(), m2 = mothers.size() > 1 ? *mothers.rbegin() : -1;  // get mother(s) id(s)
             m1 == central_system_id ||
             (m2 >= 0 && (m1 < central_system_id && central_system_id <= m2)))  // also supports range
-          vertex_central_system->add_particle_out(hepmc_particle);
+          central_system_vertex_->add_particle_out(hepmc_particle);
         else if (cepgen_id_vs_hepmc_particle_.count(m1) !=
                  0) {  // if part of the decay chain of central system, find parents
           auto production_vertex = cepgen_id_vs_hepmc_particle_.at(m1)->end_vertex();
@@ -114,6 +123,8 @@ CepGenEvent::CepGenEvent(const cepgen::Event& event) : GenEvent(Units::GEV, Unit
   add_vertex(vertex_beam1);
   add_vertex(vertex_beam2);
   add_vertex(vertex_central_system);
+  if (central_system_vertex_ != vertex_central_system)
+    add_vertex(central_system_vertex_);
   for (const auto& decay_vertex : decay_vertices)
     add_vertex(decay_vertex);
 }
@@ -237,7 +248,6 @@ bool CepGenEvent::merge(cepgen::Event& event) const {
       return false;
     }
   }
-  const auto vertex_central_system = vertices().at(2);
 
   const auto convert_momentum = [](const ConstGenParticlePtr& hepmc_particle) {
     return cepgen::Momentum::fromPxPyPzE(hepmc_particle->momentum().x(),
@@ -282,7 +292,7 @@ bool CepGenEvent::merge(cepgen::Event& event) const {
     browse_children(hepmc_particle->second, id);
   }
   // particles directly attached to the central system vertex (e.g. a photon radiated in the two-parton system decay)
-  for (const auto& central_particle : vertex_central_system->particles_out())
+  for (const auto& central_particle : central_system_vertex_->particles_out())
     if (known_particles.insert(central_particle.get()).second)
       browse_children(central_particle,
                       add_particle(central_particle,

@@ -105,7 +105,8 @@ namespace cepgen::photos {
         if (event.hasRole(role))
           if (const auto beam_id = event.oneWithRole(role).integerPdgId(); suppressed_beams_.insert(beam_id).second)
             Photos::suppressBremForDecay(0, static_cast<int>(beam_id));
-      CepGenEvent hepmc_event(event);  // conversion to a HepMC3 format
+      // conversion to a HepMC3 format, keeping the two-parton system as the single mother Photos++ radiates from
+      CepGenEvent hepmc_event(event, /* intermediate_line */ true);
       PhotosHepMC3Event photos_event(&hepmc_event);
       photos_event.process();
       return hepmc_event.merge(event);  // merge everything back into the original event
