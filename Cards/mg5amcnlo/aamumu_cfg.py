@@ -10,9 +10,9 @@ process = kt.process.clone('mg5_aMC',
     processParameters = cepgen.Parameters(
         process = 'a a > mu+ mu-',
         # alternatively, if shared object is already generated
-        #lib = 'libCepGenMadGraphProcess.so',
+        #lib = '/path/to/libCepGenMadGraphProcess.so',
         # alternatively, if standalone_cpp directory is already generated
-        #standaloneCppPath = '/tmp/cepgen_mg5_aMC',
+        #standaloneCppPath = '/path/to/process',
         mode = cepgen.ProcessMode.ElasticElastic,
     ),
     inKinematics = cepgen.Parameters(

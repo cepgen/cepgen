@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2025  Laurent Forthomme
+ *  Copyright (C) 2020-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,14 +20,17 @@
 #error "*** MADGRAPH_BIN variable not set! ***"
 #endif
 
-#include <array>
-#include <fstream>
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Physics/PDG.h>
+#include <CepGen/Utils/Caller.h>
+#include <CepGen/Utils/String.h>
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/Caller.h"
-#include "CepGen/Utils/Filesystem.h"
-#include "CepGen/Utils/String.h"
+#include <array>
+#include <chrono>
+#include <cstdint>
+#include <fstream>
+#include <random>
+
 #include "CepGenMadGraph/Utils.h"
 #include "CepGenPython/Environment.h"
 #include "CepGenPython/ObjectPtr.h"
@@ -36,6 +39,21 @@
 using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
+  fs::path workingDirectory() {
+    static const fs::path path = []() -> fs::path {
+      std::mt19937_64 generator(
+          std::random_device{}() ^
+          static_cast<std::uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count()));
+      for (size_t attempt = 0; attempt < 100; ++attempt)
+        if (const auto candidate = fs::temp_directory_path() / ("cepgen_mg5_aMC_" + std::to_string(generator()));
+            fs::create_directory(candidate))  // false if it already exists, hence safe against concurrent creations
+          return candidate;
+      throw CG_FATAL("MadGraphInterface:workingDirectory")
+          << "Failed to create a unique directory in " << fs::temp_directory_path() << ".";
+    }();
+    return path;
+  }
+
   ProcessParticles unpackProcessParticles(const std::string& process_name) {
     ProcessParticles out;
     const auto process_no_removals = utils::split(utils::trim(process_name), '/').at(0);
@@ -70,7 +88,7 @@ namespace cepgen::mg5amc {
         cmds.emplace_back("display particles " + particle_name);
         std::string py_output;
         bool found_properties{false};
-        const auto tmp_path = fs::temp_directory_path() / "mg5_aMC_part_query.dat";
+        const auto tmp_path = workingDirectory() / "part_query.dat";
         if (!utils::isWriteable(tmp_path))
           throw CG_ERROR("MadGraphInterface:describeParticle")
               << "Temporary path '" << tmp_path << "' is not writeable.";

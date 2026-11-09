@@ -32,6 +32,10 @@ namespace cepgen::mg5amc {
 
     std::string run() const;
 
+    /// Path of the mg5_aMC process definition files
+    /// \param[in] tmp_dir user-steered path; if empty, a location unique to this program instance is returned
+    static fs::path temporaryPath(const std::string& tmp_dir);
+
     /// Retrieve a CepGen-compatible parameters list from a MadGraph parameters card
     static ParametersDescription extractParamCardParameters(const std::string&);
     /// Generate a MadGraph parameters card from CepGen user-steered parameters
@@ -44,7 +48,6 @@ namespace cepgen::mg5amc {
     static void generateLibrary(const fs::path&, const fs::path&, const fs::path&);
 
     void parseExtraParticles();
-    void linkCards() const;
     std::string prepareMadGraphProcess() const;
 
     const std::string proc_;
