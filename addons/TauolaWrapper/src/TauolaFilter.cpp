@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,8 +57,7 @@ namespace cepgen::tauola {
       if (const auto& random_generator = steer<ParametersList>("randomGenerator"); !random_generator.empty()) {
         if (gRandomGenerator = RandomGeneratorFactory::get().build(random_generator); gRandomGenerator)
           Tauola::setRandomGenerator([]() -> double { return gRandomGenerator->uniform(); });
-      } else
-        Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
+      }
       if (const auto lifetime = steer<double>("decayingParticleLifetime"); lifetime > 0.)
         Tauola::setTauLifetime(lifetime);
       else if (lifetime == 0.)
@@ -75,6 +74,8 @@ namespace cepgen::tauola {
         Tauola::initialize();
       }
       CG_INFO("TauolaFilter") << "Tauola initialised. Output:\n" << std::string(80, '-') << buf << std::string(80, '-');
+      if (!gRandomGenerator && seed_ >= 0)  // ranges from RMARIN; the last two arguments are a skip count, not seeds
+        Tauola::setSeed(static_cast<int>(seed_ % 900000001ll), 0, 0);
       Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
       if (!Tauola::getIsTauolaIni())
         throw CG_FATAL("TauolaFilter") << "Tauola was not properly initialised!";
@@ -142,17 +143,11 @@ namespace cepgen::tauola {
               "uniformise the decay mode of all particle with opposite charge to the one given in 'decayingParticle'");
       desc.add("momentumConservationThreshold", 1.e-6).setDescription("numerical limit for momentum conservation");
       auto pol_desc = ParametersDescription();
-      pol_desc.add("full", true);
-      pol_desc.add("GAMMA", Tauola::spin_correlation.GAMMA);
-      pol_desc.add("Z0", Tauola::spin_correlation.Z0);
-      pol_desc.add("HIGGS", Tauola::spin_correlation.HIGGS);
-      pol_desc.add("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
-      pol_desc.add("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
-      pol_desc.add("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
-      pol_desc.add("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
-      pol_desc.add("W_PLUS", Tauola::spin_correlation.W_PLUS);
-      pol_desc.add("W_MINUS", Tauola::spin_correlation.W_MINUS);
-      desc.add("polarisations", pol_desc);
+      pol_desc.add("full", true).setDescription("switch on/off spin correlations for all mothers");
+      desc.add("polarisations", pol_desc)
+          .setDescription(
+              "spin correlations; 'full' can be refined per mother with the optional booleans GAMMA, Z0, HIGGS, "
+              "HIGGS_H, HIGGS_A, HIGGS_PLUS, HIGGS_MINUS, W_PLUS, and W_MINUS");
       auto rad_desc = ParametersDescription();
       rad_desc.add("enable", false).setDescription("switch on/off bremsstrahlung in leptonic tau decays?");
       rad_desc.add("cutoff", -1.)
@@ -180,10 +175,7 @@ namespace cepgen::tauola {
         log << "\n";
         HepMC3::Print::listing(log.stream(), *tauola_event.getEvent(), 2);
       });
-      size_t num_trials = 1;
-      while (true) {
-        if (num_trials++ >= max_trials_)
-          break;
+      for (size_t trial = 0; trial < max_trials_; ++trial) {
         tauola_event.decayTaus();
         CG_DEBUG("TauolaFilter:run").log([&tauola_event](auto& log) {
           log << "Event after to decay:\n";
@@ -191,9 +183,8 @@ namespace cepgen::tauola {
           log << "\n";
           HepMC3::Print::listing(log.stream(), *tauola_event.getEvent(), 2);
         });
-        hepmc_event.merge(event);  // merge everything back into the original event
         if (hepmc_event.particles_size() != hepmc_event_size_before)
-          return true;
+          return hepmc_event.merge(event);  // merge everything back into the original event
       }
       CG_WARNING("TauolaFilter:run") << "Maximum number of trials (" << max_trials_
                                      << ") reached without decay. Skipping the event.";
