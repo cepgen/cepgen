@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the pycepgen Python bindings"""
+"""Collection of tests for the pycepgen Python bindings."""
 
 import math
 import pycepgen as cg
