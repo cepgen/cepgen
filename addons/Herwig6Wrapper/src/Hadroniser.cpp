@@ -44,17 +44,23 @@
 namespace cepgen::herwig6 {
   namespace {  // static part of the algorithm, as Herwig 6 is Fortran, and dominated with common blocks
     std::unordered_map<std::string, double*> realParameters() {
-      return {{"B1LIM", &hwpram_.b1lim},
-              {"BTCLM", &hwpram_.btclm},
-              {"CLMAX", &hwpram_.clmax},
-              {"CLPOW", &hwpram_.clpow},
-              {"CLSMR(1)", &hwpram_.clsmr[0]},
-              {"CLSMR(2)", &hwpram_.clsmr[1]},
-              {"PSPLT(1)", &hwpram_.psplt[0]},
-              {"PSPLT(2)", &hwpram_.psplt[1]}};
+      return {{"B1LIM", &hwpram_.b1lim},  // b meson-recombination parameter (default = 0)
+              {"BTCLM", &hwpram_.btclm},  // multiplier to mass parameter to adjust splitting/grouping
+                                          // of spectator partons into colour-singlets (default = 1)
+
+              // fission threshold mass parameterisation (M_f = CLMAX**CLPOW + (m_q1 + m_q2)**CLPOW
+              {"CLMAX", &hwpram_.clmax},         // maximum cluster mass parameter in cluster hadronisation/fission
+                                                 // model (default = 3.35 GeV)
+              {"CLPOW", &hwpram_.clpow},         // power-dependence cluster mass parameter
+              {"CLSMR(1)", &hwpram_.clsmr[0]},   // cluster mass smearing parameter (no b quark)
+              {"CLSMR(2)", &hwpram_.clsmr[1]},   // cluster mass smearing parameter (b quark)
+              {"PSPLT(1)", &hwpram_.psplt[0]},   // steepness of mass spectrum (d, u, s quarks)
+              {"PSPLT(2)", &hwpram_.psplt[1]}};  // steepness of mass spectrum (b quark)
     }
     std::unordered_map<std::string, int*> integerParameters() {
-      return {{"CLDIR(1)", &hwpram_.cldir[0]}, {"CLDIR(2)", &hwpram_.cldir[1]}, {"IOPREM", &hwpram_.ioprem}};
+      return {{"CLDIR(1)", &hwpram_.cldir[0]},  // cluster dir. memory switch during non-pert. hadr. (d, u, s quarks)
+              {"CLDIR(2)", &hwpram_.cldir[1]},  // cluster dir. memory switch during non-pert. hadr. (b quark)
+              {"IOPREM", &hwpram_.ioprem}};  // Gauss. mass spectrum (0)/child as soft remnant cluster (1) (default = 1)
     }
     /// Parameter-dependent state of the (process-wide) Herwig 6 common blocks; empty until it is set up
     ParametersList& herwigConfiguration() {
