@@ -70,7 +70,7 @@ endif()
 cepgen_test_declare_unstable(python_output python_particle_mod)
 
 # Python tests
-if(CMAKE_BUILD_TESTS)
+if(CMAKE_BUILD_TESTS AND pybind11)
   add_test(NAME pycepgen_module
     COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/pycepgen_module.py)
   set_property(TEST pycepgen_module PROPERTY ENVIRONMENT
