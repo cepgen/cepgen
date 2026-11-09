@@ -107,10 +107,12 @@ void RunParameters::addGenerationTime(double generation_time) {
 }
 
 bool RunParameters::weightedEvents() const {
-  if (!generator_)
-    throw CG_FATAL("RunParameters:weightedEvents")
-        << "Failed to retrieve weighted/unweighted events flag, as the generator object was not registered.";
-  return generator_->generatorWorker().weighted();
+  if (generator_)
+    return generator_->generatorWorker().weighted();
+  CG_WARNING("RunParameters:weightedEvents")
+      << "Failed to retrieve weighted/unweighted events flag, as the generator object was not registered. Assuming "
+         "unweighted events are generated.";
+  return false;
 }
 
 proc::Process& RunParameters::process() {
