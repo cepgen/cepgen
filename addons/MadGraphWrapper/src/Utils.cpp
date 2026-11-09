@@ -84,7 +84,7 @@ namespace cepgen::mg5amc {
         cmds.emplace_back("display particles " + particle_name);
         std::string py_output;
         bool found_properties{false};
-        const auto tmp_path = fs::temp_directory_path() / "mg5_aMC_part_query.dat";
+        const auto tmp_path = workingDirectory() / "part_query.dat";
         if (!utils::isWriteable(tmp_path))
           throw CG_ERROR("MadGraphInterface:describeParticle")
               << "Temporary path '" << tmp_path << "' is not writeable.";
