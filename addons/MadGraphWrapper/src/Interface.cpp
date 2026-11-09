@@ -145,19 +145,8 @@ std::string Interface::run() const {
 #endif
 
   generateLibrary(cg_proc, cpp_path, lib_path);
-  linkCards();
-  return lib_path;
-}
-
-void Interface::linkCards() const {
-  for (const auto& f : fs::directory_iterator(tmp_dir_ / "Cards"))
-    if (f.path().extension() == ".dat") {
-      fs::path link_path = f.path().filename();
-      if (!exists(link_path))
-        create_symlink(f, link_path);
-    }
-  CG_DEBUG("mg5amc:Interface:run") << "Created links in current directory for all cards in '" +
-                                          std::string(tmp_dir_ / "Cards") + "'.";
+  CG_INFO("mg5amc:Interface:run") << "Process library generated at " << lib_path << ".";
+  return lib_path.string();
 }
 
 std::string Interface::prepareMadGraphProcess() const {

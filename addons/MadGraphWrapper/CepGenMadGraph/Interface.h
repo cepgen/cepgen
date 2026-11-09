@@ -48,7 +48,6 @@ namespace cepgen::mg5amc {
     static void generateLibrary(const fs::path&, const fs::path&, const fs::path&);
 
     void parseExtraParticles();
-    void linkCards() const;
     std::string prepareMadGraphProcess() const;
 
     const std::string proc_;
