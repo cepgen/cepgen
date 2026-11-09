@@ -21,7 +21,37 @@
 
 #include <array>
 
+namespace cepgen::herwig6 {
+  static constexpr int NMXHEP = 4000;  ///< Size of the /HEPEVT/ arrays (Herwig 6.5)
+  static constexpr int NMXRES = 500;   ///< Size of the particle properties arrays (Herwig 6.5)
+}  // namespace cepgen::herwig6
+
 extern "C" {
+/// Standard event record
+extern struct {
+  int nevhep, nhep;
+  int isthep[cepgen::herwig6::NMXHEP], idhep[cepgen::herwig6::NMXHEP];
+  int jmohep[cepgen::herwig6::NMXHEP][2], jdahep[cepgen::herwig6::NMXHEP][2];
+  double phep[cepgen::herwig6::NMXHEP][5], vhep[cepgen::herwig6::NMXHEP][4];
+} hepevt_;
+/// Event-level bookkeeping
+extern struct {
+  double avwgt, evwgt, gamwt, tlout, wbigst, wgtmax, wgtsum, wsqsum;
+  int idhw[cepgen::herwig6::NMXHEP];
+  int ierror, istat, lwevt, maxer, maxpr, nowgt, nrn[2], numer, numeru, nwgts, gensof;
+} hwevnt_;
+/// Particle properties
+extern struct {
+  double rltim[cepgen::herwig6::NMXRES + 1], rmass[cepgen::herwig6::NMXRES + 1], rspin[cepgen::herwig6::NMXRES + 1];
+  int ichrg[cepgen::herwig6::NMXRES + 1], idpdg[cepgen::herwig6::NMXRES + 1], iflav[cepgen::herwig6::NMXRES + 1], nres;
+  int vtocdk[cepgen::herwig6::NMXRES + 1], vtordk[cepgen::herwig6::NMXRES + 1];
+  int qorqqb[cepgen::herwig6::NMXRES + 1], qborqq[cepgen::herwig6::NMXRES + 1];
+} hwprop_;
+/// Particle names
+extern struct {
+  char rname[cepgen::herwig6::NMXRES + 1][8];
+  char txname[cepgen::herwig6::NMXRES + 1][2][37];
+} hwunam_;
 /// Basic parameters (and quantities derived from them)
 extern struct {
   std::array<double, 16> afch[2];
@@ -53,6 +83,12 @@ namespace cepgen::herwig6 {
   double hwuaem(double q2);
   double hwualf(int mode, double q2);
   double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam);
+  void hwuine();             ///< Initialise an event
+  void hwcfor();             ///< Form clusters from colour-connected partons
+  void hwcdec();             ///< Decay clusters into primary hadrons
+  void hwdhad();             ///< Decay unstable hadrons
+  void hwdhvy();             ///< Decay heavy-flavour hadrons
+  void hwufne();             ///< Finalise an event
   bool compatibleVersion();  ///< Is the Herwig 6 linked library version compatible with tested common block layouts?
 }  // namespace cepgen::herwig6
 
