@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 namespace cepgen {
   class EventExporter;
   class EventModifier;
+  class Generator;
   class ParametersList;
   enum class IntegratorType;
 }  // namespace cepgen
@@ -55,6 +56,9 @@ namespace cepgen {
     RunParameters& operator=(RunParameters);  ///< Assignment operator
 
     friend std::ostream& operator<<(std::ostream&, const RunParameters&);  ///< User-readable dump of runtime parameters
+
+    void setGenerator(Generator* generator) { generator_ = generator; }  ///< Set the associated generator object
+    const Generator* generator() const { return generator_; }            ///< Associated generator object
 
     void setTimeKeeper(utils::TimeKeeper*);                               ///< Initialise the timekeeper instance
     utils::TimeKeeper* timeKeeper() { return timer_.get(); }              ///< Pointer to a timekeeper instance
@@ -114,6 +118,7 @@ namespace cepgen {
     };
     inline Generation& generation() { return generation_; }              ///< Event generation parameters
     inline const Generation& generation() const { return generation_; }  ///< Event generation parameters
+    bool weightedEvents() const;  ///< Is the generator (worker) producing weighted events?
 
     //----- event modification (e.g. hadronisation, decay) algorithm
 
@@ -163,6 +168,8 @@ namespace cepgen {
     ParametersList integrator_;                 ///< Integrator parameters
     Generation generation_;                     ///< Events generation parameters
     std::unique_ptr<utils::TimeKeeper> timer_;  ///< Collection of stopwatches for timing
+
+    Generator* generator_{nullptr};  ///< Main generator object (NOT owning)
   };
 }  // namespace cepgen
 

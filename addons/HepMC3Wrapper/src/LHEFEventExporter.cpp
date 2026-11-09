@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2025  Laurent Forthomme
+ *  Copyright (C) 2016-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,8 @@ namespace cepgen::hepmc3 {
       }
       auto& hepeup = lhe_output_->hepeup;
       hepeup.heprup = &lhe_output_->heprup;
-      hepeup.XWGTUP = static_cast<double>(cross_section_) * cepgen_event.metadata("weight");
+      hepeup.XWGTUP =
+          runParameters().weightedEvents() ? static_cast<double>(cross_section_) * cepgen_event.metadata("weight") : 1.;
       hepeup.XPDWUP = std::pair<double, double>(0., 0.);
       hepeup.SCALUP = 0.;
       hepeup.AQEDUP = cepgen_event.metadata("alphaEM");
@@ -105,7 +106,9 @@ namespace cepgen::hepmc3 {
       lhe_output_->heprup.LPRUP[0] = 1;
       lhe_output_->heprup.XSECUP[0] = cross_section_;  // the integration is performed before this initialisation
       lhe_output_->heprup.XERRUP[0] = cross_section_.uncertainty();
-      lhe_output_->heprup.IDWTUP = 4;  // weighted events, with mean weight equal to the cross-section
+      lhe_output_->heprup.IDWTUP = runParameters().weightedEvents()
+                                       ? 4   // weighted events, with mean weight equal to the cross-section
+                                       : 3;  // unweighted events
     }
 
     const std::unique_ptr<LHEF::Writer> lhe_output_;

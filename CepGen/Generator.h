@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -84,6 +84,8 @@ namespace cepgen {
     /// \param[in] coordinates the n-dimensional point to compute
     /// \return the function value for the given point
     double computePoint(const std::vector<double>& coordinates);
+
+    const GeneratorWorker& generatorWorker() const;  ///< Associated generator worker (if any)
 
   private:
     void initialise();       ///< Initialise event generation
