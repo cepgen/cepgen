@@ -1,8 +1,8 @@
 #--- searching for NeoPDF
-find_library(NeoPDF neopdf_capi HINTS $ENV{NeoPDF_PATH} /usr/local PATH_SUFFIXES lib64 lib)
-find_path(NeoPDF_INCLUDE NeoPDF.hpp HINTS $ENV{NeoPDF_PATH} /usr/local PATH_SUFFIXES include/neopdf_capi)
+find_library(NeoPDF neopdf_capi HINTS $ENV{NeoPDF_PATH} PATH_SUFFIXES lib64 lib)
+find_path(NeoPDF_INCLUDE NeoPDF.hpp HINTS $ENV{NeoPDF_PATH} PATH_SUFFIXES include/neopdf_capi include)
 
-if(NOT NeoPDF)
+if(NOT NeoPDF OR NOT NeoPDF_INCLUDE)
   return()
 endif()
 
