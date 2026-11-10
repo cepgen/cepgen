@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -98,6 +98,10 @@ void Event::freeze() {
     event_content_.op1 = particles_[Particle::Role::OutgoingBeam1].size();
   if (particles_.count(Particle::Role::OutgoingBeam2) > 0)
     event_content_.op2 = particles_[Particle::Role::OutgoingBeam2].size();
+  event_content_.statuses.clear();
+  for (const auto& [role, particles] : particles_)
+    for (const auto& particle : particles)
+      event_content_.statuses[particle.id()] = static_cast<int>(particle.status());
 }
 
 void Event::restore() {
@@ -107,6 +111,25 @@ void Event::restore() {
     particles_[Particle::Role::OutgoingBeam1].resize(event_content_.op1);
   if (particles_.count(Particle::Role::OutgoingBeam2) > 0)
     particles_[Particle::Role::OutgoingBeam2].resize(event_content_.op2);
+  // remove the references to the particles dropped above (e.g. added by an event modification algorithm), so that
+  // they are not mistaken for the new particles reusing their identifiers in the next event
+  ParticlesIds remaining_ids;
+  for (const auto& [role, particles] : particles_)
+    for (const auto& particle : particles)
+      remaining_ids.insert(particle.id());
+  const auto drop_missing = [&remaining_ids](ParticlesIds& ids) {
+    const auto size_before = ids.size();
+    for (auto it = ids.begin(); it != ids.end();)
+      it = remaining_ids.count(*it) == 0 ? ids.erase(it) : std::next(it);
+    return ids.size() != size_before;
+  };
+  for (auto& [role, particles] : particles_)
+    for (auto& particle : particles) {
+      drop_missing(particle.mothers());
+      if (drop_missing(particle.children()))  // e.g. a decayed particle: set it back to its original status
+        if (const auto status = event_content_.statuses.find(particle.id()); status != event_content_.statuses.end())
+          particle.setStatus(status->second);
+    }
 }
 
 bool Event::compressed() const { return compressed_; }

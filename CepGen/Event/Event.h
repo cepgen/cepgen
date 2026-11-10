@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 #ifndef CepGen_Event_Event_h
 #define CepGen_Event_Event_h
+
+#include <unordered_map>
 
 #include "CepGen/Event/Particle.h"
 
@@ -139,9 +141,10 @@ namespace cepgen {
     ParticlesMap particles_;       ///< List of particles in the event, mapped to their role in the process
     /// Typical event indices structure
     struct NumParticles {
-      size_t cs{0};   ///< Index of the first central system particle
-      size_t op1{0};  ///< Index of the first positive-z outgoing beam state
-      size_t op2{0};  ///< Index of the first negative-z outgoing beam state
+      size_t cs{0};                             ///< Index of the first central system particle
+      size_t op1{0};                            ///< Index of the first positive-z outgoing beam state
+      size_t op2{0};                            ///< Index of the first negative-z outgoing beam state
+      std::unordered_map<int, int> statuses{};  ///< Particles status at freezing time, per particle id
     } event_content_{};
     bool compressed_{false};  ///< Is the event "compressed"?
   };
