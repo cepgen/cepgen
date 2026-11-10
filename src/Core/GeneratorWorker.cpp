@@ -68,6 +68,7 @@ bool GeneratorWorker::storeEvent(double weight) const {
   integrand_->process().eventPtr()->metadata["weight"] = weight;
   const auto& event = integrand_->process().event();
   if (const auto num_events_generated = run_params_->numGeneratedEvents();
+      run_params_->generation().printEvery() > 0 &&
       (num_events_generated + 1) % run_params_->generation().printEvery() == 0)
     CG_DEBUG("GeneratorWorker:store") << utils::s("event", num_events_generated + 1, true) << " generated.";
   if (callback_proc_)
