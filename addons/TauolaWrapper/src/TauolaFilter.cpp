@@ -79,13 +79,17 @@ namespace cepgen::tauola {
         CG_WARNING("TauolaFilter") << "Tauola++ was already initialised. The decaying particle, decay modes, and "
                                       "radiation settings of this instance are ignored.";
       std::string buf;
-      {
+      if (steer<bool>("debug"))  // let the output flow, e.g. to see why the initialisation would fail or stop
+        Tauola::initialize();
+      else {
         auto sc = utils::StreamCollector(buf);
         Tauola::initialize();
       }
       // TAUOLA decays the tau in its rest frame with its own mass; align it with the one used to generate the event
       parmas_.amtau = static_cast<float>(PDG::get().mass(PDG::tau));
-      CG_INFO("TauolaFilter") << "Tauola initialised. Output:\n" << std::string(80, '-') << buf << std::string(80, '-');
+      if (!buf.empty())
+        CG_INFO("TauolaFilter") << "Tauola initialised. Output:\n"
+                                << std::string(80, '-') << buf << std::string(80, '-');
       if (!gRandomGenerator && seed_ >= 0)  // ranges from RMARIN; the last two arguments are a skip count, not seeds
         Tauola::setSeed(static_cast<int>(seed_ % 900000001ll), 0, 0);
       Tauola::momentum_conservation_threshold = steer<double>("momentumConservationThreshold");
@@ -178,8 +182,10 @@ namespace cepgen::tauola {
       return desc;
     }
 
-    bool run(Event& event, double& weight, bool /*fast*/) override {
+    bool run(Event& event, double& weight, bool fast) override {
       weight = 1.;
+      if (fast)  // e.g. while integrating the cross section: unit-weight decays, nothing to compute
+        return true;
       CepGenEvent hepmc_event(event);  // conversion to a HepMC3 format
       const auto hepmc_event_size_before = hepmc_event.particles_size();
       TauolaHepMC3Event tauola_event(&hepmc_event);
