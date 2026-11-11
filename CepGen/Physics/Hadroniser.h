@@ -20,6 +20,7 @@
 #define CepGen_Physics_Hadroniser_h
 
 #include "CepGen/EventFilter/EventModifier.h"
+#include "CepGen/Physics/Momentum.h"
 
 /// Location for all hadronisers to be run downstream to the events generation
 namespace cepgen::hadr {
@@ -31,6 +32,16 @@ namespace cepgen::hadr {
     explicit Hadroniser(const ParametersList&);  ///< Default constructor for an undefined hadroniser
 
     static ParametersDescription description();
+
+    /// Hadron retrieved from the Herwig 6 event record
+    struct Fragment {
+      int index{0};        ///< Position in the event record
+      int mother{-1};      ///< Position of the first mother in the event record
+      long pdg_id{0};      ///< Signed PDG identifier
+      bool stable{false};  ///< Is this particle in the final state?
+      Momentum momentum;   ///< 4-momentum in the rest frame of the dissociated system
+    };
+    using Fragments = std::vector<Fragment>;
 
     inline bool fragmentRemnants() const { return fragment_remnants_; }  ///< Fragment the beam remnants?
 

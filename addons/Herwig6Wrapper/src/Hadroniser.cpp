@@ -38,7 +38,6 @@
 #include <vector>
 
 #include "CepGenHerwig6/DiffractiveSystemSeed.h"
-#include "CepGenHerwig6/Fragment.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
 namespace cepgen::herwig6 {
@@ -159,7 +158,7 @@ namespace cepgen::herwig6 {
           if (trials_for_system++ >= max_trials_)
             return false;
           ++num_trials;
-        } while (!hadronise(diffractive_seed, fragments));
+        } while (!diffractive_seed.hadronise(fragments));
         hadronised.emplace_back(outgoing, std::move(fragments));
       }
       event.metadata["herwig6:num_hadronisation_trials"] = num_trials;

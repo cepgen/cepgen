@@ -19,9 +19,10 @@
 #ifndef CepGenHerwig6_DiffractiveSystemSeed_h
 #define CepGenHerwig6_DiffractiveSystemSeed_h
 
-#include <array>
+#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/Momentum.h>
 
-#include "CepGen/Physics/Momentum.h"
+#include <array>
 
 namespace cepgen::utils {
   class RandomGenerator;
@@ -29,7 +30,8 @@ namespace cepgen::utils {
 
 namespace cepgen::herwig6 {
   /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
-  struct DiffractiveSystemSeed {
+  class DiffractiveSystemSeed {
+  public:
     /// Build the partonic content of a dissociated system
     /// \param[in] beam Incoming beam particle momentum
     /// \param[in] system Dissociated system momentum
@@ -44,7 +46,11 @@ namespace cepgen::herwig6 {
                                        utils::RandomGenerator& rng,
                                        double primordial_kt);
 
-    double system_mass{0.};  ///< Invariant mass of the system
+    /// Run cluster hadronisation of a given diffractive system
+    /// \param[out] fragments Hadrons produced, in the rest frame of the system
+    /// \return Boolean stating whether the event was successfully hadronised
+    bool hadronise(hadr::Hadroniser::Fragments& fragments) const;
+
     /// Herwig 6 internal identifiers used for the beam remnants treatment
     enum struct InternalId {
       invalid = 0,
@@ -60,11 +66,14 @@ namespace cepgen::herwig6 {
       uu_bar = 115,
       ud0_bar = 116
     };
-    InternalId struck_id{InternalId::invalid};             ///< Herwig identifier of the struck (anti)quark
-    InternalId spectator_id{InternalId::invalid};          ///< Herwig identifier of the spectator (anti)diquark
-    double struck_mass{0.};                                ///< Constituent mass of the struck (anti)quark
-    double spectator_mass{0.};                             ///< Constituent mass of the spectator (anti)diquark
-    std::array<double, 3> spectator_momentum{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
+
+  private:
+    double system_mass_{0.};                                ///< Invariant mass of the system
+    InternalId struck_id_{InternalId::invalid};             ///< Herwig identifier of the struck (anti)quark
+    InternalId spectator_id_{InternalId::invalid};          ///< Herwig identifier of the spectator (anti)diquark
+    double struck_mass_{0.};                                ///< Constituent mass of the struck (anti)quark
+    double spectator_mass_{0.};                             ///< Constituent mass of the spectator (anti)diquark
+    std::array<double, 3> spectator_momentum_{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
   };
 }  // namespace cepgen::herwig6
 
