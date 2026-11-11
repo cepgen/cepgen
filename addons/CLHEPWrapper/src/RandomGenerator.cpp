@@ -106,7 +106,9 @@ namespace cepgen::clhep {
     }
 
     int uniformInt(int min, int max) override { return CLHEP::RandFlat::shootInt(engine_.get(), min, max + 1); }
-    double uniform(double min, double max) override { return CLHEP::RandFlat::shoot(engine_.get(), min, max); }
+    double uniform(const Limits& range) override {
+      return CLHEP::RandFlat::shoot(engine_.get(), range.min(), range.max());
+    }
     double normal(double mean, double rms) override { return CLHEP::RandGauss::shoot(engine_.get(), mean, rms); }
     double exponential(double exponent) override { return CLHEP::RandExponential::shoot(engine_.get(), exponent); }
     double breitWigner(double mean, double scale) override {

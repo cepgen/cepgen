@@ -20,6 +20,7 @@
 #define CepGen_Utils_RandomGenerator_h
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Utils/Limits.h"
 
 namespace cepgen::utils {
   /// A random number generator
@@ -34,7 +35,7 @@ namespace cepgen::utils {
 
     // base distributions
     virtual int uniformInt(int min, int max) = 0;
-    virtual double uniform(double min = 0., double max = 1.) = 0;
+    virtual double uniform(const Limits& = Limits{0., 1.}) = 0;
     virtual double normal(double mean = 0., double rms = 1.) = 0;
 
     // specialised distributions
@@ -42,6 +43,9 @@ namespace cepgen::utils {
     virtual double breitWigner(double mean = 0., double scale = 1.);
     virtual double landau(double location = 0., double width = 1.);
     virtual int poisson(double mean = 0.);
+
+    /// Legacy interface for real event number generation
+    double uniform(double min, double max) { return uniform({min, max}); }
 
     /// Retrieve the engine object
     template <typename T>

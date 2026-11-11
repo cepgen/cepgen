@@ -77,7 +77,7 @@ public:
       double y;
       do {  // select a function value and reject if fmax is too small
         ps_bin_ = random_generator_->uniformInt(0, grid_->size() - 1);
-        y = random_generator_->uniform(0., grid_->globalMax());
+        y = random_generator_->uniform({0., grid_->globalMax()});
         grid_->increment(ps_bin_);
       } while (y > grid_->maxValue(ps_bin_));
       grid_->shoot(*random_generator_, ps_bin_, coordinates_);    // shoot a point x in this bin
@@ -113,7 +113,7 @@ private:
       grid_->shoot(*random_generator_, ps_bin_, coordinates_);  // select x values in phase space bin
       const auto weight = integrator_->eval(*integrand_, coordinates_);
       grid_->rescale(ps_bin_, weight);  // parameter for correction of correction
-      if (weight >= random_generator_->uniform(0., grid_->maxValueDiff()) + grid_->maxHistValue()) {
+      if (weight >= random_generator_->uniform({0., grid_->maxValueDiff()}) + grid_->maxHistValue()) {
         store = true;  // accept event
         return true;
       }

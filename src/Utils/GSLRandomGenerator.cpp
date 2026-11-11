@@ -69,7 +69,7 @@ public:
   }
 
   int uniformInt(int min, int max) override { return min + gsl_rng_uniform_int(rng_.get(), max - min + 1); }
-  double uniform(double min, double max) override { return Limits{min, max}.x(gsl_rng_uniform(rng_.get())); }
+  double uniform(const Limits& range) override { return range.x(gsl_rng_uniform(rng_.get())); }
   double normal(double mean, double rms) override { return gsl_ran_gaussian(rng_.get(), rms) + mean; }
   double exponential(double exponent) override { return gsl_ran_exponential(rng_.get(), exponent); }
   double breitWigner(double mean, double scale) override { return gsl_ran_cauchy(rng_.get(), scale) + mean; }
