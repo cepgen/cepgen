@@ -78,7 +78,7 @@ public:
   }
 
   int uniformInt(int min, int max) override { return gen_->uniformInt(min, max); }
-  double uniform(double min, double max) override { return gen_->uniform(min, max); }
+  double uniform(const Limits& range) override { return gen_->uniform(range); }
   double normal(double mean, double rms) override { return gen_->normal(mean, rms); }
   double exponential(double exponent) override { return gen_->exponential(exponent); }
   double breitWigner(double mean, double scale) override { return gen_->breitWigner(mean, scale); }
@@ -90,7 +90,9 @@ private:
   public:
     explicit Generator(unsigned long int value) : RandomGenerator(ParametersList()), rng_(value) {}
     int uniformInt(int min, int max) override { return std::uniform_int_distribution<>(min, max)(rng_); }
-    double uniform(double min, double max) override { return std::uniform_real_distribution<>(min, max)(rng_); }
+    double uniform(const Limits& range) override {
+      return std::uniform_real_distribution<>(range.min(), range.max())(rng_);
+    }
     double normal(double mean, double rms) override { return std::normal_distribution<>(mean, rms)(rng_); }
     double exponential(double exponent) override { return std::exponential_distribution<>(exponent)(rng_); }
     double breitWigner(double mean, double scale) override { return std::cauchy_distribution<>(mean, scale)(rng_); }

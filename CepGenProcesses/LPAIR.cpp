@@ -145,7 +145,7 @@ public:
 
     // randomly rotate all particles
     const short random_y = random_generator_->uniformInt(0, 1) == 1 ? 1 : -1;
-    const double random_phi = random_generator_->uniform(0., 2. * M_PI);
+    const double random_phi = random_generator_->uniform({0., 2. * M_PI});
     for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
       mom->rotatePhi(random_phi, random_y);
     if ((symmetrise_ && random_generator_->uniformInt(0, 1) == 1) ||

@@ -68,7 +68,7 @@ namespace cepgen::root {
     }
 
     int uniformInt(int min, int max) override { return min + random_number_generator_->Integer(max - min + 1); }
-    double uniform(double min, double max) override { return random_number_generator_->Uniform(min, max); }
+    double uniform(const Limits& range) override { return random_number_generator_->Uniform(range.min(), range.max()); }
     double normal(double mean, double rms) override { return random_number_generator_->Gaus(mean, rms); }
     double exponential(double exponent) override { return random_number_generator_->Exp(exponent); }
     double breitWigner(double mean, double scale) override {
