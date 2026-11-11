@@ -22,8 +22,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Utils/Algebra.h"
-#include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
@@ -172,6 +172,10 @@ double Momentum::crossProduct(const Momentum& mom, coord_t direction) const {
   }
 }
 
+Momentum Momentum::crossProduct(const Momentum& mom) const {
+  return Momentum::fromPxPyPzE(crossProduct(mom, X), crossProduct(mom, Y), crossProduct(mom, Z), 0.);
+}
+
 double Momentum::operator*(const Momentum& mom) const { return threeProduct(mom); }
 
 Momentum Momentum::operator%(const Momentum& mom) const {
@@ -224,6 +228,12 @@ Momentum& Momentum::computeP() {
 Momentum& Momentum::truncate(double tolerance) {
   std::replace_if(begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
   return computeP();
+}
+
+Momentum Momentum::unit() const { return operator/(p_); }
+
+Momentum Momentum::randomThetaPhi(utils::RandomGenerator& rng, const Limits& theta_range, const Limits& phi_range) {
+  return Momentum::fromPThetaPhiE(1., rng.uniform(theta_range), rng.uniform(phi_range), 1.);
 }
 
 //--- various getters

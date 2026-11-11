@@ -23,7 +23,14 @@
 #include <iosfwd>
 
 namespace cepgen {
+  class Limits;
   class Vector;
+}  // namespace cepgen
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
+namespace cepgen {
   /// Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
   /// \date Dec 2015
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -61,9 +68,16 @@ namespace cepgen {
 
     //--- vector and scalar operators
 
-    double threeProduct(const Momentum&) const;           ///< Scalar product of the 3-momentum with another 3-momentum
-    double fourProduct(const Momentum&) const;            ///< Scalar product of the 4-momentum with another 4-momentum
-    double crossProduct(const Momentum&, coord_t) const;  ///< Vector product of the 3-momentum with another 3-momentum
+    double threeProduct(const Momentum&) const;    ///< Scalar product of the 3-momentum with another 3-momentum
+    double fourProduct(const Momentum&) const;     ///< Scalar product of the 4-momentum with another 4-momentum
+    Momentum crossProduct(const Momentum&) const;  ///< Vector product of the 3-momentum with another 3-momentum
+    /// Single coordinate of the vector product of the 3-momentum with another 3-momentum
+    double crossProduct(const Momentum&, coord_t) const;
+
+    Momentum unit() const;  ///< Retrieve the unit-length directional component of this momentum
+
+    /// Shoot a unit-size vector-like momentum according to an azimuthal/polar angles range
+    static Momentum randomThetaPhi(utils::RandomGenerator&, const Limits& theta_range, const Limits& phi_range);
 
     // unary operators
     Momentum operator+() const;  ///< Unary trivial operator

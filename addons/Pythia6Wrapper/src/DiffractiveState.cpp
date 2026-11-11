@@ -78,10 +78,7 @@ DiffractiveState::DiffractiveState(const Momentum& system, long beam_pdg_id, uti
   const auto p_star = 0.5 * std::sqrt(lambda) / system_mass_;
 
   // isotropic string axis in the rest frame of the dissociated system
-  const auto cos_theta = rng.uniform(-1., 1.), phi = rng.uniform(0., 2. * M_PI);
-  const auto sin_theta = std::sqrt(1. - cos_theta * cos_theta);
-  diquark_momentum_ = Momentum::fromPxPyPzE(
-      p_star * sin_theta * std::cos(phi), p_star * sin_theta * std::sin(phi), p_star * cos_theta, 0.);
+  diquark_momentum_ = p_star * Momentum::randomThetaPhi(rng, {-M_PI, M_PI}, {0., 2. * M_PI});
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {

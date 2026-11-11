@@ -31,20 +31,6 @@
 
 namespace cepgen::herwig6 {
   namespace {
-    using Vec3 = std::array<double, 3>;
-    Vec3 cross(const Vec3& a, const Vec3& b) {
-      return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
-    }
-    double norm(const Vec3& a) { return std::sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]); }
-    Vec3 unit(const Vec3& a) {
-      const auto n = norm(a);
-      return {a[0] / n, a[1] / n, a[2] / n};
-    }
-    Vec3 randomDirection(utils::RandomGenerator& rng) {
-      const auto cos_theta = rng.uniform(-1., 1.), phi = rng.uniform(0., 2. * M_PI);
-      const auto sin_theta = std::sqrt(1. - cos_theta * cos_theta);
-      return {sin_theta * std::cos(phi), sin_theta * std::sin(phi), cos_theta};
-    }
     constexpr int kBeamStatus = 103;       // spectator entry holding the system kinematics
     constexpr int kPartonStatus = 149;     // final-state parton, copied to status 150 by HWCGSP
     constexpr int kSpectatorStatus = 147;  // beam remnant, copied to status 153 by HWCGSP
@@ -100,7 +86,7 @@ DiffractiveState::DiffractiveState(const Particle& beam,
                                                << " is not supported. Only protons and antiprotons can be dissociated.";
 
   // valence flavour content, weighted by the quark electric charge squared and its multiplicity in the proton
-  const bool valquark_down = rng.uniform(0., 1.) < 1. / 9.;
+  const bool valquark_down = rng.uniform() < 1. / 9.;
   if (beam_pdg_id >= 0) {  // quark/diquark
     valquark_id_ = valquark_down ? InternalId::down : InternalId::up;
     diquark_id_ = valquark_down ? InternalId::uu : InternalId::ud0;
@@ -123,22 +109,22 @@ DiffractiveState::DiffractiveState(const Particle& beam,
   const auto beam_in_system =
       Momentum(beam.momentum())
           .lorentzBoost(Momentum::fromPxPyPzE(-system.px(), -system.py(), -system.pz(), system.energy()));
-  const Vec3 beam_vector{beam_in_system.px(), beam_in_system.py(), beam_in_system.pz()};
-  const auto axis = norm(beam_vector) > 0. ? unit(beam_vector) : randomDirection(rng);
+  const auto axis =
+      beam_in_system.p() > 0. ? beam_in_system.unit() : Momentum::randomThetaPhi(rng, {-M_PI, M_PI}, {0., 2. * M_PI});
 
-  Vec3 direction = axis;
+  auto direction = axis;
   if (primordial_kt > 0.) {
     const auto px = rng.normal(0., primordial_kt * M_SQRT1_2), py = rng.normal(0., primordial_kt * M_SQRT1_2);
     const auto pt = std::hypot(px, py);
     if (pt > 0.) {
       const auto sin_theta = std::min(pt / p_star, 1.), cos_theta = std::sqrt(1. - sin_theta * sin_theta);
-      const Vec3 helper = std::fabs(axis[0]) < 0.9 ? Vec3{1., 0., 0.} : Vec3{0., 1., 0.};
-      const auto e1 = unit(cross(axis, helper)), e2 = cross(axis, e1);
-      for (size_t i = 0; i < 3; ++i)
-        direction[i] = cos_theta * axis[i] + sin_theta * (px / pt * e1[i] + py / pt * e2[i]);
+      const auto helper =
+          std::fabs(axis.px()) < 0.9 ? Momentum::fromPxPyPzE(1., 0., 0., 1.) : Momentum::fromPxPyPzE(0., 1., 0., 1.);
+      const auto e1 = axis.crossProduct(helper).unit(), e2 = axis.crossProduct(e1);
+      direction = cos_theta * axis + sin_theta * (px / pt * e1 + py / pt * e2);
     }
   }
-  diquark_momentum_ = p_star * Momentum::fromPxPyPzE(direction[0], direction[1], direction[2], 0.);
+  diquark_momentum_ = p_star * direction;
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
