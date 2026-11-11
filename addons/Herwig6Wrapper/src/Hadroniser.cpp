@@ -21,7 +21,6 @@
 #include <CepGen/Event/Event.h>
 #include <CepGen/Modules/EventModifierFactory.h>
 #include <CepGen/Modules/RandomGeneratorFactory.h>
-#include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/Kinematics.h>
 #include <CepGen/Physics/Modes.h>
 #include <CepGen/Physics/PDG.h>
@@ -31,11 +30,6 @@
 #include <CepGen/Utils/String.h>
 
 #include <cstring>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 #include "CepGenHerwig6/DiffractiveSystemSeed.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
@@ -74,6 +68,7 @@ namespace cepgen::herwig6 {
     explicit Hadroniser(const ParametersList& params)
         : cepgen::hadr::Hadroniser(params),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
+          momentum_tolerance_(steer<double>("momentumTolerance")),
           primordial_kt_(steer<double>("primordialKt")) {}
 
     // no call to the Herwig 6 library here, as this is also used for the documentation generation
@@ -83,6 +78,8 @@ namespace cepgen::herwig6 {
       desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
           .setDescription("random number generator to use for the partonic content of the dissociated systems");
+      desc.add("momentumTolerance", 1.e-6)
+          .setDescription("maximum fractional momentum tolerance to consider a hadronisation successful");
       desc.add("primordialKt", 0.)
           .setDescription("RMS of the spectator transverse momentum relative to the beam axis (GeV)");
       return desc;
@@ -158,7 +155,7 @@ namespace cepgen::herwig6 {
           if (trials_for_system++ >= max_trials_)
             return false;
           ++num_trials;
-        } while (!diffractive_seed.hadronise(fragments));
+        } while (!diffractive_seed.hadronise(fragments, momentum_tolerance_));
         hadronised.emplace_back(outgoing, std::move(fragments));
       }
       event.metadata["herwig6:num_hadronisation_trials"] = num_trials;
@@ -251,7 +248,9 @@ namespace cepgen::herwig6 {
     }
 
     const std::unique_ptr<utils::RandomGenerator> random_generator_;
+    const double momentum_tolerance_;
     const double primordial_kt_;
+
     std::vector<std::pair<Particle::Role, Particle::Role> > roles_;  ///< (incoming, outgoing) dissociating beams
     ParametersList settings_;                                        ///< User-steered Herwig 6 parameters
     double threshold_{0.};                                           ///< Lowest mass allowing a two-body decay

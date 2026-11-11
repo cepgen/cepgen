@@ -47,7 +47,6 @@ namespace cepgen::herwig6 {
     constexpr int kBeamStatus = 103;       // spectator entry holding the system kinematics
     constexpr int kPartonStatus = 149;     // final-state parton, copied to status 150 by HWCGSP
     constexpr int kSpectatorStatus = 147;  // beam remnant, copied to status 153 by HWCGSP
-    constexpr double kMomentumTolerance = 1.e-6;
 
     void fillParton(
         int index, int status, DiffractiveSystemSeed::InternalId id, const double* p3, double mass, int partner) {
@@ -143,8 +142,7 @@ DiffractiveSystemSeed DiffractiveSystemSeed::build(const Momentum& beam,
   return diffractive_seed;
 }
 
-bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments,
-                                      double /*tolerance (curr. unused)*/) const {
+bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
   fragments.clear();
   hwuine();
 
@@ -190,8 +188,8 @@ bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments,
   }
   sum[3] -= mass;
   const auto residual = std::max({std::fabs(sum[0]), std::fabs(sum[1]), std::fabs(sum[2]), std::fabs(sum[3])});
-  if (residual > kMomentumTolerance * mass) {
-    CG_WARNING("herwig6:hadronise") << "Momentum not conserved down to " << kMomentumTolerance
+  if (residual > tolerance * mass) {
+    CG_WARNING("herwig6:hadronise") << "Momentum not conserved down to " << tolerance
                                     << " tolerance after hadronisation (residual=" << residual
                                     << " GeV for a system of mass " << mass << " GeV).";
     return false;

@@ -48,9 +48,9 @@ namespace cepgen::herwig6 {
 
     /// Run cluster hadronisation of a given diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
-    /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state (unused)
+    /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
     /// \return Boolean stating whether the event was successfully hadronised
-    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance = -1.) const override;
+    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
 
     /// Herwig 6 internal identifiers used for the beam remnants treatment
     enum struct InternalId {
