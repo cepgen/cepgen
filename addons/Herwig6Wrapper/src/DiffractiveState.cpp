@@ -142,13 +142,12 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   hwuine();
 
   // the system is hadronised at rest, as a post-shower colour singlet
-  const auto mass = system_mass_;
   hepevt_.nhep = 3;
   hepevt_.isthep[0] = kBeamStatus;
   hepevt_.idhep[0] = 0;
   hwevnt_.idhw[0] = static_cast<int>(DiffractiveState::InternalId::centreOfMass);
   hepevt_.phep[0][0] = hepevt_.phep[0][1] = hepevt_.phep[0][2] = 0.;
-  hepevt_.phep[0][3] = hepevt_.phep[0][4] = mass;
+  hepevt_.phep[0][3] = hepevt_.phep[0][4] = system_mass_;
   const auto& spectator = spectator_momentum_;
   const double struck[3] = {-spectator[0], -spectator[1], -spectator[2]};
   fillParton(1, kPartonStatus, struck_id_, struck, struck_mass_, 2);
@@ -162,31 +161,26 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   if (hwevnt_.ierror != 0)
     return false;
 
-  double sum[4] = {0., 0., 0., 0.};
+  Momentum sum{0., 0., 0., system_mass_};
   for (int i = 0; i < hepevt_.nhep; ++i) {
     const auto status = hepevt_.isthep[i];
     const bool stable = status == 1;
     if (!stable && (status < 190 || status > 200))  // only keep hadrons
       continue;
     registerParticle(hwevnt_.idhw[i], hepevt_.idhep[i]);
-    hadr::Hadroniser::Fragment fragment;
-    fragment.index = i;
-    fragment.mother = hepevt_.jmohep[i][0] - 1;
-    fragment.pdg_id = hepevt_.idhep[i];
-    fragment.stable = stable;
-    const auto* p = hepevt_.phep[i];
-    fragment.momentum = Momentum::fromPxPyPzE(p[0], p[1], p[2], p[3]);
-    fragments.emplace_back(fragment);
-    if (stable)
-      for (int j = 0; j < 4; ++j)
-        sum[j] += p[j];
+    auto& fragment = fragments.emplace_back(hadr::Hadroniser::Fragment{
+        i,
+        hepevt_.jmohep[i][0] - 1,
+        hepevt_.idhep[i],
+        stable,
+        Momentum::fromPxPyPzE(hepevt_.phep[i][0], hepevt_.phep[i][1], hepevt_.phep[i][2], hepevt_.phep[i][3])});
+    if (fragment.stable)
+      sum -= fragment.momentum;
   }
-  sum[3] -= mass;
-  const auto residual = std::max({std::fabs(sum[0]), std::fabs(sum[1]), std::fabs(sum[2]), std::fabs(sum[3])});
-  if (residual > tolerance * mass) {
+  if (const auto residual = sum.p(); residual > tolerance * system_mass_) {
     CG_WARNING("herwig6:hadronise") << "Momentum not conserved down to " << tolerance
                                     << " tolerance after hadronisation (residual=" << residual
-                                    << " GeV for a system of mass " << mass << " GeV).";
+                                    << " GeV for a system of mass " << system_mass_ << " GeV).";
     return false;
   }
   return true;
