@@ -98,16 +98,19 @@ DiffractiveState::DiffractiveState(const Particle& beam,
                                                << " is not supported. Only protons and antiprotons can be dissociated.";
 
   // valence flavour content, weighted by the quark electric charge squared and its multiplicity in the proton
-  const bool struck_down = rng.uniform(0., 1.) < 1. / 9.;
-  const bool anti = beam_pdg_id < 0;
-  struck_id_ = struck_down ? (anti ? InternalId::dBar : InternalId::down) : (anti ? InternalId::uBar : InternalId::up);
-  spectator_id_ =
-      struck_down ? (anti ? InternalId::uu_bar : InternalId::uu) : (anti ? InternalId::ud0_bar : InternalId::ud0);
-  struck_mass_ = rmass[static_cast<int>(struck_id_)];
-  spectator_mass_ = rmass[static_cast<int>(spectator_id_)];
+  const bool valquark_down = rng.uniform(0., 1.) < 1. / 9.;
+  if (beam_pdg_id >= 0) {  // quark/diquark
+    valquark_id_ = valquark_down ? InternalId::down : InternalId::up;
+    diquark_id_ = valquark_down ? InternalId::uu : InternalId::ud0;
+  } else {  // anti-quark/anti-diquark
+    valquark_id_ = valquark_down ? InternalId::down_bar : InternalId::up_bar;
+    diquark_id_ = valquark_down ? InternalId::uu_bar : InternalId::ud0_bar;
+  }
+  valquark_mass_ = rmass[static_cast<int>(valquark_id_)];
+  diquark_mass_ = rmass[static_cast<int>(diquark_id_)];
 
   const auto mass2 = system_mass_ * system_mass_;
-  const auto sum = struck_mass_ + spectator_mass_, diff = struck_mass_ - spectator_mass_;
+  const auto sum = valquark_mass_ + diquark_mass_, diff = valquark_mass_ - diquark_mass_;
   const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
   if (lambda <= 0.)
     throw CG_FATAL("herwig6:DiffractiveState")
@@ -134,7 +137,7 @@ DiffractiveState::DiffractiveState(const Particle& beam,
     }
   }
   for (size_t i = 0; i < 3; ++i)
-    spectator_momentum_[i] = p_star * direction[i];
+    diquark_momentum_[i] = p_star * direction[i];
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
@@ -148,10 +151,10 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   hwevnt_.idhw[0] = static_cast<int>(DiffractiveState::InternalId::centreOfMass);
   hepevt_.phep[0][0] = hepevt_.phep[0][1] = hepevt_.phep[0][2] = 0.;
   hepevt_.phep[0][3] = hepevt_.phep[0][4] = system_mass_;
-  const auto& spectator = spectator_momentum_;
+  const auto& spectator = diquark_momentum_;
   const double struck[3] = {-spectator[0], -spectator[1], -spectator[2]};
-  fillParton(1, kPartonStatus, struck_id_, struck, struck_mass_, 2);
-  fillParton(2, kSpectatorStatus, spectator_id_, spectator.data(), spectator_mass_, 1);
+  fillParton(1, kPartonStatus, valquark_id_, struck, valquark_mass_, 2);
+  fillParton(2, kSpectatorStatus, diquark_id_, spectator.data(), diquark_mass_, 1);
 
   hwcfor();
   hwcdec();

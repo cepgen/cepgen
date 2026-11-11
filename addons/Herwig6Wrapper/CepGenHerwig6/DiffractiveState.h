@@ -58,8 +58,8 @@ namespace cepgen::herwig6 {
       invalid = 0,
       down = 1,
       up = 2,
-      dBar = 7,
-      uBar = 8,
+      down_bar = 7,
+      up_bar = 8,
       centreOfMass = 14,
       piZero = 21,
       proton = 73,
@@ -70,8 +70,8 @@ namespace cepgen::herwig6 {
     };
 
   private:
-    InternalId struck_id_{InternalId::invalid};     ///< Herwig identifier of the struck (anti)quark
-    InternalId spectator_id_{InternalId::invalid};  ///< Herwig identifier of the spectator (anti)diquark
+    InternalId valquark_id_{InternalId::invalid};  ///< Herwig identifier of the struck (anti)quark
+    InternalId diquark_id_{InternalId::invalid};   ///< Herwig identifier of the spectator (anti)diquark
   };
 }  // namespace cepgen::herwig6
 

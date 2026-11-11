@@ -16,16 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/RunParameters.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/RandomGeneratorFactory.h"
-#include "CepGen/Physics/Hadroniser.h"
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/Modes.h"
-#include "CepGen/Utils/RandomGenerator.h"
-#include "CepGen/Utils/String.h"
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Core/RunParameters.h>
+#include <CepGen/Event/Event.h>
+#include <CepGen/Modules/EventModifierFactory.h>
+#include <CepGen/Modules/RandomGeneratorFactory.h>
+#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/Kinematics.h>
+#include <CepGen/Physics/Modes.h>
+#include <CepGen/Utils/RandomGenerator.h>
+#include <CepGen/Utils/String.h>
+
 #include "CepGenPythia6/DiffractiveState.h"
 #include "CepGenPythia6/EventInterface.h"
 #include "CepGenPythia6/Pythia6Interface.h"
@@ -59,9 +60,9 @@ namespace cepgen::pythia6 {
       roles_.clear();
       const auto mode = runParameters().kinematics().incomingBeams().mode();
       if (mode == mode::Kinematics::InelasticElastic || mode == mode::Kinematics::InelasticInelastic)
-        roles_.emplace_back(Particle::Role::IncomingBeam1, Particle::Role::OutgoingBeam1);
+        roles_[Particle::Role::IncomingBeam1] = Particle::Role::OutgoingBeam1;
       if (mode == mode::Kinematics::ElasticInelastic || mode == mode::Kinematics::InelasticInelastic)
-        roles_.emplace_back(Particle::Role::IncomingBeam2, Particle::Role::OutgoingBeam2);
+        roles_[Particle::Role::IncomingBeam2] = Particle::Role::OutgoingBeam2;
     }
 
     bool run(Event& event, double& weight, bool fast) override {
@@ -75,7 +76,7 @@ namespace cepgen::pythia6 {
           if (!event.hasRole(outgoing) || event(outgoing).size() != 1)  // already fragmented by another algorithm
             continue;
           const auto& system = event.oneWithRole(outgoing);
-          const auto diffractive_state = pythia6::DiffractiveState(
+          const pythia6::DiffractiveState diffractive_state(
               system.momentum(), event.oneWithRole(incoming).integerPdgId(), *random_generator_);
           if (!diffractive_state.valid()) {
             CG_WARNING("pythia6:Hadroniser")
@@ -109,7 +110,7 @@ namespace cepgen::pythia6 {
   private:
     const std::unique_ptr<utils::RandomGenerator> random_generator_;
     const double momentum_tolerance_;
-    std::vector<std::pair<Particle::Role, Particle::Role> > roles_;  ///< (incoming, outgoing) dissociating beams
+    std::unordered_map<Particle::Role, Particle::Role> roles_;  ///< (incoming, outgoing) dissociating beams
   };
 }  // namespace cepgen::pythia6
 using Pythia6Hadroniser = cepgen::pythia6::Hadroniser;

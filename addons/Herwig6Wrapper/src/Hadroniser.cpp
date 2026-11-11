@@ -101,13 +101,13 @@ namespace cepgen::herwig6 {
     }
 
     void initialise() override {
-      {
+      {  // collect the stdout output of Herwig 6 initialisation
         std::string output;
         utils::StreamCollector collector(output);
         herwig6::initialise();
       }
-      if (hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::ud0)] != 2101  // (ud)0
-          || hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] != PDG::proton ||
+      if (hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::ud0)] != PDG::ud0 ||
+          hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] != PDG::proton ||
           hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] <= 0.)
         throw CG_FATAL("herwig6:Hadroniser")
             << "Herwig 6 particle table is not filled as expected.\n\t" << "Is the HWUDAT block data linked in?";
@@ -119,9 +119,9 @@ namespace cepgen::herwig6 {
       roles_.clear();
       const auto mode = runParameters().kinematics().incomingBeams().mode();
       if (mode == mode::Kinematics::InelasticElastic || mode == mode::Kinematics::InelasticInelastic)
-        roles_.emplace_back(Particle::Role::IncomingBeam1, Particle::Role::OutgoingBeam1);
+        roles_[Particle::Role::IncomingBeam1] = Particle::Role::OutgoingBeam1;
       if (mode == mode::Kinematics::ElasticInelastic || mode == mode::Kinematics::InelasticInelastic)
-        roles_.emplace_back(Particle::Role::IncomingBeam2, Particle::Role::OutgoingBeam2);
+        roles_[Particle::Role::IncomingBeam2] = Particle::Role::OutgoingBeam2;
     }
 
     bool run(Event& event, double& weight, bool fast) override {
@@ -137,27 +137,25 @@ namespace cepgen::herwig6 {
 
       initialiseHerwig();
 
-      std::vector<std::pair<Particle::Role, Fragments> > hadronised;  // nothing is written until all systems succeeded
+      std::unordered_map<Particle::Role, Fragments> hadronised;  // nothing is written until all systems succeeded
       int num_trials = 0;
       for (const auto& [incoming, outgoing] : roles_) {
         if (event(outgoing).size() != 1)  // already fragmented by another algorithm
           continue;
-        const auto diffractive_seed = herwig6::DiffractiveState(event.oneWithRole(incoming),
-                                                                event.oneWithRole(outgoing).momentum(),
-                                                                hwprop_.rmass,
-                                                                *random_generator_,
-                                                                primordial_kt_);
-        Fragments fragments;
+        const herwig6::DiffractiveState diffractive_seed(event.oneWithRole(incoming),
+                                                         event.oneWithRole(outgoing).momentum(),
+                                                         hwprop_.rmass,
+                                                         *random_generator_,
+                                                         primordial_kt_);
+        auto& fragments = hadronised[outgoing];
         int trials_for_system = 0;
         do {
           if (trials_for_system++ >= max_trials_)
             return false;
           ++num_trials;
         } while (!diffractive_seed.hadronise(fragments, momentum_tolerance_));
-        hadronised.emplace_back(outgoing, std::move(fragments));
       }
       event.metadata["herwig6:num_hadronisation_trials"] = num_trials;
-
       for (const auto& [role, fragments] : hadronised)
         update(event, role, fragments);
       return true;
@@ -249,9 +247,9 @@ namespace cepgen::herwig6 {
     const double momentum_tolerance_;
     const double primordial_kt_;
 
-    std::vector<std::pair<Particle::Role, Particle::Role> > roles_;  ///< (incoming, outgoing) dissociating beams
-    ParametersList settings_;                                        ///< User-steered Herwig 6 parameters
-    double threshold_{0.};                                           ///< Lowest mass allowing a two-body decay
+    std::unordered_map<Particle::Role, Particle::Role> roles_;  ///< (incoming, outgoing) dissociating beams
+    ParametersList settings_;                                   ///< User-steered Herwig 6 parameters
+    double threshold_{0.};                                      ///< Lowest mass allowing a two-body decay
     bool herwig_initialised_{false};
   };
 }  // namespace cepgen::herwig6

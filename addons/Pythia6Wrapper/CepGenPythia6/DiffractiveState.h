@@ -21,16 +21,13 @@
 
 #include <CepGen/Physics/Hadroniser.h>
 
-#include <optional>
-
 namespace cepgen::utils {
   class RandomGenerator;
-}
+}  // namespace cepgen::utils
 
 namespace cepgen::pythia6 {
   /// Colour-singlet (anti)quark-(anti)diquark string replacing a dissociated beam, in its own rest frame
-  class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
-  public:
+  struct DiffractiveState final : hadr::Hadroniser::DiffractiveState {
     /// Build the partonic content of a dissociated system
     /// \param[in] system Dissociated system momentum
     /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (a negative value yields antiquark content)
@@ -42,10 +39,6 @@ namespace cepgen::pythia6 {
     /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
     /// \return Boolean stating whether the system was successfully hadronised
     bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
-
-  private:
-    long struck_pdg_id_{0};     ///< Signed PDG identifier of the struck (anti)quark
-    long spectator_pdg_id_{0};  ///< Signed PDG identifier of the spectator (anti)diquark
   };
 }  // namespace cepgen::pythia6
 

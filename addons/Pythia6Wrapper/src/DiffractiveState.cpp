@@ -29,8 +29,6 @@
 
 namespace cepgen::pythia6 {
   namespace {
-    constexpr long kDiquarkUU1 = 2203, kDiquarkUD0 = 2101, kDiquarkUD1 = 2103;
-
     /// Fill one end of the string in the Pythia 6 event record
     void fillParton(int index, long pdg_id, const std::array<double, 3>& p3, double mass) {
       pyjets_.k[0][index] = 1;  // set to string flags by PYJOIN
@@ -51,24 +49,28 @@ using namespace cepgen::pythia6;
 DiffractiveState::DiffractiveState(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng)
     : hadr::Hadroniser::DiffractiveState(system) {
   // valence flavour content, weighted by the quark electric charge squared and the diquark spin multiplicity
-  if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1)
-    struck_pdg_id_ = PDG::down, spectator_pdg_id_ = kDiquarkUU1;  // (d,uu1)
-  else if (random_quarks < 5)
-    struck_pdg_id_ = PDG::up, spectator_pdg_id_ = kDiquarkUD0;  // (u,ud0)
-  else
-    struck_pdg_id_ = PDG::up, spectator_pdg_id_ = kDiquarkUD1;  // (u,ud1)
-  if (beam_pdg_id < 0) {                                        // antibaryon content
-    struck_pdg_id_ *= -1;
-    spectator_pdg_id_ *= -1;
+  if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1) {  // (d,uu1)
+    valquark_pdg_id_ = PDG::down;
+    diquark_pdg_id_ = PDG::uu1;
+  } else if (random_quarks < 5) {  // (u,ud0)
+    valquark_pdg_id_ = PDG::up;
+    diquark_pdg_id_ = PDG::ud0;
+  } else {  // (u,ud1)
+    valquark_pdg_id_ = PDG::up;
+    diquark_pdg_id_ = PDG::ud1;
   }
-  checkPDGid(std::labs(struck_pdg_id_));
-  checkPDGid(std::labs(spectator_pdg_id_));
-  struck_mass_ = pymass(static_cast<int>(struck_pdg_id_));
-  spectator_mass_ = pymass(static_cast<int>(spectator_pdg_id_));
+  if (beam_pdg_id < 0) {  // antibaryon content
+    valquark_pdg_id_ *= -1;
+    diquark_pdg_id_ *= -1;
+  }
+  checkPDGid(std::labs(valquark_pdg_id_));
+  checkPDGid(std::labs(diquark_pdg_id_));
+  valquark_mass_ = pymass(static_cast<int>(valquark_pdg_id_));
+  diquark_mass_ = pymass(static_cast<int>(diquark_pdg_id_));
 
   // two-body decay momentum in the rest frame of the system
   const auto mass2 = system_mass_ * system_mass_;
-  const auto sum = struck_mass_ + spectator_mass_, diff = struck_mass_ - spectator_mass_;
+  const auto sum = valquark_mass_ + diquark_mass_, diff = valquark_mass_ - diquark_mass_;
   const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
   if (lambda <= 0. || system_mass_ <= 0.) {
     CG_DEBUG("pythia6:DiffractiveState") << "Diffractive system mass unphysical. System invalid for fragmentation.";
@@ -80,17 +82,19 @@ DiffractiveState::DiffractiveState(const Momentum& system, long beam_pdg_id, uti
   // isotropic string axis in the rest frame of the dissociated system
   const auto cos_theta = rng.uniform(-1., 1.), phi = rng.uniform(0., 2. * M_PI);
   const auto sin_theta = std::sqrt(1. - cos_theta * cos_theta);
-  spectator_momentum_ = {p_star * sin_theta * std::cos(phi), p_star * sin_theta * std::sin(phi), p_star * cos_theta};
+  diquark_momentum_ = {p_star * sin_theta * std::cos(phi), p_star * sin_theta * std::sin(phi), p_star * cos_theta};
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
   fragments.clear();
 
   // the system is fragmented at rest, as a single (anti)quark-(anti)diquark string
-  const auto& spectator = spectator_momentum_;
   pyjets_.n = 2;
-  fillParton(0, struck_pdg_id_, {-spectator[0], -spectator[1], -spectator[2]}, struck_mass_);
-  fillParton(1, spectator_pdg_id_, spectator, spectator_mass_);
+  fillParton(0,
+             valquark_pdg_id_,
+             {-diquark_momentum_.at(0), -diquark_momentum_.at(1), -diquark_momentum_.at(2)},
+             valquark_mass_);
+  fillParton(1, diquark_pdg_id_, diquark_momentum_, diquark_mass_);
   pyjoin({1, 2});
 
   mstu(24) = 0;  // reset the latest error type
