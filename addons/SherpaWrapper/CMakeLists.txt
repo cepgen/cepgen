@@ -17,6 +17,7 @@ cepgen_build(CepGenSherpa
     SOURCES src/*.cpp
     LIBRARIES SHERPA::All
     INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${SHERPA_INCLUDE}
+    TESTS test/*.cc
     COMPONENT sherpa)
 if(NOT APPLE)
   target_link_options(CepGenSherpa PRIVATE "LINKER:--no-as-needed")
