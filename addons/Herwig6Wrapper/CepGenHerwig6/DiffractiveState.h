@@ -16,42 +16,50 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenHerwig6_DiffractiveSystemSeed_h
-#define CepGenHerwig6_DiffractiveSystemSeed_h
+#ifndef CepGenHerwig6_DiffractiveState_h
+#define CepGenHerwig6_DiffractiveState_h
+
+#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/Momentum.h>
 
 #include <array>
 
-#include "CepGen/Physics/Momentum.h"
-
+namespace cepgen {
+  class Particle;
+}  // namespace cepgen
 namespace cepgen::utils {
   class RandomGenerator;
-}
+}  // namespace cepgen::utils
 
 namespace cepgen::herwig6 {
   /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
-  struct DiffractiveSystemSeed {
+  class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
+  public:
     /// Build the partonic content of a dissociated system
-    /// \param[in] beam Incoming beam particle momentum
+    /// \param[in] beam Incoming beam particle
     /// \param[in] system Dissociated system momentum
-    /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (only protons and antiprotons are supported)
     /// \param[in] rmass Herwig 6 constituent masses, indexed by Herwig identifier
     /// \param[in] rng Random number generator
     /// \param[in] primordial_kt RMS of the transverse momentum of the spectator relative to the beam axis, in GeV
-    static DiffractiveSystemSeed build(const Momentum& beam,
-                                       const Momentum& system,
-                                       long beam_pdg_id,
-                                       const double* rmass,
-                                       utils::RandomGenerator& rng,
-                                       double primordial_kt);
+    explicit DiffractiveState(const Particle& beam,
+                              const Momentum& system,
+                              const double* rmass,
+                              utils::RandomGenerator& rng,
+                              double primordial_kt);
 
-    double system_mass{0.};  ///< Invariant mass of the system
+    /// Run cluster hadronisation of a given diffractive system
+    /// \param[out] fragments Hadrons produced, in the rest frame of the system
+    /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
+    /// \return Boolean stating whether the event was successfully hadronised
+    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
+
     /// Herwig 6 internal identifiers used for the beam remnants treatment
     enum struct InternalId {
       invalid = 0,
       down = 1,
       up = 2,
-      dBar = 7,
-      uBar = 8,
+      down_bar = 7,
+      up_bar = 8,
       centreOfMass = 14,
       piZero = 21,
       proton = 73,
@@ -60,11 +68,10 @@ namespace cepgen::herwig6 {
       uu_bar = 115,
       ud0_bar = 116
     };
-    InternalId struck_id{InternalId::invalid};             ///< Herwig identifier of the struck (anti)quark
-    InternalId spectator_id{InternalId::invalid};          ///< Herwig identifier of the spectator (anti)diquark
-    double struck_mass{0.};                                ///< Constituent mass of the struck (anti)quark
-    double spectator_mass{0.};                             ///< Constituent mass of the spectator (anti)diquark
-    std::array<double, 3> spectator_momentum{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
+
+  private:
+    InternalId valquark_id_{InternalId::invalid};  ///< Herwig identifier of the struck (anti)quark
+    InternalId diquark_id_{InternalId::invalid};   ///< Herwig identifier of the spectator (anti)diquark
   };
 }  // namespace cepgen::herwig6
 

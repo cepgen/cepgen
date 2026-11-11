@@ -21,7 +21,6 @@
 #include <CepGen/Event/Event.h>
 #include <CepGen/Modules/EventModifierFactory.h>
 #include <CepGen/Modules/RandomGeneratorFactory.h>
-#include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/Kinematics.h>
 #include <CepGen/Physics/Modes.h>
 #include <CepGen/Physics/PDG.h>
@@ -31,14 +30,8 @@
 #include <CepGen/Utils/String.h>
 
 #include <cstring>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
-#include "CepGenHerwig6/DiffractiveSystemSeed.h"
-#include "CepGenHerwig6/Fragment.h"
+#include "CepGenHerwig6/DiffractiveState.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
 namespace cepgen::herwig6 {
@@ -75,6 +68,7 @@ namespace cepgen::herwig6 {
     explicit Hadroniser(const ParametersList& params)
         : cepgen::hadr::Hadroniser(params),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
+          momentum_tolerance_(steer<double>("momentumTolerance")),
           primordial_kt_(steer<double>("primordialKt")) {}
 
     // no call to the Herwig 6 library here, as this is also used for the documentation generation
@@ -84,6 +78,8 @@ namespace cepgen::herwig6 {
       desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
           .setDescription("random number generator to use for the partonic content of the dissociated systems");
+      desc.add("momentumTolerance", 1.e-6)
+          .setDescription("maximum fractional momentum tolerance to consider a hadronisation successful");
       desc.add("primordialKt", 0.)
           .setDescription("RMS of the spectator transverse momentum relative to the beam axis (GeV)");
       return desc;
@@ -105,27 +101,27 @@ namespace cepgen::herwig6 {
     }
 
     void initialise() override {
-      {
+      {  // collect the stdout output of Herwig 6 initialisation
         std::string output;
         utils::StreamCollector collector(output);
         herwig6::initialise();
       }
-      if (hwprop_.idpdg[static_cast<int>(DiffractiveSystemSeed::InternalId::ud0)] != 2101  // (ud)0
-          || hwprop_.idpdg[static_cast<int>(DiffractiveSystemSeed::InternalId::proton)] != PDG::proton ||
-          hwprop_.rmass[static_cast<int>(DiffractiveSystemSeed::InternalId::proton)] <= 0.)
+      if (hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::ud0)] != PDG::ud0 ||
+          hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] != PDG::proton ||
+          hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] <= 0.)
         throw CG_FATAL("herwig6:Hadroniser")
             << "Herwig 6 particle table is not filled as expected.\n\t" << "Is the HWUDAT block data linked in?";
       if (!compatibleVersion())
         CG_WARNING("herwig6:Hadroniser") << "Common blocks layouts were not validated against linked Herwig 6 version.";
-      threshold_ = hwprop_.rmass[static_cast<int>(DiffractiveSystemSeed::InternalId::proton)] +
-                   hwprop_.rmass[static_cast<int>(DiffractiveSystemSeed::InternalId::piZero)];
+      threshold_ = hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] +
+                   hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::piZero)];
 
       roles_.clear();
       const auto mode = runParameters().kinematics().incomingBeams().mode();
       if (mode == mode::Kinematics::InelasticElastic || mode == mode::Kinematics::InelasticInelastic)
-        roles_.emplace_back(Particle::Role::IncomingBeam1, Particle::Role::OutgoingBeam1);
+        roles_[Particle::Role::IncomingBeam1] = Particle::Role::OutgoingBeam1;
       if (mode == mode::Kinematics::ElasticInelastic || mode == mode::Kinematics::InelasticInelastic)
-        roles_.emplace_back(Particle::Role::IncomingBeam2, Particle::Role::OutgoingBeam2);
+        roles_[Particle::Role::IncomingBeam2] = Particle::Role::OutgoingBeam2;
     }
 
     bool run(Event& event, double& weight, bool fast) override {
@@ -141,29 +137,25 @@ namespace cepgen::herwig6 {
 
       initialiseHerwig();
 
-      std::vector<std::pair<Particle::Role, Fragments> > hadronised;  // nothing is written until all systems succeeded
+      std::unordered_map<Particle::Role, Fragments> hadronised;  // nothing is written until all systems succeeded
       int num_trials = 0;
       for (const auto& [incoming, outgoing] : roles_) {
         if (event(outgoing).size() != 1)  // already fragmented by another algorithm
           continue;
-        const auto& beam = event.oneWithRole(incoming);
-        const auto diffractive_seed = DiffractiveSystemSeed::build(beam.momentum(),
-                                                                   event.oneWithRole(outgoing).momentum(),
-                                                                   beam.integerPdgId(),
-                                                                   hwprop_.rmass,
-                                                                   *random_generator_,
-                                                                   primordial_kt_);
-        Fragments fragments;
+        const herwig6::DiffractiveState diffractive_seed(event.oneWithRole(incoming),
+                                                         event.oneWithRole(outgoing).momentum(),
+                                                         hwprop_.rmass,
+                                                         *random_generator_,
+                                                         primordial_kt_);
+        auto& fragments = hadronised[outgoing];
         int trials_for_system = 0;
         do {
           if (trials_for_system++ >= max_trials_)
             return false;
           ++num_trials;
-        } while (!hadronise(diffractive_seed, fragments));
-        hadronised.emplace_back(outgoing, std::move(fragments));
+        } while (!diffractive_seed.hadronise(fragments, momentum_tolerance_));
       }
       event.metadata["herwig6:num_hadronisation_trials"] = num_trials;
-
       for (const auto& [role, fragments] : hadronised)
         update(event, role, fragments);
       return true;
@@ -252,10 +244,12 @@ namespace cepgen::herwig6 {
     }
 
     const std::unique_ptr<utils::RandomGenerator> random_generator_;
+    const double momentum_tolerance_;
     const double primordial_kt_;
-    std::vector<std::pair<Particle::Role, Particle::Role> > roles_;  ///< (incoming, outgoing) dissociating beams
-    ParametersList settings_;                                        ///< User-steered Herwig 6 parameters
-    double threshold_{0.};                                           ///< Lowest mass allowing a two-body decay
+
+    std::unordered_map<Particle::Role, Particle::Role> roles_;  ///< (incoming, outgoing) dissociating beams
+    ParametersList settings_;                                   ///< User-steered Herwig 6 parameters
+    double threshold_{0.};                                      ///< Lowest mass allowing a two-body decay
     bool herwig_initialised_{false};
   };
 }  // namespace cepgen::herwig6

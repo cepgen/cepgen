@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,33 +22,33 @@
 #include <vector>
 
 #include "CepGen/Event/Particle.h"
-#include "CepGen/Physics/Modes.h"
+#include "CepGen/Physics/Hadroniser.h"
 
 namespace cepgen {
   class Event;
-  namespace utils {
-    class RandomGenerator;
-  }
 }  // namespace cepgen
 
 namespace cepgen::pythia6 {
-  /// Interface to the Pythia 6 event content.
+  /// Interface between the CepGen and the Pythia 6 event contents
   class EventInterface {
   public:
-    explicit EventInterface(Event&, mode::Kinematics, utils::RandomGenerator*);
+    /// Build an interface to a CepGen event
+    /// \param[in] event Event to be modified (not owned)
+    /// \note Dissociated beams are left untouched by decay(), and are to be fragmented through a DiffractiveState
+    explicit EventInterface(Event& event);
 
-    void prepareHadronisation();  ///< Add/edit event attributes to prepare for its fragmentation/hadronisation
+    bool decay();  ///< Run Pythia 6 decay/fragmentation algorithm on full event content
     size_t numStrings() const { return evt_strings_.size(); }  ///< Number of string-bound partons in the event
-    void run();                                                ///< Run the fragmentation/hadronisation algorithm
+
+    /// Attach the hadrons from a dissociated beam fragmentation to its parent system
+    /// \param[in] role Role of the dissociated system in the event
+    /// \param[in] fragments Hadrons produced, in the rest frame of the dissociated system
+    void update(Particle::Role role, const hadr::Hadroniser::Fragments& fragments);
 
   private:
     void fillEventBlock();
 
-    Event& cepgen_event_;                       // NOT owning
-    utils::RandomGenerator* random_generator_;  ///< Random number generator engine (not owning)
-    std::vector<Particle::Role> roles_;
-
-    std::pair<short, short> pickPartonsContent() const;
+    Event& cepgen_event_;  ///< CepGen event content (not owning)
 
     using string_t = std::vector<int>;
     std::vector<string_t> evt_strings_;

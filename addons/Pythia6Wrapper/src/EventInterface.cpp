@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,75 +16,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
+#include "CepGenPythia6/EventInterface.h"
+
+#include <cstdlib>
+#include <map>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/Utils.h"
-#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenPythia6/EventInterface.h"
 #include "CepGenPythia6/Pythia6Interface.h"
 
 using namespace cepgen::pythia6;
 
-EventInterface::EventInterface(Event& event, const mode::Kinematics kinematics_mode, utils::RandomGenerator* rnd)
-    : cepgen_event_(event), random_generator_(rnd) {
-  if (kinematics_mode == mode::Kinematics::InelasticElastic || kinematics_mode == mode::Kinematics::InelasticInelastic)
-    roles_.emplace_back(Particle::Role::OutgoingBeam1);
-  if (kinematics_mode == mode::Kinematics::ElasticInelastic || kinematics_mode == mode::Kinematics::InelasticInelastic)
-    roles_.emplace_back(Particle::Role::OutgoingBeam2);
-}
-
-void EventInterface::prepareHadronisation() {
-  CG_DEBUG_LOOP("EventInterface:prepareHadronisation") << "Hadronisation preparation called.";
-
-  for (auto role : roles_) {
-    if (!cepgen_event_.hasRole(role))
-      continue;
-    const auto& part = cepgen_event_.oneWithRole(role);
-
-    const auto [parton1, parton2] = pickPartonsContent();
-    checkPDGid(parton1);
-    checkPDGid(parton2);
-    const double mq = pymass(parton1), mq2 = mq * mq;
-    const double mdq = pymass(parton2), mdq2 = mdq * mdq;
-
-    // choose random direction in MX frame
-    const double phi = random_generator_->uniform(0., 2. * M_PI), theta = acos(random_generator_->uniform(-1., 1.));
-
-    // compute momentum of decay particles from MX
-    const double px2 = std::pow(utils::energyFromW(part.momentum().mass(), mdq2, mq2), 2) - mq2;
-    if (px2 < 0.) {
-      CG_WARNING("EventInterface:prepareHadronisation") << "Invalid remnants kinematics for " << role << ".";
-      continue;
-    }
-    const auto particle_id = part.id();
-
-    // build 4-vectors and boost decay particles
-    const double px = std::sqrt(px2);
-    auto pdq = Momentum::fromPThetaPhiE(px, theta, phi, std::hypot(px, mdq)),
-         pq = Momentum(-pdq).setEnergy(std::hypot(px, mq));
-
-    cepgen_event_
-        .addParticle(role)  // singlet
-        .get()
-        .setPdgId(parton1, +1)
-        .setStatus(Particle::Status::Unfragmented)
-        .setMomentum(pq.lorentzBoost(cepgen_event_[particle_id].momentum()))
-        .addMother(cepgen_event_[particle_id]);
-    cepgen_event_
-        .addParticle(role)  // quark doublet
-        .get()
-        .setPdgId(parton2, +1)
-        .setStatus(Particle::Status::Unfragmented)
-        .setMomentum(pdq.lorentzBoost(cepgen_event_[particle_id].momentum()))
-        .addMother(cepgen_event_[particle_id]);
-
-    cepgen_event_[particle_id].setStatus(Particle::Status::Fragmented);
+namespace {
+  bool isDissociatedBeam(const cepgen::Particle& particle) {
+    return (particle.role() == cepgen::Particle::Role::OutgoingBeam1 ||
+            particle.role() == cepgen::Particle::Role::OutgoingBeam2) &&
+           particle.status() == cepgen::Particle::Status::Unfragmented;
   }
-}
+}  // namespace
+
+EventInterface::EventInterface(Event& event) : cepgen_event_(event) {}
 
 void EventInterface::fillEventBlock() {
   pyjets_.n = 0;         // reinitialise the event content
@@ -120,7 +72,9 @@ void EventInterface::fillEventBlock() {
       for (int j = 0; j < 5; ++j)
         pyjets_.v[j][i] = 0.;  // vertex position
 
-      if (part.status() == Particle::Status::Unfragmented) {
+      if (isDissociatedBeam(part))
+        pyjets_.k[0][i] = 11;  // inactive entry, fragmented separately through a DiffractiveState
+      else if (part.status() == Particle::Status::Unfragmented) {
         pyjets_.k[0][i] = 1;  // PYTHIA/JETSET workaround
         evt_string.emplace_back(part.id() + 1);
       } else if (part.status() == Particle::Status::Undecayed)
@@ -136,22 +90,24 @@ void EventInterface::fillEventBlock() {
       continue;
 
     CG_DEBUG_LOOP("EventInterface").log([&](auto& dbg) {
-      dbg << "Joining " << utils::s("particle", evt_string.size()) << " with " << cepgen_event_[evt_string[0]].role()
-          << " role"
-          << " in a same string";
-      for (const auto& particle_id : evt_string) {
-        if (particle_id != -1)
-          dbg << utils::format("\n\t * %2d (pdgId=%4d)", particle_id, pyjets_.k[1][particle_id - 1]);
-      }
+      dbg << "Joining " << utils::s("particle", evt_string.size()) << " with "
+          << cepgen_event_[evt_string[0] - 1].role() << " role in a same string";
+      for (const auto& particle_id : evt_string)
+        dbg << utils::format("\n\t * %2d (pdgId=%4d)", particle_id, pyjets_.k[1][particle_id - 1]);
     });
     pyjoin(evt_string);
   }
 }
 
-void EventInterface::run() {
+bool EventInterface::decay() {
   fillEventBlock();
   const auto old_particles_multiplicity = pyjets_.n;
+  mstu(24) = 0;  // reset the latest error type
   pyexec();
+  if (mstu(24) != 0) {
+    CG_WARNING("EventInterface:decay") << "Pythia 6 decay/fragmentation failed with error type " << mstu(24) << ".";
+    return false;
+  }
   //--- update the event
   for (int p = old_particles_multiplicity;  // filter the first particles already present in the event
        p < pyjets_.n;
@@ -176,12 +132,24 @@ void EventInterface::run() {
                                                                       : Particle::Status::Fragmented);
     particle.addMother(mother_particle);
   }
+  return true;
 }
 
-std::pair<short, short> EventInterface::pickPartonsContent() const {
-  if (const auto random_quarks = random_generator_->uniformInt(0, 8); random_quarks < 1)
-    return {PDG::down, 2203};  // (d,uu1)
-  else if (random_quarks < 5)
-    return {PDG::up, 2101};  // (u,ud0)
-  return {PDG::up, 2103};    // (u,ud1)
+void EventInterface::update(Particle::Role role, const hadr::Hadroniser::Fragments& fragments) {
+  // particles are appended to the vector the system lives in, hence only access it through its identifier
+  const auto system_id = cepgen_event_.oneWithRole(role).id();
+  const auto system_momentum = cepgen_event_[system_id].momentum();
+  cepgen_event_[system_id].children().clear();  // events are recycled, with no reset of the system's filiation
+
+  std::map<int, int> identifiers;  // Pythia 6 event record position -> CepGen identifier
+  for (const auto& fragment : fragments) {
+    auto& particle = cepgen_event_.addParticle(role).get();
+    particle.setIntegerPdgId(fragment.pdg_id)
+        .setStatus(fragment.stable ? Particle::Status::FinalState : Particle::Status::Resonance)
+        .setMomentum(Momentum(fragment.momentum).lorentzBoost(system_momentum), /*off_shell=*/true);
+    const auto mother = identifiers.find(fragment.mother);
+    particle.addMother(cepgen_event_[mother != identifiers.end() ? mother->second : system_id]);
+    identifiers[fragment.index] = particle.id();
+  }
+  cepgen_event_[system_id].setStatus(Particle::Status::Fragmented);  // after the filiation, as it alters this status
 }

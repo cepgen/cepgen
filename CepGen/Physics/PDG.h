@@ -46,6 +46,11 @@ namespace cepgen {
       piPlus = 211,
       eta = 221,
       phi1680 = 100333,
+      // diquarks
+      ud0 = 2101,
+      ud1 = 2103,
+      uu1 = 2203,
+      // baryons
       neutron = 2112,
       proton = 2212,
       diffractiveProton = 9902210

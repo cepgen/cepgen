@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@
 #ifndef CepGen_Physics_Hadroniser_h
 #define CepGen_Physics_Hadroniser_h
 
+#include <array>
+
 #include "CepGen/EventFilter/EventModifier.h"
+#include "CepGen/Physics/Momentum.h"
 
 /// Location for all hadronisers to be run downstream to the events generation
 namespace cepgen::hadr {
@@ -31,6 +34,39 @@ namespace cepgen::hadr {
     explicit Hadroniser(const ParametersList&);  ///< Default constructor for an undefined hadroniser
 
     static ParametersDescription description();
+
+    /// Hadron retrieved from the hadroniser event record
+    struct Fragment {
+      int index{0};        ///< Position in the event record
+      int mother{-1};      ///< Position of the first mother in the event record
+      long pdg_id{0};      ///< Signed PDG identifier
+      bool stable{false};  ///< Is this particle in the final state?
+      Momentum momentum;   ///< 4-momentum in the rest frame of the dissociated system
+    };
+    using Fragments = std::vector<Fragment>;
+
+    /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
+    class DiffractiveState {
+    public:
+      explicit DiffractiveState(const Momentum& system_momentum);
+
+      /// Run the diffractive system fragmentation
+      /// \param[out] fragments Hadrons produced, in the rest frame of the system
+      /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
+      /// \return Boolean stating whether the diffractive state was successfully hadronised
+      virtual bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const = 0;
+
+      bool valid() const { return valid_; }  ///< Is the fragmentation of the diffractive state possible?
+
+    protected:
+      bool valid_{true};           ///< Is the fragmentation of the diffractive state possible?
+      long valquark_pdg_id_{0};    ///< Signed PDG identifier of the struck (anti)quark
+      long diquark_pdg_id_{0};     ///< Signed PDG identifier of the spectator (anti)diquark
+      double system_mass_{0.};     ///< Invariant mass of the system
+      double valquark_mass_{0.};   ///< Mass of the struck (anti)quark
+      double diquark_mass_{0.};    ///< Mass of the spectator (anti)diquark
+      Momentum diquark_momentum_;  ///< Spectator 3-momentum (struck parton has the opposite)
+    };
 
     inline bool fragmentRemnants() const { return fragment_remnants_; }  ///< Fragment the beam remnants?
 

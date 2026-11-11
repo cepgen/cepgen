@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,14 +16,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/RunParameters.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/RandomGeneratorFactory.h"
-#include "CepGen/Physics/Hadroniser.h"
-#include "CepGen/Utils/RandomGenerator.h"
-#include "CepGen/Utils/String.h"
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Core/RunParameters.h>
+#include <CepGen/Event/Event.h>
+#include <CepGen/Modules/EventModifierFactory.h>
+#include <CepGen/Modules/RandomGeneratorFactory.h>
+#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/Kinematics.h>
+#include <CepGen/Physics/Modes.h>
+#include <CepGen/Utils/RandomGenerator.h>
+#include <CepGen/Utils/String.h>
+
+#include "CepGenPythia6/DiffractiveState.h"
 #include "CepGenPythia6/EventInterface.h"
 #include "CepGenPythia6/Pythia6Interface.h"
 
@@ -34,13 +38,17 @@ namespace cepgen::pythia6 {
   public:
     explicit Hadroniser(const ParametersList& params)
         : cepgen::hadr::Hadroniser(params),
-          random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {}
+          random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
+          momentum_tolerance_(steer<double>("momentumTolerance")) {}
 
     static ParametersDescription description() {
       auto desc = cepgen::hadr::Hadroniser::description();
       desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
+      desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
-          .setDescription("random number generator to use for the various intermediate computations");
+          .setDescription("random number generator to use for the partonic content of the dissociated systems");
+      desc.add("momentumTolerance", 1.e-6)
+          .setDescription("maximum fractional momentum tolerance to consider a hadronisation successful");
       return desc;
     }
 
@@ -49,31 +57,59 @@ namespace cepgen::pythia6 {
       CG_WARNING("pythia6:Hadroniser") << "Branching fraction not yet implemented in this hadroniser.\n\t"
                                        << "You will have to specify manually the multiplication factor according\n\t"
                                        << "to your list of open channels.";
-      kinematics_mode_ = runParameters().kinematics().incomingBeams().mode();
+      roles_.clear();
+      const auto mode = runParameters().kinematics().incomingBeams().mode();
+      if (mode == mode::Kinematics::InelasticElastic || mode == mode::Kinematics::InelasticInelastic)
+        roles_[Particle::Role::IncomingBeam1] = Particle::Role::OutgoingBeam1;
+      if (mode == mode::Kinematics::ElasticInelastic || mode == mode::Kinematics::InelasticInelastic)
+        roles_[Particle::Role::IncomingBeam2] = Particle::Role::OutgoingBeam2;
     }
+
     bool run(Event& event, double& weight, bool fast) override {
       weight = 1.;
-      EventInterface pythia_event(
-          event,
-          fast ? mode::Kinematics::ElasticElastic /*do not treat beam remnants when running in fast mode*/
-               : kinematics_mode_,
-          random_generator_.get());
-      pythia_event.prepareHadronisation();  // fill Pythia 6 common blocks
 
-      CG_DEBUG_LOOP("pythia6:Hadroniser")
-          << "Dump of the event before the hadronisation:" << event << "\n\t"
-          << utils::s("string object", pythia_event.numStrings(), true) << " identified and constructed.";
+      // fragment the dissociated beams first, as nothing is written until all systems succeeded
+      std::vector<std::pair<Particle::Role, Fragments> > hadronised;
+      if (!fast && fragment_remnants_) {  // do not treat beam remnants when running in fast mode
+        int num_trials = 0;
+        for (const auto& [incoming, outgoing] : roles_) {
+          if (!event.hasRole(outgoing) || event(outgoing).size() != 1)  // already fragmented by another algorithm
+            continue;
+          const pythia6::DiffractiveState diffractive_state(
+              event.oneWithRole(outgoing).momentum(), event.oneWithRole(incoming).integerPdgId(), *random_generator_);
+          if (!diffractive_state.valid()) {
+            CG_WARNING("pythia6:Hadroniser") << "Invalid remnants kinematics for " << outgoing << " (mass "
+                                             << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
+            return false;
+          }
+          Fragments fragments;
+          int trials_for_system = 0;
+          do {
+            if (trials_for_system++ >= max_trials_)
+              return false;
+            ++num_trials;
+          } while (!diffractive_state.hadronise(fragments, momentum_tolerance_));
+          hadronised.emplace_back(outgoing, std::move(fragments));
+        }
+        event.metadata["pythia6:num_hadronisation_trials"] = num_trials;
+      }
 
-      const auto old_particles_multiplicity = pyjets_.n;
-      pythia_event.run();  // run the hadronisation/decay
-      if (!fast && pyjets_.n == old_particles_multiplicity)
-        return false;  // hadronisation failed
+      // then decay/fragment the rest of the event content (central system, strings)
+      EventInterface pythia_event(event);
+      if (!pythia_event.decay())
+        return false;
+      CG_DEBUG_LOOP("pythia6:Hadroniser") << utils::s("string object", pythia_event.numStrings(), true)
+                                          << " identified and constructed in the event content.";
+
+      for (const auto& [role, fragments] : hadronised)
+        pythia_event.update(role, fragments);
       return true;
     }
 
   private:
-    mode::Kinematics kinematics_mode_{mode::Kinematics::ElasticElastic};
     const std::unique_ptr<utils::RandomGenerator> random_generator_;
+    const double momentum_tolerance_;
+    std::unordered_map<Particle::Role, Particle::Role> roles_;  ///< (incoming, outgoing) dissociating beams
   };
 }  // namespace cepgen::pythia6
 using Pythia6Hadroniser = cepgen::pythia6::Hadroniser;
