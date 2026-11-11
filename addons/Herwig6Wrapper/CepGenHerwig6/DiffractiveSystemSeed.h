@@ -30,7 +30,7 @@ namespace cepgen::utils {
 
 namespace cepgen::herwig6 {
   /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
-  class DiffractiveSystemSeed {
+  class DiffractiveSystemSeed final : public hadr::Hadroniser::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
     /// \param[in] beam Incoming beam particle momentum
@@ -48,8 +48,9 @@ namespace cepgen::herwig6 {
 
     /// Run cluster hadronisation of a given diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
+    /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state (unused)
     /// \return Boolean stating whether the event was successfully hadronised
-    bool hadronise(hadr::Hadroniser::Fragments& fragments) const;
+    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance = -1.) const override;
 
     /// Herwig 6 internal identifiers used for the beam remnants treatment
     enum struct InternalId {
@@ -68,12 +69,8 @@ namespace cepgen::herwig6 {
     };
 
   private:
-    double system_mass_{0.};                                ///< Invariant mass of the system
-    InternalId struck_id_{InternalId::invalid};             ///< Herwig identifier of the struck (anti)quark
-    InternalId spectator_id_{InternalId::invalid};          ///< Herwig identifier of the spectator (anti)diquark
-    double struck_mass_{0.};                                ///< Constituent mass of the struck (anti)quark
-    double spectator_mass_{0.};                             ///< Constituent mass of the spectator (anti)diquark
-    std::array<double, 3> spectator_momentum_{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
+    InternalId struck_id_{InternalId::invalid};     ///< Herwig identifier of the struck (anti)quark
+    InternalId spectator_id_{InternalId::invalid};  ///< Herwig identifier of the spectator (anti)diquark
   };
 }  // namespace cepgen::herwig6
 

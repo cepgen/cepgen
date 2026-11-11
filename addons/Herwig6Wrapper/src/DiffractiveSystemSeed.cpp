@@ -143,7 +143,8 @@ DiffractiveSystemSeed DiffractiveSystemSeed::build(const Momentum& beam,
   return diffractive_seed;
 }
 
-bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments) const {
+bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments,
+                                      double /*tolerance (curr. unused)*/) const {
   fragments.clear();
   hwuine();
 

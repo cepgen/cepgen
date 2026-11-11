@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #ifndef CepGen_Physics_Hadroniser_h
 #define CepGen_Physics_Hadroniser_h
 
+#include <array>
+
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Physics/Momentum.h"
 
@@ -33,7 +35,7 @@ namespace cepgen::hadr {
 
     static ParametersDescription description();
 
-    /// Hadron retrieved from the Herwig 6 event record
+    /// Hadron retrieved from the hadroniser event record
     struct Fragment {
       int index{0};        ///< Position in the event record
       int mother{-1};      ///< Position of the first mother in the event record
@@ -42,6 +44,23 @@ namespace cepgen::hadr {
       Momentum momentum;   ///< 4-momentum in the rest frame of the dissociated system
     };
     using Fragments = std::vector<Fragment>;
+
+    /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
+    class DiffractiveState {
+    public:
+      /// Run the diffractive system fragmentation
+      /// \param[out] fragments Hadrons produced, in the rest frame of the system
+      /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
+      /// \return Boolean stating whether the diffractive state was successfully hadronised
+      virtual bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const = 0;
+
+    protected:
+      double system_mass_{0.};                                ///< Invariant mass of the system
+      double struck_mass_{0.};                                ///< Mass of the struck (anti)quark
+      double spectator_mass_{0.};                             ///< Mass of the spectator (anti)diquark
+      std::array<double, 3> spectator_momentum_{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
+                                                              //TODO: use Momentum here
+    };
 
     inline bool fragmentRemnants() const { return fragment_remnants_; }  ///< Fragment the beam remnants?
 
