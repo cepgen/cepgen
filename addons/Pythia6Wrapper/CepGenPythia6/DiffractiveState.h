@@ -35,7 +35,7 @@ namespace cepgen::pythia6 {
     /// \param[in] system Dissociated system momentum
     /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (a negative value yields antiquark content)
     /// \param[in] rng Random number generator
-    static DiffractiveState build(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng);
+    explicit DiffractiveState(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng);
 
     /// Run the Lund string fragmentation of the diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system

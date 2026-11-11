@@ -48,6 +48,8 @@ namespace cepgen::hadr {
     /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
     class DiffractiveState {
     public:
+      explicit DiffractiveState(const Momentum& system_momentum);
+
       /// Run the diffractive system fragmentation
       /// \param[out] fragments Hadrons produced, in the rest frame of the system
       /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state

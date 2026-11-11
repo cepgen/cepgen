@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,3 +30,6 @@ ParametersDescription Hadroniser::description() {
   desc.add("remnantsFragmentation", true).setDescription("Apply the fragmentation algorithm to proton remnants");
   return desc;
 }
+
+Hadroniser::DiffractiveState::DiffractiveState(const Momentum& system_momentum)
+    : system_mass_(system_momentum.mass()) {}

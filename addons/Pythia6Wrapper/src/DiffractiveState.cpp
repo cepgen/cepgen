@@ -48,44 +48,39 @@ namespace cepgen::pythia6 {
 
 using namespace cepgen::pythia6;
 
-DiffractiveState DiffractiveState::build(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng) {
-  DiffractiveState diffractive_state;
-  diffractive_state.system_mass_ = system.mass();
-
+DiffractiveState::DiffractiveState(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng)
+    : hadr::Hadroniser::DiffractiveState(system) {
   // valence flavour content, weighted by the quark electric charge squared and the diquark spin multiplicity
   if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1)
-    diffractive_state.struck_pdg_id_ = PDG::down, diffractive_state.spectator_pdg_id_ = kDiquarkUU1;  // (d,uu1)
+    struck_pdg_id_ = PDG::down, spectator_pdg_id_ = kDiquarkUU1;  // (d,uu1)
   else if (random_quarks < 5)
-    diffractive_state.struck_pdg_id_ = PDG::up, diffractive_state.spectator_pdg_id_ = kDiquarkUD0;  // (u,ud0)
+    struck_pdg_id_ = PDG::up, spectator_pdg_id_ = kDiquarkUD0;  // (u,ud0)
   else
-    diffractive_state.struck_pdg_id_ = PDG::up, diffractive_state.spectator_pdg_id_ = kDiquarkUD1;  // (u,ud1)
-  if (beam_pdg_id < 0) {  // antibaryon content
-    diffractive_state.struck_pdg_id_ *= -1;
-    diffractive_state.spectator_pdg_id_ *= -1;
+    struck_pdg_id_ = PDG::up, spectator_pdg_id_ = kDiquarkUD1;  // (u,ud1)
+  if (beam_pdg_id < 0) {                                        // antibaryon content
+    struck_pdg_id_ *= -1;
+    spectator_pdg_id_ *= -1;
   }
-  checkPDGid(std::labs(diffractive_state.struck_pdg_id_));
-  checkPDGid(std::labs(diffractive_state.spectator_pdg_id_));
-  diffractive_state.struck_mass_ = pymass(static_cast<int>(diffractive_state.struck_pdg_id_));
-  diffractive_state.spectator_mass_ = pymass(static_cast<int>(diffractive_state.spectator_pdg_id_));
+  checkPDGid(std::labs(struck_pdg_id_));
+  checkPDGid(std::labs(spectator_pdg_id_));
+  struck_mass_ = pymass(static_cast<int>(struck_pdg_id_));
+  spectator_mass_ = pymass(static_cast<int>(spectator_pdg_id_));
 
   // two-body decay momentum in the rest frame of the system
-  const auto mass2 = diffractive_state.system_mass_ * diffractive_state.system_mass_;
-  const auto sum = diffractive_state.struck_mass_ + diffractive_state.spectator_mass_,
-             diff = diffractive_state.struck_mass_ - diffractive_state.spectator_mass_;
+  const auto mass2 = system_mass_ * system_mass_;
+  const auto sum = struck_mass_ + spectator_mass_, diff = struck_mass_ - spectator_mass_;
   const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
-  if (lambda <= 0. || diffractive_state.system_mass_ <= 0.) {
+  if (lambda <= 0. || system_mass_ <= 0.) {
     CG_DEBUG("pythia6:DiffractiveState") << "Diffractive system mass unphysical. System invalid for fragmentation.";
-    diffractive_state.valid_ = false;
-    return diffractive_state;
+    valid_ = false;
+    return;
   }
-  const auto p_star = 0.5 * std::sqrt(lambda) / diffractive_state.system_mass_;
+  const auto p_star = 0.5 * std::sqrt(lambda) / system_mass_;
 
   // isotropic string axis in the rest frame of the dissociated system
   const auto cos_theta = rng.uniform(-1., 1.), phi = rng.uniform(0., 2. * M_PI);
   const auto sin_theta = std::sqrt(1. - cos_theta * cos_theta);
-  diffractive_state.spectator_momentum_ = {
-      p_star * sin_theta * std::cos(phi), p_star * sin_theta * std::sin(phi), p_star * cos_theta};
-  return diffractive_state;
+  spectator_momentum_ = {p_star * sin_theta * std::cos(phi), p_star * sin_theta * std::sin(phi), p_star * cos_theta};
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {

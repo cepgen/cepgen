@@ -142,13 +142,11 @@ namespace cepgen::herwig6 {
       for (const auto& [incoming, outgoing] : roles_) {
         if (event(outgoing).size() != 1)  // already fragmented by another algorithm
           continue;
-        const auto& beam = event.oneWithRole(incoming);
-        const auto diffractive_seed = DiffractiveSystemSeed::build(beam.momentum(),
-                                                                   event.oneWithRole(outgoing).momentum(),
-                                                                   beam.integerPdgId(),
-                                                                   hwprop_.rmass,
-                                                                   *random_generator_,
-                                                                   primordial_kt_);
+        const auto diffractive_seed = DiffractiveSystemSeed(event.oneWithRole(incoming),
+                                                            event.oneWithRole(outgoing).momentum(),
+                                                            hwprop_.rmass,
+                                                            *random_generator_,
+                                                            primordial_kt_);
         Fragments fragments;
         int trials_for_system = 0;
         do {

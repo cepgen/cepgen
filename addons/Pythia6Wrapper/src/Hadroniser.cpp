@@ -75,7 +75,7 @@ namespace cepgen::pythia6 {
           if (!event.hasRole(outgoing) || event(outgoing).size() != 1)  // already fragmented by another algorithm
             continue;
           const auto& system = event.oneWithRole(outgoing);
-          const auto diffractive_state = pythia6::DiffractiveState::build(
+          const auto diffractive_state = pythia6::DiffractiveState(
               system.momentum(), event.oneWithRole(incoming).integerPdgId(), *random_generator_);
           if (!diffractive_state.valid()) {
             CG_WARNING("pythia6:Hadroniser")

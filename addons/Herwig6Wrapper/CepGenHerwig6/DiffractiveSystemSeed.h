@@ -24,27 +24,28 @@
 
 #include <array>
 
+namespace cepgen {
+  class Particle;
+}  // namespace cepgen
 namespace cepgen::utils {
   class RandomGenerator;
-}
+}  // namespace cepgen::utils
 
 namespace cepgen::herwig6 {
   /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
   class DiffractiveSystemSeed final : public hadr::Hadroniser::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
-    /// \param[in] beam Incoming beam particle momentum
+    /// \param[in] beam Incoming beam particle
     /// \param[in] system Dissociated system momentum
-    /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (only protons and antiprotons are supported)
     /// \param[in] rmass Herwig 6 constituent masses, indexed by Herwig identifier
     /// \param[in] rng Random number generator
     /// \param[in] primordial_kt RMS of the transverse momentum of the spectator relative to the beam axis, in GeV
-    static DiffractiveSystemSeed build(const Momentum& beam,
-                                       const Momentum& system,
-                                       long beam_pdg_id,
-                                       const double* rmass,
-                                       utils::RandomGenerator& rng,
-                                       double primordial_kt);
+    explicit DiffractiveSystemSeed(const Particle& beam,
+                                   const Momentum& system,
+                                   const double* rmass,
+                                   utils::RandomGenerator& rng,
+                                   double primordial_kt);
 
     /// Run cluster hadronisation of a given diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system

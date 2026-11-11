@@ -17,6 +17,7 @@
  */
 
 #include <CepGen/Core/Exception.h>
+#include <CepGen/Event/Particle.h>
 #include <CepGen/Physics/Constants.h>
 #include <CepGen/Physics/PDG.h>
 #include <CepGen/Utils/RandomGenerator.h>
@@ -86,42 +87,39 @@ namespace cepgen::herwig6 {
 
 using namespace cepgen::herwig6;
 
-DiffractiveSystemSeed DiffractiveSystemSeed::build(const Momentum& beam,
-                                                   const Momentum& system,
-                                                   long beam_pdg_id,
-                                                   const double* rmass,
-                                                   utils::RandomGenerator& rng,
-                                                   double primordial_kt) {
-  if (std::labs(beam_pdg_id) != 2212)
+DiffractiveSystemSeed::DiffractiveSystemSeed(const Particle& beam,
+                                             const Momentum& system,
+                                             const double* rmass,
+                                             utils::RandomGenerator& rng,
+                                             double primordial_kt)
+    : DiffractiveState(system) {
+  const auto beam_pdg_id = beam.integerPdgId();
+  if (std::labs(beam_pdg_id) != PDG::proton)
     throw CG_FATAL("herwig6:DiffractiveSystemSeed")
-        << "Beam particle with PDG id " << beam_pdg_id
+        << "Beam particle with PDG id " << beam.pdgId()
         << " is not supported. Only protons and antiprotons can be dissociated.";
-
-  DiffractiveSystemSeed diffractive_seed;
-  diffractive_seed.system_mass_ = system.mass();
 
   // valence flavour content, weighted by the quark electric charge squared and its multiplicity in the proton
   const bool struck_down = rng.uniform(0., 1.) < 1. / 9.;
   const bool anti = beam_pdg_id < 0;
-  diffractive_seed.struck_id_ =
-      struck_down ? (anti ? InternalId::dBar : InternalId::down) : (anti ? InternalId::uBar : InternalId::up);
-  diffractive_seed.spectator_id_ =
+  struck_id_ = struck_down ? (anti ? InternalId::dBar : InternalId::down) : (anti ? InternalId::uBar : InternalId::up);
+  spectator_id_ =
       struck_down ? (anti ? InternalId::uu_bar : InternalId::uu) : (anti ? InternalId::ud0_bar : InternalId::ud0);
-  diffractive_seed.struck_mass_ = rmass[static_cast<int>(diffractive_seed.struck_id_)];
-  diffractive_seed.spectator_mass_ = rmass[static_cast<int>(diffractive_seed.spectator_id_)];
+  struck_mass_ = rmass[static_cast<int>(struck_id_)];
+  spectator_mass_ = rmass[static_cast<int>(spectator_id_)];
 
-  const auto mass2 = diffractive_seed.system_mass_ * diffractive_seed.system_mass_;
-  const auto sum = diffractive_seed.struck_mass_ + diffractive_seed.spectator_mass_,
-             diff = diffractive_seed.struck_mass_ - diffractive_seed.spectator_mass_;
+  const auto mass2 = system_mass_ * system_mass_;
+  const auto sum = struck_mass_ + spectator_mass_, diff = struck_mass_ - spectator_mass_;
   const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
   if (lambda <= 0.)
     throw CG_FATAL("herwig6:DiffractiveSystemSeed")
-        << "Dissociated system of mass " << diffractive_seed.system_mass_ << " GeV is too light for its constituents.";
-  const auto p_star = 0.5 * std::sqrt(lambda) / diffractive_seed.system_mass_;
+        << "Dissociated system of mass " << system_mass_ << " GeV is too light for its constituents.";
+  const auto p_star = 0.5 * std::sqrt(lambda) / system_mass_;
 
   // the spectator follows the beam direction, as seen from the rest frame of the dissociated system
   const auto beam_in_system =
-      Momentum(beam).lorentzBoost(Momentum::fromPxPyPzE(-system.px(), -system.py(), -system.pz(), system.energy()));
+      Momentum(beam.momentum())
+          .lorentzBoost(Momentum::fromPxPyPzE(-system.px(), -system.py(), -system.pz(), system.energy()));
   const Vec3 beam_vector{beam_in_system.px(), beam_in_system.py(), beam_in_system.pz()};
   const auto axis = norm(beam_vector) > 0. ? unit(beam_vector) : randomDirection(rng);
 
@@ -138,8 +136,7 @@ DiffractiveSystemSeed DiffractiveSystemSeed::build(const Momentum& beam,
     }
   }
   for (size_t i = 0; i < 3; ++i)
-    diffractive_seed.spectator_momentum_[i] = p_star * direction[i];
-  return diffractive_seed;
+    spectator_momentum_[i] = p_star * direction[i];
 }
 
 bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
