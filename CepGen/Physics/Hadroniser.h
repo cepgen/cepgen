@@ -54,10 +54,13 @@ namespace cepgen::hadr {
       /// \return Boolean stating whether the diffractive state was successfully hadronised
       virtual bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const = 0;
 
+      bool valid() const { return valid_; }  ///< Is the fragmentation of the diffractive state possible?
+
     protected:
-      double system_mass_{0.};                                ///< Invariant mass of the system
-      double struck_mass_{0.};                                ///< Mass of the struck (anti)quark
-      double spectator_mass_{0.};                             ///< Mass of the spectator (anti)diquark
+      bool valid_{true};           ///< Is the fragmentation of the diffractive state possible?
+      double system_mass_{0.};     ///< Invariant mass of the system
+      double struck_mass_{0.};     ///< Mass of the struck (anti)quark
+      double spectator_mass_{0.};  ///< Mass of the spectator (anti)diquark
       std::array<double, 3> spectator_momentum_{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
                                                               //TODO: use Momentum here
     };
