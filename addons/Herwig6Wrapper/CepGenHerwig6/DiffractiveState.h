@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenHerwig6_DiffractiveSystemSeed_h
-#define CepGenHerwig6_DiffractiveSystemSeed_h
+#ifndef CepGenHerwig6_DiffractiveState_h
+#define CepGenHerwig6_DiffractiveState_h
 
 #include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/Momentum.h>
@@ -33,7 +33,7 @@ namespace cepgen::utils {
 
 namespace cepgen::herwig6 {
   /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
-  class DiffractiveSystemSeed final : public hadr::Hadroniser::DiffractiveState {
+  class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
     /// \param[in] beam Incoming beam particle
@@ -41,11 +41,11 @@ namespace cepgen::herwig6 {
     /// \param[in] rmass Herwig 6 constituent masses, indexed by Herwig identifier
     /// \param[in] rng Random number generator
     /// \param[in] primordial_kt RMS of the transverse momentum of the spectator relative to the beam axis, in GeV
-    explicit DiffractiveSystemSeed(const Particle& beam,
-                                   const Momentum& system,
-                                   const double* rmass,
-                                   utils::RandomGenerator& rng,
-                                   double primordial_kt);
+    explicit DiffractiveState(const Particle& beam,
+                              const Momentum& system,
+                              const double* rmass,
+                              utils::RandomGenerator& rng,
+                              double primordial_kt);
 
     /// Run cluster hadronisation of a given diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system

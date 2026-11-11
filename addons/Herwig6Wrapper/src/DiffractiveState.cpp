@@ -26,7 +26,7 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "CepGenHerwig6/DiffractiveSystemSeed.h"
+#include "CepGenHerwig6/DiffractiveState.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
 namespace cepgen::herwig6 {
@@ -49,8 +49,7 @@ namespace cepgen::herwig6 {
     constexpr int kPartonStatus = 149;     // final-state parton, copied to status 150 by HWCGSP
     constexpr int kSpectatorStatus = 147;  // beam remnant, copied to status 153 by HWCGSP
 
-    void fillParton(
-        int index, int status, DiffractiveSystemSeed::InternalId id, const double* p3, double mass, int partner) {
+    void fillParton(int index, int status, DiffractiveState::InternalId id, const double* p3, double mass, int partner) {
       hepevt_.isthep[index] = status;
       hepevt_.idhep[index] = hwprop_.idpdg[static_cast<int>(id)];
       hwevnt_.idhw[index] = static_cast<int>(id);
@@ -87,17 +86,16 @@ namespace cepgen::herwig6 {
 
 using namespace cepgen::herwig6;
 
-DiffractiveSystemSeed::DiffractiveSystemSeed(const Particle& beam,
-                                             const Momentum& system,
-                                             const double* rmass,
-                                             utils::RandomGenerator& rng,
-                                             double primordial_kt)
-    : DiffractiveState(system) {
+DiffractiveState::DiffractiveState(const Particle& beam,
+                                   const Momentum& system,
+                                   const double* rmass,
+                                   utils::RandomGenerator& rng,
+                                   double primordial_kt)
+    : hadr::Hadroniser::DiffractiveState(system) {
   const auto beam_pdg_id = beam.integerPdgId();
   if (std::labs(beam_pdg_id) != PDG::proton)
-    throw CG_FATAL("herwig6:DiffractiveSystemSeed")
-        << "Beam particle with PDG id " << beam.pdgId()
-        << " is not supported. Only protons and antiprotons can be dissociated.";
+    throw CG_FATAL("herwig6:DiffractiveState") << "Beam particle with PDG id " << beam.pdgId()
+                                               << " is not supported. Only protons and antiprotons can be dissociated.";
 
   // valence flavour content, weighted by the quark electric charge squared and its multiplicity in the proton
   const bool struck_down = rng.uniform(0., 1.) < 1. / 9.;
@@ -112,7 +110,7 @@ DiffractiveSystemSeed::DiffractiveSystemSeed(const Particle& beam,
   const auto sum = struck_mass_ + spectator_mass_, diff = struck_mass_ - spectator_mass_;
   const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
   if (lambda <= 0.)
-    throw CG_FATAL("herwig6:DiffractiveSystemSeed")
+    throw CG_FATAL("herwig6:DiffractiveState")
         << "Dissociated system of mass " << system_mass_ << " GeV is too light for its constituents.";
   const auto p_star = 0.5 * std::sqrt(lambda) / system_mass_;
 
@@ -139,7 +137,7 @@ DiffractiveSystemSeed::DiffractiveSystemSeed(const Particle& beam,
     spectator_momentum_[i] = p_star * direction[i];
 }
 
-bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
+bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
   fragments.clear();
   hwuine();
 
@@ -148,7 +146,7 @@ bool DiffractiveSystemSeed::hadronise(hadr::Hadroniser::Fragments& fragments, do
   hepevt_.nhep = 3;
   hepevt_.isthep[0] = kBeamStatus;
   hepevt_.idhep[0] = 0;
-  hwevnt_.idhw[0] = static_cast<int>(DiffractiveSystemSeed::InternalId::centreOfMass);
+  hwevnt_.idhw[0] = static_cast<int>(DiffractiveState::InternalId::centreOfMass);
   hepevt_.phep[0][0] = hepevt_.phep[0][1] = hepevt_.phep[0][2] = 0.;
   hepevt_.phep[0][3] = hepevt_.phep[0][4] = mass;
   const auto& spectator = spectator_momentum_;

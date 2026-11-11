@@ -31,7 +31,7 @@
 
 #include <cstring>
 
-#include "CepGenHerwig6/DiffractiveSystemSeed.h"
+#include "CepGenHerwig6/DiffractiveState.h"
 #include "CepGenHerwig6/Herwig6Interface.h"
 
 namespace cepgen::herwig6 {
@@ -106,15 +106,15 @@ namespace cepgen::herwig6 {
         utils::StreamCollector collector(output);
         herwig6::initialise();
       }
-      if (hwprop_.idpdg[static_cast<int>(DiffractiveSystemSeed::InternalId::ud0)] != 2101  // (ud)0
-          || hwprop_.idpdg[static_cast<int>(DiffractiveSystemSeed::InternalId::proton)] != PDG::proton ||
-          hwprop_.rmass[static_cast<int>(DiffractiveSystemSeed::InternalId::proton)] <= 0.)
+      if (hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::ud0)] != 2101  // (ud)0
+          || hwprop_.idpdg[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] != PDG::proton ||
+          hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] <= 0.)
         throw CG_FATAL("herwig6:Hadroniser")
             << "Herwig 6 particle table is not filled as expected.\n\t" << "Is the HWUDAT block data linked in?";
       if (!compatibleVersion())
         CG_WARNING("herwig6:Hadroniser") << "Common blocks layouts were not validated against linked Herwig 6 version.";
-      threshold_ = hwprop_.rmass[static_cast<int>(DiffractiveSystemSeed::InternalId::proton)] +
-                   hwprop_.rmass[static_cast<int>(DiffractiveSystemSeed::InternalId::piZero)];
+      threshold_ = hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::proton)] +
+                   hwprop_.rmass[static_cast<int>(herwig6::DiffractiveState::InternalId::piZero)];
 
       roles_.clear();
       const auto mode = runParameters().kinematics().incomingBeams().mode();
@@ -142,11 +142,11 @@ namespace cepgen::herwig6 {
       for (const auto& [incoming, outgoing] : roles_) {
         if (event(outgoing).size() != 1)  // already fragmented by another algorithm
           continue;
-        const auto diffractive_seed = DiffractiveSystemSeed(event.oneWithRole(incoming),
-                                                            event.oneWithRole(outgoing).momentum(),
-                                                            hwprop_.rmass,
-                                                            *random_generator_,
-                                                            primordial_kt_);
+        const auto diffractive_seed = herwig6::DiffractiveState(event.oneWithRole(incoming),
+                                                                event.oneWithRole(outgoing).momentum(),
+                                                                hwprop_.rmass,
+                                                                *random_generator_,
+                                                                primordial_kt_);
         Fragments fragments;
         int trials_for_system = 0;
         do {
