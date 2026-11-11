@@ -75,12 +75,11 @@ namespace cepgen::pythia6 {
         for (const auto& [incoming, outgoing] : roles_) {
           if (!event.hasRole(outgoing) || event(outgoing).size() != 1)  // already fragmented by another algorithm
             continue;
-          const auto& system = event.oneWithRole(outgoing);
           const pythia6::DiffractiveState diffractive_state(
-              system.momentum(), event.oneWithRole(incoming).integerPdgId(), *random_generator_);
+              event.oneWithRole(outgoing).momentum(), event.oneWithRole(incoming).integerPdgId(), *random_generator_);
           if (!diffractive_state.valid()) {
-            CG_WARNING("pythia6:Hadroniser")
-                << "Invalid remnants kinematics for " << outgoing << " (mass " << system.momentum().mass() << " GeV).";
+            CG_WARNING("pythia6:Hadroniser") << "Invalid remnants kinematics for " << outgoing << " (mass "
+                                             << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
             return false;
           }
           Fragments fragments;

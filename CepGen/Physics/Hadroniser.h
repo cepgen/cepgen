@@ -59,14 +59,13 @@ namespace cepgen::hadr {
       bool valid() const { return valid_; }  ///< Is the fragmentation of the diffractive state possible?
 
     protected:
-      bool valid_{true};                                    ///< Is the fragmentation of the diffractive state possible?
-      long valquark_pdg_id_{0};                             ///< Signed PDG identifier of the struck (anti)quark
-      long diquark_pdg_id_{0};                              ///< Signed PDG identifier of the spectator (anti)diquark
-      double system_mass_{0.};                              ///< Invariant mass of the system
-      double valquark_mass_{0.};                            ///< Mass of the struck (anti)quark
-      double diquark_mass_{0.};                             ///< Mass of the spectator (anti)diquark
-      std::array<double, 3> diquark_momentum_{0., 0., 0.};  ///< Spectator 3-momentum (struck parton has the opposite)
-                                                            //TODO: use Momentum here
+      bool valid_{true};           ///< Is the fragmentation of the diffractive state possible?
+      long valquark_pdg_id_{0};    ///< Signed PDG identifier of the struck (anti)quark
+      long diquark_pdg_id_{0};     ///< Signed PDG identifier of the spectator (anti)diquark
+      double system_mass_{0.};     ///< Invariant mass of the system
+      double valquark_mass_{0.};   ///< Mass of the struck (anti)quark
+      double diquark_mass_{0.};    ///< Mass of the spectator (anti)diquark
+      Momentum diquark_momentum_;  ///< Spectator 3-momentum (struck parton has the opposite)
     };
 
     inline bool fragmentRemnants() const { return fragment_remnants_; }  ///< Fragment the beam remnants?

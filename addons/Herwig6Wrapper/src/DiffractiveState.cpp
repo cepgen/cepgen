@@ -49,7 +49,8 @@ namespace cepgen::herwig6 {
     constexpr int kPartonStatus = 149;     // final-state parton, copied to status 150 by HWCGSP
     constexpr int kSpectatorStatus = 147;  // beam remnant, copied to status 153 by HWCGSP
 
-    void fillParton(int index, int status, DiffractiveState::InternalId id, const double* p3, double mass, int partner) {
+    void fillParton(
+        int index, int status, DiffractiveState::InternalId id, const Momentum& p3, double mass, int partner) {
       hepevt_.isthep[index] = status;
       hepevt_.idhep[index] = hwprop_.idpdg[static_cast<int>(id)];
       hwevnt_.idhw[index] = static_cast<int>(id);
@@ -57,9 +58,10 @@ namespace cepgen::herwig6 {
       // a colour singlet pair is connected through both of its colour lines
       hepevt_.jmohep[index][1] = partner + 1;
       hepevt_.jdahep[index][1] = partner + 1;
-      for (int i = 0; i < 3; ++i)
-        hepevt_.phep[index][i] = p3[i];
-      hepevt_.phep[index][3] = std::sqrt(p3[0] * p3[0] + p3[1] * p3[1] + p3[2] * p3[2] + mass * mass);
+      hepevt_.phep[index][0] = p3.px();
+      hepevt_.phep[index][1] = p3.py();
+      hepevt_.phep[index][2] = p3.pz();
+      hepevt_.phep[index][3] = std::hypot(p3.p(), mass);
       hepevt_.phep[index][4] = mass;
     }
 
@@ -136,8 +138,7 @@ DiffractiveState::DiffractiveState(const Particle& beam,
         direction[i] = cos_theta * axis[i] + sin_theta * (px / pt * e1[i] + py / pt * e2[i]);
     }
   }
-  for (size_t i = 0; i < 3; ++i)
-    diquark_momentum_[i] = p_star * direction[i];
+  diquark_momentum_ = p_star * Momentum::fromPxPyPzE(direction[0], direction[1], direction[2], 0.);
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
@@ -151,10 +152,8 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   hwevnt_.idhw[0] = static_cast<int>(DiffractiveState::InternalId::centreOfMass);
   hepevt_.phep[0][0] = hepevt_.phep[0][1] = hepevt_.phep[0][2] = 0.;
   hepevt_.phep[0][3] = hepevt_.phep[0][4] = system_mass_;
-  const auto& spectator = diquark_momentum_;
-  const double struck[3] = {-spectator[0], -spectator[1], -spectator[2]};
-  fillParton(1, kPartonStatus, valquark_id_, struck, valquark_mass_, 2);
-  fillParton(2, kSpectatorStatus, diquark_id_, spectator.data(), diquark_mass_, 1);
+  fillParton(1, kPartonStatus, valquark_id_, -diquark_momentum_, valquark_mass_, 2);
+  fillParton(2, kSpectatorStatus, diquark_id_, diquark_momentum_, diquark_mass_, 1);
 
   hwcfor();
   hwcdec();
