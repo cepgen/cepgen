@@ -138,14 +138,14 @@ namespace cepgen::sherpa {
                                      const std::function<double(long, bool)>& parton_mass,
                                      utils::RandomGenerator& rng,
                                      double primordial_kt)
-      : hadr::Hadroniser::DiffractiveState(system), system_pdg_id_(beam.integerPdgId()) {
-    if (std::labs(system_pdg_id_) != PDG::proton)
+      : hadr::Hadroniser::DiffractiveState(system, beam.integerPdgId()) {
+    if (std::labs(beam_pdg_id_) != PDG::proton)
       throw CG_FATAL("sherpa:DiffractiveState")
-          << "Beam particle with PDG id " << system_pdg_id_
+          << "Beam particle with PDG id " << beam_pdg_id_
           << " is not supported. Only protons and antiprotons can be dissociated.";
 
     // valence flavour content, weighted by the quark electric charge squared and its multiplicity in the proton
-    const long sign = system_pdg_id_ < 0 ? -1 : +1;
+    const long sign = beam_pdg_id_ < 0 ? -1 : +1;
     if (rng.uniform() < 1. / 9.) {  // valence down quark
       valquark_pdg_id_ = sign * PDG::down;
       diquark_pdg_id_ = sign * PDG::uu1;
@@ -203,7 +203,7 @@ namespace cepgen::sherpa {
     // the system is hadronised at rest, as a colour singlet ready for fragmentation; the Sherpa algorithms expect the
     // partons to be attached to a full chain of upstream blobs:
     //   [bunch: beam -> system] -> [beam: system -> partons] -> [fragmentation: partons -> hadrons]
-    const ATOOLS::Flavour system_flavour(static_cast<kf_code>(std::labs(system_pdg_id_)), system_pdg_id_ < 0);
+    const ATOOLS::Flavour system_flavour(static_cast<kf_code>(std::labs(beam_pdg_id_)), beam_pdg_id_ < 0);
     const ATOOLS::Vec4D system_momentum(system_mass_, 0., 0., 0.);
     auto* incoming_system = new ATOOLS::Particle(-1, system_flavour, system_momentum, 'B');
     auto* system = new ATOOLS::Particle(-1, system_flavour, system_momentum, 'B');  // garbage-collected

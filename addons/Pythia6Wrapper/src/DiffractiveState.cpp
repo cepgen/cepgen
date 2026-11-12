@@ -17,6 +17,7 @@
  */
 
 #include <CepGen/Core/Exception.h>
+#include <CepGen/Event/Particle.h>
 #include <CepGen/Physics/PDG.h>
 #include <CepGen/Utils/RandomGenerator.h>
 
@@ -47,10 +48,10 @@ namespace cepgen::pythia6 {
 
 using namespace cepgen::pythia6;
 
-DiffractiveState::DiffractiveState(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng)
-    : hadr::Hadroniser::DiffractiveState(system) {
+DiffractiveState::DiffractiveState(const Particle& beam, const Momentum& system, utils::RandomGenerator& rng)
+    : hadr::Hadroniser::DiffractiveState(system, beam.integerPdgId()) {
   // valence flavour content, weighted by the quark electric charge squared and the diquark spin multiplicity
-  const long sign = beam_pdg_id < 0 ? -1 : +1;
+  const long sign = beam_pdg_id_ < 0 ? -1 : +1;
   if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1) {  // (d,uu1)
     valquark_pdg_id_ = sign * PDG::down;
     diquark_pdg_id_ = sign * PDG::uu1;

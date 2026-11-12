@@ -56,7 +56,6 @@ namespace cepgen::sherpa {
     bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
 
   private:
-    long system_pdg_id_{0};           ///< Signed PDG identifier of the dissociated beam
     bool constituent_masses_{false};  ///< Are the partons on their constituent mass shell?
   };
 }  // namespace cepgen::sherpa

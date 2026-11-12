@@ -29,10 +29,10 @@ namespace cepgen::pythia6 {
   /// Colour-singlet (anti)quark-(anti)diquark string replacing a dissociated beam, in its own rest frame
   struct DiffractiveState final : hadr::Hadroniser::DiffractiveState {
     /// Build the partonic content of a dissociated system
+    /// \param[in] beam Incoming beam particle
     /// \param[in] system Dissociated system momentum
-    /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (a negative value yields antiquark content)
     /// \param[in] rng Random number generator
-    explicit DiffractiveState(const Momentum& system, long beam_pdg_id, utils::RandomGenerator& rng);
+    explicit DiffractiveState(const Particle& beam, const Momentum& system, utils::RandomGenerator& rng);
 
     /// Run the Lund string fragmentation of the diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system

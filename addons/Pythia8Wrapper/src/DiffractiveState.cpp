@@ -30,7 +30,7 @@ DiffractiveState::DiffractiveState(const Momentum& system,
                                    long beam_pdg_id,
                                    utils::RandomGenerator& rng,
                                    Pythia8::Pythia& pythia)
-    : hadr::Hadroniser::DiffractiveState(system), pythia_(&pythia) {
+    : hadr::Hadroniser::DiffractiveState(system, beam_pdg_id), pythia_(&pythia) {
   // valence flavour content, weighted by the quark electric charge squared and the diquark spin multiplicity
   const long sign = beam_pdg_id < 0 ? -1 : +1;
   if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1) {  // (d,uu1)

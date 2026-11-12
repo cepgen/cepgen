@@ -32,8 +32,8 @@ ParametersDescription Hadroniser::description() {
   return desc;
 }
 
-Hadroniser::DiffractiveState::DiffractiveState(const Momentum& system_momentum)
-    : system_mass_(system_momentum.mass()) {}
+Hadroniser::DiffractiveState::DiffractiveState(const Momentum& system_momentum, long beam_pdg_id)
+    : beam_pdg_id_(beam_pdg_id), system_mass_(system_momentum.mass()) {}
 
 bool Hadroniser::DiffractiveState::momentumConserved(const Fragments& fragments, double tolerance) const {
   Momentum sum{0., 0., 0., system_mass_};

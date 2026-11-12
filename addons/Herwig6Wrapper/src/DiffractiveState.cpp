@@ -79,15 +79,14 @@ DiffractiveState::DiffractiveState(const Particle& beam,
                                    const double* rmass,
                                    utils::RandomGenerator& rng,
                                    double primordial_kt)
-    : hadr::Hadroniser::DiffractiveState(system) {
-  const auto beam_pdg_id = beam.integerPdgId();
-  if (std::labs(beam_pdg_id) != PDG::proton)
+    : hadr::Hadroniser::DiffractiveState(system, beam.integerPdgId()) {
+  if (std::labs(beam_pdg_id_) != PDG::proton)
     throw CG_FATAL("herwig6:DiffractiveState") << "Beam particle with PDG id " << beam.pdgId()
                                                << " is not supported. Only protons and antiprotons can be dissociated.";
 
   // valence flavour content, weighted by the quark electric charge squared and its multiplicity in the proton
   const bool valquark_down = rng.uniform() < 1. / 9.;
-  if (beam_pdg_id >= 0) {  // quark/diquark
+  if (beam_pdg_id_ >= 0) {  // quark/diquark
     valquark_id_ = valquark_down ? InternalId::down : InternalId::up;
     diquark_id_ = valquark_down ? InternalId::uu : InternalId::ud0;
   } else {  // anti-quark/anti-diquark
