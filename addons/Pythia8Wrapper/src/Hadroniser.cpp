@@ -44,6 +44,7 @@ namespace cepgen::pythia8 {
           pythia_(new Pythia8::Pythia),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
           momentum_tolerance_(steer<double>("momentumTolerance")),
+          primordial_kt_(steer<double>("primordialKt")),
           output_config_(steer<std::string>("outputConfig")) {}
 
     ~Hadroniser() override {
@@ -59,6 +60,8 @@ namespace cepgen::pythia8 {
           .setDescription("random number generator to use for the partonic content of the dissociated systems");
       desc.add("momentumTolerance", 1.e-6)
           .setDescription("maximum fractional momentum tolerance to consider a hadronisation successful");
+      desc.add("primordialKt", 0.)
+          .setDescription("RMS of the spectator transverse momentum relative to the beam axis (GeV)");
       desc.add("outputConfig", "last_pythia_config.cmd"s).setDescription("last Pythia configuration snapshot filename");
       return desc;
     }
@@ -99,10 +102,11 @@ namespace cepgen::pythia8 {
         for (const auto& [incoming, outgoing] : roles_) {
           if (!event.hasRole(outgoing) || event(outgoing).size() != 1)  // already fragmented by another algorithm
             continue;
-          const pythia8::DiffractiveState diffractive_state(event.oneWithRole(outgoing).momentum(),
-                                                            event.oneWithRole(incoming).integerPdgId(),
-                                                            *random_generator_,
-                                                            *pythia_);
+          const pythia8::DiffractiveState diffractive_state(*random_generator_,
+                                                            event.oneWithRole(outgoing).momentum(),
+                                                            event.oneWithRole(incoming),
+                                                            *pythia_,
+                                                            primordial_kt_);
           if (!diffractive_state.valid()) {
             CG_WARNING("pythia8:Hadroniser") << "Invalid remnants kinematics for " << outgoing << " (mass "
                                              << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
@@ -134,6 +138,7 @@ namespace cepgen::pythia8 {
     const std::unique_ptr<Pythia8::Pythia> pythia_;  ///< Pythia 8 core to be wrapped
     const std::unique_ptr<utils::RandomGenerator> random_generator_;
     const double momentum_tolerance_;
+    const double primordial_kt_;
     const std::string output_config_;
 
     std::unordered_map<Particle::Role, Particle::Role> roles_;  ///< (incoming, outgoing) dissociating beams

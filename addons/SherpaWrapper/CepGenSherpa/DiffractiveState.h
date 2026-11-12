@@ -22,8 +22,6 @@
 #include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/Momentum.h>
 
-#include <functional>
-
 namespace cepgen {
   class Particle;
 }  // namespace cepgen
@@ -36,17 +34,15 @@ namespace cepgen::sherpa {
   class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
+    /// \param[in] rng Random number generator
     /// \param[in] beam Incoming beam particle
     /// \param[in] system Dissociated system momentum
-    /// \param[in] parton_mass Mass to be assigned to each of the two partons
     /// \note Partons are put on their constituent mass shells whenever the system is heavy enough, on their
     ///       perturbative mass shells otherwise
-    /// \param[in] rng Random number generator
     /// \param[in] primordial_kt RMS of the transverse momentum of the spectator relative to the beam axis, in GeV
-    explicit DiffractiveState(const Particle& beam,
+    explicit DiffractiveState(utils::RandomGenerator& rng,
+                              const Particle& beam,
                               const Momentum& system,
-                              const std::function<double(long, bool)>& parton_mass,
-                              utils::RandomGenerator& rng,
                               double primordial_kt);
 
     /// Run the Sherpa fragmentation (and hadron decays, if enabled) of a given diffractive system
@@ -56,6 +52,7 @@ namespace cepgen::sherpa {
     bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
 
   private:
+    double massFromPdgId(long pdg_id) const override;
     bool constituent_masses_{false};  ///< Are the partons on their constituent mass shell?
   };
 }  // namespace cepgen::sherpa

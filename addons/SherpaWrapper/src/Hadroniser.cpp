@@ -113,7 +113,7 @@ namespace cepgen::sherpa {
         sherpa_initialised_ = true;
       }
 
-      std::vector<std::pair<Particle::Role, Fragments> > hadronised;  // nothing is written until all systems succeeded
+      std::unordered_map<Particle::Role, Fragments> hadronised;  // nothing is written until all systems succeeded
       int num_trials = 0;
       {
         std::lock_guard<std::mutex> lock(framework.mutex());  // Sherpa algorithms rely on global objects
@@ -122,7 +122,7 @@ namespace cepgen::sherpa {
             continue;
           const auto& beam = event.oneWithRole(incoming);
           const auto diffractive_seed = sherpa::DiffractiveState(
-              beam, event.oneWithRole(outgoing).momentum(), &Framework::partonMass, *random_generator_, primordial_kt_);
+              *random_generator_, beam, event.oneWithRole(outgoing).momentum(), primordial_kt_);
           Fragments fragments;
           int trials_for_system = 0;
           do {
@@ -130,7 +130,7 @@ namespace cepgen::sherpa {
               return false;
             ++num_trials;
           } while (!diffractive_seed.hadronise(fragments, tolerance_));
-          hadronised.emplace_back(outgoing, std::move(fragments));
+          hadronised[outgoing] = std::move(fragments);
         }
       }
       event.metadata["sherpa:num_hadronisation_trials"] = num_trials;

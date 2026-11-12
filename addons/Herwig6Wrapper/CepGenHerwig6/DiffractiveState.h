@@ -36,15 +36,13 @@ namespace cepgen::herwig6 {
   class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
+    /// \param[in] rng Random number generator
     /// \param[in] beam Incoming beam particle
     /// \param[in] system Dissociated system momentum
-    /// \param[in] rmass Herwig 6 constituent masses, indexed by Herwig identifier
-    /// \param[in] rng Random number generator
     /// \param[in] primordial_kt RMS of the transverse momentum of the spectator relative to the beam axis, in GeV
-    explicit DiffractiveState(const Particle& beam,
+    explicit DiffractiveState(utils::RandomGenerator& rng,
+                              const Particle& beam,
                               const Momentum& system,
-                              const double* rmass,
-                              utils::RandomGenerator& rng,
                               double primordial_kt);
 
     /// Run cluster hadronisation of a given diffractive system
@@ -70,6 +68,7 @@ namespace cepgen::herwig6 {
     };
 
   private:
+    double massFromPdgId(long pdg_id) const override;
     InternalId valquark_id_{InternalId::invalid};  ///< Herwig identifier of the struck (anti)quark
     InternalId diquark_id_{InternalId::invalid};   ///< Herwig identifier of the spectator (anti)diquark
   };

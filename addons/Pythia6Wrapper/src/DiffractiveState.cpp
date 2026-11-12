@@ -48,38 +48,15 @@ namespace cepgen::pythia6 {
 
 using namespace cepgen::pythia6;
 
-DiffractiveState::DiffractiveState(const Particle& beam, const Momentum& system, utils::RandomGenerator& rng)
-    : hadr::Hadroniser::DiffractiveState(system, beam.integerPdgId()) {
-  // valence flavour content, weighted by the quark electric charge squared and the diquark spin multiplicity
-  const long sign = beam_pdg_id_ < 0 ? -1 : +1;
-  if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1) {  // (d,uu1)
-    valquark_pdg_id_ = sign * PDG::down;
-    diquark_pdg_id_ = sign * PDG::uu1;
-  } else if (random_quarks < 5) {  // (u,ud0)
-    valquark_pdg_id_ = sign * PDG::up;
-    diquark_pdg_id_ = sign * PDG::ud0;
-  } else {  // (u,ud1)
-    valquark_pdg_id_ = sign * PDG::up;
-    diquark_pdg_id_ = sign * PDG::ud1;
-  }
+DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
+                                   const Particle& beam,
+                                   const Momentum& system,
+                                   double primordial_kt)
+    : hadr::Hadroniser::DiffractiveState(
+          rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 4.}, {PDG::up, PDG::ud1, 4.}}) {
   checkPDGid(std::labs(valquark_pdg_id_));
   checkPDGid(std::labs(diquark_pdg_id_));
-  valquark_mass_ = pymass(static_cast<int>(valquark_pdg_id_));
-  diquark_mass_ = pymass(static_cast<int>(diquark_pdg_id_));
-
-  // two-body decay momentum in the rest frame of the system
-  const auto mass2 = system_mass_ * system_mass_;
-  const auto sum = valquark_mass_ + diquark_mass_, diff = valquark_mass_ - diquark_mass_;
-  const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
-  if (lambda <= 0. || system_mass_ <= 0.) {
-    CG_DEBUG("pythia6:DiffractiveState") << "Diffractive system mass unphysical. System invalid for fragmentation.";
-    valid_ = false;
-    return;
-  }
-  const auto p_star = 0.5 * std::sqrt(lambda) / system_mass_;
-
-  // isotropic string axis in the rest frame of the dissociated system
-  diquark_momentum_ = p_star * Momentum::randomThetaPhi(rng, {-M_PI, M_PI}, {0., 2. * M_PI});
+  initialise(system, beam.momentum(), primordial_kt);
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
@@ -114,3 +91,5 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   }
   return momentumConserved(fragments, tolerance);
 }
+
+double DiffractiveState::massFromPdgId(long pdg_id) const { return pymass(static_cast<int>(pdg_id)); }

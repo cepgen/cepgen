@@ -24,6 +24,10 @@
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Physics/Momentum.h"
 
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
 /// Location for all hadronisers to be run downstream to the events generation
 namespace cepgen::hadr {
   /// Class template to define any hadroniser as a general object with defined methods
@@ -48,8 +52,18 @@ namespace cepgen::hadr {
     /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
     class DiffractiveState {
     public:
-      explicit DiffractiveState(const Momentum& system_momentum, long beam_pdg_id);
+      struct ContentProbability {
+        long valquark_pdg_id{0};  ///< PDG identifier of the struck quark
+        long diquark_pdg_id{0};   ///< PDG identifier of the spectator diquark
+        double weight{0.};        ///< Relative probability
+      };
+      using PartonsContent = std::vector<ContentProbability>;
 
+      explicit DiffractiveState(utils::RandomGenerator& rng, long beam_pdg_id, const PartonsContent&);
+
+      void initialise(const Momentum& system_momentum,
+                      const Momentum& beam_momentum,
+                      double primordial_kt);  ///< Compute primary quantities
       /// Run the diffractive system fragmentation
       /// \param[out] fragments Hadrons produced, in the rest frame of the system
       /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
@@ -61,6 +75,9 @@ namespace cepgen::hadr {
     protected:
       /// Check the momentum balance between the system and its stable fragments
       bool momentumConserved(const Fragments& fragments, double tolerance) const;
+      virtual double massFromPdgId(long pdg_id) const;
+
+      utils::RandomGenerator* random_generator_{nullptr};  //NOT owning
 
       bool valid_{true};            ///< Is the fragmentation of the diffractive state possible?
       long beam_pdg_id_{0};         ///< Signed PDG identifier of the dissociated beam

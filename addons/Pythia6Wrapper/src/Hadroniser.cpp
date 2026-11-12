@@ -39,7 +39,8 @@ namespace cepgen::pythia6 {
     explicit Hadroniser(const ParametersList& params)
         : cepgen::hadr::Hadroniser(params),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
-          momentum_tolerance_(steer<double>("momentumTolerance")) {}
+          momentum_tolerance_(steer<double>("momentumTolerance")),
+          primordial_kt_(steer<double>("primordialKt")) {}
 
     static ParametersDescription description() {
       auto desc = cepgen::hadr::Hadroniser::description();
@@ -49,6 +50,8 @@ namespace cepgen::pythia6 {
           .setDescription("random number generator to use for the partonic content of the dissociated systems");
       desc.add("momentumTolerance", 1.e-6)
           .setDescription("maximum fractional momentum tolerance to consider a hadronisation successful");
+      desc.add("primordialKt", 0.)
+          .setDescription("RMS of the spectator transverse momentum relative to the beam axis (GeV)");
       return desc;
     }
 
@@ -76,7 +79,7 @@ namespace cepgen::pythia6 {
           if (!event.hasRole(outgoing) || event(outgoing).size() != 1)  // already fragmented by another algorithm
             continue;
           const pythia6::DiffractiveState diffractive_state(
-              event.oneWithRole(incoming), event.oneWithRole(outgoing).momentum(), *random_generator_);
+              *random_generator_, event.oneWithRole(incoming), event.oneWithRole(outgoing).momentum(), primordial_kt_);
           if (!diffractive_state.valid()) {
             CG_WARNING("pythia6:Hadroniser") << "Invalid remnants kinematics for " << outgoing << " (mass "
                                              << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
@@ -109,6 +112,8 @@ namespace cepgen::pythia6 {
   private:
     const std::unique_ptr<utils::RandomGenerator> random_generator_;
     const double momentum_tolerance_;
+    const double primordial_kt_;
+
     std::unordered_map<Particle::Role, Particle::Role> roles_;  ///< (incoming, outgoing) dissociating beams
   };
 }  // namespace cepgen::pythia6

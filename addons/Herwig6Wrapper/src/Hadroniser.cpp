@@ -142,11 +142,8 @@ namespace cepgen::herwig6 {
       for (const auto& [incoming, outgoing] : roles_) {
         if (event(outgoing).size() != 1)  // already fragmented by another algorithm
           continue;
-        const herwig6::DiffractiveState diffractive_seed(event.oneWithRole(incoming),
-                                                         event.oneWithRole(outgoing).momentum(),
-                                                         hwprop_.rmass,
-                                                         *random_generator_,
-                                                         primordial_kt_);
+        const herwig6::DiffractiveState diffractive_seed(
+            *random_generator_, event.oneWithRole(incoming), event.oneWithRole(outgoing).momentum(), primordial_kt_);
         auto& fragments = hadronised[outgoing];
         int trials_for_system = 0;
         do {

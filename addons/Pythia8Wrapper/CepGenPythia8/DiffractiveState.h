@@ -24,6 +24,9 @@
 namespace Pythia8 {
   class Pythia;
 }  // namespace Pythia8
+namespace cepgen {
+  class Particle;
+}  // namespace cepgen
 namespace cepgen::utils {
   class RandomGenerator;
 }  // namespace cepgen::utils
@@ -33,14 +36,15 @@ namespace cepgen::pythia8 {
   class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
-    /// \param[in] system Dissociated system momentum
-    /// \param[in] beam_pdg_id Signed PDG identifier of the incoming beam (a negative value yields antiquark content)
     /// \param[in] rng Random number generator
+    /// \param[in] system Dissociated system momentum
+    /// \param[in] beam Incoming beam
     /// \param[in] pythia Pythia 8 engine, initialised in the hadron-level standalone mode (ProcessLevel:all = off)
-    explicit DiffractiveState(const Momentum& system,
-                              long beam_pdg_id,
-                              utils::RandomGenerator& rng,
-                              Pythia8::Pythia& pythia);
+    explicit DiffractiveState(utils::RandomGenerator& rng,
+                              const Momentum& system,
+                              const Particle& beam,
+                              Pythia8::Pythia& pythia,
+                              double primordial_kt);
 
     /// Run the Lund string fragmentation of the diffractive system
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
@@ -49,6 +53,7 @@ namespace cepgen::pythia8 {
     bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
 
   private:
+    double massFromPdgId(long pdg_id) const override;
     Pythia8::Pythia* pythia_;  ///< Pythia 8 engine (not owning)
   };
 }  // namespace cepgen::pythia8

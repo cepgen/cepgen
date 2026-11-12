@@ -17,6 +17,7 @@
  */
 
 #include <CepGen/Core/Exception.h>
+#include <CepGen/Event/Particle.h>
 #include <CepGen/Physics/PDG.h>
 #include <CepGen/Utils/RandomGenerator.h>
 #include <Pythia8/Pythia.h>
@@ -26,39 +27,15 @@
 
 using namespace cepgen::pythia8;
 
-DiffractiveState::DiffractiveState(const Momentum& system,
-                                   long beam_pdg_id,
-                                   utils::RandomGenerator& rng,
-                                   Pythia8::Pythia& pythia)
-    : hadr::Hadroniser::DiffractiveState(system, beam_pdg_id), pythia_(&pythia) {
-  // valence flavour content, weighted by the quark electric charge squared and the diquark spin multiplicity
-  const long sign = beam_pdg_id < 0 ? -1 : +1;
-  if (const auto random_quarks = rng.uniformInt(0, 8); random_quarks < 1) {  // (d,uu1)
-    valquark_pdg_id_ = sign * PDG::down;
-    diquark_pdg_id_ = sign * PDG::uu1;
-  } else if (random_quarks < 5) {  // (u,ud0)
-    valquark_pdg_id_ = sign * PDG::up;
-    diquark_pdg_id_ = sign * PDG::ud0;
-  } else {  // (u,ud1)
-    valquark_pdg_id_ = sign * PDG::up;
-    diquark_pdg_id_ = sign * PDG::ud1;
-  }
-  // constituent masses, as used by the Lund string model
-  valquark_mass_ = pythia_->particleData.m0(static_cast<int>(valquark_pdg_id_));
-  diquark_mass_ = pythia_->particleData.m0(static_cast<int>(diquark_pdg_id_));
-
-  // two-body decay momentum in the rest frame of the system
-  const auto mass2 = system_mass_ * system_mass_;
-  const auto sum = valquark_mass_ + diquark_mass_, diff = valquark_mass_ - diquark_mass_;
-  const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
-  if (lambda <= 0. || system_mass_ <= 0.) {
-    CG_DEBUG("pythia8:DiffractiveState") << "Diffractive system mass unphysical. System invalid for fragmentation.";
-    valid_ = false;
-    return;
-  }
-  // isotropic string axis in dissociated system rest frame
-  diquark_momentum_ =
-      0.5 * std::sqrt(lambda) / system_mass_ * Momentum::randomThetaPhi(rng, {-M_PI, M_PI}, {0., 2. * M_PI});
+DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
+                                   const Momentum& system,
+                                   const Particle& beam,
+                                   Pythia8::Pythia& pythia,
+                                   double primordial_kt)
+    : hadr::Hadroniser::DiffractiveState(
+          rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 4.}, {PDG::up, PDG::ud1, 4.}}),
+      pythia_(&pythia) {
+  initialise(system, beam.momentum(), primordial_kt);
 }
 
 bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
@@ -102,4 +79,11 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
         Momentum::fromPxPyPzE(particle.px(), particle.py(), particle.pz(), particle.e())});
   }
   return momentumConserved(fragments, tolerance);
+}
+
+double DiffractiveState::massFromPdgId(long pdg_id) const {
+  if (pythia_)
+    return pythia_->particleData.m0(static_cast<int>(pdg_id));
+  throw CG_FATAL("pythia6:DiffractiveState:massFromPdgId")
+      << "Trying to retrieve particle mass while no Pythia 8 object was initialised.";
 }
