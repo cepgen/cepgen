@@ -18,6 +18,7 @@
 
 // CepGen includes
 #include <CepGen/Core/Exception.h>
+#include <CepGen/Utils/Filesystem.h>
 #include <CepGen/Utils/Message.h>
 #include <CepGen/Utils/StreamCollector.h>
 #include <CepGen/Utils/String.h>
@@ -77,26 +78,6 @@ namespace cepgen::sherpa {
       os << exception;
       return os.str();
     }
-
-    /// Temporary working directory for the Sherpa initialisation, holding the defaults run card, and receiving the
-    /// (unused) process libraries directory structure; removed once the framework is set up
-    class TemporaryDirectory {
-    public:
-      explicit TemporaryDirectory(const std::string& defaults)
-          : path_(std::filesystem::temp_directory_path() / ("cepgen_sherpa_" + std::to_string(::getpid()))) {
-        std::filesystem::create_directories(path_);
-        std::ofstream(runCard()) << defaults;
-      }
-      ~TemporaryDirectory() {
-        std::error_code ec;
-        std::filesystem::remove_all(path_, ec);
-      }
-      std::string path() const { return path_.string(); }
-      std::string runCard() const { return (path_ / "defaults.yaml").string(); }
-
-    private:
-      const std::filesystem::path path_;
-    };
 
     /// Command-line arguments for the Sherpa settings handler
     class Arguments {
@@ -166,12 +147,14 @@ namespace cepgen::sherpa {
     if (!configuration.run_card.empty() && !std::filesystem::exists(configuration.run_card))
       throw CG_FATAL("sherpa:Framework") << "Sherpa run card '" << configuration.run_card << "' does not exist.";
 
-    const TemporaryDirectory working_directory(configuration.defaults);
+    const utils::TemporaryDirectory working_directory("cepgen_sherpa_" + std::to_string(::getpid()));
+    const auto run_card = working_directory.path() / "defaults.yaml";
+    std::ofstream(run_card) << configuration.defaults;
     Arguments arguments;
-    arguments.add("SHERPA_CPP_PATH: " + working_directory.path());  // do not pollute the current directory
+    arguments.add("SHERPA_CPP_PATH: " + working_directory.path().string());  // do not pollute the current directory
     for (const auto& argument : configuration.arguments)
       arguments.add(argument);
-    addRunCard(arguments, working_directory.runCard());  // run cards are listed by increasing priority
+    addRunCard(arguments, run_card);  // run cards are listed by increasing priority
     if (!configuration.run_card.empty())
       addRunCard(arguments, configuration.run_card);
 

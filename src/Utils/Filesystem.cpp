@@ -37,4 +37,18 @@ namespace cepgen::utils {
     std::ofstream file(path);
     return file.good();
   }
+
+  // Temporary working directory
+
+  TemporaryDirectory::TemporaryDirectory(const std::string& base_dir)
+      : path_(std::filesystem::temp_directory_path() / base_dir) {
+    std::filesystem::create_directories(path_);
+  }
+
+  TemporaryDirectory::~TemporaryDirectory() {
+    std::error_code ec;
+    std::filesystem::remove_all(path_, ec);
+  }
+
+  const fs::path& TemporaryDirectory::path() const { return path_; }
 }  // namespace cepgen::utils
