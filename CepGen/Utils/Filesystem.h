@@ -41,6 +41,16 @@ namespace cepgen::utils {
   std::string fileExtension(const std::string& file);  ///< Small utility to retrieve the extension of a filename
   std::string readFile(const std::string&);            ///< Read the content of a file into a string buffer
   bool isWriteable(const std::string&);                ///< Check if path can be accessed for writing
+  /// Build a temporary working directory
+  class TemporaryDirectory {
+  public:
+    explicit TemporaryDirectory(const std::string& base_dir);
+    ~TemporaryDirectory();
+    const fs::path& path() const;
+
+  private:
+    const fs::path path_;
+  };
 }  // namespace cepgen::utils
 
 #endif

@@ -22,6 +22,7 @@ add_subdirectory(REvolverWrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(ROOTWrapper)
 add_subdirectory(SciplotWrapper)
+add_subdirectory(SherpaWrapper)
 add_subdirectory(TauolaWrapper)
 add_subdirectory(TopdrawerWrapper)
 
