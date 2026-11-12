@@ -52,10 +52,14 @@ void DiffractiveState::initialise(const Momentum& system_momentum,
                                   const Momentum& beam_momentum,
                                   double primordial_kt) {
   system_mass_ = system_momentum.mass();
-  if (valquark_mass_ <= 0.)
+  // parton masses, falling back on the next mass model for the lightest systems
+  for (mass_model_index_ = 0; mass_model_index_ < numMassModels(); ++mass_model_index_) {
     valquark_mass_ = massFromPdgId(valquark_pdg_id_);
-  if (diquark_mass_ <= 0.)
     diquark_mass_ = massFromPdgId(diquark_pdg_id_);
+    if (valquark_mass_ + diquark_mass_ < system_mass_)
+      break;
+  }
+  mass_model_index_ = std::min(mass_model_index_, numMassModels() - 1);
 
   const auto mass2 = system_mass_ * system_mass_;
   const auto sum = valquark_mass_ + diquark_mass_, diff = valquark_mass_ - diquark_mass_;

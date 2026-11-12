@@ -66,6 +66,8 @@ namespace cepgen::hadr {
     bool momentumConserved(const Fragments& fragments, double tolerance) const;
     /// Mass of a particle according to the hadroniser algorithm
     virtual double massFromPdgId(long pdg_id) const;
+    /// Number of mass models (see Sherpa...) to try until system is heavy enough
+    virtual size_t numMassModels() const { return 1; }
 
     utils::RandomGenerator* random_generator_{nullptr};  //NOT owning
 

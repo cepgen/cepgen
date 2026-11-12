@@ -52,7 +52,7 @@ namespace cepgen::sherpa {
 
   private:
     double massFromPdgId(long pdg_id) const override;
-    bool constituent_masses_{false};  ///< Are the partons on their constituent mass shell?
+    size_t numMassModels() const override { return 2; }  ///< constituent, then perturbative masses
   };
 }  // namespace cepgen::sherpa
 

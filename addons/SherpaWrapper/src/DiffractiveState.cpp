@@ -219,5 +219,7 @@ namespace cepgen::sherpa {
     return false;
   }
 
-  double DiffractiveState::massFromPdgId(long pdg_id) const { return Framework::get().partonMass(pdg_id, true); }
+  double DiffractiveState::massFromPdgId(long pdg_id) const {
+    return Framework::partonMass(pdg_id, /*constituent=*/mass_model_index_ == 0);
+  }
 }  // namespace cepgen::sherpa
