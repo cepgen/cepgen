@@ -32,13 +32,13 @@ DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
                                    const Particle& beam,
                                    Pythia8::Pythia& pythia,
                                    double primordial_kt)
-    : hadr::Hadroniser::DiffractiveState(
+    : hadr::DiffractiveState(
           rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 4.}, {PDG::up, PDG::ud1, 4.}}),
       pythia_(&pythia) {
   initialise(system, beam.momentum(), primordial_kt);
 }
 
-bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
+bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) const {
   fragments.clear();
 
   // system fragmented at rest (q-qq string)
@@ -71,12 +71,12 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
     if (particle.statusAbs() < 81)  // only keep hadronisation (81-89) and decay (91-99) products
       continue;
     EventInterface::registerParticle(particle);
-    fragments.emplace_back(hadr::Hadroniser::Fragment{
-        i,
-        particle.mother1(),  // string ends are not part of the fragments: attached to the system
-        particle.id(),
-        particle.isFinal(),
-        Momentum::fromPxPyPzE(particle.px(), particle.py(), particle.pz(), particle.e())});
+    fragments.emplace_back(
+        hadr::Fragment{i,
+                       particle.mother1(),  // string ends are not part of the fragments: attached to the system
+                       particle.id(),
+                       particle.isFinal(),
+                       Momentum::fromPxPyPzE(particle.px(), particle.py(), particle.pz(), particle.e())});
   }
   return momentumConserved(fragments, tolerance);
 }

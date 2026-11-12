@@ -37,10 +37,10 @@ using namespace std::string_literals;
 namespace cepgen::pythia8 {
   /// Interface to the Pythia 8 hadronisation algorithm
   /// \note do not use full Pythia 8 event content -> but fragment beam remnants and decay central system afterwards.
-  class Hadroniser final : public cepgen::hadr::Hadroniser {
+  class Hadroniser final : public hadr::Hadroniser {
   public:
     explicit Hadroniser(const ParametersList& params)
-        : cepgen::hadr::Hadroniser(params),
+        : hadr::Hadroniser(params),
           pythia_(new Pythia8::Pythia),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
           momentum_tolerance_(steer<double>("momentumTolerance")),
@@ -53,7 +53,7 @@ namespace cepgen::pythia8 {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::hadr::Hadroniser::description();
+      auto desc = hadr::Hadroniser::description();
       desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
       desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
@@ -96,7 +96,7 @@ namespace cepgen::pythia8 {
       weight = 1.;
 
       // fragment the dissociated beams first, as nothing is written until all systems succeeded
-      std::unordered_map<Particle::Role, Fragments> hadronised;
+      std::unordered_map<Particle::Role, hadr::Fragments> hadronised;
       if (!fast && fragment_remnants_) {  // do not treat beam remnants when running in fast mode
         int num_trials = 0;
         for (const auto& [incoming, outgoing] : roles_) {
@@ -112,7 +112,7 @@ namespace cepgen::pythia8 {
                                              << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
             return false;
           }
-          Fragments fragments;
+          hadr::Fragments fragments;
           int trials_for_system = 0;
           do {
             if (trials_for_system++ >= max_trials_)

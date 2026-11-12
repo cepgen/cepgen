@@ -19,7 +19,7 @@
 #ifndef CepGenPythia8_DiffractiveState_h
 #define CepGenPythia8_DiffractiveState_h
 
-#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/DiffractiveState.h>
 
 namespace Pythia8 {
   class Pythia;
@@ -33,7 +33,7 @@ namespace cepgen::utils {
 
 namespace cepgen::pythia8 {
   /// Colour-singlet quark-diquark string
-  class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
+  class DiffractiveState final : public hadr::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
     /// \param[in] rng Random number generator
@@ -50,7 +50,7 @@ namespace cepgen::pythia8 {
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
     /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
     /// \return Boolean stating whether the system was successfully hadronised
-    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
+    bool hadronise(hadr::Fragments& fragments, double tolerance) const override;
 
   private:
     double massFromPdgId(long pdg_id) const override;

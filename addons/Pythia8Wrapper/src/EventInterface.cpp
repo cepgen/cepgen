@@ -18,6 +18,7 @@
 
 #include <CepGen/Core/Exception.h>
 #include <CepGen/Event/Event.h>
+#include <CepGen/Physics/DiffractiveState.h>
 #include <CepGen/Physics/PDG.h>
 #include <Pythia8/Pythia.h>
 
@@ -157,7 +158,7 @@ bool EventInterface::decay(double& weight) {
   return true;
 }
 
-void EventInterface::update(Particle::Role role, const hadr::Hadroniser::Fragments& fragments) {
+void EventInterface::update(Particle::Role role, const hadr::Fragments& fragments) {
   // particles appended to the vector the system lives in -> access through identifier
   const auto system_id = cepgen_event_.oneWithRole(role).id();
   const auto system_momentum = cepgen_event_[system_id].momentum();

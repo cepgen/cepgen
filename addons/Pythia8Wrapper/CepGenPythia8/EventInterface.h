@@ -20,7 +20,7 @@
 #define CepGenPythia8_EventInterface_h
 
 #include <CepGen/Event/Particle.h>
-#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/DiffractiveState.h>
 
 #include <unordered_map>
 
@@ -49,7 +49,7 @@ namespace cepgen::pythia8 {
     /// Attach the hadrons from a dissociated beam fragmentation to its parent system
     /// \param[in] role Role of the dissociated system in the event
     /// \param[in] fragments Hadrons produced, in the rest frame of the dissociated system
-    void update(Particle::Role role, const hadr::Hadroniser::Fragments& fragments);
+    void update(Particle::Role role, const hadr::Fragments& fragments);
 
     static void registerParticle(const Pythia8::Particle&);  ///< Register unknown Pythia 8 particle to CepGen
 

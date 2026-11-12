@@ -19,10 +19,7 @@
 #ifndef CepGenHerwig6_DiffractiveState_h
 #define CepGenHerwig6_DiffractiveState_h
 
-#include <CepGen/Physics/Hadroniser.h>
-#include <CepGen/Physics/Momentum.h>
-
-#include <array>
+#include <CepGen/Physics/DiffractiveState.h>
 
 namespace cepgen {
   class Particle;
@@ -33,7 +30,7 @@ namespace cepgen::utils {
 
 namespace cepgen::herwig6 {
   /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
-  class DiffractiveState final : public hadr::Hadroniser::DiffractiveState {
+  class DiffractiveState final : public hadr::DiffractiveState {
   public:
     /// Build the partonic content of a dissociated system
     /// \param[in] rng Random number generator
@@ -49,7 +46,7 @@ namespace cepgen::herwig6 {
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
     /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
     /// \return Boolean stating whether the event was successfully hadronised
-    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
+    bool hadronise(hadr::Fragments& fragments, double tolerance) const override;
 
     /// Herwig 6 internal identifiers used for the beam remnants treatment
     enum struct InternalId {

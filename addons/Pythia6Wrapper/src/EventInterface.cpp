@@ -16,14 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGenPythia6/EventInterface.h"
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Event/Event.h>
+#include <CepGen/Utils/String.h>
 
 #include <cstdlib>
 #include <map>
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/Utils/String.h"
+#include "CepGenPythia6/EventInterface.h"
 #include "CepGenPythia6/Pythia6Interface.h"
 
 using namespace cepgen::pythia6;
@@ -135,7 +135,7 @@ bool EventInterface::decay() {
   return true;
 }
 
-void EventInterface::update(Particle::Role role, const hadr::Hadroniser::Fragments& fragments) {
+void EventInterface::update(Particle::Role role, const hadr::Fragments& fragments) {
   // particles are appended to the vector the system lives in, hence only access it through its identifier
   const auto system_id = cepgen_event_.oneWithRole(role).id();
   const auto system_momentum = cepgen_event_[system_id].momentum();

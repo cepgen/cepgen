@@ -34,16 +34,16 @@
 namespace cepgen::pythia6 {
   /// Interface to the Pythia 6 algorithm
   /// \note It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
-  class Hadroniser final : public cepgen::hadr::Hadroniser {
+  class Hadroniser final : public hadr::Hadroniser {
   public:
     explicit Hadroniser(const ParametersList& params)
-        : cepgen::hadr::Hadroniser(params),
+        : hadr::Hadroniser(params),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
           momentum_tolerance_(steer<double>("momentumTolerance")),
           primordial_kt_(steer<double>("primordialKt")) {}
 
     static ParametersDescription description() {
-      auto desc = cepgen::hadr::Hadroniser::description();
+      auto desc = hadr::Hadroniser::description();
       desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
       desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
@@ -72,7 +72,7 @@ namespace cepgen::pythia6 {
       weight = 1.;
 
       // fragment the dissociated beams first, as nothing is written until all systems succeeded
-      std::vector<std::pair<Particle::Role, Fragments> > hadronised;
+      std::vector<std::pair<Particle::Role, hadr::Fragments> > hadronised;
       if (!fast && fragment_remnants_) {  // do not treat beam remnants when running in fast mode
         int num_trials = 0;
         for (const auto& [incoming, outgoing] : roles_) {
@@ -85,7 +85,7 @@ namespace cepgen::pythia6 {
                                              << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
             return false;
           }
-          Fragments fragments;
+          hadr::Fragments fragments;
           int trials_for_system = 0;
           do {
             if (trials_for_system++ >= max_trials_)

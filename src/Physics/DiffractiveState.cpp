@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2026  Laurent Forthomme
+ *  Copyright (C) 2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,33 +19,19 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Physics/DiffractiveState.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
-using namespace cepgen;
 using namespace cepgen::hadr;
 
-Hadroniser::Hadroniser(const ParametersList& plist)
-    : EventModifier(plist), fragment_remnants_(steer<bool>("remnantsFragmentation")) {}
-
-ParametersDescription Hadroniser::description() {
-  auto desc = EventModifier::description();
-  desc.add("remnantsFragmentation", true).setDescription("Apply the fragmentation algorithm to proton remnants");
-  return desc;
-}
-
-Hadroniser::DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
-                                               long beam_pdg_id,
-                                               const PartonsContent& partons_content)
+DiffractiveState::DiffractiveState(utils::RandomGenerator& rng, long beam_pdg_id, const PartonsContent& partons_content)
     : random_generator_(&rng), beam_pdg_id_(beam_pdg_id) {
   if (std::labs(beam_pdg_id_) != PDG::proton)
-    throw CG_FATAL("Hadroniser:DiffractiveState")
-        << "Beam particle with PDG id " << beam_pdg_id_
-        << " is not supported. Only protons and antiprotons can be dissociated.";
+    throw CG_FATAL("DiffractiveState") << "Beam particle with PDG id " << beam_pdg_id_
+                                       << " is not supported. Only protons and antiprotons can be dissociated.";
   if (partons_content.empty())
-    throw CG_FATAL("Hadroniser:DiffractiveState") << "Flavour content must be provided.";
+    throw CG_FATAL("DiffractiveState") << "Flavour content must be provided.";
 
   // shoot valence flavour content
   double total_weight = 0.;
@@ -61,9 +47,9 @@ Hadroniser::DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
   }
 }
 
-void Hadroniser::DiffractiveState::initialise(const Momentum& system_momentum,
-                                              const Momentum& beam_momentum,
-                                              double primordial_kt) {
+void DiffractiveState::initialise(const Momentum& system_momentum,
+                                  const Momentum& beam_momentum,
+                                  double primordial_kt) {
   system_mass_ = system_momentum.mass();
   if (valquark_mass_ <= 0.)
     valquark_mass_ = massFromPdgId(valquark_pdg_id_);
@@ -105,7 +91,7 @@ void Hadroniser::DiffractiveState::initialise(const Momentum& system_momentum,
   diquark_momentum_ = p_star * direction;
 }
 
-bool Hadroniser::DiffractiveState::momentumConserved(const Fragments& fragments, double tolerance) const {
+bool DiffractiveState::momentumConserved(const Fragments& fragments, double tolerance) const {
   Momentum sum{0., 0., 0., system_mass_};
   for (const auto& fragment : fragments)
     if (fragment.stable)
@@ -119,4 +105,4 @@ bool Hadroniser::DiffractiveState::momentumConserved(const Fragments& fragments,
   return true;
 }
 
-double Hadroniser::DiffractiveState::massFromPdgId(long pdg_id) const { return PDG::get().mass(pdg_id); }
+double DiffractiveState::massFromPdgId(long pdg_id) const { return PDG::get().mass(pdg_id); }

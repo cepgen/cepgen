@@ -21,6 +21,7 @@
 #include <CepGen/Event/Event.h>
 #include <CepGen/Modules/EventModifierFactory.h>
 #include <CepGen/Modules/RandomGeneratorFactory.h>
+#include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/Kinematics.h>
 #include <CepGen/Physics/Modes.h>
 #include <CepGen/Physics/PDG.h>
@@ -63,17 +64,17 @@ namespace cepgen::herwig6 {
   }  // namespace
 
   /// Interface to the Herwig 6 cluster hadronisation algorithm for the dissociated beam systems
-  class Hadroniser final : public cepgen::hadr::Hadroniser {
+  class Hadroniser final : public hadr::Hadroniser {
   public:
     explicit Hadroniser(const ParametersList& params)
-        : cepgen::hadr::Hadroniser(params),
+        : hadr::Hadroniser(params),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
           momentum_tolerance_(steer<double>("momentumTolerance")),
           primordial_kt_(steer<double>("primordialKt")) {}
 
     // no call to the Herwig 6 library here, as this is also used for the documentation generation
     static ParametersDescription description() {
-      auto desc = cepgen::hadr::Hadroniser::description();
+      auto desc = hadr::Hadroniser::description();
       desc.setDescription("Interface to the Herwig 6 cluster hadronisation of dissociated beam systems");
       desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
@@ -137,7 +138,7 @@ namespace cepgen::herwig6 {
 
       initialiseHerwig();
 
-      std::unordered_map<Particle::Role, Fragments> hadronised;  // nothing is written until all systems succeeded
+      std::unordered_map<Particle::Role, hadr::Fragments> hadronised;  // nothing is written until all systems succeeded
       int num_trials = 0;
       for (const auto& [incoming, outgoing] : roles_) {
         if (event(outgoing).size() != 1)  // already fragmented by another algorithm
@@ -221,7 +222,7 @@ namespace cepgen::herwig6 {
     }
 
     /// Add the hadrons to the event, once the full event was successfully hadronised
-    void update(Event& event, Particle::Role role, const Fragments& fragments) const {
+    void update(Event& event, Particle::Role role, const hadr::Fragments& fragments) const {
       // particles are appended to the vector the system lives in, hence only access it through its identifier
       const auto system_id = event.oneWithRole(role).id();
       const auto system_momentum = event[system_id].momentum();

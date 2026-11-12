@@ -19,14 +19,7 @@
 #ifndef CepGen_Physics_Hadroniser_h
 #define CepGen_Physics_Hadroniser_h
 
-#include <array>
-
 #include "CepGen/EventFilter/EventModifier.h"
-#include "CepGen/Physics/Momentum.h"
-
-namespace cepgen::utils {
-  class RandomGenerator;
-}  // namespace cepgen::utils
 
 /// Location for all hadronisers to be run downstream to the events generation
 namespace cepgen::hadr {
@@ -35,60 +28,15 @@ namespace cepgen::hadr {
   /// \date January 2014
   class Hadroniser : public EventModifier {
   public:
-    explicit Hadroniser(const ParametersList&);  ///< Default constructor for an undefined hadroniser
+    /// Default constructor for an undefined hadroniser
+    explicit Hadroniser(const ParametersList& plist)
+        : EventModifier(plist), fragment_remnants_(steer<bool>("remnantsFragmentation")) {}
 
-    static ParametersDescription description();
-
-    /// Hadron retrieved from the hadroniser event record
-    struct Fragment {
-      int index{0};        ///< Position in the event record
-      int mother{-1};      ///< Position of the first mother in the event record
-      long pdg_id{0};      ///< Signed PDG identifier
-      bool stable{false};  ///< Is this particle in the final state?
-      Momentum momentum;   ///< 4-momentum in the rest frame of the dissociated system
-    };
-    using Fragments = std::vector<Fragment>;
-
-    /// Colour-singlet (anti)quark-(anti)diquark system replacing a dissociated beam, in its own rest frame
-    class DiffractiveState {
-    public:
-      struct ContentProbability {
-        long valquark_pdg_id{0};  ///< PDG identifier of the struck quark
-        long diquark_pdg_id{0};   ///< PDG identifier of the spectator diquark
-        double weight{0.};        ///< Relative probability
-      };
-      using PartonsContent = std::vector<ContentProbability>;
-
-      explicit DiffractiveState(utils::RandomGenerator& rng, long beam_pdg_id, const PartonsContent&);
-
-      void initialise(const Momentum& system_momentum,
-                      const Momentum& beam_momentum,
-                      double primordial_kt);  ///< Compute primary quantities
-      /// Run the diffractive system fragmentation
-      /// \param[out] fragments Hadrons produced, in the rest frame of the system
-      /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
-      /// \return Boolean stating whether the diffractive state was successfully hadronised
-      virtual bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const = 0;
-
-      bool valid() const { return valid_; }  ///< Is the fragmentation of the diffractive state possible?
-
-    protected:
-      /// Check the momentum balance between the system and its stable fragments
-      bool momentumConserved(const Fragments& fragments, double tolerance) const;
-      virtual double massFromPdgId(long pdg_id) const;
-
-      utils::RandomGenerator* random_generator_{nullptr};  //NOT owning
-
-      bool valid_{true};            ///< Is the fragmentation of the diffractive state possible?
-      long beam_pdg_id_{0};         ///< Signed PDG identifier of the dissociated beam
-      long valquark_pdg_id_{0};     ///< Signed PDG identifier of the struck (anti)quark
-      long diquark_pdg_id_{0};      ///< Signed PDG identifier of the spectator (anti)diquark
-      double system_mass_{0.};      ///< Invariant mass of the system
-      double valquark_mass_{0.};    ///< Mass of the struck (anti)quark
-      double diquark_mass_{0.};     ///< Mass of the spectator (anti)diquark
-      size_t mass_model_index_{0};  ///< Index of the mass model eventually used
-      Momentum diquark_momentum_;   ///< Spectator 3-momentum (struck parton has the opposite)
-    };
+    static ParametersDescription description() {
+      auto desc = EventModifier::description();
+      desc.add("remnantsFragmentation", true).setDescription("Apply the fragmentation algorithm to proton remnants");
+      return desc;
+    }
 
     inline bool fragmentRemnants() const { return fragment_remnants_; }  ///< Fragment the beam remnants?
 

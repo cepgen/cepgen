@@ -21,6 +21,7 @@
 #include <CepGen/Event/Event.h>
 #include <CepGen/Modules/EventModifierFactory.h>
 #include <CepGen/Modules/RandomGeneratorFactory.h>
+#include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/PDG.h>
 #include <CepGen/Utils/RandomGenerator.h>
 #include <CepGen/Utils/String.h>
@@ -33,10 +34,10 @@ using namespace std::string_literals;
 namespace cepgen::sherpa {
   /// Interface to the Sherpa fragmentation (AHADIC++ cluster model by default) and hadron decays (HADRONS++)
   /// algorithms for the dissociated beam systems
-  class Hadroniser final : public cepgen::hadr::Hadroniser {
+  class Hadroniser final : public hadr::Hadroniser {
   public:
     explicit Hadroniser(const ParametersList& params)
-        : cepgen::hadr::Hadroniser(params),
+        : hadr::Hadroniser(params),
           random_generator_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
           primordial_kt_(steer<double>("primordialKt")),
           tolerance_(steer<double>("momentumTolerance")),
@@ -49,7 +50,7 @@ namespace cepgen::sherpa {
     }
 
     static ParametersDescription description() {
-      auto desc = cepgen::hadr::Hadroniser::description();
+      auto desc = hadr::Hadroniser::description();
       desc.setDescription("Interface to the Sherpa fragmentation and hadron decays of dissociated beam systems");
       desc.add("maxTrials", 10).setDescription("maximum number of hadronisation attempts per dissociated system");
       desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
@@ -113,7 +114,7 @@ namespace cepgen::sherpa {
         sherpa_initialised_ = true;
       }
 
-      std::unordered_map<Particle::Role, Fragments> hadronised;  // nothing is written until all systems succeeded
+      std::unordered_map<Particle::Role, hadr::Fragments> hadronised;  // nothing is written until all systems succeeded
       int num_trials = 0;
       {
         std::lock_guard<std::mutex> lock(framework.mutex());  // Sherpa algorithms rely on global objects
@@ -123,7 +124,7 @@ namespace cepgen::sherpa {
           const auto& beam = event.oneWithRole(incoming);
           const auto diffractive_seed = sherpa::DiffractiveState(
               *random_generator_, beam, event.oneWithRole(outgoing).momentum(), primordial_kt_);
-          Fragments fragments;
+          hadr::Fragments fragments;
           int trials_for_system = 0;
           do {
             if (trials_for_system++ >= max_trials_)
@@ -164,12 +165,12 @@ namespace cepgen::sherpa {
     }
 
     /// Add the hadrons to the event, once the full event was successfully hadronised
-    static void update(Event& event, Particle::Role role, const Fragments& fragments) {
+    static void update(Event& event, Particle::Role role, const hadr::Fragments& fragments) {
       const auto system_id = event.oneWithRole(role).id();
       const auto system_momentum = event[system_id].momentum();
       event[system_id].children().clear();
 
-      std::map<int, int> identifiers;  // fragment index -> CepGen identifier
+      std::unordered_map<int, int> identifiers;  // fragment index -> CepGen identifier
       for (const auto& fragment : fragments) {
         auto& particle = event.addParticle(role).get();
         particle.setIntegerPdgId(fragment.pdg_id)

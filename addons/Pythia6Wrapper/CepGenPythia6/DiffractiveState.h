@@ -19,7 +19,7 @@
 #ifndef CepGenPythia6_DiffractiveState_h
 #define CepGenPythia6_DiffractiveState_h
 
-#include <CepGen/Physics/Hadroniser.h>
+#include <CepGen/Physics/DiffractiveState.h>
 
 namespace cepgen::utils {
   class RandomGenerator;
@@ -27,7 +27,7 @@ namespace cepgen::utils {
 
 namespace cepgen::pythia6 {
   /// Colour-singlet (anti)quark-(anti)diquark string replacing a dissociated beam, in its own rest frame
-  struct DiffractiveState final : hadr::Hadroniser::DiffractiveState {
+  struct DiffractiveState final : hadr::DiffractiveState {
     /// Build the partonic content of a dissociated system
     /// \param[in] rng Random number generator
     /// \param[in] beam Incoming beam particle
@@ -41,7 +41,7 @@ namespace cepgen::pythia6 {
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
     /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
     /// \return Boolean stating whether the system was successfully hadronised
-    bool hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const override;
+    bool hadronise(hadr::Fragments& fragments, double tolerance) const override;
     double massFromPdgId(long pdg_id) const override;
   };
 }  // namespace cepgen::pythia6

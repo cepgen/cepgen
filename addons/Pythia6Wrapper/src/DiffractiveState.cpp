@@ -18,6 +18,7 @@
 
 #include <CepGen/Core/Exception.h>
 #include <CepGen/Event/Particle.h>
+#include <CepGen/Physics/Hadroniser.h>
 #include <CepGen/Physics/PDG.h>
 #include <CepGen/Utils/RandomGenerator.h>
 
@@ -52,14 +53,14 @@ DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
                                    const Particle& beam,
                                    const Momentum& system,
                                    double primordial_kt)
-    : hadr::Hadroniser::DiffractiveState(
+    : hadr::DiffractiveState(
           rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 4.}, {PDG::up, PDG::ud1, 4.}}) {
   checkPDGid(std::labs(valquark_pdg_id_));
   checkPDGid(std::labs(diquark_pdg_id_));
   initialise(system, beam.momentum(), primordial_kt);
 }
 
-bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
+bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) const {
   fragments.clear();
 
   // the system is fragmented at rest, as a single (anti)quark-(anti)diquark string
@@ -82,12 +83,12 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
     if (const auto abs_pdg_id = std::abs(pdg_id); abs_pdg_id == 91 || abs_pdg_id == 92 || abs_pdg_id == 93)
       continue;  // skip the cluster/string/independent fragmentation system pseudo-particles
     checkPDGid(std::abs(pdg_id));
-    fragments.emplace_back(hadr::Hadroniser::Fragment{
-        i,
-        pyjets_.k[2][i] - 1,
-        pdg_id,
-        stable,
-        Momentum::fromPxPyPzE(pyjets_.p[0][i], pyjets_.p[1][i], pyjets_.p[2][i], pyjets_.p[3][i])});
+    fragments.emplace_back(
+        hadr::Fragment{i,
+                       pyjets_.k[2][i] - 1,
+                       pdg_id,
+                       stable,
+                       Momentum::fromPxPyPzE(pyjets_.p[0][i], pyjets_.p[1][i], pyjets_.p[2][i], pyjets_.p[3][i])});
   }
   return momentumConserved(fragments, tolerance);
 }

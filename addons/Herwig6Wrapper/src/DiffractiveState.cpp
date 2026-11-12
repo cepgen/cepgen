@@ -78,8 +78,7 @@ DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
                                    const Particle& beam,
                                    const Momentum& system,
                                    double primordial_kt)
-    : hadr::Hadroniser::DiffractiveState(
-          rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}) {
+    : hadr::DiffractiveState(rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}) {
   if (std::labs(beam_pdg_id_) != PDG::proton)
     throw CG_FATAL("herwig6:DiffractiveState") << "Beam particle with PDG id " << beam.pdgId()
                                                << " is not supported. Only protons and antiprotons can be dissociated.";
@@ -99,7 +98,7 @@ DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
   initialise(system, beam.momentum(), primordial_kt);
 }
 
-bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
+bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) const {
   fragments.clear();
   hwuine();
 
@@ -127,7 +126,7 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
     if (!stable && (status < 190 || status > 200))  // only keep hadrons
       continue;
     registerParticle(hwevnt_.idhw[i], hepevt_.idhep[i]);
-    fragments.emplace_back(hadr::Hadroniser::Fragment{
+    fragments.emplace_back(hadr::Fragment{
         i,
         hepevt_.jmohep[i][0] - 1,
         hepevt_.idhep[i],

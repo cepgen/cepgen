@@ -108,7 +108,7 @@ namespace cepgen::sherpa {
     /// Collect all colourless particles, following the decay chains from the system fragmentation
     void collect(ATOOLS::Blob* blob,
                  int mother,
-                 hadr::Hadroniser::Fragments& fragments,
+                 hadr::Fragments& fragments,
                  std::unordered_set<const ATOOLS::Blob*>& visited_blobs) {
       if (!blob || !visited_blobs.insert(blob).second)  // multi-partons blobs are reached once per incoming parton
         return;
@@ -118,7 +118,7 @@ namespace cepgen::sherpa {
         auto parent = mother;
         if (particle->Flav().StrongCharge() == 0) {  // intermediate partons are not exported, only their products
           registerParticle(particle->Flav());
-          hadr::Hadroniser::Fragment fragment;
+          hadr::Fragment fragment;
           fragment.index = static_cast<int>(fragments.size());
           fragment.mother = mother;
           fragment.pdg_id = static_cast<long>(particle->Flav());
@@ -137,8 +137,7 @@ namespace cepgen::sherpa {
                                      const Particle& beam,
                                      const Momentum& system,
                                      double primordial_kt)
-      : hadr::Hadroniser::DiffractiveState(
-            rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}) {
+      : hadr::DiffractiveState(rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}) {
     if (std::labs(beam_pdg_id_) != PDG::proton)
       throw CG_FATAL("sherpa:DiffractiveState")
           << "Beam particle with PDG id " << beam_pdg_id_
@@ -146,7 +145,7 @@ namespace cepgen::sherpa {
     initialise(system, beam.momentum(), primordial_kt);
   }
 
-  bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double tolerance) const {
+  bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) const {
     {  // start by preparing the environment after any previous run
       fragments.clear();
       ATOOLS::Blob::Reset();
