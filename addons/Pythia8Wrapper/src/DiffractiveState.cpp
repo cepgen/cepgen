@@ -89,28 +89,17 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   if (!pythia_->next())  // hadron-level standalone: string fragmentation and subsequent decays
     return false;
 
-  Momentum sum{0., 0., 0., system_mass_};
   for (int i = 3; i < event.size(); ++i) {  // skip the system entry and the two string ends
     const auto& particle = event[i];
     if (particle.statusAbs() < 81)  // only keep hadronisation (81-89) and decay (91-99) products
       continue;
     EventInterface::registerParticle(particle);
-    auto& fragment = fragments.emplace_back(hadr::Hadroniser::Fragment{
+    fragments.emplace_back(hadr::Hadroniser::Fragment{
         i,
         particle.mother1(),  // string ends are not part of the fragments: attached to the system
         particle.id(),
         particle.isFinal(),
         Momentum::fromPxPyPzE(particle.px(), particle.py(), particle.pz(), particle.e())});
-    if (fragment.stable)
-      sum -= fragment.momentum;
   }
-  if (const auto residual =
-          std::max({std::fabs(sum.px()), std::fabs(sum.py()), std::fabs(sum.pz()), std::fabs(sum.energy())});
-      residual > tolerance * system_mass_) {
-    CG_WARNING("pythia8:hadronise") << "Momentum not conserved down to " << tolerance
-                                    << " tolerance after hadronisation (residual=" << residual
-                                    << " GeV for a system of mass " << system_mass_ << " GeV).";
-    return false;
-  }
-  return true;
+  return momentumConserved(fragments, tolerance);
 }

@@ -263,20 +263,8 @@ namespace cepgen::sherpa {
 
     std::unordered_set<const ATOOLS::Blob*> visited_blobs;
     collect(blob, -1, fragments, visited_blobs);
-    if (fragments.empty())
-      return false;
-
-    // the final state must balance the system four-momentum
-    Momentum sum{0., 0., 0., system_mass_};
-    for (const auto& fragment : fragments)
-      if (fragment.stable)
-        sum -= fragment.momentum;
-    if (const auto residual = sum.p(); residual > tolerance * system_mass_) {
-      CG_WARNING("sherpa:hadronise") << "Momentum not conserved down to " << tolerance
-                                     << " tolerance after hadronisation (residual=" << residual
-                                     << " GeV for a system of mass " << system_mass_ << " GeV).";
-      return false;
-    }
-    return true;
+    if (!fragments.empty())
+      return momentumConserved(fragments, tolerance);
+    return false;
   }
 }  // namespace cepgen::sherpa

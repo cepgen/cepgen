@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Utils/Message.h"
 
 using namespace cepgen;
 using namespace cepgen::hadr;
@@ -33,3 +34,17 @@ ParametersDescription Hadroniser::description() {
 
 Hadroniser::DiffractiveState::DiffractiveState(const Momentum& system_momentum)
     : system_mass_(system_momentum.mass()) {}
+
+bool Hadroniser::DiffractiveState::momentumConserved(const Fragments& fragments, double tolerance) const {
+  Momentum sum{0., 0., 0., system_mass_};
+  for (const auto& fragment : fragments)
+    if (fragment.stable)
+      sum -= fragment.momentum;
+  if (const auto residual = sum.p(); residual > tolerance * system_mass_) {
+    CG_WARNING("DiffractiveState:momentumConserved")
+        << "Momentum not conserved down to " << tolerance << " tolerance after hadronisation (residual=" << residual
+        << " GeV for a system of mass " << system_mass_ << " GeV).";
+    return false;
+  }
+  return true;
+}

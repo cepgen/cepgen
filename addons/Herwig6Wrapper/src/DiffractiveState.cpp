@@ -149,27 +149,18 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   if (hwevnt_.ierror != 0)
     return false;
 
-  Momentum sum{0., 0., 0., system_mass_};
   for (int i = 0; i < hepevt_.nhep; ++i) {
     const auto status = hepevt_.isthep[i];
     const bool stable = status == 1;
     if (!stable && (status < 190 || status > 200))  // only keep hadrons
       continue;
     registerParticle(hwevnt_.idhw[i], hepevt_.idhep[i]);
-    auto& fragment = fragments.emplace_back(hadr::Hadroniser::Fragment{
+    fragments.emplace_back(hadr::Hadroniser::Fragment{
         i,
         hepevt_.jmohep[i][0] - 1,
         hepevt_.idhep[i],
         stable,
         Momentum::fromPxPyPzE(hepevt_.phep[i][0], hepevt_.phep[i][1], hepevt_.phep[i][2], hepevt_.phep[i][3])});
-    if (fragment.stable)
-      sum -= fragment.momentum;
   }
-  if (const auto residual = sum.p(); residual > tolerance * system_mass_) {
-    CG_WARNING("herwig6:hadronise") << "Momentum not conserved down to " << tolerance
-                                    << " tolerance after hadronisation (residual=" << residual
-                                    << " GeV for a system of mass " << system_mass_ << " GeV).";
-    return false;
-  }
-  return true;
+  return momentumConserved(fragments, tolerance);
 }

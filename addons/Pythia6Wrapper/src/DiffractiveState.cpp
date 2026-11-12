@@ -95,7 +95,6 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
   if (mstu(24) != 0)
     return false;
 
-  Momentum sum{0., 0., 0., system_mass_};
   for (int i = 2; i < pyjets_.n; ++i) {  // skip the two string ends
     const auto status = pyjets_.k[0][i];
     const bool stable = status == 1;
@@ -105,22 +104,12 @@ bool DiffractiveState::hadronise(hadr::Hadroniser::Fragments& fragments, double 
     if (const auto abs_pdg_id = std::abs(pdg_id); abs_pdg_id == 91 || abs_pdg_id == 92 || abs_pdg_id == 93)
       continue;  // skip the cluster/string/independent fragmentation system pseudo-particles
     checkPDGid(std::abs(pdg_id));
-    auto& fragment = fragments.emplace_back(hadr::Hadroniser::Fragment{
+    fragments.emplace_back(hadr::Hadroniser::Fragment{
         i,
         pyjets_.k[2][i] - 1,
         pdg_id,
         stable,
         Momentum::fromPxPyPzE(pyjets_.p[0][i], pyjets_.p[1][i], pyjets_.p[2][i], pyjets_.p[3][i])});
-    if (stable)
-      sum -= fragment.momentum;
   }
-  if (const auto residual =
-          std::max({std::fabs(sum.px()), std::fabs(sum.py()), std::fabs(sum.pz()), std::fabs(sum.energy())});
-      residual > tolerance * system_mass_) {
-    CG_WARNING("pythia6:hadronise") << "Momentum not conserved down to " << tolerance
-                                    << " tolerance after hadronisation (residual=" << residual
-                                    << " GeV for a system of mass " << system_mass_ << " GeV).";
-    return false;
-  }
-  return true;
+  return momentumConserved(fragments, tolerance);
 }
