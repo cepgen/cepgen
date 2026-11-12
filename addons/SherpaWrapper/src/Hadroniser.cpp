@@ -124,6 +124,11 @@ namespace cepgen::sherpa {
           const auto& beam = event.oneWithRole(incoming);
           const auto diffractive_seed = sherpa::DiffractiveState(
               *random_generator_, beam, event.oneWithRole(outgoing).momentum(), primordial_kt_);
+          if (!diffractive_seed.valid()) {
+            CG_WARNING("sherpa:Hadroniser") << "Invalid remnants kinematics for " << outgoing << " (mass "
+                                            << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
+            return false;
+          }
           hadr::Fragments fragments;
           int trials_for_system = 0;
           do {

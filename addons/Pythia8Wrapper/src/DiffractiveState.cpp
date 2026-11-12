@@ -84,6 +84,6 @@ bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) c
 double DiffractiveState::massFromPdgId(long pdg_id) const {
   if (pythia_)
     return pythia_->particleData.m0(static_cast<int>(pdg_id));
-  throw CG_FATAL("pythia6:DiffractiveState:massFromPdgId")
+  throw CG_FATAL("pythia8:DiffractiveState:massFromPdgId")
       << "Trying to retrieve particle mass while no Pythia 8 object was initialised.";
 }

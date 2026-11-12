@@ -78,23 +78,9 @@ DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
                                    const Particle& beam,
                                    const Momentum& system,
                                    double primordial_kt)
-    : hadr::DiffractiveState(rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}) {
-  if (std::labs(beam_pdg_id_) != PDG::proton)
-    throw CG_FATAL("herwig6:DiffractiveState") << "Beam particle with PDG id " << beam.pdgId()
-                                               << " is not supported. Only protons and antiprotons can be dissociated.";
-  if (beam_pdg_id_ > 0) {  // particle
-    if (valquark_pdg_id_ == PDG::down)
-      valquark_id_ = InternalId::down, diquark_id_ = InternalId::uu;
-    else
-      valquark_id_ = InternalId::up, diquark_id_ = InternalId::ud0;
-  } else {  // anti-particle
-    if (valquark_pdg_id_ == PDG::down)
-      valquark_id_ = InternalId::down_bar, diquark_id_ = InternalId::uu_bar;
-    else
-      valquark_id_ = InternalId::up_bar, diquark_id_ = InternalId::ud0_bar;
-  }
-  valquark_mass_ = massFromPdgId(static_cast<int>(valquark_id_));
-  diquark_mass_ = massFromPdgId(static_cast<int>(diquark_id_));
+    : hadr::DiffractiveState(rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}),
+      valquark_id_(internalId(valquark_pdg_id_)),
+      diquark_id_(internalId(diquark_pdg_id_)) {
   initialise(system, beam.momentum(), primordial_kt);
 }
 
@@ -137,9 +123,21 @@ bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) c
 }
 
 double DiffractiveState::massFromPdgId(long pdg_id) const {
-  if (const auto abs_pdg_id = static_cast<size_t>(std::abs(pdg_id));
-      abs_pdg_id < sizeof(hwprop_.rmass) / sizeof(hwprop_.rmass[0]))
-    return hwprop_.rmass[abs_pdg_id];
-  throw CG_FATAL("herwig6:DiffractiveState:massFromPdgId")
-      << "Failed to retrieve mass for particle with PDG id=" << pdg_id << ".";
+  return hwprop_.rmass[static_cast<int>(internalId(pdg_id))];
+}
+
+DiffractiveState::InternalId DiffractiveState::internalId(long pdg_id) {
+  const bool anti = pdg_id < 0;
+  switch (std::labs(pdg_id)) {
+    case PDG::down:
+      return anti ? InternalId::down_bar : InternalId::down;
+    case PDG::up:
+      return anti ? InternalId::up_bar : InternalId::up;
+    case PDG::uu1:
+      return anti ? InternalId::uu_bar : InternalId::uu;
+    case PDG::ud0:
+      return anti ? InternalId::ud0_bar : InternalId::ud0;
+    default:
+      throw CG_FATAL("herwig6:DiffractiveState") << "No Herwig 6 identifier for parton with PDG id " << pdg_id << ".";
+  }
 }

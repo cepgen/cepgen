@@ -138,10 +138,6 @@ namespace cepgen::sherpa {
                                      const Momentum& system,
                                      double primordial_kt)
       : hadr::DiffractiveState(rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 8.}}) {
-    if (std::labs(beam_pdg_id_) != PDG::proton)
-      throw CG_FATAL("sherpa:DiffractiveState")
-          << "Beam particle with PDG id " << beam_pdg_id_
-          << " is not supported. Only protons and antiprotons can be dissociated.";
     initialise(system, beam.momentum(), primordial_kt);
   }
 

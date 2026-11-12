@@ -19,6 +19,8 @@
 #ifndef CepGen_Physics_DiffractiveState_h
 #define CepGen_Physics_DiffractiveState_h
 
+#include <vector>
+
 #include "CepGen/Physics/Momentum.h"
 
 namespace cepgen::utils {
@@ -48,10 +50,8 @@ namespace cepgen::hadr {
     using PartonsContent = std::vector<ContentProbability>;
 
     explicit DiffractiveState(utils::RandomGenerator& rng, long beam_pdg_id, const PartonsContent&);
+    virtual ~DiffractiveState() = default;
 
-    void initialise(const Momentum& system_momentum,
-                    const Momentum& beam_momentum,
-                    double primordial_kt);  ///< Compute primary quantities
     /// Run the diffractive system fragmentation
     /// \param[out] fragments Hadrons produced, in the rest frame of the system
     /// \param[in] tolerance Relative tolerance on the four-momentum balance of the final state
@@ -60,8 +60,11 @@ namespace cepgen::hadr {
 
     bool valid() const { return valid_; }  ///< Is the fragmentation of the diffractive state possible?
   protected:
+    /// Compute the parton masses and the system kinematics
+    void initialise(const Momentum& system_momentum, const Momentum& beam_momentum, double primordial_kt);
     /// Check the momentum balance between the system and its stable fragments
     bool momentumConserved(const Fragments& fragments, double tolerance) const;
+    /// Mass of a particle according to the hadroniser algorithm
     virtual double massFromPdgId(long pdg_id) const;
 
     utils::RandomGenerator* random_generator_{nullptr};  //NOT owning

@@ -145,6 +145,11 @@ namespace cepgen::herwig6 {
           continue;
         const herwig6::DiffractiveState diffractive_seed(
             *random_generator_, event.oneWithRole(incoming), event.oneWithRole(outgoing).momentum(), primordial_kt_);
+        if (!diffractive_seed.valid()) {
+          CG_WARNING("herwig6:Hadroniser") << "Invalid remnants kinematics for " << outgoing << " (mass "
+                                           << event.oneWithRole(outgoing).momentum().mass() << " GeV).";
+          return false;
+        }
         auto& fragments = hadronised[outgoing];
         int trials_for_system = 0;
         do {

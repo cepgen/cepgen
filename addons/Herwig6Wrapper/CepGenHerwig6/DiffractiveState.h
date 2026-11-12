@@ -64,6 +64,8 @@ namespace cepgen::herwig6 {
       ud0_bar = 116
     };
 
+    static InternalId internalId(long pdg_id);  ///< Herwig 6 identifier of a signed (anti)quark/(anti)diquark PDG id
+
   private:
     double massFromPdgId(long pdg_id) const override;
     InternalId valquark_id_{InternalId::invalid};  ///< Herwig identifier of the struck (anti)quark

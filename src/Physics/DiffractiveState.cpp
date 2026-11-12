@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
@@ -59,8 +60,9 @@ void DiffractiveState::initialise(const Momentum& system_momentum,
   const auto mass2 = system_mass_ * system_mass_;
   const auto sum = valquark_mass_ + diquark_mass_, diff = valquark_mass_ - diquark_mass_;
   const auto lambda = (mass2 - sum * sum) * (mass2 - diff * diff);
-  if (lambda <= 0. || system_mass_ <= 0.) {
-    CG_DEBUG("pythia8:DiffractiveState") << "Diffractive system mass unphysical. System invalid for fragmentation.";
+  if (system_mass_ <= sum || lambda <= 0.) {
+    CG_DEBUG("DiffractiveState") << "Dissociated system of mass " << system_mass_
+                                 << " GeV is too light for its constituents. System invalid for fragmentation.";
     valid_ = false;
     return;
   }
