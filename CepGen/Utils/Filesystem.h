@@ -44,12 +44,13 @@ namespace cepgen::utils {
   /// Build a temporary working directory
   class TemporaryDirectory {
   public:
-    explicit TemporaryDirectory(const std::string& base_dir);
+    explicit TemporaryDirectory(const std::string& base_dir, bool keep_files = false);
     ~TemporaryDirectory();
     const fs::path& path() const;
 
   private:
     const fs::path path_;
+    const bool keep_files_;
   };
 }  // namespace cepgen::utils
 

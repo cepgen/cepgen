@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *                2023       Dmitri Konstantinov
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,14 +40,22 @@ namespace cepgen::utils {
 
   // Temporary working directory
 
-  TemporaryDirectory::TemporaryDirectory(const std::string& base_dir)
-      : path_(std::filesystem::temp_directory_path() / base_dir) {
+  TemporaryDirectory::TemporaryDirectory(const std::string& base_dir, bool keep_files)
+      : path_(std::filesystem::temp_directory_path() / base_dir), keep_files_(keep_files) {
     std::filesystem::create_directories(path_);
   }
 
   TemporaryDirectory::~TemporaryDirectory() {
-    std::error_code ec;
-    std::filesystem::remove_all(path_, ec);
+    if (!keep_files_) {
+      std::error_code ec;
+      if (const auto num_files_removed = std::filesystem::remove_all(path_, ec);
+          ec || num_files_removed == static_cast<std::uintmax_t>(-1))
+        CG_ERROR("TemporaryDirectory") << "Failed to remove the temporary directory at " << path_ << ": "
+                                       << ec.message() << ".";
+      else
+        CG_DEBUG("TemporaryDirectory") << "Successfully removed the temporary directory at " << path_ << ".";
+    } else
+      CG_DEBUG("TemporaryDirectory") << "Keeping the temporary directory structure at " << path_ << ".";
   }
 
   const fs::path& TemporaryDirectory::path() const { return path_; }
