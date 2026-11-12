@@ -41,7 +41,7 @@ public:
         NEG_CHAR('-'),
         MARKERS_CHAR("o+*#@."),
         VALUES_CHAR(" .:oO0@%#"),
-        width_(std::max(5lu, steerAs<int, size_t>("width"))),
+        width_(static_cast<size_t>(std::max(5, steer<int>("width")))),
         colourise_(steer<bool>("colourise")) {}
 
   static ParametersDescription description() {
@@ -260,7 +260,8 @@ void TextDrawer::drawValues(
     os << y_label << "\n";
   }
   os << sep << format("%-5.2f ", mode & Mode::logy ? std::exp(log_values_range.min()) : values_range.min())
-     << std::setw(width_ - 11) << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
+     << std::setw(width_ > 11 ? width_ - 11 : 0) << std::left
+     << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
      << format("%5.2e", mode & Mode::logy ? std::exp(log_values_range.max()) : values_range.max()) << "\n"
      << sep << std::string(width_ + 2, '.');  // abscissa axis
   size_t idx = 0;
@@ -316,8 +317,8 @@ void TextDrawer::drawValues(
   if (!dr.yAxis().label().empty()) {
     const auto y_label = delatexify(dr.yAxis().label());
     os << sep;
-    if (const auto length = 2 + width_ - y_label.size(); length > 0)
-      os << std::string(length, ' ');
+    if (2 + width_ > y_label.size())
+      os << std::string(2 + width_ - y_label.size(), ' ');
     os << y_label << "\n";
   }
   // find the maximum element of the graph
