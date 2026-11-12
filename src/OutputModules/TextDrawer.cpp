@@ -135,6 +135,13 @@ private:
   const std::string MARKERS_CHAR, VALUES_CHAR;
 
   static std::string delatexify(const std::string& tok) { return replaceAll(tok, {{"$", ""}}); }
+  /// Build a centred "empty plot" banner of exactly the requested width
+  static std::string emptyBanner(size_t width) {
+    if (width <= kEmptyLabel.size())
+      return kEmptyLabel.substr(0, width);
+    const auto left = (width - kEmptyLabel.size()) / 2, right = width - kEmptyLabel.size() - left;
+    return std::string(left, ' ') + kEmptyLabel + std::string(right, ' ');
+  }
 
   /// Sorting helper for the axis metadata container
   struct map_elements {
@@ -269,38 +276,37 @@ void TextDrawer::drawValues(
   for (const auto& [coordinates, value] : axis) {
     const auto left_label = coordinates.label.empty() ? format("%17g", coordinates.value) : coordinates.label;
     if (empty_plot) {  // empty plot; display the "EMPTY" banner
-      os << "\n" << left_label << ":";
-      if (idx == axis.size() / 2) {
-        std::string padding;
-        if (const auto padding_length = (width_ - kEmptyLabel.size()) / 2; padding_length > 0)
-          padding = std::string(padding_length, ' ');
-        os << padding << kEmptyLabel << padding;
-      } else
-        os << std::string(width_, ' ');
-      os << ":";
-    } else {  // value is valid
-      size_t i_value = 0ull, i_uncertainty = 0ull;
-      {
-        if (mode & Mode::logy) {  // log scale
-          i_value = std::ceil(
-              width_ * (value > 0. && values_range.max() > 0. ? std::max(std::log(value) / log_values_range, 0.) : 0.));
-          i_uncertainty = std::ceil(width_ * (value < values_range.max()
-                                                  ? std::max(std::log(value.uncertainty()) / log_values_range, 0.)
-                                                  : 0.));
-        } else if (values_range.max() > 0.) {  // linear scale
-          i_value = std::ceil(width_ * (value / values_range));
-          i_uncertainty = std::ceil(width_ * (value.uncertainty() / values_range.range()));
-        }
-      }
       os << "\n"
-         << left_label << ":" << (i_value > i_uncertainty ? std::string(i_value - i_uncertainty, ' ') : ""s)
-         << (i_uncertainty > 0 ? std::string(i_uncertainty, ERR_CHAR) : ""s)
-         << (effects ? boldify(std::string{CHAR}) : std::string{CHAR});
-      if (const ssize_t padding = width_ - i_value - 1; i_uncertainty > 0 && padding > 0)
-        os << std::string(std::min(static_cast<size_t>(padding), i_uncertainty), ERR_CHAR);
-      if (const ssize_t padding = width_ - i_value - i_uncertainty - 1; padding > 0)
-        os << std::string(padding, ' ');
-      os << ": "
+         << left_label << ":" << (idx == axis.size() / 2 ? emptyBanner(width_) : std::string(width_, ' ')) << ":";
+    } else {  // value is valid
+      const double val = value, unc = value.uncertainty();
+      // column (in [0, width-1]) at which a given ordinate is drawn
+      const auto column = [this, &mode, &values_range, &log_values_range](double y) -> size_t {
+        double frac = 0.;
+        if (mode & Mode::logy) {  // log scale
+          if (y > 0. && values_range.max() > 0.)
+            frac = std::log(y) / log_values_range;
+        } else if (values_range.max() > 0.)  // linear scale
+          frac = y / values_range;
+        if (!std::isfinite(frac) || frac <= 0.)
+          return 0;
+        return std::min(width_ - 1, static_cast<size_t>(std::ceil(width_ * std::min(frac, 1.))));
+      };
+      const auto i_value = column(val);
+      size_t i_unc_low = 0, i_unc_high = 0;  // error bar extension on each side of the marker
+      if (unc > 0.) {
+        if (mode & Mode::logy) {  // asymmetric in log scale: span [log(y-dy), log(y+dy)]
+          i_unc_low = i_value - std::min(i_value, column(val - unc));
+          i_unc_high = std::max(i_value, column(val + unc)) - i_value;
+        } else if (const auto frac = unc / values_range.range(); std::isfinite(frac) && frac > 0.)
+          i_unc_low = i_unc_high = static_cast<size_t>(std::ceil(width_ * frac));
+      }
+      i_unc_low = std::min(i_unc_low, i_value);
+      i_unc_high = std::min(i_unc_high, width_ - 1 - i_value);
+      os << "\n"
+         << left_label << ":" << std::string(i_value - i_unc_low, ' ') << std::string(i_unc_low, ERR_CHAR)
+         << (effects ? boldify(std::string{CHAR}) : std::string{CHAR}) << std::string(i_unc_high, ERR_CHAR)
+         << std::string(width_ - 1 - i_value - i_unc_high, ' ') << ": "
          << (mode & Mode::logy ? format("% 6.2e +/- %6.2e", value, value.uncertainty())
                                : format("% 6f +/- %6f", value, value.uncertainty()));
     }
@@ -346,13 +352,7 @@ void TextDrawer::drawValues(
   for (const auto& [x_coordinate, y_values] : axes) {
     os << "\n" << (x_coordinate.label.empty() ? format("%16g ", x_coordinate.value) : x_coordinate.label) << ":";
     if (empty_plot) {  // empty plot; display the "EMPTY" banner
-      if (idx == axes.size() / 2) {
-        std::string padding;
-        if (const auto padding_length = (width_ - kEmptyLabel.size()) / 2; padding_length > 0)
-          padding = std::string(padding_length, ' ');
-        os << padding << kEmptyLabel << padding;
-      } else
-        os << std::string(width_, ' ');
+      os << (idx == axes.size() / 2 ? emptyBanner(width_) : std::string(width_, ' '));
     } else {
       for (const auto& [y_coordinate, y_value] : y_values) {
         double val_norm = 0.;
