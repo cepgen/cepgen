@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -372,7 +372,9 @@ void TextDrawer::drawValues(
           os << (effects ? colourise(std::string(1, NEG_CHAR), kColours.at(0)) : std::string(1, NEG_CHAR));
         else {
           size_t ch_id = std::ceil(val_norm * (VALUES_CHAR.size() - 1));
-          size_t col_id = 1 + val_norm * (kColours.size() - 2);
+          // index 0 (red) is reserved for negative/invalid values, last index is the colour reset
+          const size_t col_id =
+              std::min(kColours.size() - 2, static_cast<size_t>(1 + val_norm * (kColours.size() - 2)));
           os << (effects ? colourise(std::string(1, VALUES_CHAR.at(ch_id)),
                                      kColours.at(col_id),
                                      val_norm > 0.75 ? Modifier::bold : Modifier::reset)
@@ -402,7 +404,7 @@ void TextDrawer::drawValues(
   os << ": "  // 2nd abscissa axis
      << delatexify(dr.yAxis().label()) << "\n\t"
      << "(scale: \"" << VALUES_CHAR << "\", ";
-  for (size_t i = 0; i < kColours.size(); ++i)
+  for (size_t i = 0; i < kColours.size() - 1; ++i)  // skip colour reset
     os << (effects ? colourise("*", kColours.at(i)) : ""s) << (i == 0 ? "|" : ""s);
   os << ")\n";
 }
