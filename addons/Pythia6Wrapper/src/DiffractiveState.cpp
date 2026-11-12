@@ -55,8 +55,6 @@ DiffractiveState::DiffractiveState(utils::RandomGenerator& rng,
                                    double primordial_kt)
     : hadr::DiffractiveState(
           rng, beam.integerPdgId(), {{PDG::down, PDG::uu1, 1.}, {PDG::up, PDG::ud0, 4.}, {PDG::up, PDG::ud1, 4.}}) {
-  checkPDGid(std::labs(valquark_pdg_id_));
-  checkPDGid(std::labs(diquark_pdg_id_));
   initialise(system, beam.momentum(), primordial_kt);
 }
 
@@ -93,4 +91,7 @@ bool DiffractiveState::hadronise(hadr::Fragments& fragments, double tolerance) c
   return momentumConserved(fragments, tolerance);
 }
 
-double DiffractiveState::massFromPdgId(long pdg_id) const { return pymass(static_cast<int>(pdg_id)); }
+double DiffractiveState::massFromPdgId(long pdg_id) const {
+  checkPDGid(std::labs(pdg_id));
+  return pymass(static_cast<int>(pdg_id));
+}
