@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <mutex>
+
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
@@ -23,20 +25,18 @@ using namespace cepgen;
 
 std::string Message::now() { return utils::timeAs("%H:%M:%S"); }
 
-LoggedMessage::LoggedMessage(const std::string& module,
-                             const std::string& from,
-                             MessageType type,
-                             const std::string& file,
-                             short lineno) noexcept
-    : from_(from), file_(file), line_num_(lineno), type_(type), module_(module) {}
+void Message::write(std::ostream& os, const std::string& formatted_message) noexcept {
+  static std::mutex output_mutex;  // avoid interleaved printouts from concurrent threads
+  try {
+    const std::lock_guard<std::mutex> lock(output_mutex);
+    os << formatted_message;
+  } catch (...) {  // never let a printout failure escape (this may be called from a destructor)
+  }
+}
 
-LoggedMessage::LoggedMessage(const LoggedMessage& rhs) noexcept
-    : message_(rhs.message_.str()),  // only reason to customise the copy constructor
-      from_(rhs.from_),
-      file_(rhs.file_),
-      line_num_(rhs.line_num_),
-      type_(rhs.type_),
-      module_(rhs.module_) {}
+LoggedMessage::LoggedMessage(
+    const std::string& module, const std::string& from, MessageType type, const std::string& file, int lineno) noexcept
+    : from_(from), file_(file), line_num_(lineno), type_(type), module_(module) {}
 
 LoggedMessage::~LoggedMessage() noexcept {
   if (type_ != MessageType::undefined)
@@ -44,51 +44,56 @@ LoggedMessage::~LoggedMessage() noexcept {
 }
 
 void LoggedMessage::dump(std::ostream* os) const noexcept {
-  if (!os)
-    os = utils::Logger::get().output().get();
-  if (!os)
-    return;
+  try {
+    if (!os)
+      os = utils::Logger::get().output().get();
+    if (!os)
+      return;
 
-  if (type_ == MessageType::verbatim || type_ == MessageType::undefined) {
-    (*os) << message_.str() << "\n";
-    return;
+    std::ostringstream buf;  // format the full message first, to write it at once
+    if (type_ == MessageType::verbatim || type_ == MessageType::undefined)
+      buf << message_.str() << "\n";
+    else {
+      buf << type_;
+      if (type_ == MessageType::info) {
+        if (utils::Logger::get().extended())
+          buf << colourise(
+              "{" + from_ + "}\n\t", utils::Colour::none, utils::Modifier::dimmed | utils::Modifier::italic);
+        else
+          buf << ":\t";
+        buf << message_.str() << "\n";
+      } else {
+        buf << " " << colourise(from_, utils::Colour::none, utils::Modifier::underline | utils::Modifier::dimmed);
+        if (utils::Logger::get().extended())
+          buf << " "
+              << colourise(file_,
+                           utils::Colour::none,
+                           utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed)
+              << ":"
+              << colourise(
+                     std::to_string(line_num_), utils::Colour::none, utils::Modifier::italic | utils::Modifier::dimmed)
+              << "\n";
+        else
+          buf << ": ";
+        if (type_ == MessageType::debug)
+          buf << colourise(message_.str(), utils::Colour::none, utils::Modifier::dimmed) << "\n";
+        else if (type_ == MessageType::warning)
+          buf << message_.str() << "\n";
+      }
+    }
+    write(*os, buf.str());
+  } catch (...) {  // never let a printout failure escape (this is called from the destructor)
   }
-  (*os) << type_;
-  if (type_ == MessageType::info) {
-    if (utils::Logger::get().extended())
-      (*os) << colourise("{" + from_ + "}\n\t", utils::Colour::none, utils::Modifier::dimmed | utils::Modifier::italic);
-    else
-      (*os) << ":\t";
-    (*os) << message_.str() << "\n";
-    return;
-  }
-  (*os) << " " << colourise(from_, utils::Colour::none, utils::Modifier::underline | utils::Modifier::dimmed);
-  if (utils::Logger::get().extended())
-    (*os) << " "
-          << colourise(
-                 file_, utils::Colour::none, utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed)
-          << ":"
-          << colourise(
-                 std::to_string(line_num_), utils::Colour::none, utils::Modifier::italic | utils::Modifier::dimmed)
-          << "\n";
-  else
-    (*os) << ": ";
-  if (type_ == MessageType::debug) {
-    (*os) << colourise(message_.str(), utils::Colour::none, utils::Modifier::dimmed) << "\n";
-    return;
-  }
-  if (type_ == MessageType::warning)
-    (*os) << message_.str() << "\n";
 }
 
 namespace cepgen {
-  const LoggedMessage& operator<<(const LoggedMessage& exc, const bool& var) noexcept {
+  const LoggedMessage& operator<<(const LoggedMessage& exc, const bool& var) {
     LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
     nc_except.message_ << (var ? colourise("true", utils::Colour::green) : colourise("false", utils::Colour::red));
     return exc;
   }
 
-  const LoggedMessage& operator<<(const LoggedMessage& exc, const std::wstring& var) noexcept {
+  const LoggedMessage& operator<<(const LoggedMessage& exc, const std::wstring& var) {
     LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
     nc_except.message_ << utils::toString(var);
     return exc;
