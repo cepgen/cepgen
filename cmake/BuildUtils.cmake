@@ -259,6 +259,12 @@ macro(cepgen_test_category)
     set(CEPGEN_UNSTABLE_TESTS ${CEPGEN_UNSTABLE_TESTS} PARENT_SCOPE)
 endmacro()
 
+#--- declare a hadronisation/fragmentation algorithm to be tested with the common
+#    kt-factorised process test (test/generator/ktfactor_proc_hadronisation.cc)
+macro(cepgen_test_hadroniser ALGO)
+    set_property(GLOBAL APPEND PROPERTY CEPGEN_HADRONISERS_TO_TEST ${ALGO})
+endmacro()
+
 macro(cepgen_test_declare_unstable)
     if(NOT CMAKE_BUILD_TESTS)
         return()

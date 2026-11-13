@@ -19,6 +19,7 @@ cepgen_build(CepGenSherpa
     INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${SHERPA_INCLUDE}
     TESTS test/*.cc
     COMPONENT sherpa)
+cepgen_test_hadroniser(sherpa)
 if(NOT APPLE)
   target_link_options(CepGenSherpa PRIVATE "LINKER:--no-as-needed")
 endif()

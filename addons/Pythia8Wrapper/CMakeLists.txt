@@ -23,6 +23,7 @@ cepgen_build(CepGenPythia8
     TESTS test/*.cc
     OPTIONS "-Wno-misleading-indentation"
     COMPONENT pythia8)
+cepgen_test_hadroniser(pythia8)
 cpack_add_component(pythia8
     DISPLAY_NAME "CepGen Pythia 8 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to Pythia 8"

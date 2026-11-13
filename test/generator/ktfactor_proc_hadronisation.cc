@@ -57,11 +57,11 @@ int main(int argc, char* argv[]) {
   double evt_weight = 1.;
 
   const auto evt_before_particles = evt.particles().size();
-  hadroniser_algo->run(evt, evt_weight, true);
+  CG_TEST(hadroniser_algo->run(evt, evt_weight, true), prefix + "successful run in fast mode");
   CG_TEST(evt_weight == 1., prefix + "no event weight modification in fast mode");
   CG_TEST(evt.particles().size() == evt_before_particles, prefix + "no event modification in fast mode");
 
-  hadroniser_algo->run(evt, evt_weight, false);
+  CG_TEST(hadroniser_algo->run(evt, evt_weight, false), prefix + "successful run in full mode");
 
   CG_DEBUG("main") << "Hadroniser-filtered event:\n" << evt;
 

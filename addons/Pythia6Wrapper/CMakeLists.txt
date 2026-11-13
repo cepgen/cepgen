@@ -42,4 +42,4 @@ cepgen_build(CepGenPythia6
 install(DIRECTORY CepGenPythia6
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT pythia6)
-add_test(NAME pythia6_kt_hadr COMMAND ${CMAKE_BINARY_DIR}/test/generator/ktfactor_proc_hadronisation -H pythia6)
+cepgen_test_hadroniser(pythia6)
