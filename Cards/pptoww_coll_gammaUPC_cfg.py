@@ -9,6 +9,7 @@ gammaUPC_flux = cepgen.Module('gammaUPC', pdgId = PDG.proton, gamma = 6500. / 0.
 
 process = coll.process.clone('pptoww',
     partonsGenerator = 'coll',
+    survivalFactor = cepgen.Module('gammaUPC'),  # two-photon fluxes non-overlap correction
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         method = 0,  # on-shell (0) or off-shell (1) formula

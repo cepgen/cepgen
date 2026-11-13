@@ -31,8 +31,6 @@ using namespace cepgen;
 
 namespace gammaUPC {
   /// Single-beam gammaUPC photon flux (EDFF, no impact parameter dependence)
-  /// \note The beam-beam non-overlap condition of the gammaUPC two-photon fluxes is not accounted for, as the
-  ///  factorised process expects one independent flux per beam.
   class CollinearFlux final : public cepgen::CollinearFlux {
   public:
     explicit CollinearFlux(const ParametersList& params)
