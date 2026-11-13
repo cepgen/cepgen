@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
-#include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
@@ -76,6 +76,7 @@ public:
               utils::Drawer::Mode::grid | (info.log_z ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
       }
     } catch (const Exception& error) {
+      error.handled();  // its content is reported in the message below
       CG_ERROR("EventHarvester") << "Failed to save the histograms harvested in this run. Error received: "
                                  << error.what();
     }
