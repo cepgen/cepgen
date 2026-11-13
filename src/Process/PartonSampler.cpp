@@ -110,7 +110,7 @@ std::unique_ptr<PartonFlux> KTPartonSampler::buildFlux(const ParametersList& par
 
 void KTPartonSampler::fluxInitialised() { kt_flux_ = &flux<KTFlux>(); }
 
-std::vector<PartonSampler::IntegrationVariable> KTPartonSampler::integrationVariables(const cuts::Initial& cuts) {
+std::vector<IntegrationVariable> KTPartonSampler::integrationVariables(const cuts::Initial& cuts) {
   std::vector<IntegrationVariable> vars;
   // parton transverse virtuality
   if (log_parton_virtuality_)
@@ -175,7 +175,7 @@ std::unique_ptr<PartonFlux> CollinearPartonSampler::buildFlux(const ParametersLi
 
 void CollinearPartonSampler::fluxInitialised() { coll_flux_ = &flux<CollinearFlux>(); }
 
-std::vector<PartonSampler::IntegrationVariable> CollinearPartonSampler::integrationVariables(const cuts::Initial& cuts) {
+std::vector<IntegrationVariable> CollinearPartonSampler::integrationVariables(const cuts::Initial& cuts) {
   const auto lim_q2 = cuts.q2.at(static_cast<size_t>(side_)).truncate(Limits{1.e-10, 5.});
   if (log_parton_virtuality_)
     return {{t_,

@@ -19,7 +19,6 @@
 #ifndef CepGen_Process_PartonSampler_h
 #define CepGen_Process_PartonSampler_h
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,8 +26,7 @@
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Momentum.h"
-#include "CepGen/Process/Process.h"
-#include "CepGen/Utils/Limits.h"
+#include "CepGen/Process/IntegrationVariable.h"
 
 namespace cepgen {
   class Beam;
@@ -57,15 +55,6 @@ namespace cepgen {
 
     /// Beam side this sampler is attached to
     enum class Side { positive = 0, negative = 1 };
-
-    /// Description of one integration variable required by this sampler
-    struct IntegrationVariable {
-      std::reference_wrapper<double> value;  ///< Reference to the variable to be mapped
-      proc::Process::Mapping mapping;        ///< Mapping type
-      Limits range;                          ///< Integration range (in mapped coordinates)
-      std::string name;                      ///< Computer-readable variable name
-      std::string description;               ///< Human-readable variable description
-    };
 
     /// Build the parton flux for one beam (user-steered, or default for this beam type)
     void initialise(const Kinematics&, Side);

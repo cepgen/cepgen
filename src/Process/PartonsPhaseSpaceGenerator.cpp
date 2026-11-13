@@ -43,7 +43,7 @@ void PartonsPhaseSpaceGenerator::initialise(proc::FactorisedProcess* process) {
   const auto& initial_cuts = kin.cuts().initial;
   const auto pos_vars = samplers_.at(0)->integrationVariables(initial_cuts),
              neg_vars = samplers_.at(1)->integrationVariables(initial_cuts);
-  auto define = [this](const PartonSampler::IntegrationVariable& var) {
+  auto define = [this](const IntegrationVariable& var) {
     this->process().defineVariable(var.value.get(), var.mapping, var.range, var.name, var.description);
   };
   for (size_t i = 0; i < std::max(pos_vars.size(), neg_vars.size()); ++i) {
