@@ -22,6 +22,7 @@
 
 // list of factories documented
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/CentralPhaseSpaceFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DocumentationGeneratorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -73,6 +74,7 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
                cepgen::SigmaRatiosFactory::get());
   add_category("collflux"s, "Collinear parton flux modelling", "", cepgen::CollinearFluxFactory::get());
   add_category("ktflux"s, "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
+  add_category("centralps"s, "Central system phase space mappers", "", cepgen::CentralPhaseSpaceFactory::get());
   add_category("alphaem"s, "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());
   add_category("alphas"s, "Strong coupling evolution", "", cepgen::AlphaSFactory::get());
   add_category("integr"s, "Integrator algorithms", "", cepgen::IntegratorFactory::get());

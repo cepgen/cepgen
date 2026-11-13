@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
@@ -38,7 +38,7 @@ namespace cepgen {
   ///  deduced by the consumer process from the central system, once built.
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Nov 2026
-  class CentralPhaseSpace : public SteeredObject<CentralPhaseSpace> {
+  class CentralPhaseSpace : public NamedModule<CentralPhaseSpace> {
   public:
     explicit CentralPhaseSpace(const ParametersList&);
 
@@ -69,29 +69,6 @@ namespace cepgen {
     spdgids_t particles_;
     std::vector<double> masses_;
     std::vector<cuts::Central> particle_cuts_;
-  };
-
-  /// Two-parton to two-particle central system phase space mapper
-  /// \note Variables: both central particles' rapidities, and their transverse momentum difference
-  ///  (norm and azimuthal angle)
-  class CentralPhaseSpace2to2 final : public CentralPhaseSpace {
-  public:
-    using CentralPhaseSpace::CentralPhaseSpace;
-
-    static ParametersDescription description();
-
-    size_t multiplicity() const override { return 2; }
-    std::vector<IntegrationVariable> integrationVariables() override;
-    double generate(const Momentum& qt_sum, std::vector<Momentum>& central_momenta) const override;
-
-  private:
-    // factor 1/4 from jacobian of transformations
-    static constexpr double prefactor_ = M_1_PI * M_1_PI / 16. / 4.;
-    // mapped variables
-    double m_y_c1_{0.};         ///< Rapidity of the first central particle
-    double m_y_c2_{0.};         ///< Rapidity of the second central particle
-    double m_pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
-    double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
   };
 }  // namespace cepgen
 

@@ -30,6 +30,7 @@
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
+#include "CepGen/Process/CentralPhaseSpace.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
@@ -42,6 +43,7 @@
 
 namespace cepgen {
   template class ModuleFactory<card::Handler>;
+  template class ModuleFactory<CentralPhaseSpace>;
   template class ModuleFactory<CollinearFlux>;
   template class ModuleFactory<Coupling>;
   template class ModuleFactory<utils::Derivator>;

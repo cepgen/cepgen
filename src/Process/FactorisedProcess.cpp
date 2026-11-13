@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CentralPhaseSpaceFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
@@ -106,14 +107,14 @@ std::unique_ptr<PartonSampler> FactorisedProcess::buildPartonSampler(PartonSampl
 }
 
 std::unique_ptr<CentralPhaseSpace> FactorisedProcess::buildCentralPhaseSpace() const {
-  switch (central_particles_.size()) {
-    case 2:
-      return std::make_unique<CentralPhaseSpace2to2>(ParametersList());
-    default:
-      throw CG_FATAL("FactorisedProcess:buildCentralPhaseSpace")
-          << "No central system phase space mapper available for a " << central_particles_.size()
-          << "-particle central system (" << central_particles_ << ").";
-  }
+  // central system phase space mappers are indexed by the multiplicity they handle: "2to<N>"
+  const auto mapper_name = "2to" + std::to_string(central_particles_.size());
+  if (!CentralPhaseSpaceFactory::get().has(mapper_name))
+    throw CG_FATAL("FactorisedProcess:buildCentralPhaseSpace")
+        << "No central system phase space mapper available for a " << central_particles_.size()
+        << "-particle central system (" << central_particles_ << "). "
+        << "Registered mappers: " << CentralPhaseSpaceFactory::get().modules() << ".";
+  return CentralPhaseSpaceFactory::get().build(mapper_name);
 }
 
 spdgids_t FactorisedProcess::partons() const {
