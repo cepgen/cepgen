@@ -19,6 +19,7 @@
 #include <CepGen/Core/Exception.h>
 #include <CepGen/Modules/PartonFluxFactory.h>
 #include <CepGen/PartonFluxes/CollinearFlux.h>
+#include <CepGen/Physics/Beam.h>
 #include <CepGen/Physics/HeavyIon.h>
 #include <CepGen/Physics/PDG.h>
 #include <CepGen/Utils/Limits.h>
@@ -35,33 +36,32 @@ namespace gammaUPC {
   public:
     explicit CollinearFlux(const ParametersList& params)
         : cepgen::CollinearFlux(params),
-          beam_pdg_id_(steer<pdgid_t>("pdgId")),
-          heavy_ion_(HeavyIon::isHI(beam_pdg_id_)),
-          gamma_(steer<double>("gamma")),
           q2_range_(steer<Limits>("q2range")),
           inv_log_q2_range_(1. / std::log(q2_range_.max() / q2_range_.min())) {
-      if (gamma_ <= 1.)
-        throw CG_FATAL("gammaUPC:CollinearFlux") << "Invalid beam Lorentz factor: " << gamma_ << ".";
       if (q2_range_.min() <= 0. || q2_range_.max() <= q2_range_.min())
         throw CG_FATAL("gammaUPC:CollinearFlux") << "Invalid virtuality range: " << q2_range_ << ".";
-      if (heavy_ion_) {
-        const auto hi = HeavyIon::fromPdgId(beam_pdg_id_);
-        z_ = static_cast<double>(hi.Z);
-        a_ = static_cast<double>(hi.A);
-        radius_fm_ = hi.radius() * 1.e15;  // m -> fm
-        mass2_ = std::pow(hi.mass(), 2);
-      } else
-        mass2_ = std::pow(PDG::get().mass(beam_pdg_id_), 2);
     }
 
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("gammaUPC single-beam photon flux");
-      desc.addAs<int, pdgid_t>("pdgId", PDG::proton).setDescription("beam particle (proton or heavy ion) PDG id");
-      desc.add("gamma", 0.).setDescription("beam Lorentz factor");
       desc.add("q2range", Limits{1.e-10, 5.})
           .setDescription("parton virtuality range sampled by the collinear parton sampler (GeV^2)");
       return desc;
+    }
+
+    void initialise(const Beam& beam) override {  // beam particle content and Lorentz factor from beam kinematics
+      const auto& momentum = beam.momentum();
+      if (mass2_ = momentum.mass2(); mass2_ <= 0. || (gamma_ = momentum.energy() / momentum.mass()) <= 1.)
+        throw CG_FATAL("gammaUPC:CollinearFlux") << "Invalid beam kinematics: " << momentum << ".";
+      if (heavy_ion_ = HeavyIon::isHI(beam.integerPdgId()); heavy_ion_) {
+        const auto hi = HeavyIon::fromPdgId(beam.integerPdgId());
+        z_ = static_cast<double>(hi.Z);
+        a_ = static_cast<double>(hi.A);
+        radius_fm_ = hi.radius() * 1.e15;  // m -> fm
+      }
+      CG_DEBUG("gammaUPC:CollinearFlux") << "Initialised for beam " << beam.integerPdgId() << " with gamma=" << gamma_
+                                         << (heavy_ion_ ? " (heavy ion)" : "") << ".";
     }
 
     bool fragmenting() const override { return false; }
@@ -69,6 +69,8 @@ namespace gammaUPC {
     double mass2() const override { return mass2_; }
 
     double fluxQ2(double x, double q2) const override {
+      if (gamma_ <= 0.)
+        throw CG_FATAL("gammaUPC:CollinearFlux") << "Flux was not initialised with a beam.";
       if (!x_range_.contains(x, true) || !q2_range_.contains(q2))
         return 0.;
       if (heavy_ion_)
@@ -77,13 +79,11 @@ namespace gammaUPC {
     }
 
   private:
-    const pdgid_t beam_pdg_id_;
-    const bool heavy_ion_;
-    const double gamma_;
     const Limits q2_range_;
     const double inv_log_q2_range_;
 
-    double z_{1.}, a_{1.}, radius_fm_{0.}, mass2_{0.};
+    bool heavy_ion_{false};
+    double gamma_{0.}, z_{1.}, a_{1.}, radius_fm_{0.}, mass2_{0.};
   };
 }  // namespace gammaUPC
 using gammaUPCCollinearFlux = gammaUPC::CollinearFlux;

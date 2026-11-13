@@ -4,8 +4,8 @@ from Config.generator_cfi import generator as _gen
 from Config.PDG_cfi import PDG
 
 
-# gammaUPC single-beam photon flux (proton beam at 6.5 TeV)
-gammaUPC_flux = cepgen.Module('gammaUPC', pdgId = PDG.proton, gamma = 6500. / 0.938272)
+# gammaUPC single-beam photon flux (beam particle and Lorentz factor taken from the beams kinematics)
+gammaUPC_flux = cepgen.Module('gammaUPC')
 
 process = coll.process.clone('pptoff',
     partonsGenerator = 'coll',
