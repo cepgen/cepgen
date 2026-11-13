@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2025  Laurent Forthomme
+ *  Copyright (C) 2018-2026  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -81,8 +81,14 @@ private:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
       }
     };
-    g_part1_ = generate_coupling(event().oneWithRole(Particle::Role::Parton1).pdgId());
-    g_part2_ = generate_coupling(event().oneWithRole(Particle::Role::Parton2).pdgId());
+    const auto parton1_id = event().oneWithRole(Particle::Role::Parton1).pdgId(),
+               parton2_id = event().oneWithRole(Particle::Role::Parton2).pdgId();
+    g_part1_ = generate_coupling(parton1_id);
+    g_part2_ = generate_coupling(parton2_id);
+    // sum over final-state colours for colour-neutral (photon-photon) initial states
+    // (colour factor already accounted for in coupling for gluon-induced processes)
+    colour_factor_ =
+        (parton1_id == PDG::photon && parton2_id == PDG::photon && cs_prop.colours > 0) ? cs_prop.colours : 1.;
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
                                << "Produced particles: " << phase_space_generator_->central() << ".\n\t"
@@ -135,7 +141,7 @@ private:
   } osp_;
 
   static constexpr double kFourPi = 4. * M_PI;
-  double mf2_{0.}, qf2_{0.};
+  double mf2_{0.}, qf2_{0.}, colour_factor_{1.};
   std::function<double(double)> g_part1_{nullptr}, g_part2_{nullptr};
 };
 
@@ -146,7 +152,7 @@ double PPtoFF::onShellME() const {
   if (t_hat == mf2_ || u_hat == mf2_)
     return 0.;
   const auto q = std::sqrt(t_hat);
-  const auto prefactor = g_part1_(q) * g_part2_(q);
+  const auto prefactor = colour_factor_ * g_part1_(q) * g_part2_(q);
   if (!utils::positive(prefactor))
     return 0.;
 
@@ -182,7 +188,7 @@ double PPtoFF::offShellME() const {
 
     return 2. * zpm / vec_qt.pt2() *
            ((osp_.term_ll * 4. * zpm * zpm * q2 * phi2_0) +
-            (osp_.term_tt1 * (zp * zp + zm * zm) * phi2_t + mf2_ * phi2_0) +
+            (osp_.term_tt1 * ((zp * zp + zm * zm) * phi2_t + mf2_ * phi2_0)) +
             (osp_.term_tt2 * (cross * cross - dot * dot) / vec_pho.pt2()) -
             (osp_.term_lt * 4. * zpm * (zp - zm) * phi_0 * dot));
   };
@@ -202,7 +208,8 @@ double PPtoFF::offShellME() const {
     return 0.;
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
-  if (const auto prefactor = g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
+  if (const auto prefactor =
+          colour_factor_ * g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
       utils::positive(prefactor))
     return prefactor * amat2;
   return 0.;
