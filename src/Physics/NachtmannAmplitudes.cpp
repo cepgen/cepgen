@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -17,6 +17,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <algorithm>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -69,7 +71,8 @@ NachtmannAmplitudes::Kinematics NachtmannAmplitudes::Kinematics::fromSCosTheta(d
 }
 
 void NachtmannAmplitudes::Kinematics::setCosTheta(double cth) {
-  cos_theta = cth;
+  // with off-shell photons, (t-u)/(s*beta) may exceed unity, possibly reaching the 1/A pole at beta*|cos(theta)|=1
+  cos_theta = std::clamp(cth, -1., 1.);
   cos_theta2 = cos_theta * cos_theta;
   sin_theta2 = 1. - cos_theta2;
   sin_theta = sqrt(fabs(sin_theta2));
@@ -224,8 +227,8 @@ std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, 
   const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
   if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
     return {2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
-                0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * eft_ext_.s1 * eft_ext_.c1() * (1. + kin.beta2) *
-                    static_cast<double>(hel.lam1 + hel.lam2),
+                0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * invB * eft_ext_.s1 * eft_ext_.c1() *
+                    (1. + kin.beta2) * static_cast<double>(hel.lam1 + hel.lam2),
             0.};
 
   if (hel.lam4 == 0)  // transverse-longitudinal
