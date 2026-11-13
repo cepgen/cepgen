@@ -132,7 +132,7 @@ private:
       desc.add("termLL"s, 1).setDescription("fully longitudinal relative weight");
       desc.add("termLT"s, 1).setDescription("cross-polarisation relative weight");
       desc.add("termTT"s, 1).setDescription("fully transverse relative weight");
-      desc.add("termtt"s, 1).setDescription("fully transverse relative weight");
+      desc.add("termtt"s, 1).setDescription("transverse-transverse azimuthal correlation relative weight");
       return desc;
     }
 
@@ -151,7 +151,7 @@ double PPtoFF::onShellME() const {
 
   if (t_hat == mf2_ || u_hat == mf2_)
     return 0.;
-  const auto q = std::sqrt(t_hat);
+  const auto q = std::sqrt(std::fabs(t_hat));  // t-hat negative in region of interest
   const auto prefactor = colour_factor_ * g_part1_(q) * g_part2_(q);
   if (!utils::positive(prefactor))
     return 0.;
