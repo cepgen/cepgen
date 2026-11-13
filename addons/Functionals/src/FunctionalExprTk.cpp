@@ -44,7 +44,7 @@ namespace cepgen::utils {
     expr_.register_symbol_table(symbols_);
     auto expr = replaceAll(expression_, {{"**", "^"}});
     if (!parser_.compile(expr, expr_))
-      throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
+      throw CG_ERROR("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
   }
 
   double FunctionalExprTk::eval() const { return expr_.value(); }

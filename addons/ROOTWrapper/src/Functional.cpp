@@ -39,7 +39,7 @@ namespace cepgen::root {
     }
     inline double eval() const override {
       if (!func_.IsValid())
-        throw CG_WARNING("root:Functional") << "Cannot evaluate the invalid function at " << values_ << ".";
+        throw CG_ERROR("root:Functional") << "Cannot evaluate the invalid function at " << values_ << ".";
       return func_.EvalPar(values_.data());
     }
 
