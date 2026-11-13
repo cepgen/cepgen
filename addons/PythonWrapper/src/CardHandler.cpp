@@ -181,8 +181,8 @@ namespace cepgen::python {
           kinematics_parameters += process.get<ParametersList>("outKinematics");
           process.erase("outKinematics");
         }
-        if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator"); pkgen.name().empty())
-          pkgen.setName((process.get<bool>("ktFactorised", true) ? "kt"s : "coll"s) + ":2to4");
+        if (!process.has<std::string>("partonsGenerator") && !process.has<ParametersList>("kinematicsGenerator"))
+          process.set<std::string>("partonsGenerator", process.get<bool>("ktFactorised", true) ? "kt" : "coll");
         runParameters()->setProcess(ProcessFactory::get().build(process));
 
         for (const auto& tf : process.get<std::vector<ParametersList> >("tamingFunctions"))

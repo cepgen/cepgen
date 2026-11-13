@@ -40,11 +40,7 @@ public:
   explicit PPtoFF(const ParametersList& params)
       : cepgen::proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
-        osp_(steer<ParametersList>("offShellParameters")) {
-    if (method_ == Mode::offShell && !phase_space_generator_->ktFactorised())
-      throw CG_FATAL("PPtoFF:prepare")
-          << "Off-shell matrix element only defined for factorised process with partons kt.";
-  }
+        osp_(steer<ParametersList>("offShellParameters")) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(*this); }
 
@@ -62,7 +58,10 @@ public:
 
 private:
   void prepareFactorisedPhaseSpace() override {
-    const auto cs_prop = PDG::get()(phase_space_generator_->central().at(0));
+    if (method_ == Mode::offShell && !partonsKtFactorised())
+      throw CG_FATAL("PPtoFF:prepare")
+          << "Off-shell matrix element only defined for factorised process with partons kt.";
+    const auto cs_prop = PDG::get()(central().at(0));
     // define central particle properties and couplings with partons
     if (!cs_prop.fermion || cs_prop.charges.empty())
       throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
@@ -91,7 +90,7 @@ private:
         (parton1_id == PDG::photon && parton2_id == PDG::photon && cs_prop.colours > 0) ? cs_prop.colours : 1.;
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
-                               << "Produced particles: " << phase_space_generator_->central() << ".\n\t"
+                               << "Produced particles: " << central() << ".\n\t"
                                << "ME computation method: " << static_cast<int>(method_) << ".";
 
     // constrain central particles cuts

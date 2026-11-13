@@ -45,8 +45,6 @@ public:
         method_(steer<int>("method")),
         amplitudes_(params_),
         polarisation_(polarisationParameters(params_)) {
-    if (method_ == 1 && !phase_space_generator_->ktFactorised())
-      throw CG_FATAL("PPtoWW") << "Off-shell matrix element only defined for processes with initial partons kT.";
     CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
                        << "polarisation states: "
                        << "W1=" << polarisation_.polarisations().first << ", "
@@ -87,10 +85,8 @@ private:
     return params.get<ParametersList>("polarisationStates");
   }
   void prepareFactorisedPhaseSpace() override {
-    cuts::Central single_w_cuts(ParametersList{});
-    if (kinematics().cuts().central_particles.count(PDG::W) > 0)
-      single_w_cuts = kinematics().cuts().central_particles.at(PDG::W);
-    phase_space_generator_->setCentralCuts(single_w_cuts);
+    if (method_ == 1 && !partonsKtFactorised())
+      throw CG_FATAL("PPtoWW") << "Off-shell matrix element only defined for processes with initial partons kT.";
   }
   double computeFactorisedMatrixElement() override {
     CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
