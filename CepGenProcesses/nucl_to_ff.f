@@ -457,20 +457,21 @@ c     =================================================================
      &         * q_l**2 ! photon exchange
 
 c     =================================================================
+c     only the matrix element is returned: the phase space Jacobian
+c     (1/(16.pi^2), factor 1/4 from jacobian of transformations, and
+c     ptdiff) and the partons' factors q1t/pi and q2t/pi (integration
+c     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2)
+c     are applied by CepGen
 c     factor 2.*pi below from integration over phi_sum
-c     factor 1/4 below from jacobian of transformations
-c     factors 1/pi and 1/pi due to integration
-c     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
 c     =================================================================
 
-      aintegral = (2.d0*pi)*1.d0/(16.d0*pi**2*(x1*x2*s)**2) * amat2
+      aintegral = amat2 / (x1*x2*s)**2
      &          * coupling
-     &          * (1.d0/4.d0)
-     &          * 0.5d0 / (4.d0*pi)
+     &          * (2.d0*pi) * 0.5d0 / (4.d0*pi)
 
 c     *****************************************************************
 c     =================================================================
-      nucl_to_ff = aintegral*q1t*q2t*ptdiff
+      nucl_to_ff = aintegral
 c     =================================================================
 c     *****************************************************************
 
