@@ -124,6 +124,7 @@ namespace cepgen::test {
       sequence();                                                                                                     \
       CG_FAILED(name) << "Exception was not thrown.";                                                                 \
     } catch (const cepgen::Exception& exc) {                                                                          \
+      exc.handled(); /* expected exception, its message is shown below */                                             \
       CG_PASSED(name) << " Resulting exception:\n"                                                                    \
                       << cepgen::utils::colourise(exc.message(),                                                      \
                                                   cepgen::utils::Colour::none,                                        \

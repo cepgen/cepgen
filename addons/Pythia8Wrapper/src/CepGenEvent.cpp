@@ -193,7 +193,8 @@ void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type, double ev
         else  // anti-particle
           colours.second = central_colour;
       }
-    } catch (const cepgen::Exception&) {
+    } catch (const cepgen::Exception& exc) {  // colour information unavailable for this particle
+      exc.handled();
     }
     int status = 1;
     if (type == Type::centralAndFullBeamRemnants && p.status() == cepgen::Particle::Status::Resonance)

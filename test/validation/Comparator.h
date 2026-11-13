@@ -44,6 +44,7 @@ namespace cepgen::validation {
       try {
         finalise();
       } catch (const Exception& err) {
+        err.handled();  // its content is reported in the message below
         CG_ERROR("Comparator") << "Caught exception while finalising the comparison:\n" << err.what();
       }
     }

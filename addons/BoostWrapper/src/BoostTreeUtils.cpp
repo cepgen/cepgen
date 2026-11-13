@@ -142,7 +142,8 @@ namespace boost::cepgen {
           }
         else
           add(out, it.first, it.second);
-      } catch (const ::cepgen::Exception&) {
+      } catch (const ::cepgen::Exception& exc) {  // not a parameters list; try simpler types
+        exc.handled();
         if (it.second.get_value<std::string>().find('.') != std::string::npos)
           try {  // try to parse float if contains a '.'
             out.set(it.first, it.second.get_value<double>());

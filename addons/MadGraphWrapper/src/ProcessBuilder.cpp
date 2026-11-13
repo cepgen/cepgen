@@ -96,7 +96,7 @@ namespace cepgen::mg5amc {
     }
     double computeFactorisedMatrixElement() override {
       if (!mg5_proc_)
-        CG_FATAL("mg5amc:ProcessBuilder:eval") << "Process not properly linked!";
+        throw CG_FATAL("mg5amc:ProcessBuilder:eval") << "Process not properly linked!";
       if (!kinematics().cuts().initial.contain(event()(Particle::Role::Parton1)) ||
           !kinematics().cuts().initial.contain(event()(Particle::Role::Parton2)))
         return 0.;
@@ -148,7 +148,7 @@ namespace cepgen::mg5amc {
           params_.set("tmpDir", generated_lib.parent_path().string());
         }
       } catch (const utils::RunAbortedException&) {
-        CG_FATAL("mg5amc:ProcessBuilder") << "MadGraph_aMC process generation aborted.";
+        throw CG_FATAL("mg5amc:ProcessBuilder") << "MadGraph_aMC process generation aborted.";
       }
     }
 
