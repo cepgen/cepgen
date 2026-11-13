@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,12 +22,11 @@
 #include <frameobject.h>
 // clang-format on
 
-#include "CepGen/Utils/String.h"
+#include <CepGen/Utils/String.h>
 
 using namespace cepgen::python;
 
-Error::Error(const char *origin, const char *file, short lineno) noexcept
-    : Exception("", origin, Type::error, file, lineno) {
+Error::Error(const char* origin, const char* file, int lineno) : Exception("", origin, Type::error, file, lineno) {
   // retrieve error indicator and clear it to handle ourself the error
   PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
   PyErr_Clear();
@@ -41,10 +40,10 @@ Error::Error(const char *origin, const char *file, short lineno) noexcept
         if (ObjectPtr pyth_val(PyObject_CallFunctionObjArgs(fmt.get(), ptype_, pvalue_, ptraceback_obj_, nullptr));
             pyth_val) {
           (*this) << "\n" << std::string(80, '.') << "\n";
-          for (const auto &tb : pyth_val.vector<std::string>()) {
+          for (const auto& tb : pyth_val.vector<std::string>()) {
             size_t i = 0;
             std::string sep;
-            for (const auto &err_line : utils::split(tb, '\n'))
+            for (const auto& err_line : utils::split(tb, '\n'))
               (*this) << sep << (i == 0 ? utils::boldify(err_line) : err_line), ++i, sep = "\n";
             (*this) << "\n";
           }
