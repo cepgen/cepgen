@@ -47,6 +47,7 @@ void PartonSampler::initialise(const Kinematics& kin, Side side) {
   if (flux_ = buildFlux(params); !flux_)
     throw CG_FATAL("PartonSampler:initialise")
         << "Failed to initiate a parton flux object with properties: " << params << ".";
+  flux_->initialise(beam);
   if (flux_->ktFactorised() != ktFactorised())
     throw CG_FATAL("PartonSampler:initialise")
         << "Invalid incoming parton flux modelling for a " << (ktFactorised() ? "kT-factorised" : "collinear")
