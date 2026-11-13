@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,52 +19,54 @@
 #ifndef CepGen_Process_PartonsPhaseSpaceGenerator_h
 #define CepGen_Process_PartonsPhaseSpaceGenerator_h
 
+#include <array>
 #include <memory>
 
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Process/PartonSampler.h"
 
 namespace cepgen::proc {
   class FactorisedProcess;
-}
+}  // namespace cepgen::proc
 
 namespace cepgen {
   class PartonFlux;
-  /// A generic phase space integration wrapper.
+  /// Two-parton phase space generator, built from one single-beam parton sampler per incoming beam
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2023
   class PartonsPhaseSpaceGenerator : public SteeredObject<PartonsPhaseSpaceGenerator> {
   public:
-    explicit PartonsPhaseSpaceGenerator(const ParametersList& params) : SteeredObject(params) {}
+    /// Build a two-parton generator from two (positive-z and negative-z) single-beam samplers
+    explicit PartonsPhaseSpaceGenerator(const ParametersList&,
+                                        std::unique_ptr<PartonSampler> positive_sampler,
+                                        std::unique_ptr<PartonSampler> negative_sampler);
 
-    inline void initialise(proc::FactorisedProcess* process) {
-      proc_ = process;
-      initialise();
-    }
+    static ParametersDescription description();
 
-    virtual bool ktFactorised() const = 0;        ///< Do incoming partons carry a primordial kT?
-    virtual bool generatePartonKinematics() = 0;  ///< Generate the 4-momentum of incoming partons
-    virtual double fluxes() const = 0;            ///< Retrieve the event weight in the phase space
+    void initialise(proc::FactorisedProcess*);  ///< Build the fluxes and register all integration variables
+
+    bool ktFactorised() const;        ///< Do both incoming partons carry a primordial kT?
+    bool generatePartonKinematics();  ///< Generate the 4-momentum of incoming partons
+    double fluxes() const;            ///< Retrieve the event weight in the phase space
 
     /// Retrieve a type-casted positive-z parton flux modelling
     template <typename T = PartonFlux>
     inline const T& positiveFlux() const {
-      return dynamic_cast<const T&>(*pos_flux_);
+      return sampler(PartonSampler::Side::positive).flux<T>();
     }
     /// Retrieve a type-casted negative-z parton flux modelling
     template <typename T = PartonFlux>
     inline const T& negativeFlux() const {
-      return dynamic_cast<const T&>(*neg_flux_);
+      return sampler(PartonSampler::Side::negative).flux<T>();
     }
-
-  protected:
-    virtual void initialise() = 0;  ///< Initialise the process and define the integration phase space
-    inline proc::FactorisedProcess& process() { return *proc_; }  ///< Consumer process object
-    /// Const-qualified consumer process object
-    inline const proc::FactorisedProcess& process() const { return const_cast<const proc::FactorisedProcess&>(*proc_); }
-    std::unique_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
+    const PartonSampler& sampler(PartonSampler::Side) const;  ///< Single-beam parton sampler
 
   private:
-    proc::FactorisedProcess* proc_{nullptr};  //NOT owning
+    proc::FactorisedProcess& process();              ///< Consumer process object
+    const proc::FactorisedProcess& process() const;  ///< Const-qualified consumer process object
+
+    std::array<std::unique_ptr<PartonSampler>, 2> samplers_;  ///< Positive- and negative-z single-beam samplers
+    proc::FactorisedProcess* proc_{nullptr};                  //NOT owning
   };
 }  // namespace cepgen
 
