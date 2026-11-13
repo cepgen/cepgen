@@ -19,7 +19,6 @@
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -102,9 +101,7 @@ int main(int argc, char* argv[]) {
       proc += "<process:'a a > mu- mu+'";
     pars.setProcess(cepgen::ProcessFactory::get().build(
         proc,
-        cepgen::ParametersList().set(
-            "kinematicsGenerator",
-            cepgen::PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4").parameters())));
+        cepgen::ParametersList().set<std::string>("partonsGenerator", "kt")));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 11})
                                                   .set<vector<double> >("pz", {7000., 50.})
