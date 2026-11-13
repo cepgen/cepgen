@@ -48,6 +48,40 @@ extern int __elasticphotonphotonflux_MOD_nuclearz_beam2 __attribute__((weak));
 }
 
 namespace gammaUPC {
+  std::ostream& operator<<(std::ostream& os, const BeamsContent& content) {
+    switch (content) {
+      case BeamsContent::none:
+      default:
+        return os << "none (pp mode)";
+      case BeamsContent::heavyion_cb:
+        return os << "to_heavyion_pdg common block";
+      case BeamsContent::module_var:
+        return os << "ElasticPhotonPhotonFlux module variables";
+    };
+  }
+
+  BeamsContent setBeamsContent(const std::array<int, 2>& z, const std::array<int, 2>& a) {
+    if (&to_heavyion_pdg_) {  // (nb_proton, nb_neutron) = (1, 0) for protons
+      for (size_t i = 0; i < 2; ++i)
+        to_heavyion_pdg_.nb_proton[i] = z[i], to_heavyion_pdg_.nb_neutron[i] = a[i] - z[i];
+      return BeamsContent::heavyion_cb;
+    }
+    if (&__elasticphotonphotonflux_MOD_nucleara_beam1 && &__elasticphotonphotonflux_MOD_nucleara_beam2 &&
+        &__elasticphotonphotonflux_MOD_nuclearz_beam1 && &__elasticphotonphotonflux_MOD_nuclearz_beam2) {
+      // convention in these versions: A = Z = 0 for a proton beam
+      __elasticphotonphotonflux_MOD_nucleara_beam1 = a[0] > 1 ? a[0] : 0;
+      __elasticphotonphotonflux_MOD_nuclearz_beam1 = a[0] > 1 ? z[0] : 0;
+      __elasticphotonphotonflux_MOD_nucleara_beam2 = a[1] > 1 ? a[1] : 0;
+      __elasticphotonphotonflux_MOD_nuclearz_beam2 = a[1] > 1 ? z[1] : 0;
+      return BeamsContent::module_var;
+    }
+    if (a[0] > 1 || a[1] > 1)
+      throw CG_FATAL("gammaUPC:setBeamsContent")
+          << "Could not find any way to pass the ions content to this gammaUPC version (neither to_heavyion_pdg common "
+             "block nor nuclearA_beamN/nuclearZ_beamN module variables).";
+    return BeamsContent::none;
+  }
+
   double photonFluxP(double x, double gamma) {
     const auto flux = __elasticphotonphotonflux_MOD_photonflux_proton_edff_nob(x, gamma);
     CG_DEBUG_LOOP("gammaUPC:photonFluxP")

@@ -20,6 +20,7 @@
 #define CepGenGammaUPC_GammaUPCInterface_h
 
 #include <array>
+#include <iosfwd>
 
 namespace gammaUPC {
   struct to_collider_t {
@@ -34,6 +35,12 @@ namespace gammaUPC {
 extern "C" {
 extern gammaUPC::to_collider_t to_collider_;
 }
+
+namespace gammaUPC {
+  enum struct BeamsContent { none = 0, heavyion_cb, module_var };
+  std::ostream& operator<<(std::ostream&, const BeamsContent&);
+  BeamsContent setBeamsContent(const std::array<int, 2>& z, const std::array<int, 2>& a);
+}  // namespace gammaUPC
 
 namespace gammaUPC {
   enum struct HeavyIonMode { HardSphere, WoodsSaxon };
