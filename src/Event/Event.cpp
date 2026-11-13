@@ -454,7 +454,8 @@ namespace cepgen {
           for (size_t i = 0; i < mothers.size(); ++i)
             try {
               oss_pdg << delim << static_cast<PDG::Id>(event(*std::next(mothers.begin(), i)).pdgId()), delim = "/";
-            } catch (const Exception&) {
+            } catch (const Exception& exc) {  // unknown particle: fall back on the integer PDG id
+              exc.handled();
               oss_pdg << delim << event(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
             }
           os << utils::format("\n %2d\t\t   %-7s", particle.id(), oss_pdg.str().c_str());
@@ -464,7 +465,8 @@ namespace cepgen {
           else  // single particle
             try {
               oss_pdg << static_cast<PDG::Id>(particle.pdgId());
-            } catch (const Exception&) {
+            } catch (const Exception& exc) {  // unknown particle
+              exc.handled();
               oss_pdg << "?";
             }
           os << utils::format("\n %2d\t%-+10d %-7s", particle.id(), particle.integerPdgId(), oss_pdg.str().c_str());

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 namespace cepgen::python {
   class Error final : public Exception {
   public:
-    explicit Error(const char*, const char*, short) noexcept;
+    explicit Error(const char*, const char*, int);
 
   private:
     PyObject* ptype_{nullptr};

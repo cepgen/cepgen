@@ -120,12 +120,13 @@ namespace cepgen::mg5amc {
               << "Error while parsing the MadGraph python output for particle '" << particle_name << "' of model '"
               << physics_model << ". Python output:\n"
               << py_output;
-      } catch (const Exception&) {
+      } catch (const Exception& exc) {
         switch (particle_name[particle_name.size() - 1]) {
           case '+':
           case '-':
             throw;
-          default:
+          default:  // retry with a charged particle name
+            exc.handled();
             return describeParticle(particle_name + "+", physics_model);
         }
       }

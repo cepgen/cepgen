@@ -47,7 +47,7 @@ namespace cepgen::utils {
       try {
         return parser_.Eval();
       } catch (const mu::Parser::exception_type& e) {
-        throw CG_WARNING("FunctionalMuParser")
+        throw CG_ERROR("FunctionalMuParser")
             << "Failed to evaluate the function\n\t" << expression_ << "\n\t" << std::string(e.GetPos(), '-') + "^"
             << "\n\t" << e.GetMsg();
       }
