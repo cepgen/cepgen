@@ -86,12 +86,6 @@ private:
       return ParametersList().set<int>("mode", params.get<int>("polarisationStates"));
     return params.get<ParametersList>("polarisationStates");
   }
-  void prepareFactorisedPhaseSpace() override {
-    cuts::Central single_w_cuts(ParametersList{});
-    if (kinematics().cuts().central_particles.count(PDG::W) > 0)
-      single_w_cuts = kinematics().cuts().central_particles.at(PDG::W);
-    phase_space_generator_->setCentralCuts(single_w_cuts);
-  }
   double computeFactorisedMatrixElement() override {
     CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
     switch (method_) {

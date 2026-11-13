@@ -25,9 +25,6 @@
 namespace cepgen::proc {
   class FactorisedProcess;
 }
-namespace cepgen::cuts {
-  struct Central;
-}
 
 namespace cepgen {
   /// Class template to define any phase space helper process
@@ -39,8 +36,7 @@ namespace cepgen {
 
     inline virtual bool ktFactorised() const { return false; }
 
-    inline virtual void setCentralCuts(const cuts::Central&) {}  ///< Set cuts on central particles
-    virtual void initialise(proc::FactorisedProcess*) = 0;       ///< Set all process parameters
+    virtual void initialise(proc::FactorisedProcess*) = 0;  ///< Set all process parameters
 
     virtual bool generate() = 0;        ///< Generate a kinematics combination, and return a success flag
     virtual double weight() const = 0;  ///< Return the event weight for a kinematics combination
@@ -48,10 +44,6 @@ namespace cepgen {
     virtual spdgids_t partons() const = 0;          ///< List of incoming partons in kinematics
     virtual void setCentral(const spdgids_t&) = 0;  ///< Override the central particles list
     virtual spdgids_t central() const = 0;          ///< List of outgoing central particles in kinematics
-
-    // Mandelstam variables
-    virtual double that() const = 0;
-    virtual double uhat() const = 0;
   };
 }  // namespace cepgen
 
