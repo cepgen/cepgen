@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,14 +26,13 @@ namespace gammaUPC {
     std::array<double, 2> ebeam, xbk, q2fact;
     std::array<int, 2> lpp;
   };
-  struct ion_beam_t {
-    int nuclearA_beam1, nuclearA_beam2, nuclearZ_beam1, nuclearZ_beam2;
+  struct to_heavyion_pdg_t {
+    std::array<int, 2> nb_proton, nb_neutron;
   };
 }  // namespace gammaUPC
 
 extern "C" {
 extern gammaUPC::to_collider_t to_collider_;
-extern gammaUPC::ion_beam_t ion_beam_;
 }
 
 namespace gammaUPC {
