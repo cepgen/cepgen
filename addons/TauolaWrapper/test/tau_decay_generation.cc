@@ -24,7 +24,6 @@
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
@@ -61,8 +60,7 @@ int main(int argc, char* argv[]) {
   const auto configure_run = [&](const string& process_name) {
     auto process_parameters = ParametersList().set<int>("pair", (int)PDG::tau);
     if (process_name != "lpair")  // kt-factorised processes
-      process_parameters.set("kinematicsGenerator",
-                             PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4").parameters());
+      process_parameters.set<std::string>("partonsGenerator", "kt");
     gen.runParameters().setProcess(ProcessFactory::get().build(process_name, process_parameters));
     gen.runParameters().process().kinematics().setParameters(ParametersList()
                                                                  .set<vector<int> >("pdgIds", {2212, 2212})
