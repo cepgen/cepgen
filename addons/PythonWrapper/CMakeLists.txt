@@ -55,11 +55,13 @@ if(CMAKE_BUILD_UTILS)
   add_custom_target(CepGenPythonModules ALL
     DEPENDS ${MODULES_DESCRIPTOR}
     COMMENT "Generation of Python modules descriptions")
+  add_dependencies(CepGenPythonModules CepGenPython)  # the 'python' documentation generator is defined there
   add_custom_command(TARGET CepGenPythonModules POST_BUILD
     COMMAND ${CMAKE_COMMAND}
       -DMODULE_DOC_EXE=${MODULES_DESCRIPTOR}
       -DMODULE_DOC_OUTPUT=${MODULES_OUTPUT}
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake)
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})  # where CepGenAddOns.txt is looked for
   install(DIRECTORY ${MODULES_OUTPUT}
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
     COMPONENT python

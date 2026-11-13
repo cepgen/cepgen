@@ -25,7 +25,14 @@ macro(cepgen_generate_python_descriptions)
             --modules ${mod_name}
             --output "${MODULE_DIR}/${mod_name}_cfi.py"
             --quiet
-            OUTPUT_VARIABLE dummy)
+            OUTPUT_VARIABLE dummy
+            ERROR_VARIABLE error
+            RESULT_VARIABLE result)
+        if(NOT result EQUAL 0)
+            message(WARNING "Python... failed to generate the ${ARG_NAME} modules descriptions"
+                " (first failure for module '${mod_name}', exit code ${result}):\n${error}")
+            break()
+        endif()
         if(ARG_LIST_ALL)
             file(APPEND ${MODULE_DIR}/__init__.py "\nfrom .${mod_name}_cfi import *")
         endif()
