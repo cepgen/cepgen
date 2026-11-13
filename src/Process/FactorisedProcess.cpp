@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@ FactorisedProcess::FactorisedProcess(const ParametersList& params)
     : Process(params),
       phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(steer<ParametersList>("kinematicsGenerator"))),
       symmetrise_(steer<bool>("symmetrise")),
-      store_alphas_(steer<bool>("storeAlphas")) {}
+      store_alphas_(steer<bool>("storeAlphas")),
+      randomise_charge_(steer<bool>("randomiseCharge")) {}
 
 FactorisedProcess::FactorisedProcess(const ParametersList& params, const spdgids_t& central_particles)
     : FactorisedProcess(params) {
@@ -47,6 +48,7 @@ FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
       phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(proc.phase_space_generator_->parameters())),
       symmetrise_(proc.symmetrise_),
       store_alphas_(proc.store_alphas_),
+      randomise_charge_(proc.randomise_charge_),
       central_particles_(proc.central_particles_) {}
 
 void FactorisedProcess::setCentral(const spdgids_t& central_particles) {
@@ -119,6 +121,16 @@ double FactorisedProcess::computeWeight() {
 }
 
 void FactorisedProcess::fillKinematics() {
+  {  // central system
+    auto central_system = event()[Particle::Role::CentralSystem];
+    if (randomise_charge_ && central_system.size() == 2) {  // randomise the charge of outgoing system
+      const auto sign = random_generator_->uniformInt(0, 1) == 1;
+      central_system[0].get().setAntiparticle(sign);
+      central_system[1].get().setAntiparticle(!sign);
+    }
+    for (auto& central_particle : central_system)
+      central_particle.get().setStatus(Particle::Status::FinalState);
+  }
   if (symmetrise_ && random_generator_->uniformInt(0, 1) == 1) {  // symmetrise the el-in and in-el cases
     std::swap(pX(), pY());
     std::swap(q1(), q2());
@@ -171,9 +183,17 @@ utils::RandomGenerator& FactorisedProcess::randomGenerator() const {
   return *random_generator_;
 }
 
-double FactorisedProcess::that() const { return phase_space_generator_->that(); }
+double FactorisedProcess::that() const {
+  if (central_particles_.size() != 2)
+    throw CG_FATAL("FactorisedProcess:that") << "t-hat is only defined for a two-particle central system.";
+  return 0.5 * ((q1() - pc(0)).mass2() + (q2() - pc(1)).mass2());
+}
 
-double FactorisedProcess::uhat() const { return phase_space_generator_->uhat(); }
+double FactorisedProcess::uhat() const {
+  if (central_particles_.size() != 2)
+    throw CG_FATAL("FactorisedProcess:uhat") << "u-hat is only defined for a two-particle central system.";
+  return 0.5 * ((q1() - pc(1)).mass2() + (q2() - pc(0)).mass2());
+}
 
 bool FactorisedProcess::validatedBeamKinematics() {
   const auto invariant_mass = (q1() + q2()).mass();
@@ -217,6 +237,7 @@ ParametersDescription FactorisedProcess::description() {
                .setDescription("Parton fluxes modelling"));
   desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4"));
   desc.add("symmetrise", false).setDescription("Symmetrise along z the central system?");
+  desc.add("randomiseCharge", true).setDescription("randomise the charges of the central system (if charged)?");
   desc.add("storeAlphas", false).setDescription("store electromagnetic & strong coupling constants in event content?");
   desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
       .setDescription("random number generator engine");

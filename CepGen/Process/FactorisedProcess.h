@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ namespace cepgen::proc {
     void prepareKinematics() final;
     void setCentral(const spdgids_t&);  ///< Set central final state particles
 
-    virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
+    virtual void prepareFactorisedPhaseSpace() {}  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
     virtual void computeBeamKinematics();                 ///< Compute the outgoing protons (or remnants) kinematics
 
@@ -62,6 +62,7 @@ namespace cepgen::proc {
     const std::unique_ptr<PhaseSpaceGenerator> phase_space_generator_;
     const bool symmetrise_;
     const bool store_alphas_;
+    const bool randomise_charge_;
 
   private:
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
