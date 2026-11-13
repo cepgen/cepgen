@@ -34,8 +34,8 @@ namespace {
 
 /// State shared by all copies of an exception
 struct Exception::State {
-  State(const std::string& module, const std::string& from, Type type, const std::string& file, int lineno) noexcept
-      : message(module, from, LoggedMessage::MessageType::undefined, file, lineno), type(type) {}
+  State(const std::string& module_name, const std::string& from, Type type, const std::string& file, int lineno) noexcept
+      : message(module_name, from, LoggedMessage::MessageType::undefined, file, lineno), type(type) {}
   /// Last copy of the exception is gone: report it if nobody did it before, and stop the process if it is fatal
   ~State() {
     if (type >= Type::error && !reported.exchange(true))

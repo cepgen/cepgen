@@ -167,8 +167,8 @@ namespace cepgen {
     int line_num_;                ///< Line number
 
   private:
-    MessageType type_;    ///< Message type
-    std::string module_;  ///< Exception classification
+    MessageType type_;         ///< Message type
+    std::string module_name_;  ///< Exception classification
   };
 
   /// Placeholder for debugging messages if logging threshold is not reached

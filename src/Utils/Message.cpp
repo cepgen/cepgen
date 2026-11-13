@@ -34,9 +34,12 @@ void Message::write(std::ostream& os, const std::string& formatted_message) noex
   }
 }
 
-LoggedMessage::LoggedMessage(
-    const std::string& module, const std::string& from, MessageType type, const std::string& file, int lineno) noexcept
-    : from_(from), file_(file), line_num_(lineno), type_(type), module_(module) {}
+LoggedMessage::LoggedMessage(const std::string& module_name,
+                             const std::string& from,
+                             MessageType type,
+                             const std::string& file,
+                             int lineno) noexcept
+    : from_(from), file_(file), line_num_(lineno), type_(type), module_name_(module_name) {}
 
 LoggedMessage::~LoggedMessage() noexcept {
   if (type_ != MessageType::undefined)
