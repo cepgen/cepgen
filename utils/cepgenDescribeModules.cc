@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 
 #include <fstream>
+#include <iostream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
@@ -40,22 +41,30 @@ int main(int argc, char* argv[]) {
 
   if (quiet)
     CG_LOG_LEVEL(nothing);
-  cepgen::initialise();
+  try {
+    cepgen::initialise();
 
-  if (const auto documentation_generator = cepgen::DocumentationGeneratorFactory::get().build(
-          doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
-      documentation_generator) {
-    if (output_file.empty()) {
-      if (quiet)
-        CG_LOG_LEVEL(information);
-      CG_LOG << documentation_generator->describe();
-    } else {
-      ofstream of(output_file);
-      of << documentation_generator->describe();
-      of.close();
-      CG_INFO("main") << "Documentation written in '" << output_file << "'.";
+    if (const auto documentation_generator = cepgen::DocumentationGeneratorFactory::get().build(
+            doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
+        documentation_generator) {
+      if (output_file.empty()) {
+        if (quiet)
+          CG_LOG_LEVEL(information);
+        CG_LOG << documentation_generator->describe();
+      } else {
+        ofstream of(output_file);
+        of << documentation_generator->describe();
+        of.close();
+        CG_INFO("main") << "Documentation written in '" << output_file << "'.";
+      }
+      return 0;
     }
-    return 0;
+  } catch (const cepgen::Exception& e) {
+    if (quiet)  // logger output is disabled: keep the standard output clean, and report on the error stream
+      std::cerr << e.what() << std::endl;
+    else
+      e.dump();
+    return EXIT_FAILURE;
   }
   return -1;
 }
