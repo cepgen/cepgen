@@ -4,8 +4,11 @@ from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator as _gen
 
 
+# gammaUPC single-beam photon flux (proton beam at 6.5 TeV)
+gammaUPC_flux = cepgen.Module('gammaUPC', pdgId = PDG.proton, gamma = 6500. / 0.938272)
+
 process = coll.process.clone('pptoww',
-    kinematicsGenerator = cepgen.Module('gammaUPC:2to4'),
+    partonsGenerator = 'coll',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         method = 0,  # on-shell (0) or off-shell (1) formula
@@ -14,7 +17,7 @@ process = coll.process.clone('pptoww',
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
         #partonFluxes = (coll.ProtonFlux.LHAPDFLUXlep, coll.ProtonFlux.LHAPDFLUXlep),
-        partonFluxes = (coll.ProtonFlux.PhotonElastic, coll.ProtonFlux.PhotonElastic),
+        partonFluxes = (gammaUPC_flux, gammaUPC_flux),
         cmEnergy = 13.e3,
     ),
     outKinematics = coll.process.outKinematics.clone(
