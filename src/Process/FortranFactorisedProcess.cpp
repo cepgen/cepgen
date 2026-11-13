@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2025  Laurent Forthomme
+ *  Copyright (C) 2018-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params,
   if (!func_)
     throw CG_FATAL("FortranFactorisedProcess")
         << "Invalid (Fortran) function given to the factorised process interface.";
-  if (phase_space_generator_->central().empty())  // event content was not yet initialised
+  if (central().empty())  // event content was not yet initialised
     setCentral(make_pdgids_pair(steer<ParticleProperties>("pair").pdgid));
 }
 
@@ -144,8 +144,8 @@ void FortranFactorisedProcess::prepareFactorisedPhaseSpace() {
     genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
 
   // intermediate partons information
-  genparams_.iflux1 = static_cast<int>(phase_space_generator_->partons().at(0));
-  genparams_.iflux2 = static_cast<int>(phase_space_generator_->partons().at(1));
+  genparams_.iflux1 = static_cast<int>(partons().at(0));
+  genparams_.iflux2 = static_cast<int>(partons().at(1));
 }
 
 double FortranFactorisedProcess::computeFactorisedMatrixElement() {

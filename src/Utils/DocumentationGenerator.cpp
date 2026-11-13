@@ -33,8 +33,6 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
-#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -73,8 +71,6 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
                "Longitudinal/transverse cross section ratio parameterisations",
                "",
                cepgen::SigmaRatiosFactory::get());
-  add_category("partmap"s, "Partons generation algorithm", "", cepgen::PartonsPhaseSpaceGeneratorFactory::get());
-  add_category("psmap"s, "Phase space mapper", "", cepgen::PhaseSpaceGeneratorFactory::get());
   add_category("collflux"s, "Collinear parton flux modelling", "", cepgen::CollinearFluxFactory::get());
   add_category("ktflux"s, "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
   add_category("alphaem"s, "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());

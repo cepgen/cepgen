@@ -19,7 +19,13 @@
 #ifndef CepGen_Process_FactorisedProcess_h
 #define CepGen_Process_FactorisedProcess_h
 
-#include "CepGen/Process/PhaseSpaceGenerator.h"
+#include <array>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "CepGen/Process/CentralPhaseSpace.h"
+#include "CepGen/Process/PartonSampler.h"
 #include "CepGen/Process/Process.h"
 
 namespace cepgen::utils {
@@ -28,7 +34,9 @@ namespace cepgen::utils {
 
 namespace cepgen::proc {
   /// Generic parton emission-factorised process
-  /// \note 0 to 2 dimensions may be used for the scattered diffractive system('s) invariant mass definition.
+  /// \note The phase space is built from one single-beam parton sampler per incoming beam (parton flux and its own
+  ///  variables), and a central system phase space mapper chosen from the central system multiplicity.
+  ///  0 to 2 dimensions may be used for the scattered diffractive system('s) invariant mass definition.
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2023
   class FactorisedProcess : public Process {
@@ -45,6 +53,12 @@ namespace cepgen::proc {
     bool validatedBeamKinematics();
     utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
 
+    inline const spdgids_t& central() const { return central_particles_; }  ///< Central system content
+    spdgids_t partons() const;  ///< Incoming partons PDG ids (once the process kinematics is prepared)
+    /// Single-beam parton sampler (once the process kinematics is prepared)
+    const PartonSampler& partonSampler(PartonSampler::Side) const;
+    bool partonsKtFactorised() const;  ///< Do both incoming partons carry a primordial kT?
+
   protected:
     void addEventContent() override;
     void prepareKinematics() final;
@@ -53,18 +67,31 @@ namespace cepgen::proc {
     virtual void prepareFactorisedPhaseSpace() {}  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
     virtual void computeBeamKinematics();                 ///< Compute the outgoing protons (or remnants) kinematics
+    /// Build the central system phase space mapper (by default, chosen from the central system multiplicity)
+    virtual std::unique_ptr<CentralPhaseSpace> buildCentralPhaseSpace() const;
 
     //--- Mandelstam variables
     double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
     double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
-    /// Kinematic variables generator for the phase space coverage
-    const std::unique_ptr<PhaseSpaceGenerator> phase_space_generator_;
     const bool symmetrise_;
     const bool store_alphas_;
     const bool randomise_charge_;
 
   private:
+    static std::string partonsGeneratorType(const ParametersList&);        ///< Partons generator type ("kt" or "coll")
+    static ParametersList partonSamplerParameters(const ParametersList&);  ///< Steering for parton samplers
+    std::unique_ptr<PartonSampler> buildPartonSampler(PartonSampler::Side) const;  ///< Build one beam's sampler
+    bool generatePhaseSpace();        ///< Generate the incoming partons and central system kinematics
+    double phaseSpaceWeight() const;  ///< Incoming partons fluxes and central system phase space weight
+
+    const std::string partons_generator_;  ///< Default incoming partons generator type ("kt" or "coll")
+    const ParametersList sampler_params_;  ///< Steering parameters for the single-beam parton samplers
+    std::array<std::unique_ptr<PartonSampler>, 2> parton_samplers_;  ///< Positive- and negative-z parton samplers
+    std::unique_ptr<CentralPhaseSpace> central_phase_space_;         ///< Central system phase space mapper
+    std::vector<Momentum> central_momenta_;                          ///< Central particles momenta buffer
+    double central_weight_{0.};                                      ///< Central system phase space weight
+
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
     std::unique_ptr<utils::RandomGenerator> random_generator_;  ///< Process-local random number generator engine
 
