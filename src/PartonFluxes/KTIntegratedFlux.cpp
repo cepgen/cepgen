@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2025  Laurent Forthomme
+ *  Copyright (C) 2018-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ public:
   bool fragmenting() const final { return flux_->fragmenting(); }
   spdgid_t partonPdgId() const final { return flux_->partonPdgId(); }
   double mass2() const final { return flux_->mass2(); }
+  void initialise(const Beam& beam) override { flux_->initialise(beam); }
 
   static ParametersDescription description() {
     auto desc = CollinearFlux::description();
