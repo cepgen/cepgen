@@ -84,7 +84,9 @@ int main(int argc, char* argv[]) {
   const auto beam_energy = 0.5 * sqrt_s, gamma = beam_energy / PDG::get().mass(PDG::proton);
   to_collider_.ebeam = {beam_energy, beam_energy};
   to_collider_.lpp = {2, 2};
-  CG_DEBUG("gammaupc_fluxes") << "Beams content passed through: " << gammaUPC::setBeamsContent({1, 1}, {1, 1}) << ".";
+  // NOTE: never call it within a logging macro, as its stream may not be evaluated
+  const auto beams_content = gammaUPC::setBeamsContent({1, 1}, {1, 1});
+  CG_DEBUG("gammaupc_fluxes") << "Beams content passed through: " << beams_content << ".";
 
   const auto single_fluxes = [&gamma](double x1, double x2) {
     return gammaUPC::photonFluxP(x1, gamma) * gammaUPC::photonFluxP(x2, gamma);

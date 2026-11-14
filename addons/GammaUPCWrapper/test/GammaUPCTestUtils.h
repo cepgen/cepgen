@@ -19,6 +19,7 @@
 #ifndef CepGenGammaUPC_test_GammaUPCTestUtils_h
 #define CepGenGammaUPC_test_GammaUPCTestUtils_h
 
+#include <CepGen/Core/Exception.h>
 #include <CepGen/Event/Event.h>
 #include <CepGen/Physics/HeavyIon.h>
 #include <CepGen/Physics/PDG.h>
@@ -83,6 +84,16 @@ namespace gammaUPC::test {
     to_collider_.lpp = {2, 2};
     return setBeamsContent({beam1.z, beam2.z}, {beam1.a, beam2.a});
   }
+
+  /// Within its scope, fatal exceptions do not terminate the process once caught (e.g. to test them)
+  class ScopedNonTerminatingFatals {
+  public:
+    ScopedNonTerminatingFatals() : previous_handler_(cepgen::Exception::setFatalHandler([] {})) {}
+    ~ScopedNonTerminatingFatals() { cepgen::Exception::setFatalHandler(previous_handler_); }
+
+  private:
+    const cepgen::Exception::FatalHandler previous_handler_;
+  };
 
   inline std::string label(double v1, double v2) { return "(" + std::to_string(v1) + ", " + std::to_string(v2) + ")"; }
 }  // namespace gammaUPC::test

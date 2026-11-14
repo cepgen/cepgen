@@ -54,7 +54,10 @@ int main(int argc, char* argv[]) {
 
   const auto lead = BeamSpec::ion(208, Element::Pb, energy_n);
   const auto mode = gammaUPC::HeavyIonMode::HardSphere;
-  CG_DEBUG("gammaupc_fluxes_aa") << "Beams content passed through: " << configure(lead, lead) << ".";
+  // NOTE: never call it within a logging macro, as its stream may not be evaluated
+  const auto beams_content = configure(lead, lead);
+  CG_DEBUG("gammaupc_fluxes_aa") << "Beams content passed through: " << beams_content << ".";
+  CG_TEST(beams_content != gammaUPC::BeamsContent::none, "ions content passed to gammaUPC");
 
   const auto survival = [&mode](double x1, double x2) {
     const auto flux_no_had = gammaUPC::twoPhotonFluxAB(x1, x2, 1, mode);
