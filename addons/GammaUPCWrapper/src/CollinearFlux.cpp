@@ -36,6 +36,8 @@ namespace gammaUPC {
   public:
     explicit CollinearFlux(const ParametersList& params)
         : cepgen::CollinearFlux(params),
+          form_factor_(steerAs<int, FormFactor>("formFactor")),
+          proton_ff_correction_(steer<bool>("protonFFCorrection")),
           q2_range_(steer<Limits>("q2range")),
           inv_log_q2_range_(1. / std::log(q2_range_.max() / q2_range_.min())) {
       if (q2_range_.min() <= 0. || q2_range_.max() <= q2_range_.min())
@@ -45,12 +47,19 @@ namespace gammaUPC {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("gammaUPC single-beam photon flux");
+      desc.addAs<int, FormFactor>("formFactor", FormFactor::EDFF)
+          .setDescription("photon flux modelling (process-wide gammaUPC setting)")
+          .allow(static_cast<int>(FormFactor::EDFF), "electric dipole form factor")
+          .allow(static_cast<int>(FormFactor::ChFF), "charge form factor (protons only for this flux)");
+      desc.add("protonFFCorrection", false)
+          .setDescription("include the proton form factor correction beyond the dipole (ChFF only)?");
       desc.add("q2range", Limits{1.e-10, 5.})
           .setDescription("parton virtuality range sampled by the collinear parton sampler (GeV^2)");
       return desc;
     }
 
     void initialise(const Beam& beam) override {  // beam particle content and Lorentz factor from beam kinematics
+      setFormFactor(form_factor_, proton_ff_correction_);  // before any flux evaluation (cached grids)
       const auto& momentum = beam.momentum();
       if (mass2_ = momentum.mass2(); mass2_ <= 0. || (gamma_ = momentum.energy() / momentum.mass()) <= 1.)
         throw CG_FATAL("gammaUPC:CollinearFlux") << "Invalid beam kinematics: " << momentum << ".";
@@ -59,9 +68,13 @@ namespace gammaUPC {
         z_ = static_cast<double>(hi.Z);
         a_ = static_cast<double>(hi.A);
         radius_fm_ = hi.radius() * 1.e15;  // m -> fm
+        if (form_factor_ != FormFactor::EDFF)
+          throw CG_FATAL("gammaUPC:CollinearFlux")
+              << "Only the EDFF modelling is available for single-photon nucleus fluxes (" << form_factor_
+              << " requested).";
       }
       CG_DEBUG("gammaUPC:CollinearFlux") << "Initialised for beam " << beam.integerPdgId() << " with gamma=" << gamma_
-                                         << (heavy_ion_ ? " (heavy ion)" : "") << ".";
+                                         << (heavy_ion_ ? " (heavy ion)" : "") << ", " << form_factor_ << " modelling.";
     }
 
     bool fragmenting() const override { return false; }
@@ -75,10 +88,12 @@ namespace gammaUPC {
         return 0.;
       if (heavy_ion_)
         return a_ * x * photonFluxA(x, gamma_, z_, radius_fm_) * inv_log_q2_range_;
-      return x * photonFluxP(x, gamma_) * inv_log_q2_range_;
+      return x * photonFluxP(x, gamma_, form_factor_) * inv_log_q2_range_;
     }
 
   private:
+    const FormFactor form_factor_;
+    const bool proton_ff_correction_;
     const Limits q2_range_;
     const double inv_log_q2_range_;
 

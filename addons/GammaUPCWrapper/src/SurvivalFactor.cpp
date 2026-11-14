@@ -35,7 +35,9 @@ namespace gammaUPC {
     explicit SurvivalFactor(const ParametersList& params)
         : cepgen::SurvivalFactor(params),
           force_p_non_hadronisation_(steer<bool>("forcePNonHadronisation")),
-          heavy_ion_mode_(steerAs<int, HeavyIonMode>("heavyIonMode")) {}
+          heavy_ion_mode_(steerAs<int, HeavyIonMode>("heavyIonMode")),
+          form_factor_(steerAs<int, FormFactor>("formFactor")),
+          proton_ff_correction_(steer<bool>("protonFFCorrection")) {}
 
     static ParametersDescription description() {
       auto desc = cepgen::SurvivalFactor::description();
@@ -47,6 +49,12 @@ namespace gammaUPC {
           .setDescription("type of modelling for the heavy ion parton emission")
           .allow(static_cast<int>(HeavyIonMode::HardSphere), "hard sphere model")
           .allow(static_cast<int>(HeavyIonMode::WoodsSaxon), "Woods-Saxon model");
+      desc.addAs<int, FormFactor>("formFactor", FormFactor::EDFF)
+          .setDescription("photon flux modelling (process-wide gammaUPC setting)")
+          .allow(static_cast<int>(FormFactor::EDFF), "electric dipole form factor")
+          .allow(static_cast<int>(FormFactor::ChFF), "charge form factor (Woods-Saxon heavy ion modelling only)");
+      desc.add("protonFFCorrection", false)
+          .setDescription("include the proton form factor correction beyond the dipole (ChFF only)?");
       return desc;
     }
 
@@ -89,6 +97,11 @@ namespace gammaUPC {
         beams_mode_ = heavy_ion.at(1) ? BeamsMode::AB : BeamsMode::Ap;
       else
         beams_mode_ = heavy_ion.at(1) ? BeamsMode::pB : BeamsMode::pp;
+      if (form_factor_ == FormFactor::ChFF && beams_mode_ != BeamsMode::pp &&
+          heavy_ion_mode_ != HeavyIonMode::WoodsSaxon)
+        throw CG_FATAL("gammaUPC:SurvivalFactor")
+            << "ChFF photon fluxes are only available with the Woods-Saxon heavy ion modelling in gammaUPC.";
+      setFormFactor(form_factor_, proton_ff_correction_);  // before any flux evaluation (cached grids)
       if (beams_mode_ == BeamsMode::Ap) {  // gammaUPC expects proton as first beam for asymmetric collisions
         std::swap(z[0], z[1]);
         std::swap(a[0], a[1]);
@@ -121,6 +134,8 @@ namespace gammaUPC {
 
     const bool force_p_non_hadronisation_;
     const HeavyIonMode heavy_ion_mode_;
+    const FormFactor form_factor_;
+    const bool proton_ff_correction_;
 
     // beams information, retrieved from the first event
     mutable bool initialised_{false};

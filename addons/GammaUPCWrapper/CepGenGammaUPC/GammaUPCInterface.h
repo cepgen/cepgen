@@ -43,8 +43,18 @@ namespace gammaUPC {
 }  // namespace gammaUPC
 
 namespace gammaUPC {
+  /// Photon flux modelling
+  enum struct FormFactor { EDFF = 0, ChFF = 1 };
+  std::ostream& operator<<(std::ostream&, const FormFactor&);
+  /// Select the photon flux modelling for all gammaUPC fluxes (to be done before first evaluation)
+  void setFormFactor(FormFactor, bool proton_ff_correction = false);
+  FormFactor formFactor();  ///< Currently selected photon flux modelling
+
   enum struct HeavyIonMode { HardSphere, WoodsSaxon };
+  /// Single-photon proton flux (no impact parameter dependence), using the currently selected modelling
   double photonFluxP(double x, double gamma);
+  /// Single-photon proton flux (no impact parameter dependence), for a given modelling
+  double photonFluxP(double x, double gamma, FormFactor form_factor);
   double photonFluxA(double a, double gamma, double z, double ra);
   double twoPhotonFluxPP(double x1, double x2, int force_p_no_hadronisation);
   double twoPhotonFluxPA(double x1, double x2, int force_p_no_hadronisation, HeavyIonMode mode);
