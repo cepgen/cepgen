@@ -33,13 +33,20 @@ using namespace std::string_literals;
 int main(int argc, char* argv[]) {
   int num_gen, pair;
   string filename, plotter;
-  double sqrts, ptmin, qtmax;
+  double sqrts, ptmin, qtmax, mu0, ff_power, sf_gp, sf_pp;
+  bool swap_fluxes;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("pair,q", "PDG id of the produced quark flavour", &pair, 4 /* charm */)
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 50'000)
       .addOptionalArgument("sqrts,s", "centre of mass energy (GeV)", &sqrts, 13.6e3)
       .addOptionalArgument("ptmin", "minimal quark transverse momentum (GeV)", &ptmin, 3.)
       .addOptionalArgument("qtmax", "maximal parton transverse virtuality (GeV)", &qtmax, 50.)
+      .addOptionalArgument("mu0", "pomeron-quark vertex form factor cutoff (GeV); <= 0 for point-like", &mu0, 1.2)
+      .addOptionalArgument("ff-power", "power p of the pomeron vertex form factor (beta^2 F^p)", &ff_power, 2.)
+      .addOptionalArgument(
+          "swap-fluxes,S", "place the pomeron on the positive-z beam (gamma-pomeron mode)", &swap_fluxes, false)
+      .addOptionalArgument("sf-gp", "constant gap survival factor for the gamma-pomeron mode", &sf_gp, 1.)
+      .addOptionalArgument("sf-pp", "constant gap survival factor for the pomeron-pomeron mode", &sf_pp, 1.)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument("filename,f", "output base filename", &filename, "validation/comparison_qq_pomeron_kt_")
       .parse();
@@ -92,19 +99,34 @@ int main(int argc, char* argv[]) {
           .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)));
 
   // incoming parton types, defined for each beam
-  const vector<std::pair<string, vector<string> > > samples{{"$\\gamma\\gamma$", {"BudnevElastic", "BudnevElastic"}},
-                                                            {"$\\gamma IP$", {"BudnevElastic", "PomeronElastic"}},
-                                                            {"$IPIP$", {"PomeronElastic", "PomeronElastic"}}};
+  const auto photon = cepgen::ParametersList().setName("BudnevElastic"),
+             pomeron = cepgen::ParametersList()
+                           .setName("PomeronElastic")
+                           .set<double>("mu0", mu0)
+                           .set<double>("formFactorPower", ff_power);
+  struct sample_t {
+    string name;
+    vector<cepgen::ParametersList> fluxes;
+    double survival;  ///< constant gap survival factor (1 = no correction)
+  };
+  const vector<sample_t> samples{
+      {"$\\gamma\\gamma$", {photon, photon}, 1.},
+      {swap_fluxes ? "$IP\\gamma$" : "$\\gamma IP$",
+       swap_fluxes ? vector{pomeron, photon} : vector{photon, pomeron},
+       sf_gp},
+      {"$IPIP$", {pomeron, pomeron}, sf_pp}};
 
   auto& pars = gen.runParameters();
-  for (const auto& [sample_name, fluxes] : samples) {
-    pars.setProcess(cepgen::ProcessFactory::get().build(
-        "pptoff", cepgen::ParametersList().set<string>("partonsGenerator", "kt").set<int>("pair", pair)));
+  for (const auto& [sample_name, fluxes, survival] : samples) {
+    auto proc_params = cepgen::ParametersList().set<string>("partonsGenerator", "kt").set<int>("pair", pair);
+    if (survival != 1.)
+      proc_params.set("survivalFactor", cepgen::ParametersList().setName("constant").set<double>("value", survival));
+    pars.setProcess(cepgen::ProcessFactory::get().build("pptoff", proc_params));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})
                                                   .set<double>("sqrtS", sqrts)
                                                   .set<int>("mode", 1 /* elastic-elastic */)
-                                                  .set<vector<string> >("partonFluxes", fluxes)
+                                                  .set<vector<cepgen::ParametersList> >("partonFluxes", fluxes)
                                                   .set<double>("ptmin", ptmin)
                                                   .set<cepgen::Limits>("qt", cepgen::Limits{0., qtmax}));
     comp.loop(sample_name);
