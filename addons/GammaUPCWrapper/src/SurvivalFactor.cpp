@@ -40,7 +40,7 @@ namespace gammaUPC {
     static ParametersDescription description() {
       auto desc = cepgen::SurvivalFactor::description();
       desc.setDescription("gammaUPC two-photon fluxes non-overlap correction");
-      desc.add("forcePNonHadronisation", true)
+      desc.add("forcePNonHadronisation", false)
           .setDescription("disable the hadronisation of beam remnants after parton emission?");
       desc.addAs<int, HeavyIonMode>("heavyIonMode", HeavyIonMode::HardSphere)
           .setDescription("type of modelling for the heavy ion parton emission")
