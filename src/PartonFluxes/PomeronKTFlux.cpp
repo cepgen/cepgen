@@ -47,6 +47,7 @@ public:
 
   bool fragmenting() const override { return false; }
   double mass2() const override { return mp2_; }
+  double beta2() const override { return beta2_; }
   spdgid_t partonPdgId() const override { return PDG::pomeron; }
 
   double fluxMX2(double x, double kt2, double) const override {
@@ -66,6 +67,9 @@ private:
     return (four_m2 - 2.8 * t) / (four_m2 - t) * dipole * dipole;
   }
 
-  const double beta2_, epsilon_, alpha_prime_, f1_scale_;
+  const double beta2_;
+  const double epsilon_;
+  const double alpha_prime_;
+  const double f1_scale_;
 };
 REGISTER_KT_FLUX("PomeronElastic", 30, PomeronKTFlux);

@@ -40,7 +40,6 @@ public:
   explicit PPtoFF(const ParametersList& params)
       : cepgen::proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
-        pomeron_beta2_(steer<double>("pomeronBeta2")),
         osp_(steer<ParametersList>("offShellParameters")) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(*this); }
@@ -70,7 +69,8 @@ private:
       throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
     mf2_ = cs_prop.mass * cs_prop.mass;
     qf2_ = std::pow(cs_prop.integerCharge() * (1. / 3), 2);
-    const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id) -> std::function<double(double)> {
+    const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id,
+                                                    PartonSampler::Side side) -> std::function<double(double)> {
       switch (parton_id) {
         case PDG::gluon: {
           if (cs_prop.colours == 0)
@@ -85,7 +85,7 @@ private:
           if (method_ != Mode::offShell)
             throw CG_FATAL("PPtoFF:prepare")
                 << "Pomeron-initiated modes are only defined for the off-shell matrix element.";
-          return [this](double) { return pomeron_beta2_; };
+          return [this, &side](double) { return partonSampler(side).flux().beta2(); };
         }
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
@@ -93,8 +93,8 @@ private:
     };
     const auto parton1_id = event().oneWithRole(Particle::Role::Parton1).pdgId(),
                parton2_id = event().oneWithRole(Particle::Role::Parton2).pdgId();
-    g_part1_ = generate_coupling(parton1_id);
-    g_part2_ = generate_coupling(parton2_id);
+    g_part1_ = generate_coupling(parton1_id, PartonSampler::Side::positive);
+    g_part2_ = generate_coupling(parton2_id, PartonSampler::Side::negative);
     // sum over final-state colours for colour-neutral (photon/pomeron) initial states
     // (colour factor already accounted for in coupling for gluon-induced processes)
     const auto colour_singlet = [](pdgid_t id) { return id == PDG::photon || id == PDG::pomeron; };
@@ -123,7 +123,6 @@ private:
   double offShellME() const;
 
   const enum class Mode { onShell = 0, offShell = 1 } method_;
-  const double pomeron_beta2_;  ///< squared pomeron-quark coupling (in GeV^-2)
 
   /// Parameters for the off-shell matrix element
   struct OffShellParameters : SteeredObject<OffShellParameters> {
