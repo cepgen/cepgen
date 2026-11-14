@@ -21,8 +21,8 @@
 #include "CepGenGammaUPC/GammaUPCInterface.h"
 
 extern "C" {
-extern double __elasticphotonphotonflux_MOD_photonflux_proton_edff_nob(double& x, double& gamma);
-extern double __elasticphotonphotonflux_MOD_photonflux_nucleus_edff_nob(double& x, double& gamma, double& z, double& ra);
+extern double __elasticphotonphotonflux_MOD_photonflux_proton_nob(double& x, double& gamma);
+extern double __elasticphotonphotonflux_MOD_photonflux_nucleus_nob(double& x, double& gamma, double& z, double& ra);
 extern double __elasticphotonphotonflux_MOD_photonphotonflux_pp(double& x1, double& x2, int& force_p_no_hadronisation);
 extern double __elasticphotonphotonflux_MOD_photonphotonflux_pa_hardsphere(double& x1,
                                                                            double& x2,
@@ -83,14 +83,14 @@ namespace gammaUPC {
   }
 
   double photonFluxP(double x, double gamma) {
-    const auto flux = __elasticphotonphotonflux_MOD_photonflux_proton_edff_nob(x, gamma);
+    const auto flux = __elasticphotonphotonflux_MOD_photonflux_proton_nob(x, gamma);
     CG_DEBUG_LOOP("gammaUPC:photonFluxP")
         << "Single-photon flux from proton (gamma=" << gamma << ", no b-effect): " << flux << ".";
     return flux;
   }
 
   double photonFluxA(double a, double gamma, double z, double ra) {
-    const auto flux = __elasticphotonphotonflux_MOD_photonflux_nucleus_edff_nob(a, gamma, z, ra);
+    const auto flux = __elasticphotonphotonflux_MOD_photonflux_nucleus_nob(a, gamma, z, ra);
     CG_DEBUG_LOOP("gammaUPC:photonFluxA") << "Single-photon flux from HI{A=" << a << ", Z=" << z << ", gamma=" << gamma
                                           << ", rA=" << ra << "} (no b-effect): " << flux << ".";
     return flux;
