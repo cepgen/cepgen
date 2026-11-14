@@ -34,24 +34,27 @@ auto make_pdgids_pair = [](pdgid_t pair) {
   return spdgids_t{static_cast<spdgid_t>(pair), -static_cast<spdgid_t>(pair)};
 };
 
-/// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
+/// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma/\gamma{\bb P}/{\bb P}{\bb P}\rightarrow f\bar f\f$ process
 class PPtoFF final : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoFF(const ParametersList& params)
       : cepgen::proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
+        pomeron_beta2_(steer<double>("pomeronBeta2")),
         osp_(steer<ParametersList>("offShellParameters")) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(*this); }
 
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();
-    desc.setDescription("γγ → f⁺f¯");
+    desc.setDescription("γγ/γℙ/ℙℙ/gg → f⁺f¯");
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
     desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
         .allow(1, "off-shell");
+    desc.add("pomeronBeta2", 3.5)
+        .setDescription("squared pomeron-quark coupling for pomeron-initiated modes (in GeV^-2)");
     desc.add("offShellParameters", OffShellParameters::description());
     return desc;
   }
@@ -76,6 +79,14 @@ private:
         }
         case PDG::photon:
           return [this](double q) { return kFourPi * qf2_ * alphaEM(q); };
+        case PDG::pomeron: {
+          if (cs_prop.colours == 0)
+            throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion type for pomeron coupling. Should be a quark.";
+          if (method_ != Mode::offShell)
+            throw CG_FATAL("PPtoFF:prepare")
+                << "Pomeron-initiated modes are only defined for the off-shell matrix element.";
+          return [this](double) { return pomeron_beta2_; };
+        }
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
       }
@@ -84,10 +95,11 @@ private:
                parton2_id = event().oneWithRole(Particle::Role::Parton2).pdgId();
     g_part1_ = generate_coupling(parton1_id);
     g_part2_ = generate_coupling(parton2_id);
-    // sum over final-state colours for colour-neutral (photon-photon) initial states
+    // sum over final-state colours for colour-neutral (photon/pomeron) initial states
     // (colour factor already accounted for in coupling for gluon-induced processes)
+    const auto colour_singlet = [](pdgid_t id) { return id == PDG::photon || id == PDG::pomeron; };
     colour_factor_ =
-        (parton1_id == PDG::photon && parton2_id == PDG::photon && cs_prop.colours > 0) ? cs_prop.colours : 1.;
+        (colour_singlet(parton1_id) && colour_singlet(parton2_id) && cs_prop.colours > 0) ? cs_prop.colours : 1.;
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
                                << "Produced particles: " << central() << ".\n\t"
@@ -111,6 +123,7 @@ private:
   double offShellME() const;
 
   const enum class Mode { onShell = 0, offShell = 1 } method_;
+  const double pomeron_beta2_;  ///< squared pomeron-quark coupling (in GeV^-2)
 
   /// Parameters for the off-shell matrix element
   struct OffShellParameters : SteeredObject<OffShellParameters> {
