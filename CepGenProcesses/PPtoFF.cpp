@@ -82,7 +82,7 @@ private:
           if (method_ != Mode::offShell)
             throw CG_FATAL("PPtoFF:prepare")
                 << "Pomeron-initiated modes are only defined for the off-shell matrix element.";
-          return [this, &side](double /*no scale dependence*/) { return partonSampler(side).flux().beta2(); };
+          return [this, side](double /*no scale dependence*/) { return partonSampler(side).flux().beta2(); };
         }
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
