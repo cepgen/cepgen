@@ -18,6 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -82,7 +84,7 @@ private:
           if (method_ != Mode::offShell)
             throw CG_FATAL("PPtoFF:prepare")
                 << "Pomeron-initiated modes are only defined for the off-shell matrix element.";
-          return [this, side](double /*no scale dependence*/) { return partonSampler(side).flux().beta2(); };
+          return [this, side](double /*no scale dependence*/) { return partonSampler(side).flux().beta2(0.); };
         }
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
@@ -90,6 +92,11 @@ private:
     };
     g_part1_ = generate_coupling(PartonSampler::Side::positive);
     g_part2_ = generate_coupling(PartonSampler::Side::negative);
+    // pomeron-quark vertex form factors: one factor per pomeron leg for each off-shell internal quark line
+    pomeron_fluxes_.clear();
+    for (const auto& side : {PartonSampler::Side::positive, PartonSampler::Side::negative})
+      if (const auto& flux = partonSampler(side).flux(); flux.partonPdgId() == PDG::pomeron)
+        pomeron_fluxes_.emplace_back(&flux);
     // sum over final-state colours for colour-neutral (photon/pomeron) initial states
     // (colour factor already accounted for in coupling for gluon-induced processes)
     const auto colour_singlet = [](pdgid_t id) { return id == PDG::photon || id == PDG::pomeron; };
@@ -151,6 +158,17 @@ private:
   static constexpr double kFourPi = 4. * M_PI;
   double mf2_{0.}, qf2_{0.}, colour_factor_{1.};
   std::function<double(double)> g_part1_{nullptr}, g_part2_{nullptr};
+  std::vector<const PartonFlux*> pomeron_fluxes_;  ///< incoming pomeron fluxes (providing the vertex form factors)
+
+  /// Product of quark-vertex FFs for all incoming pomerons
+  double pomeronFF(double virtuality2) const {
+    auto ff = 1.;
+    for (const auto* flux : pomeron_fluxes_) {
+      const auto beta2_0 = flux->beta2(0.);
+      ff *= beta2_0 > 0. ? std::sqrt(flux->beta2(virtuality2) / beta2_0) : 0.;
+    }
+    return ff;
+  }
 };
 
 double PPtoFF::onShellME() const {
@@ -188,13 +206,20 @@ double PPtoFF::offShellME() const {
     const auto phi_p = vec_kt + zp * vec_qt, phi_m = vec_kt - zm * vec_qt;
     const auto zpm = zp * zm, eps2 = mf2_ + zpm * q2;
 
-    const auto kp = 1. / (phi_p.pt2() + eps2), km = 1. / (phi_m.pt2() + eps2);
+    // quark propagator denominators; |k^2-m^2| = (phi^2+eps^2)/z is the virtuality of the internal quark line
+    // of each diagram
+    const auto den_p = phi_p.pt2() + eps2, den_m = phi_m.pt2() + eps2;
+    const auto kp = 1. / den_p, km = 1. / den_m;
+    // pomeron-quark vertex form factors, as one overall factor to preserve the cancellation between both diagrams
+    // (current conservation, on which the kT-factorised matrix element relies), evaluated at the virtuality of the
+    // dominant (least off-shell) quark line
+    const auto form_factor = pomeronFF(std::min(den_p / zp, den_m / zm));
     const auto phi = Momentum(kp * phi_p - km * phi_m).setEnergy(kp - km);
     const auto dot = phi.threeProduct(vec_pho), cross = phi.crossProduct(vec_pho, Momentum::Z);
 
     const auto phi_0 = phi.energy(), phi2_0 = phi_0 * phi_0, phi_t = phi.p(), phi2_t = phi_t * phi_t;
 
-    return 2. * zpm / vec_qt.pt2() *
+    return form_factor * form_factor * 2. * zpm / vec_qt.pt2() *
            ((osp_.term_ll * 4. * zpm * zpm * q2 * phi2_0) +
             (osp_.term_tt1 * ((zp * zp + zm * zm) * phi2_t + mf2_ * phi2_0)) +
             (osp_.term_tt2 * (cross * cross - dot * dot) / vec_pho.pt2()) -

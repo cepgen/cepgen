@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     void initialise() override {
       (*this)
           .book("invmass", "$m(q\\bar{q})$", "GeV", cepgen::utils::Hist1D(50, {0., 100.}))
-          .book("ptpair", "$p_{T}(q\\bar{q})$", "GeV", cepgen::utils::Hist1D(50, {0., 50.}))
+          .book("ptpair", "$p_{T}(q\\bar{q})$", "GeV", cepgen::utils::Hist1D(50, {0., 5.}))
           .book("ptlead", "$p_{T}^{lead}$", "GeV", cepgen::utils::Hist1D(50, {0., 50.}))
           .book("ptsublead", "$p_{T}^{sublead}$", "GeV", cepgen::utils::Hist1D(50, {0., 50.}))
           .book("etalead", "$\\eta^{lead}$", "", cepgen::utils::Hist1D(50, {-2.5, 2.5}))
