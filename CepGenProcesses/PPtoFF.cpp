@@ -52,8 +52,6 @@ public:
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
         .allow(1, "off-shell");
-    desc.add("pomeronBeta2", 3.5)
-        .setDescription("squared pomeron-quark coupling for pomeron-initiated modes (in GeV^-2)");
     desc.add("offShellParameters", OffShellParameters::description());
     return desc;
   }
@@ -69,9 +67,8 @@ private:
       throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
     mf2_ = cs_prop.mass * cs_prop.mass;
     qf2_ = std::pow(cs_prop.integerCharge() * (1. / 3), 2);
-    const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id,
-                                                    PartonSampler::Side side) -> std::function<double(double)> {
-      switch (parton_id) {
+    const auto generate_coupling = [this, &cs_prop](PartonSampler::Side side) -> std::function<double(double)> {
+      switch (const auto parton_id = partonSampler(side).flux().partonPdgId()) {
         case PDG::gluon: {
           if (cs_prop.colours == 0)
             throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion type for gluon coupling. Should be a quark.";
@@ -85,21 +82,21 @@ private:
           if (method_ != Mode::offShell)
             throw CG_FATAL("PPtoFF:prepare")
                 << "Pomeron-initiated modes are only defined for the off-shell matrix element.";
-          return [this, &side](double) { return partonSampler(side).flux().beta2(); };
+          return [this, &side](double /*no scale dependence*/) { return partonSampler(side).flux().beta2(); };
         }
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
       }
     };
-    const auto parton1_id = event().oneWithRole(Particle::Role::Parton1).pdgId(),
-               parton2_id = event().oneWithRole(Particle::Role::Parton2).pdgId();
-    g_part1_ = generate_coupling(parton1_id, PartonSampler::Side::positive);
-    g_part2_ = generate_coupling(parton2_id, PartonSampler::Side::negative);
+    g_part1_ = generate_coupling(PartonSampler::Side::positive);
+    g_part2_ = generate_coupling(PartonSampler::Side::negative);
     // sum over final-state colours for colour-neutral (photon/pomeron) initial states
     // (colour factor already accounted for in coupling for gluon-induced processes)
     const auto colour_singlet = [](pdgid_t id) { return id == PDG::photon || id == PDG::pomeron; };
-    colour_factor_ =
-        (colour_singlet(parton1_id) && colour_singlet(parton2_id) && cs_prop.colours > 0) ? cs_prop.colours : 1.;
+    colour_factor_ = (colour_singlet(event().oneWithRole(Particle::Role::Parton1).pdgId()) &&
+                      colour_singlet(event().oneWithRole(Particle::Role::Parton2).pdgId()) && cs_prop.colours > 0)
+                         ? cs_prop.colours
+                         : 1.;
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
                                << "Produced particles: " << central() << ".\n\t"
