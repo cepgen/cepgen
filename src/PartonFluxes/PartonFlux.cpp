@@ -35,6 +35,6 @@ ParametersDescription PartonFlux::description() {
   return desc;
 }
 
-double PartonFlux::beta2() const {
+double PartonFlux::beta2(double) const {
   throw CG_ERROR("PartonFlux:beta2") << "Flux '" << name() << "' does not provide an effective parton-quark coupling.";
 }

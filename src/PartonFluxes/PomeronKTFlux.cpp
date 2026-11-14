@@ -31,6 +31,7 @@ public:
   explicit PomeronKTFlux(const ParametersList& params)
       : KTFlux(params),
         beta2_(steer<double>("beta2")),
+        mu02_(std::pow(std::max(steer<double>("mu0"), 0.), 2)),
         epsilon_(steer<double>("epsilon")),
         alpha_prime_(steer<double>("alphaPrime")),
         f1_scale_(steer<double>("formFactorScale")) {}
@@ -39,6 +40,8 @@ public:
     auto desc = KTFlux::description();
     desc.setDescription("Elastic pomeron emission from a proton (Donnachie-Landshoff)");
     desc.add("beta2", 3.5).setDescription("squared pomeron-quark coupling (in GeV^-2)");
+    desc.add("mu0", 1.2)
+        .setDescription("pomeron-quark vertex form factor cutoff (in GeV); <= 0 for a point-like vertex");
     desc.add("epsilon", 0.0808).setDescription("pomeron trajectory intercept, alpha(0)-1");
     desc.add("alphaPrime", 0.25).setDescription("pomeron trajectory slope (in GeV^-2)");
     desc.add("formFactorScale", 0.71).setDescription("proton isoscalar form factor dipole scale (in GeV^2)");
@@ -47,7 +50,14 @@ public:
 
   bool fragmenting() const override { return false; }
   double mass2() const override { return mp2_; }
-  double beta2() const override { return beta2_; }
+  /// Virtuality-dependent squared coupling \f$\beta_{\mathbb P}^2\left[\mu_0^2/(\mu_0^2+q^2)\right]^2\f$
+  /// \note Donnachie-Landshoff form factor \f$\mu_0^2/(\mu_0^2+q^2)\f$ applied to off-shell quark leg coupling.
+  double beta2(double q2) const override {
+    if (mu02_ <= 0.)
+      return beta2_;
+    const auto form_factor = mu02_ / (mu02_ + q2);
+    return beta2_ * form_factor * form_factor;
+  }
   spdgid_t partonPdgId() const override { return PDG::pomeron; }
 
   double fluxMX2(double x, double kt2, double) const override {
@@ -68,6 +78,7 @@ private:
   }
 
   const double beta2_;
+  const double mu02_;
   const double epsilon_;
   const double alpha_prime_;
   const double f1_scale_;

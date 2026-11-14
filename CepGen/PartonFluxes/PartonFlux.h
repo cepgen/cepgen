@@ -37,7 +37,8 @@ namespace cepgen {
     virtual bool fragmenting() const = 0;                ///< Is initiator particle fragmenting after parton emission?
     virtual spdgid_t partonPdgId() const = 0;            ///< Parton PDG identifier
     virtual double mass2() const = 0;                    ///< Initiator particle squared mass (in \f${\rm GeV}^2/c^4\f$)
-    virtual double beta2() const;                        ///< Parton-quark coupling constant (e.g. pomeron fluxes)
+    /// Squared parton-quark coupling (e.g. pomeron fluxes) for a quark leg of virtuality \f$q^2\f$ (in GeV^2)
+    virtual double beta2(double q2) const;
     virtual void initialise(const Beam&) {}              ///< Initiate the parton flux from beam info
 
   protected:
