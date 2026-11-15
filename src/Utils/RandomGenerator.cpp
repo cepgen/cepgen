@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <random>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
@@ -24,6 +26,13 @@ using namespace cepgen::utils;
 
 RandomGenerator::RandomGenerator(const ParametersList& params)
     : NamedModule(params), seed_(steer<unsigned long long>("seed")) {}
+
+ParametersList RandomGenerator::streamParameters(ParametersList params, size_t stream) {
+  if (stream == 0)
+    return params;
+  params.set<unsigned long long>("seed", params.get<unsigned long long>("seed") + stream);
+  return params;
+}
 
 double RandomGenerator::exponential(double /*exponent*/) {
   CG_WARNING("RandomGenerator:exponential")

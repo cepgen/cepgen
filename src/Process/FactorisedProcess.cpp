@@ -172,7 +172,7 @@ void FactorisedProcess::addEventContent() {
 }
 
 void FactorisedProcess::prepareKinematics() {
-  random_generator_ = RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"));
+  random_generator_ = buildRandomGenerator();
   if (central_particles_.empty())
     CG_WARNING("FactorisedProcess:prepareKinematics") << "Empty central particles content.";
 

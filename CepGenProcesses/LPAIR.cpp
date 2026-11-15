@@ -93,7 +93,7 @@ public:
           << "gamma=" << gamma_cm_ << ", beta*gamma=" << beta_gamma_cm_;
     }
 
-    random_generator_ = RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"));
+    random_generator_ = buildRandomGenerator();
     formfac1_ = FormFactorsFactory::get().build(kinematics().incomingBeams().positive().formFactors());
     formfac2_ = FormFactorsFactory::get().build(kinematics().incomingBeams().negative().formFactors());
     strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());

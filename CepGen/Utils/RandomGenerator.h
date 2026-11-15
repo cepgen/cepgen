@@ -33,6 +33,9 @@ namespace cepgen::utils {
 
     static ParametersDescription description();
 
+    /// Build steering parameters for a given stream's RNG
+    static ParametersList streamParameters(ParametersList params, size_t stream);
+
     // base distributions
     virtual int uniformInt(int min, int max) = 0;
     virtual double uniform(const Limits& = Limits{0., 1.}) = 0;
