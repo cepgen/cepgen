@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,10 @@ namespace cepgen::formfac {
       desc.add("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
       desc.add("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.}).setDescription("diffractive mass range (in GeV/c^2)");
       return desc;
+    }
+
+    bool singleThreaded() const override {
+      return Parameterisation::singleThreaded() || sf_->singleThreaded() || integrator_->singleThreaded();
     }
 
   protected:

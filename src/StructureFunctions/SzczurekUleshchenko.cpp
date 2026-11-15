@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2025  Laurent Forthomme
+ *  Copyright (C) 2016-2026  Laurent Forthomme
  *                2016       Antoni Szczurek
  *                2016       Volodymyr Uleshchenko
  *
@@ -39,6 +39,8 @@ namespace cepgen::strfun {
       desc.add("q2shift", 0.8);
       return desc;
     }
+
+    bool singleThreaded() const override { return true; }  ///< Fortran GRV routine
 
   private:
     void eval() override {
