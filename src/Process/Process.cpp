@@ -87,8 +87,9 @@ std::unique_ptr<Process> Process::clone() const {
 }
 
 bool Process::singleThreaded() const {
-  return (survival_factor_ && survival_factor_->singleThreaded()) || (alpha_em_ && alpha_em_->singleThreaded()) ||
-         (alpha_s_ && alpha_s_->singleThreaded());
+  return (survival_factor_ && survival_factor_->singleThreaded()) ||
+         (alpha_em_used_ && alpha_em_ && alpha_em_->singleThreaded()) ||
+         (alpha_s_used_ && alpha_s_ && alpha_s_->singleThreaded());
 }
 
 Momentum& Process::pA() { return event().oneWithRole(Particle::Role::IncomingBeam1).momentum(); }
@@ -360,12 +361,14 @@ double Process::alphaEM(double q) const {
   if (!alpha_em_)
     throw CG_FATAL("Process:alphaEM")
         << "Trying to compute the electromagnetic running coupling while it is not initialised.";
+  alpha_em_used_ = true;
   return (*alpha_em_)(q);
 }
 
 double Process::alphaS(double q) const {
   if (!alpha_s_)
     throw CG_FATAL("Process:alphaS") << "Trying to compute the strong running coupling while it is not initialised.";
+  alpha_s_used_ = true;
   return (*alpha_s_)(q);
 }
 

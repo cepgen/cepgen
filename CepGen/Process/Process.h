@@ -181,6 +181,8 @@ namespace cepgen::proc {
     double x2_{0.};        ///< Second parton fractional momentum
     std::unique_ptr<Coupling> alpha_em_;               ///< Electromagnetic running coupling algorithm
     std::unique_ptr<Coupling> alpha_s_;                ///< Strong running coupling algorithm
+    mutable bool alpha_em_used_{false};                ///< Was the electromagnetic coupling evaluated?
+    mutable bool alpha_s_used_{false};                 ///< Was the strong coupling evaluated?
     std::unique_ptr<SurvivalFactor> survival_factor_;  ///< Gap survival factor modelling (if any)
     /// Handler to a variable mapped by this process
     struct MappingVariable {
