@@ -16,7 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <atomic>
 #include <chrono>
+#include <thread>
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
@@ -225,7 +227,28 @@ void Generator::generate(size_t num_events,
 
   const utils::Timer tmr;
 
-  worker_->generate(num_events, callback);  // launch the event generation
+  // launch the event generation
+  if (num_threads == 0)
+    num_threads = parameters_->generation().numThreads();
+  if (num_threads <= 1 || !prepareThreadWorkers(num_threads)) {
+    thread_workers_.clear();
+    worker_->generate(num_events, callback);
+  } else {  // multithreaded generation
+    const size_t num_remaining =
+        num_events > parameters_->numGeneratedEvents() ? num_events - parameters_->numGeneratedEvents() : 0;
+    CG_INFO("Generator") << "Generating events on " << utils::s("thread", num_threads, true) << ".";
+
+    std::atomic<bool> stop{false};
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < num_threads; ++i) {
+      auto* worker = i == 0 ? worker_.get() : thread_workers_.at(i - 1).get();
+      const size_t share = num_remaining / num_threads + (i < num_remaining % num_threads ? 1 : 0);
+      threads.emplace_back([&, worker, share]() { worker->produce(share, callback, stop); });
+    }
+
+    for (auto& thread : threads)
+      thread.join();
+  }
 
   const double generation_time = tmr.elapsed();
   const double rate_ms = (parameters_->numGeneratedEvents() > 0)
