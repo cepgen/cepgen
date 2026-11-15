@@ -33,6 +33,9 @@ namespace cepgen {
     inline virtual const ParametersList& parameters() const { return params_; }  ///< Module parameters
     virtual void setParameters(const ParametersList&);                           ///< Set module parameters
 
+    /// Is module intended for one single thread at a time?
+    inline virtual bool singleThreaded() const { return false; }
+
   protected:
     /// Retrieve a parameters as previously steered
     template <typename T>
