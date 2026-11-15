@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+include /usr/share/dpkg/pkg-info.mk
+
+# "-DCMAKE_BUILD_TYPE=Release" must be explicit: debhelper passes "None" by default, and the
+# project only selects its optimised flags when the build type is empty or "Release".
+# CEPGEN_VERSION_OVERRIDE replaces the "git describe" lookup, which cannot work from a tarball.
+%:
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	  -DCMAKE_BUILD_TYPE=Release \
+	  -DCEPGEN_VERSION_OVERRIDE=$(DEB_VERSION_UPSTREAM) \
+	  -DCMAKE_BUILD_UTILS=ON \
+	  -DCMAKE_BUILD_TESTS=OFF
+
+override_dh_auto_test:
+	# tests are run by the upstream CI

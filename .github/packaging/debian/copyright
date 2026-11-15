@@ -1,0 +1,26 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: CepGen
+Upstream-Contact: Laurent Forthomme <laurent.forthomme@cern.ch>
+Source: https://github.com/cepgen/cepgen
+
+Files: *
+Copyright: 2014-2026 Laurent Forthomme <laurent.forthomme@cern.ch>
+License: GPL-3+
+
+# TODO: External/ ships third-party Fortran code and data tables (alphaS.f, grv_lo.f, the MSTW and
+# a08tmc grids, mass_width_*.txt). Check their upstream licences and add Files: stanzas here
+# before uploading anywhere other than a personal PPA.
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the Free
+ Software Foundation, either version 3 of the License, or (at your option)
+ any later version.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ more details.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".

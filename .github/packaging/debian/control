@@ -1,0 +1,34 @@
+Source: cepgen
+Section: science
+Priority: optional
+Maintainer: Laurent Forthomme <laurent.forthomme@cern.ch>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.20),
+               g++,
+               gfortran,
+               libboost-dev,
+               libgsl-dev,
+               pybind11-dev,
+               python3-dev
+Standards-Version: 4.7.0
+Homepage: https://cepgen.hepforge.org
+Rules-Requires-Root: no
+
+Package: cepgen
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Generic central exclusive processes event generator
+ CepGen is a generic central exclusive processes event generator. It
+ provides a modular framework to compute cross sections and to generate
+ events for photon-induced and other central exclusive processes in hadron
+ and lepton colliders.
+
+Package: cepgen-dev
+Section: libdevel
+Architecture: any
+Depends: cepgen (= ${binary:Version}), ${misc:Depends}
+Description: Generic central exclusive processes event generator - development files
+ CepGen is a generic central exclusive processes event generator.
+ .
+ This package contains the headers and the CMake find module needed to build
+ programs and plugins against the CepGen libraries.
