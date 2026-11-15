@@ -30,6 +30,7 @@ void TimeKeeper::clear() {
 }
 
 TimeKeeper& TimeKeeper::tick(const std::string& func, double time) {
+  std::lock_guard lock(mutex_);
   monitors_[func].emplace_back(time > 0. ? time : tmr_.elapsed());
   return *this;
 }

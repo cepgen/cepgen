@@ -19,6 +19,7 @@
 #ifndef CepGen_Utils_TimeKeeper_h
 #define CepGen_Utils_TimeKeeper_h
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -59,6 +60,7 @@ namespace cepgen::utils {
     };
 
   private:
+    std::mutex mutex_;  ///< Protection of the monitors collection against concurrent ticks
     std::unordered_map<std::string, std::vector<float> > monitors_;
     Timer tmr_;
   };
