@@ -31,6 +31,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
@@ -54,6 +55,7 @@ Generator::~Generator() {
 
 void Generator::clearRun() {
   CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
+  thread_workers_.clear();
   worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
   CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters() << ".";
   parameters_->setGenerator(this);
@@ -202,7 +204,9 @@ const Event& Generator::next() {
   return worker_->integrand().process().event();
 }
 
-void Generator::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
+void Generator::generate(size_t num_events,
+                         const std::function<void(const proc::Process&)>& callback,
+                         size_t num_threads) {
   CG_TICKER(parameters_->timeKeeper());
 
   if (!worker_ || !initialised_)
@@ -234,11 +238,56 @@ void Generator::generate(size_t num_events, const std::function<void(const proc:
                        << "Equivalent luminosity: " << utils::format("%g", equivalent_luminosity) << " pb^-1.";
 }
 
-void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {
-  generate(num_events, [this, &callback](const proc::Process& process) {
-    if (callback)
-      callback(process.event(), parameters_->numGeneratedEvents());
-  });
+bool Generator::prepareThreadWorkers(size_t num_threads) {
+  // the integrator is shared between all workers, but only its (stateless) evaluation method is called concurrently
+  if (worker_->singleThreaded()) {
+    CG_WARNING("Generator")
+        << "Generator worker cannot be run concurrently. Falling back to a single-threaded event generation.";
+    return false;
+  }
+  if (worker_->integrand().process().singleThreaded()) {
+    CG_WARNING("Generator")
+        << "Process cannot be run concurrently. Falling back to a single-threaded event generation.";
+    return false;
+  }
+  for (const auto& event_modifier : parameters_->eventModifiersSequence())
+    if (event_modifier->singleThreaded()) {
+      CG_WARNING("Generator") << "Event modifier '" << event_modifier->name()
+                              << "' cannot be run concurrently. Falling back to a single-threaded event generation.";
+      return false;
+    }
+  for (const auto& taming_function : parameters_->tamingFunctions())
+    if (taming_function->singleThreaded()) {
+      CG_WARNING("Generator") << "Taming function '" << taming_function->name()
+                              << "' cannot be run concurrently. Falling back to a single-threaded event generation.";
+      return false;
+    }
+  // workers are kept between calls, so that a new generation continues the random numbers streams of the previous one
+  for (size_t stream = thread_workers_.size() + 1; stream < num_threads; ++stream) {
+    if (auto worker = worker_->fork(stream, cross_section_); worker)
+      thread_workers_.emplace_back(std::move(worker));
+    else {
+      CG_WARNING("Generator")
+          << "Generator worker cannot be run concurrently. Falling back to a single-threaded event generation.";
+      return false;
+    }
+  }
+  worker_->setStoreMutex(&store_mutex_);
+  for (auto& worker : thread_workers_)
+    worker->setStoreMutex(&store_mutex_);
+  return true;
+}
+
+void Generator::generate(size_t num_events,
+                         const std::function<void(const Event&, size_t)>& callback,
+                         size_t num_threads) {
+  generate(
+      num_events,
+      [this, &callback](const proc::Process& process) {
+        if (callback)
+          callback(process.event(), parameters_->numGeneratedEvents());
+      },
+      num_threads);
 }
 
 const GeneratorWorker& Generator::generatorWorker() const {
