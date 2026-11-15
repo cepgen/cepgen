@@ -1,0 +1,144 @@
+name: Distribution packages
+
+# On every published release: rebuild the RPMs on COPR and upload source packages to a Launchpad PPA.
+# Also runnable by hand ("Run workflow"), e.g. to retry a single target.
+#
+# Files: .github/packaging/{cepgen.spec,debian/}, .github/scripts/{copr-custom,ppa-source}.
+# The package version comes from the tag. Only tags containing this packaging can be built.
+#
+# Each job is skipped unless its repository variable is defined (Settings > Secrets and variables > Actions).
+#
+# COPR (one-time setup)
+#   1. Create the project with the chroots you want:
+#        copr-cli create cepgen --chroot fedora-44-x86_64 --chroot fedora-45-x86_64 --chroot fedora-rawhide-x86_64
+#   2. Copy the configuration shown on https://copr.fedorainfracloud.org/api/ into the secret COPR_CONFIG
+#      (the token expires after 180 days).
+#   3. Set the variable COPR_PROJECT to "<user>/cepgen".
+#   Users: dnf copr enable <user>/cepgen && dnf install cepgen
+#
+# Launchpad PPA (one-time setup)
+#   1. Create a PPA and a GPG key (ideally dedicated); publish the public key on keyserver.ubuntu.com and register
+#      its fingerprint on your Launchpad profile.
+#   2. Secrets: PPA_GPG_PRIVATE_KEY (gpg --armor --export-secret-keys <FPR>) and PPA_GPG_PASSPHRASE (empty if none).
+#   3. Variables: PPA = "ppa:<user>/cepgen"; PPA_SERIES (optional, default "noble resolute").
+#   The changelog identity is taken from the key's user ID, which must match the one registered on Launchpad.
+#   Launchpad never accepts the same version twice: to re-upload a release, rerun by hand with a higher ppa_revision.
+#   Users: add-apt-repository ppa:<user>/cepgen && apt install cepgen
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to package (e.g. 1.3.1)"
+        required: true
+        type: string
+      target:
+        description: "What to run"
+        type: choice
+        options: [both, copr, ppa]
+        default: both
+      ppa_revision:
+        description: "PPA upload revision (bump it to re-upload the same release after a rejected upload)"
+        type: string
+        default: "1"
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  copr:
+    name: COPR build
+    if: ${{ vars.COPR_PROJECT != '' && (github.event_name == 'release' || inputs.target != 'ppa') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Install and configure copr-cli
+        env:
+          COPR_CONFIG: ${{ secrets.COPR_CONFIG }}
+        run: |
+          test -n "$COPR_CONFIG" || { echo "::error::secret COPR_CONFIG is not set"; exit 1; }
+          pipx install copr-cli
+          mkdir -p ~/.config
+          (umask 077; printf '%s\n' "$COPR_CONFIG" > ~/.config/copr)
+
+      # The script is stored in the COPR package definition, so it is refreshed for every release with the tag
+      # to build. COPR clones the tag, builds the SRPM and builds it in every chroot enabled in the project.
+      - name: Update the COPR package definition
+        env:
+          COPR_PROJECT: ${{ vars.COPR_PROJECT }}
+        run: |
+          {
+            echo "TAG='$TAG'"
+            echo "REPO_URL='https://github.com/${GITHUB_REPOSITORY}.git'"
+            cat .github/scripts/copr-custom
+          } > "$RUNNER_TEMP/copr-script"
+          args=(--name cepgen --script "$RUNNER_TEMP/copr-script" --script-builddeps git)
+          copr-cli edit-package-custom "${args[@]}" "$COPR_PROJECT" \
+            || copr-cli add-package-custom "${args[@]}" "$COPR_PROJECT"
+
+      # --nowait: do not keep this runner busy while COPR builds.
+      - name: Submit the build
+        env:
+          COPR_PROJECT: ${{ vars.COPR_PROJECT }}
+        run: copr-cli build-package --name cepgen --nowait "$COPR_PROJECT"
+
+  ppa:
+    name: Launchpad PPA upload
+    if: ${{ vars.PPA != '' && (github.event_name == 'release' || inputs.target != 'copr') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            debhelper devscripts dput dpkg-dev fakeroot gnupg cmake
+
+      - name: Import the signing key
+        id: key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.PPA_GPG_PASSPHRASE }}
+        run: |
+          test -n "$GPG_PRIVATE_KEY" || { echo "::error::secret PPA_GPG_PRIVATE_KEY is not set"; exit 1; }
+          printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --import
+          fpr=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')
+          uid=$(gpg --list-secret-keys --with-colons | awk -F: '/^uid/{print $10; exit}')
+          echo "fingerprint=$fpr" >> "$GITHUB_OUTPUT"
+          # the uploader identity (changelog trailer) must be the one registered on Launchpad
+          echo "DEBFULLNAME=$(sed -E 's/ *(\(.*\))? *<.*//' <<<"$uid")" >> "$GITHUB_ENV"
+          echo "DEBEMAIL=$(sed -E 's/.*<(.*)>.*/\1/' <<<"$uid")" >> "$GITHUB_ENV"
+          # passphrase for non-interactive signing (empty file if the key has none)
+          (umask 077; printf '%s' "$GPG_PASSPHRASE" > "$RUNNER_TEMP/gpg-passphrase")
+
+      - name: Build the source packages
+        env:
+          SERIES: ${{ vars.PPA_SERIES || 'noble resolute' }}
+          REVISION: ${{ inputs.ppa_revision || '1' }}
+        run: .github/scripts/ppa-source "$TAG" "$RUNNER_TEMP/ppa" "$SERIES" "$REVISION"
+
+      - name: Sign and upload
+        env:
+          PPA: ${{ vars.PPA }}
+          FPR: ${{ steps.key.outputs.fingerprint }}
+        run: |
+          for changes in "$RUNNER_TEMP"/ppa/*/*_source.changes; do
+            debsign -k"$FPR" \
+              -p"gpg --batch --yes --pinentry-mode loopback --passphrase-file $RUNNER_TEMP/gpg-passphrase" \
+              "$changes"
+            dput "$PPA" "$changes"
+          done
