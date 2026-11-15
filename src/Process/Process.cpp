@@ -86,6 +86,11 @@ std::unique_ptr<Process> Process::clone() const {
   throw CG_FATAL("Process:clone") << "Process \"" << name_ << "\" has no cloning method implementation!";
 }
 
+bool Process::singleThreaded() const {
+  return (survival_factor_ && survival_factor_->singleThreaded()) || (alpha_em_ && alpha_em_->singleThreaded()) ||
+         (alpha_s_ && alpha_s_->singleThreaded());
+}
+
 Momentum& Process::pA() { return event().oneWithRole(Particle::Role::IncomingBeam1).momentum(); }
 
 const Momentum& Process::pA() const { return event().oneWithRole(Particle::Role::IncomingBeam1).momentum(); }

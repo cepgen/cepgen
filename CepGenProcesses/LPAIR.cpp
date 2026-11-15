@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,6 +45,10 @@ public:
       : Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_), randomise_charge_(oth.randomise_charge_) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
+  bool singleThreaded() const override {
+    return Process::singleThreaded() || formfac1_->singleThreaded() || formfac2_->singleThreaded() ||
+           random_generator_->singleThreaded() || (strfun_ && strfun_->singleThreaded());
+  }
 
   void addEventContent() override {
     const auto signed_pair = static_cast<spdgid_t>(pair_.pdgid);

@@ -153,6 +153,11 @@ double FactorisedProcess::phaseSpaceWeight() const {
   return fluxes_weight * central_weight_;
 }
 
+bool FactorisedProcess::singleThreaded() const {
+  return Process::singleThreaded() || parton_samplers_[0]->singleThreaded() || parton_samplers_[1]->singleThreaded() ||
+         central_phase_space_->singleThreaded() || random_generator_->singleThreaded();
+}
+
 void FactorisedProcess::setCentral(const spdgids_t& central_particles) {
   central_particles_ = central_particles;
   CG_DEBUG("FactorisedProcess:setCentral") << "Setting the central particles system to: " << central_particles_ << ".";

@@ -44,6 +44,9 @@ namespace cepgen::proc {
     virtual std::unique_ptr<Process> clone() const;  ///< Copy all process attributes into a new object
     virtual double computeWeight() = 0;              ///< Compute the phase space point weight
 
+    /// Process, couplings (if evaluated so far), and gap survival factor restricted to one single thread?
+    bool singleThreaded() const override;
+
     void clear();       ///< Reset process prior to the phase space and variables definition
     void clearEvent();  ///< Restore the event object to its initial state
     void initialise();  ///< Initialise the process once the kinematics has been set

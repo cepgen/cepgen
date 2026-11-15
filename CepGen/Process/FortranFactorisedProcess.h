@@ -28,7 +28,9 @@ namespace cepgen::proc {
     /// Construct a Fortran-CepGen interface object using a double precision argument-less F77 function
     /// \param[in] func a double precision argument-less Fortran function returning the matrix element
     explicit FortranFactorisedProcess(const ParametersList&, const std::function<double()>& func);
+
     ProcessPtr clone() const override { return std::make_unique<FortranFactorisedProcess>(*this); }
+    bool singleThreaded() const override { return true; }  ///< Fortran common blocks
 
     static ParametersList kProcParameters;
 

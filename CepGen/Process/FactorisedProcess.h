@@ -45,10 +45,11 @@ namespace cepgen::proc {
     explicit FactorisedProcess(const ParametersList&, const spdgids_t&);  ///< Class constructor
     FactorisedProcess(const FactorisedProcess&);
 
+    static ParametersDescription description();
+
     double computeWeight() override;
     void fillKinematics() final;
-
-    static ParametersDescription description();
+    bool singleThreaded() const override;
 
     bool validatedBeamKinematics();
     utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
