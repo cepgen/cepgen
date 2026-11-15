@@ -59,6 +59,7 @@ public:
     worker->setRunParameters(run_params_, stream);
     worker->setIntegrator(integrator_);
     worker->integrand().setStorage(true);  // no grid preparation for this worker: directly store the events
+    worker->integrand().buildLocalModules(stream, cross_section);
     worker->grid_ = std::make_unique<GridParameters>(*grid_);
     worker->coordinates_ = std::vector<double>(worker->integrand().size());
     return worker;

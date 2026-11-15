@@ -56,6 +56,7 @@ public:
     worker->setRunParameters(run_params_, stream);
     worker->setIntegrator(integrator_);
     worker->integrand().setStorage(true);  // no presampling for this worker: directly store the events
+    worker->integrand().buildLocalModules(stream, cross_section);
     worker->coordinates_.resize(worker->integrand().size());
     worker->mean_weight_ = mean_weight_;  // common normalisation of the event weights for all threads
     return worker;

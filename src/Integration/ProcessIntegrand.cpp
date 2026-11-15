@@ -24,10 +24,13 @@
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Utils/Value.h"
 
 using namespace cepgen;
 
@@ -46,6 +49,21 @@ ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters, size_t s
 }
 
 ProcessIntegrand::~ProcessIntegrand() = default;
+
+void ProcessIntegrand::buildLocalModules(size_t stream, const Value& cross_section) {
+  local_event_modifiers_.clear();
+  for (const auto& event_modifier : run_parameters_->eventModifiersSequence()) {
+    auto local_modifier = EventModifierFactory::get().build(event_modifier->parameters());
+    local_modifier->setSeed(event_modifier->seed() + static_cast<long long>(stream));
+    local_modifier->initialise(*run_parameters_);
+    local_modifier->setCrossSection(cross_section);
+    local_event_modifiers_.emplace_back(std::move(local_modifier));
+  }
+  local_taming_functions_.clear();
+  for (const auto& taming_function : run_parameters_->tamingFunctions())
+    local_taming_functions_.emplace_back(FunctionalFactory::get().build(taming_function->parameters()));
+  local_modules_ = true;
+}
 
 size_t ProcessIntegrand::size() const { return process().ndim(); }
 
@@ -121,7 +139,7 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
   }
 
   // once kinematics variables computed, can apply taming functions
-  for (const auto& taming_function : run_parameters_->tamingFunctions())
+  for (const auto& taming_function : local_modules_ ? local_taming_functions_ : run_parameters_->tamingFunctions())
     if (const auto val = (*taming_function)(bws_.get(*event, taming_function->variables().at(0))) != 0.)
       weight *= val;
     else
@@ -132,7 +150,7 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
 
   {  // run all event modification algorithms
     double branching_ratio = -1.;
-    for (auto& event_modifier : run_parameters_->eventModifiersSequence()) {
+    for (auto& event_modifier : local_modules_ ? local_event_modifiers_ : run_parameters_->eventModifiersSequence()) {
       if (!event_modifier->run(*event, branching_ratio, !storage_) || branching_ratio == 0.)
         return 0.;
       weight *= branching_ratio;  // branching fraction for all decays
