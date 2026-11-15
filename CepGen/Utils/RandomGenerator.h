@@ -34,6 +34,8 @@ namespace cepgen::utils {
     static ParametersDescription description();
 
     /// Build steering parameters for a given stream's RNG
+    /// \param[in] params Steering parameters of the reference generator
+    /// \param[in] stream Stream index (the stream 0 is the reference generator itself)
     static ParametersList streamParameters(ParametersList params, size_t stream);
 
     // base distributions

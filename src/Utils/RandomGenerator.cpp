@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <array>
 #include <random>
 
 #include "CepGen/Core/Exception.h"
@@ -30,7 +31,14 @@ RandomGenerator::RandomGenerator(const ParametersList& params)
 ParametersList RandomGenerator::streamParameters(ParametersList params, size_t stream) {
   if (stream == 0)
     return params;
-  params.set<unsigned long long>("seed", params.get<unsigned long long>("seed") + stream);
+  auto seed = params.get<unsigned long long>("seed");
+  if (seed == 0)  // no reference seed: draw one, for the stream to differ from one run to the other
+    seed = std::random_device{}();
+  // derive the stream seed from the (seed, stream) pair
+  std::seed_seq sequence{seed, static_cast<unsigned long long>(stream)};
+  std::array<unsigned int, 1> stream_seed;
+  sequence.generate(stream_seed.begin(), stream_seed.end());
+  params.set<unsigned long long>("seed", stream_seed.at(0));
   return params;
 }
 
