@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,6 +72,7 @@ namespace cepgen::lhapdf {
     spdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
+    bool singleThreaded() const override { return true; }  ///< LHAPDF not validated for concurrent use
 
     double fluxQ2(double x, double q2) const override {
       if (x == 0. || !pdf_->inPhysicalRangeXQ2(x, q2))

@@ -101,6 +101,12 @@ namespace cepgen::survival {
       return grid_.eval(coord).at(0);
     }
 
+    bool singleThreaded() const override {
+      if (fallback_)
+        return fallback_->singleThreaded();
+      return false;
+    }
+
   private:
     void readGrid() {
       std::ifstream file(path_);

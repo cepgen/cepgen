@@ -80,6 +80,7 @@ namespace gammaUPC {
     bool fragmenting() const override { return false; }
     spdgid_t partonPdgId() const override { return PDG::photon; }
     double mass2() const override { return mass2_; }
+    bool singleThreaded() const override { return true; }  ///< gammaUPC Fortran module variables
 
     double fluxQ2(double x, double q2) const override {
       if (gamma_ <= 0.)

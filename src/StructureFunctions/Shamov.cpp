@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,9 @@ namespace cepgen::strfun {
     }
 
     void eval() override;
+    bool singleThreaded() const override {
+      return Parameterisation::singleThreaded() || (sy_sf_ && sy_sf_->singleThreaded());
+    }
 
   private:
     static constexpr double prefactor_ =

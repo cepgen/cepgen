@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ public:
   }
 
   double operator()(double q) const override { return alphas_(q); }
+  bool singleThreaded() const override { return true; }  ///< Fortran common blocks
 
 private:
   int order_;

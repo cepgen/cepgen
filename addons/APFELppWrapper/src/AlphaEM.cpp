@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ namespace cepgen::apfelpp {
     }
 
     inline double operator()(double q) const override { return alpha_em_.Evaluate(q); }
+    bool singleThreaded() const override { return true; }  ///< not validated for concurrent use
 
   private:
     const apfel::AlphaQED alpha_em_;

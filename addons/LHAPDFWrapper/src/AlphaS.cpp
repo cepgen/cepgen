@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ namespace cepgen::lhapdf {
       LHAPDF::initPDFSet(steer<std::string>("pdfSet"), LHAPDF::LHGRID, steer<int>("pdfMember"));
     }
 #endif
+
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
@@ -57,6 +58,7 @@ namespace cepgen::lhapdf {
       return LHAPDF::alphasPDF(q);
 #endif
     }
+    bool singleThreaded() const override { return true; }  ///< LHAPDF not validated for concurrent use
 
   private:
 #ifdef LHAPDF_GE_6

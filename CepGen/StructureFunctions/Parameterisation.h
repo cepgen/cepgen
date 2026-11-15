@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,12 @@ namespace cepgen::strfun {
     ~Parameterisation() override = default;
 
     static ParametersDescription description();  ///< Generic description for the structure functions
+
+    inline bool singleThreaded() const override {
+      if (r_ratio_)
+        return r_ratio_->singleThreaded();
+      return false;
+    }
 
     /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
     friend std::ostream& operator<<(std::ostream&, const Parameterisation&);

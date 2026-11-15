@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,6 +54,8 @@ namespace cepgen::apfel {
       desc.add("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
       return desc;
     }
+
+    bool singleThreaded() const override { return true; }  ///< APFEL Fortran core
 
   private:
     double evalxQ2(int flavour, double xbj, double q2) override {
