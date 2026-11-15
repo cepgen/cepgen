@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,10 +29,11 @@ namespace cepgen::python {
     explicit Functional(const ParametersList&);
     explicit Functional(const ObjectPtr&);
 
+    static ParametersDescription description();
+
     double eval() const override;
     const std::vector<std::string>& arguments() const;
-
-    static ParametersDescription description();
+    bool singleThreaded() const override { return true; }  ///< Python interpreter
 
   private:
     const std::unique_ptr<Environment> environment_;

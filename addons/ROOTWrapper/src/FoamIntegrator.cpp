@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2025  Laurent Forthomme
+ *  Copyright (C) 2020-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -115,6 +115,7 @@ public:
     });
     return res;
   }
+  bool singleThreaded() const override { return true; }  ///< ROOT global state
 
   /// Compute the weight for a given phase space point
   double Density(int num_dimensions, double* coordinates) override {
