@@ -19,6 +19,8 @@
 #ifndef CepGen_Core_GeneratorWorker_h
 #define CepGen_Core_GeneratorWorker_h
 
+#include <atomic>
+#include <functional>
 #include <memory>
 #include <mutex>
 
@@ -50,6 +52,12 @@ namespace cepgen {
     /// \param[in] num_events Events multiplicity to generate
     /// \param[in] callback The callback function applied on every event generated
     void generate(size_t num_events, const std::function<void(const proc::Process&)>& callback);
+
+    /// Generate a fixed number of events, to be called from one of the generation threads
+    /// \param[in] stop Flag requesting this worker to stop after the event being generated
+    void produce(size_t num_events,
+                 const std::function<void(const proc::Process&)>& callback,
+                 const std::atomic<bool>& stop);
 
     /// Build an independent worker for a secondary generation thread, sharing this worker's preparation
     /// \param[in] stream Index of the thread (strictly positive)

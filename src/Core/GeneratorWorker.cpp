@@ -59,6 +59,17 @@ void GeneratorWorker::generate(size_t num_events, const std::function<void(const
     next();
 }
 
+void GeneratorWorker::produce(size_t num_events,
+                              const std::function<void(const proc::Process&)>& callback,
+                              const std::atomic<bool>& stop) {
+  if (!run_params_)
+    throw CG_FATAL("GeneratorWorker:product") << "No steering parameters specified!";
+  callback_proc_ = callback;
+  for (size_t num_stored = 0; num_stored < num_events && !stop;)
+    if (next())
+      ++num_stored;
+}
+
 bool GeneratorWorker::storeEvent(double weight) const {
   CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
