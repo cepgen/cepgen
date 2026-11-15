@@ -57,18 +57,31 @@ Generator::~Generator() {
 
 void Generator::clearRun() {
   CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
-  thread_workers_.clear();
-  worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
-  CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters() << ".";
   parameters_->setGenerator(this);
   // destroy and recreate the integrator instance
   resetIntegrator();
-
-  worker_->setRunParameters(parameters_.get());
-  worker_->setIntegrator(integrator_.get());
+  buildWorker();
   cross_section_ = Value{};
   parameters_->prepareRun();
   initialised_ = false;
+}
+
+void Generator::resetGeneration() {
+  if (!worker_)  // nothing integrated yet: the next generation will prepare a full run
+    return;
+  CG_DEBUG("Generator:resetGeneration") << "Event generation is set to be reset, keeping the integration.";
+  buildWorker();
+  parameters_->prepareRun();
+  initialised_ = false;
+}
+
+void Generator::buildWorker() {
+  thread_workers_.clear();
+  worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
+  CG_DEBUG("Generator:buildWorker") << "Initialised a generator worker with parameters: " << worker_->parameters()
+                                    << ".";
+  worker_->setRunParameters(parameters_.get());
+  worker_->setIntegrator(integrator_.get());
 }
 
 void Generator::parseRunParameters(const std::string& filename) {

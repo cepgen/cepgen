@@ -66,6 +66,7 @@ namespace cepgen {
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
     Integrator& integrator() const;                   ///< Retrieve the integrator object
     void integrate();                                 ///< Integrate the functional over the phase space of interest
+    void resetGeneration();                           ///< Rewind the event generator workers state
 
     Value computeXsection();  ///< Compute the cross-section and uncertainty, in pb, for the run parameters
     /// Compute the cross-section for the run parameters
@@ -95,6 +96,7 @@ namespace cepgen {
   private:
     void initialise();       ///< Initialise event generation
     void clearRun();         ///< Remove all references to a previous generation/run
+    void buildWorker();      ///< Build a new generator worker for the current integrator
     void resetIntegrator();  ///< Reset integrator algorithm from the user-specified configuration
     /// Prepare one worker per generation thread
     /// \return A boolean stating whether this run can be multithreaded
