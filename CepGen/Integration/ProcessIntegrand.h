@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,21 +25,23 @@
 #include "CepGen/Integration/Integrand.h"
 
 namespace cepgen {
+  class EventModifier;
   class RunParameters;
-}
+}  // namespace cepgen
 namespace cepgen::proc {
   class Process;
 }
 namespace cepgen::utils {
   class Timer;
-}
+}  // namespace cepgen::utils
 
 namespace cepgen {
   /// Wrapper to the function to be integrated
   class ProcessIntegrand final : public Integrand {
   public:
     explicit ProcessIntegrand(const proc::Process&);
-    explicit ProcessIntegrand(const RunParameters*);
+    explicit ProcessIntegrand(const RunParameters*, size_t stream = 0);
+    ~ProcessIntegrand() override;
 
     /// Compute the integrand for a given phase space point (or “event”)
     /// \param[in] x Phase space point coordinates
@@ -58,7 +60,7 @@ namespace cepgen {
     bool storage() const { return storage_; }          ///< Store the events generated in this run?
 
   private:
-    void setProcess(const proc::Process&);
+    void setProcess(const proc::Process&, size_t stream = 0);
 
     std::unique_ptr<proc::Process> process_;        ///< Local instance of the physics process
     const RunParameters* run_parameters_{nullptr};  ///< Generator-owned runtime parameters

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,19 +36,22 @@ ProcessIntegrand::ProcessIntegrand(const proc::Process& process)
   setProcess(process);
 }
 
-ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters)
+ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters, size_t stream)
     : run_parameters_(run_parameters), timer_(new utils::Timer) {
   if (!run_parameters_)
     throw CG_FATAL("ProcessIntegrand") << "Invalid runtime parameters specified.";
   if (!run_parameters_->hasProcess())
     throw CG_FATAL("ProcessIntegrand") << "No process defined in runtime parameters.";
-  setProcess(run_parameters_->process());
+  setProcess(run_parameters_->process(), stream);
 }
+
+ProcessIntegrand::~ProcessIntegrand() = default;
 
 size_t ProcessIntegrand::size() const { return process().ndim(); }
 
-void ProcessIntegrand::setProcess(const proc::Process& original_process) {
+void ProcessIntegrand::setProcess(const proc::Process& original_process, size_t stream) {
   process_ = original_process.clone();  // each integrand object has its own clone of the process
+  process_->setRandomStream(stream);
   // NOTE: kinematics is already set by the process copy constructor
   process().kinematics().setParameters(
       original_process.kinematics().parameters());  // override default kinematics with the one defined in mother process

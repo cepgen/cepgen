@@ -33,9 +33,9 @@ using namespace cepgen;
 
 GeneratorWorker::GeneratorWorker(const ParametersList& params) : SteeredObject(params) {}
 
-void GeneratorWorker::setRunParameters(const RunParameters* run_parameters) {
+void GeneratorWorker::setRunParameters(const RunParameters* run_parameters, size_t stream) {
   run_params_ = run_parameters;
-  integrand_ = std::make_unique<ProcessIntegrand>(run_parameters);
+  integrand_ = std::make_unique<ProcessIntegrand>(run_parameters, stream);
   CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                               << "Run parameters at " << dynamic_cast<const void*>(run_params_) << ".";
 }

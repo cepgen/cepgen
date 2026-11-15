@@ -41,8 +41,8 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void setRunParameters(const RunParameters*);  ///< Specify the runtime parameters
-    void setIntegrator(const Integrator*);        ///< Specify the integrator instance handled by the mother generator
+    void setRunParameters(const RunParameters*, size_t stream = 0);  ///< Specify the stream-local runtime parameters
+    void setIntegrator(const Integrator*);  ///< Specify the integrator instance handled by the mother generator
 
     /// Launch the event generation
     /// \param[in] num_events Events multiplicity to generate
