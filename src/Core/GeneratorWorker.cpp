@@ -72,6 +72,9 @@ void GeneratorWorker::produce(size_t num_events,
 
 bool GeneratorWorker::storeEvent(double weight) const {
   CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
+  std::unique_lock<std::mutex> lock;
+  if (store_mutex_)
+    lock = std::unique_lock(*store_mutex_);
 
   if (!integrand_->process().hasEvent())
     return true;
