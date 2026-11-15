@@ -154,8 +154,11 @@ double FactorisedProcess::phaseSpaceWeight() const {
 }
 
 bool FactorisedProcess::singleThreaded() const {
-  return Process::singleThreaded() || parton_samplers_[0]->singleThreaded() || parton_samplers_[1]->singleThreaded() ||
-         central_phase_space_->singleThreaded() || random_generator_->singleThreaded();
+  // sub-modules are only built once the process kinematics is prepared
+  return Process::singleThreaded() || (parton_samplers_[0] && parton_samplers_[0]->singleThreaded()) ||
+         (parton_samplers_[1] && parton_samplers_[1]->singleThreaded()) ||
+         (central_phase_space_ && central_phase_space_->singleThreaded()) ||
+         (random_generator_ && random_generator_->singleThreaded());
 }
 
 void FactorisedProcess::setCentral(const spdgids_t& central_particles) {
