@@ -166,11 +166,8 @@ private:
     if (!treat_)  // by default, no grid treatment
       return integrand.eval(coordinates);
     // treatment of the integration grid
-    if (r_boxes_ == 0) {
-      r_boxes_ = static_cast<size_t>(std::pow(vegas_state_->bins, integrand.size()));
-      treated_coordinates_.resize(integrand.size());
-    }
-    double weight = r_boxes_;
+    std::vector<double> treated_coordinates(integrand.size());  // local, as this method may be called concurrently
+    double weight = std::pow(vegas_state_->bins, integrand.size());
     for (size_t j = 0; j < integrand.size(); ++j) {
       // find surrounding coordinates and interpolate
       const double z = coordinates.at(j) * vegas_state_->bins;
@@ -178,10 +175,10 @@ private:
       const double rel_pos = z - id;           // position between coordinates (norm.)
       const double bin_width = id == 0 ? COORD(1, j) : COORD(id + 1, j) - COORD(id, j);
       // build new coordinate from linear interpolation
-      treated_coordinates_[j] = COORD(id + 1, j) - bin_width * (1. - rel_pos);
+      treated_coordinates[j] = COORD(id + 1, j) - bin_width * (1. - rel_pos);
       weight *= bin_width;
     }
-    return weight * integrand.eval(treated_coordinates_);
+    return weight * integrand.eval(treated_coordinates);
   }
 
   const int num_function_calls_;
@@ -196,7 +193,5 @@ private:
 
   /// A Vegas integrator state for integration (optional) and/or "treated" event generation
   std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_{nullptr};
-  mutable unsigned long long r_boxes_{0ull};
-  mutable std::vector<double> treated_coordinates_;
 };
 REGISTER_INTEGRATOR("Vegas", VegasIntegrator);

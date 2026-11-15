@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,16 @@ namespace cepgen::python {
         throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
     }
 
+    static ParametersDescription description() {
+      auto desc = cepgen::Integrator::description();
+      desc.setDescription("Python integration algorithm");
+      desc.add("module", "IntegrationAlgos.Vegas"s)
+          .setDescription("name of the Python module embedding the integrate() function");
+      desc.add("iterations", 10);
+      desc.add("evals", 1000);
+      return desc;
+    }
+
     Value run(Integrand& integrand, const std::vector<Limits>& range) override {
       lims_ = ObjectPtr::make(range);
       gIntegrand = &integrand;
@@ -59,15 +69,8 @@ namespace cepgen::python {
       return Value{vals[0], vals[1]};
     }
 
-    static ParametersDescription description() {
-      auto desc = cepgen::Integrator::description();
-      desc.setDescription("Python integration algorithm");
-      desc.add("module", "IntegrationAlgos.Vegas"s)
-          .setDescription("name of the Python module embedding the integrate() function");
-      desc.add("iterations", 10);
-      desc.add("evals", 1000);
-      return desc;
-    }
+    bool singleThreaded() const override { return true; }  ///< Python interpreter
+
     static Integrand* gIntegrand;
 
   private:

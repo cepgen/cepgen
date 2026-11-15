@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ using namespace cepgen;
 
 struct KMRGluonKTFlux final : KTFlux {
   using KTFlux::KTFlux;
+
   static ParametersDescription description() {
     auto desc = KTFlux::description();
     desc.setDescription("Proton inelastic gluon emission (KMR flux)");
@@ -38,5 +39,6 @@ struct KMRGluonKTFlux final : KTFlux {
   spdgid_t partonPdgId() const override { return PDG::gluon; }
   bool fragmenting() const override { return false; }
   double mass2() const override { return mp2_; }
+  bool singleThreaded() const override { return true; }  ///< global gluon grid singleton
 };
 REGISTER_KT_FLUX("KMR", 20, KMRGluonKTFlux);

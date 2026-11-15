@@ -210,6 +210,7 @@ namespace cepgen::tauola {
                                      << ") reached without decay. Skipping the event.";
       return false;
     }
+    bool singleThreaded() const override { return true; }  ///< Tauola++ global interface
   };
 }  // namespace cepgen::tauola
 using cepgen::tauola::TauolaFilter;

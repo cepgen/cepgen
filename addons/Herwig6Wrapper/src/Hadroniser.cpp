@@ -72,7 +72,6 @@ namespace cepgen::herwig6 {
           momentum_tolerance_(steer<double>("momentumTolerance")),
           primordial_kt_(steer<double>("primordialKt")) {}
 
-    // no call to the Herwig 6 library here, as this is also used for the documentation generation
     static ParametersDescription description() {
       auto desc = hadr::Hadroniser::description();
       desc.setDescription("Interface to the Herwig 6 cluster hadronisation of dissociated beam systems");
@@ -163,6 +162,8 @@ namespace cepgen::herwig6 {
         update(event, role, fragments);
       return true;
     }
+
+    bool singleThreaded() const override { return true; }  ///< Herwig 6 Fortran core
 
   private:
     /// Compute the Herwig 6 parameter-dependent constants

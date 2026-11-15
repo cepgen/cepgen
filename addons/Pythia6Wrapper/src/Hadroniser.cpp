@@ -67,7 +67,7 @@ namespace cepgen::pythia6 {
       if (mode == mode::Kinematics::ElasticInelastic || mode == mode::Kinematics::InelasticInelastic)
         roles_[Particle::Role::IncomingBeam2] = Particle::Role::OutgoingBeam2;
     }
-
+    bool singleThreaded() const override { return true; }  ///< Pythia 6 Fortran core
     bool run(Event& event, double& weight, bool fast) override {
       weight = 1.;
 

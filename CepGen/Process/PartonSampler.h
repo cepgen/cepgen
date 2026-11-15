@@ -65,6 +65,7 @@ namespace cepgen {
     virtual Momentum partonMomentum() const = 0;  ///< Parton 4-momentum seed for the current phase space point
     /// Flux weight (including this sampler's own variables Jacobian) once x and the remnant mass are known
     virtual double weight(double x, double mx2) const = 0;
+    inline bool singleThreaded() const override { return flux_ && flux_->singleThreaded(); }
 
     const PartonFlux& flux() const;  ///< Parton flux modelling
     /// Type-casted parton flux modelling

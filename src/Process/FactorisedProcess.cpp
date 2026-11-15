@@ -153,6 +153,14 @@ double FactorisedProcess::phaseSpaceWeight() const {
   return fluxes_weight * central_weight_;
 }
 
+bool FactorisedProcess::singleThreaded() const {
+  // sub-modules are only built once the process kinematics is prepared
+  return Process::singleThreaded() || (parton_samplers_[0] && parton_samplers_[0]->singleThreaded()) ||
+         (parton_samplers_[1] && parton_samplers_[1]->singleThreaded()) ||
+         (central_phase_space_ && central_phase_space_->singleThreaded()) ||
+         (random_generator_ && random_generator_->singleThreaded());
+}
+
 void FactorisedProcess::setCentral(const spdgids_t& central_particles) {
   central_particles_ = central_particles;
   CG_DEBUG("FactorisedProcess:setCentral") << "Setting the central particles system to: " << central_particles_ << ".";
@@ -167,7 +175,7 @@ void FactorisedProcess::addEventContent() {
 }
 
 void FactorisedProcess::prepareKinematics() {
-  random_generator_ = RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"));
+  random_generator_ = buildRandomGenerator();
   if (central_particles_.empty())
     CG_WARNING("FactorisedProcess:prepareKinematics") << "Empty central particles content.";
 

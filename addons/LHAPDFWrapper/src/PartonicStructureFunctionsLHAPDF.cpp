@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,8 @@ namespace cepgen::strfun {
       desc.add("pdfMember", 0);
       return desc;
     }
+
+    bool singleThreaded() const override { return true; }  ///< LHAPDF not validated for concurrent use
 
   private:
     void initialise();

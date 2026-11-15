@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ namespace cepgen::herwig6 {
     }
 
     inline double operator()(double q) const override { return hwuaem(q * q); }
+    bool singleThreaded() const override { return true; }  ///< Herwig 6 Fortran core
   };
 }  // namespace cepgen::herwig6
 using Herwig6AlphaEM = cepgen::herwig6::AlphaEM;

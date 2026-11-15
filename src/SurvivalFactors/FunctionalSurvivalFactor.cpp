@@ -57,6 +57,7 @@ namespace cepgen::survival {
         values_[i] = browser_.get(event, variables_[i]);
       return (*functional_)(values_);
     }
+    bool singleThreaded() const override { return SurvivalFactor::singleThreaded() || functional_->singleThreaded(); }
 
   private:
     const std::vector<std::string> variables_;

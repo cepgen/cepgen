@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,6 +71,8 @@ namespace cepgen::apfel {
       desc.add("targetDIS", "isoscalar"s);
       return desc;
     }
+
+    bool singleThreaded() const override { return true; }  ///< APFEL Fortran core
 
   private:
     void eval() override {

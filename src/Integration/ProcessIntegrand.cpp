@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <atomic>
 #include <numeric>
 
 #include "CepGen/Core/Exception.h"
@@ -24,10 +25,13 @@
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Utils/Value.h"
 
 using namespace cepgen;
 
@@ -36,19 +40,37 @@ ProcessIntegrand::ProcessIntegrand(const proc::Process& process)
   setProcess(process);
 }
 
-ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters)
+ProcessIntegrand::ProcessIntegrand(const RunParameters* run_parameters, size_t stream)
     : run_parameters_(run_parameters), timer_(new utils::Timer) {
   if (!run_parameters_)
     throw CG_FATAL("ProcessIntegrand") << "Invalid runtime parameters specified.";
   if (!run_parameters_->hasProcess())
     throw CG_FATAL("ProcessIntegrand") << "No process defined in runtime parameters.";
-  setProcess(run_parameters_->process());
+  setProcess(run_parameters_->process(), stream);
+}
+
+ProcessIntegrand::~ProcessIntegrand() = default;
+
+void ProcessIntegrand::buildLocalModules(size_t stream, const Value& cross_section) {
+  local_event_modifiers_.clear();
+  for (const auto& event_modifier : run_parameters_->eventModifiersSequence()) {
+    auto local_modifier = EventModifierFactory::get().build(event_modifier->parameters());
+    local_modifier->setSeed(event_modifier->seed() + static_cast<long long>(stream));
+    local_modifier->initialise(*run_parameters_);
+    local_modifier->setCrossSection(cross_section);
+    local_event_modifiers_.emplace_back(std::move(local_modifier));
+  }
+  local_taming_functions_.clear();
+  for (const auto& taming_function : run_parameters_->tamingFunctions())
+    local_taming_functions_.emplace_back(FunctionalFactory::get().build(taming_function->parameters()));
+  local_modules_ = true;
 }
 
 size_t ProcessIntegrand::size() const { return process().ndim(); }
 
-void ProcessIntegrand::setProcess(const proc::Process& original_process) {
+void ProcessIntegrand::setProcess(const proc::Process& original_process, size_t stream) {
   process_ = original_process.clone();  // each integrand object has its own clone of the process
+  process_->setRandomStream(stream);
   // NOTE: kinematics is already set by the process copy constructor
   process().kinematics().setParameters(
       original_process.kinematics().parameters());  // override default kinematics with the one defined in mother process
@@ -104,12 +126,10 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
   if (const auto* survival_factor = process_->survivalFactor(); survival_factor) {
     const auto survival = (*survival_factor)(*event);
     static const Limits allowed_sf_range{0., 1.};
-    static bool warning_has_fired = false;
-    if (!warning_has_fired && !allowed_sf_range.contains(survival)) {
+    static std::atomic<bool> warning_has_fired{false};
+    if (!allowed_sf_range.contains(survival) && !warning_has_fired.exchange(true))
       CG_WARNING("ProcessIntegrand") << "Survival factor value " << survival << " is outside the " << allowed_sf_range
                                      << " range.";
-      warning_has_fired = true;
-    }
     if (!utils::positive(survival))
       return 0.;
     weight *= survival;
@@ -118,7 +138,7 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
   }
 
   // once kinematics variables computed, can apply taming functions
-  for (const auto& taming_function : run_parameters_->tamingFunctions())
+  for (const auto& taming_function : local_modules_ ? local_taming_functions_ : run_parameters_->tamingFunctions())
     if (const auto val = (*taming_function)(bws_.get(*event, taming_function->variables().at(0))) != 0.)
       weight *= val;
     else
@@ -129,7 +149,7 @@ double ProcessIntegrand::eval(const std::vector<double>& x) {
 
   {  // run all event modification algorithms
     double branching_ratio = -1.;
-    for (auto& event_modifier : run_parameters_->eventModifiersSequence()) {
+    for (auto& event_modifier : local_modules_ ? local_event_modifiers_ : run_parameters_->eventModifiersSequence()) {
       if (!event_modifier->run(*event, branching_ratio, !storage_) || branching_ratio == 0.)
         return 0.;
       weight *= branching_ratio;  // branching fraction for all decays

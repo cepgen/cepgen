@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *                2021       Sergey Kulagin
  *                           Vladislav Barinov
  *
@@ -163,6 +163,7 @@ namespace cepgen::strfun {
     }
 
     void eval() override;
+    bool singleThreaded() const override { return Parameterisation::singleThreaded() || derivator_->singleThreaded(); }
 
   private:
     static constexpr double prefactor_ = M_1_PI * M_1_PI / constants::ALPHA_EM;

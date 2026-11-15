@@ -53,16 +53,6 @@ namespace cepgen::mg5amc {
             << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
     }
 
-    proc::ProcessPtr clone() const override { return std::make_unique<ProcessBuilder>(parameters(), false); }
-
-    void addEventContent() override {
-      setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-                       {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                       {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-                       {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                       {Particle::Role::CentralSystem, mg5_proc_->centralSystem()}});
-    }
-
     static ParametersDescription description() {
       auto desc = FactorisedProcess::description();
       desc.setDescription("MadGraph_aMC process builder");
@@ -70,6 +60,17 @@ namespace cepgen::mg5amc {
       desc.add("parametersCard", "param_card.dat"s).setDescription("Runtime MadGraph parameters card");
       desc += Interface::description();
       return desc;
+    }
+
+    proc::ProcessPtr clone() const override { return std::make_unique<ProcessBuilder>(parameters(), false); }
+    bool singleThreaded() const override { return true; }  ///< MadGraph standalone process: global model parameters
+
+    void addEventContent() override {
+      setEventContent({{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                       {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                       {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                       {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                       {Particle::Role::CentralSystem, mg5_proc_->centralSystem()}});
     }
 
     void prepareFactorisedPhaseSpace() override {

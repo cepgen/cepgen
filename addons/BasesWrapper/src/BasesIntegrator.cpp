@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ namespace cepgen {
           << " for the grid definition, " << utils::s("iteration", it2, true) << " for the integration.";
       return Value{res, unc};
     }
+    bool singleThreaded() const override { return true; }  ///< static integrand, Fortran common blocks
 
   private:
     static Integrand* gIntegrand;

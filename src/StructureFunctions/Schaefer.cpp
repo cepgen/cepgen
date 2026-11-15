@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2025  Laurent Forthomme
+ *  Copyright (C) 2017-2026  Laurent Forthomme
  *                2017       Wolfgang Schaefer
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -90,6 +90,11 @@ namespace cepgen::strfun {
           setFL(perturbative_model_->FL(args_.xbj, args_.q2) * (1. + higher_twist_ / args_.q2));
         }
       }
+    }
+
+    bool singleThreaded() const override {
+      return Parameterisation::singleThreaded() || resonances_model_->singleThreaded() ||
+             perturbative_model_->singleThreaded() || continuum_model_->singleThreaded();
     }
 
   private:

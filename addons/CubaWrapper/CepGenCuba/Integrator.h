@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2021-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ namespace cepgen::cuba {
     static Integrand* gIntegrand;
 
     Value run(Integrand&, const std::vector<Limits>&) override;
+    bool singleThreaded() const override { return true; }  ///< static integrand
 
   protected:
     virtual Value integrate() = 0;

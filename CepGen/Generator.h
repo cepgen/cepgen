@@ -19,6 +19,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 
 #include "CepGen/Utils/Value.h"
 
@@ -65,6 +66,7 @@ namespace cepgen {
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
     Integrator& integrator() const;                   ///< Retrieve the integrator object
     void integrate();                                 ///< Integrate the functional over the phase space of interest
+    void resetGeneration();                           ///< Rewind the event generator workers state
 
     Value computeXsection();  ///< Compute the cross-section and uncertainty, in pb, for the run parameters
     /// Compute the cross-section for the run parameters
@@ -76,8 +78,12 @@ namespace cepgen {
       return cross_section_.uncertainty();
     }  ///< Last error on the cross-section computed
 
-    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);            ///< Generate events
-    void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);  ///< Generate events
+    /// Generate events
+    void generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback, size_t num_threads = 0);
+    /// Generate events
+    void generate(size_t num_events,
+                  const std::function<void(const proc::Process&)>& callback = nullptr,
+                  size_t num_threads = 0);
     const Event& next();  ///< Generate one single event
 
     /// Compute one single point from the total phase space
@@ -90,13 +96,20 @@ namespace cepgen {
   private:
     void initialise();       ///< Initialise event generation
     void clearRun();         ///< Remove all references to a previous generation/run
+    void buildWorker();      ///< Build a new generator worker for the current integrator
     void resetIntegrator();  ///< Reset integrator algorithm from the user-specified configuration
+    /// Prepare one worker per generation thread
+    /// \return A boolean stating whether this run can be multithreaded
+    bool prepareThreadWorkers(size_t num_threads);
 
     std::unique_ptr<RunParameters> parameters_;  ///< Run parameters for event generation and cross-section computation
     std::unique_ptr<GeneratorWorker> worker_;    ///< Generator worker instance
     std::unique_ptr<Integrator> integrator_;     ///< Integration algorithm
     bool initialised_{false};                    ///< Has the event generator already been initialised?
     Value cross_section_{-1., -1.};              ///< Cross-section value computed at the last integration
+
+    std::vector<std::unique_ptr<GeneratorWorker> > thread_workers_;  ///< Workers of the secondary generation threads
+    std::mutex store_mutex_;                                         ///< Lock for the events storage
   };
 }  // namespace cepgen
 

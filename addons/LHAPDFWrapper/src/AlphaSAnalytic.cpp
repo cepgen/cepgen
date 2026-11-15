@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ namespace cepgen::lhapdf {
     }
 
     double operator()(double q) const override { return alphas_analytic_->alphasQ(q); }
+    bool singleThreaded() const override { return true; }  ///< LHAPDF not validated for concurrent use
 
   private:
     const std::unique_ptr<LHAPDF::AlphaS_Analytic> alphas_analytic_;

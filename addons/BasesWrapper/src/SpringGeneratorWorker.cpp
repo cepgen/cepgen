@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,14 @@ namespace cepgen {
       spinfo_(lu);
     }
 
+    static ParametersDescription description() {
+      auto desc = GeneratorWorker::description();
+      desc.setDescription("Spring/Bases worker");
+      desc.add("maxTrials", 50).setDescription("maximum number of trials per generation");
+      desc.add("verbosity", 0);
+      return desc;
+    }
+
     void initialise() override {
       gIntegrand = dynamic_cast<Integrand*>(integrand_.get());
       sprng2_.mxtryp = max_trials_;
@@ -59,14 +67,7 @@ namespace cepgen {
         return false;
       return storeEvent();  // return with an accepted event
     }
-
-    static ParametersDescription description() {
-      auto desc = GeneratorWorker::description();
-      desc.setDescription("Spring/Bases worker");
-      desc.add("maxTrials", 50).setDescription("maximum number of trials per generation");
-      desc.add("verbosity", 0);
-      return desc;
-    }
+    bool singleThreaded() const override { return true; }  ///< static integrand, Fortran common blocks
 
   private:
     static Integrand* gIntegrand;

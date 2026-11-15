@@ -28,6 +28,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 using namespace cepgen;
@@ -84,6 +85,17 @@ Process& Process::operator=(const Process& proc) {
 
 std::unique_ptr<Process> Process::clone() const {
   throw CG_FATAL("Process:clone") << "Process \"" << name_ << "\" has no cloning method implementation!";
+}
+
+bool Process::singleThreaded() const {
+  return (survival_factor_ && survival_factor_->singleThreaded()) ||
+         (alpha_em_used_ && alpha_em_ && alpha_em_->singleThreaded()) ||
+         (alpha_s_used_ && alpha_s_ && alpha_s_->singleThreaded());
+}
+
+std::unique_ptr<utils::RandomGenerator> Process::buildRandomGenerator() const {
+  return RandomGeneratorFactory::get().build(
+      utils::RandomGenerator::streamParameters(steer<ParametersList>("randomGenerator"), random_stream_));
 }
 
 Momentum& Process::pA() { return event().oneWithRole(Particle::Role::IncomingBeam1).momentum(); }
@@ -355,12 +367,14 @@ double Process::alphaEM(double q) const {
   if (!alpha_em_)
     throw CG_FATAL("Process:alphaEM")
         << "Trying to compute the electromagnetic running coupling while it is not initialised.";
+  alpha_em_used_ = true;
   return (*alpha_em_)(q);
 }
 
 double Process::alphaS(double q) const {
   if (!alpha_s_)
     throw CG_FATAL("Process:alphaS") << "Trying to compute the strong running coupling while it is not initialised.";
+  alpha_s_used_ = true;
   return (*alpha_s_)(q);
 }
 

@@ -29,6 +29,7 @@
 #include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Utils/Value.h"
 
 using namespace cepgen;
 
@@ -46,6 +47,22 @@ public:
         .setDescription("random number generator engine");
     desc.add("binSize", 3);
     return desc;
+  }
+
+  std::unique_ptr<GeneratorWorker> fork(size_t stream, const Value& cross_section) const override {
+    if (!grid_ || !grid_->prepared())
+      throw CG_FATAL("GridOptimisedGeneratorWorker:fork") << "Grid must be prepared before forking/spawning worker.";
+    auto params = parameters();
+    params.set("randomGenerator",
+               utils::RandomGenerator::streamParameters(steer<ParametersList>("randomGenerator"), stream));
+    auto worker = std::make_unique<GridOptimisedGeneratorWorker>(params);
+    worker->setRunParameters(run_params_, stream);
+    worker->setIntegrator(integrator_);
+    worker->integrand().setStorage(true);  // no grid preparation for this worker: directly store the events
+    worker->integrand().buildLocalModules(stream, cross_section);
+    worker->grid_ = std::make_unique<GridParameters>(*grid_);
+    worker->coordinates_ = std::vector<double>(worker->integrand().size());
+    return worker;
   }
 
   void initialise() override {

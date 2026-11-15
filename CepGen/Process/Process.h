@@ -27,6 +27,10 @@
 #include "CepGen/SurvivalFactors/SurvivalFactor.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
+namespace cepgen::utils {
+  class RandomGenerator;
+}  // namespace cepgen::utils
+
 /// Location for all physics processes to be generated
 namespace cepgen::proc {
   /// Class template to define any process to compute using this MC integrator/events generator
@@ -43,6 +47,11 @@ namespace cepgen::proc {
 
     virtual std::unique_ptr<Process> clone() const;  ///< Copy all process attributes into a new object
     virtual double computeWeight() = 0;              ///< Compute the phase space point weight
+
+    /// Process, couplings (if evaluated so far), and gap survival factor restricted to one single thread?
+    bool singleThreaded() const override;
+    /// Specify the index of the random numbers stream to be used by this clone (before its initialisation)
+    inline void setRandomStream(size_t stream) { random_stream_ = stream; }
 
     void clear();       ///< Reset process prior to the phase space and variables definition
     void clearEvent();  ///< Restore the event object to its initial state
@@ -118,6 +127,8 @@ namespace cepgen::proc {
     inline virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
     virtual void fillKinematics() = 0;          ///< Fill the Event object with the particles' kinematics
 
+    std::unique_ptr<utils::RandomGenerator> buildRandomGenerator() const;  ///< Build this clone's random generator
+
     //--- Mandelstam variables
     double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
 
@@ -163,21 +174,24 @@ namespace cepgen::proc {
     inline const std::vector<double>& lastCoordinates() const { return point_coord_; }  ///< Last coordinates fed
 
   private:
-    double s_{-1.};        ///< \f$s\f$, squared centre of mass energy of the two-beam system, in GeV\f${}^2\f$
-    double sqs_{-1.};      ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)
-    double inv_s_{-1.};    ///< \f$s^{-1}\f$, inverse squared CM energy of the two-beam system (in GeV\f${}^{-2}\f$)
-    double inv_sqs_{-1.};  ///< \f$s^{-1/2}\f$, inverse CM energy of the two-beam system (in GeV\f${}^{-1}\f$)
-    double wcm_{-1.};      ///< two-parton centre of mass energy
-    double mA2_{-1.};      ///< first incoming beam particle squared mass
-    double mB2_{-1.};      ///< second incoming beam particle squared mass
-    double mX2_{-1.};      ///< First diffractive state squared mass
-    double mY2_{-1.};      ///< Second diffractive state squared mass
-    double t1_{-1.};       ///< First parton virtuality
-    double t2_{-1.};       ///< Second parton virtuality
-    double x1_{0.};        ///< First parton fractional momentum
-    double x2_{0.};        ///< Second parton fractional momentum
+    double s_{-1.};            ///< \f$s\f$, squared centre of mass energy of the two-beam system, in GeV\f${}^2\f$
+    double sqs_{-1.};          ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)
+    double inv_s_{-1.};        ///< \f$s^{-1}\f$, inverse squared CM energy of the two-beam system (in GeV\f${}^{-2}\f$)
+    double inv_sqs_{-1.};      ///< \f$s^{-1/2}\f$, inverse CM energy of the two-beam system (in GeV\f${}^{-1}\f$)
+    double wcm_{-1.};          ///< two-parton centre of mass energy
+    double mA2_{-1.};          ///< first incoming beam particle squared mass
+    double mB2_{-1.};          ///< second incoming beam particle squared mass
+    double mX2_{-1.};          ///< First diffractive state squared mass
+    double mY2_{-1.};          ///< Second diffractive state squared mass
+    double t1_{-1.};           ///< First parton virtuality
+    double t2_{-1.};           ///< Second parton virtuality
+    double x1_{0.};            ///< First parton fractional momentum
+    double x2_{0.};            ///< Second parton fractional momentum
+    size_t random_stream_{0};  ///< Index of the random numbers stream used by this clone
     std::unique_ptr<Coupling> alpha_em_;               ///< Electromagnetic running coupling algorithm
     std::unique_ptr<Coupling> alpha_s_;                ///< Strong running coupling algorithm
+    mutable bool alpha_em_used_{false};                ///< Was the electromagnetic coupling evaluated?
+    mutable bool alpha_s_used_{false};                 ///< Was the strong coupling evaluated?
     std::unique_ptr<SurvivalFactor> survival_factor_;  ///< Gap survival factor modelling (if any)
     /// Handler to a variable mapped by this process
     struct MappingVariable {

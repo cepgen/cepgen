@@ -35,6 +35,7 @@ namespace cepgen {
     /// Specify a random numbers generator seed for the external module
     /// \param[in] seed An RNG seed
     void setSeed(long long seed) { seed_ = seed; }
+    long long seed() const { return seed_; }  ///< Random numbers generator seed fed to the algorithm
 
     inline virtual void readString(const std::string&) {}       ///< Parse a configuration string
     virtual void readStrings(const std::vector<std::string>&);  ///< Parse a list of configuration strings

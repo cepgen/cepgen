@@ -33,9 +33,9 @@ using namespace cepgen;
 
 GeneratorWorker::GeneratorWorker(const ParametersList& params) : SteeredObject(params) {}
 
-void GeneratorWorker::setRunParameters(const RunParameters* run_parameters) {
+void GeneratorWorker::setRunParameters(const RunParameters* run_parameters, size_t stream) {
   run_params_ = run_parameters;
-  integrand_ = std::make_unique<ProcessIntegrand>(run_parameters);
+  integrand_ = std::make_unique<ProcessIntegrand>(run_parameters, stream);
   CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                               << "Run parameters at " << dynamic_cast<const void*>(run_params_) << ".";
 }
@@ -59,8 +59,22 @@ void GeneratorWorker::generate(size_t num_events, const std::function<void(const
     next();
 }
 
+void GeneratorWorker::produce(size_t num_events,
+                              const std::function<void(const proc::Process&)>& callback,
+                              const std::atomic<bool>& stop) {
+  if (!run_params_)
+    throw CG_FATAL("GeneratorWorker:produce") << "No steering parameters specified!";
+  callback_proc_ = callback;
+  for (size_t num_stored = 0; num_stored < num_events && !stop;)
+    if (next())
+      ++num_stored;
+}
+
 bool GeneratorWorker::storeEvent(double weight) const {
   CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
+  std::unique_lock<std::mutex> lock;
+  if (store_mutex_)
+    lock = std::unique_lock(*store_mutex_);
 
   if (!integrand_->process().hasEvent())
     return true;

@@ -75,6 +75,7 @@ namespace gammaUPC {
         return twoPhotonFlux(x1, x2, force_p_non_hadronisation_) / no_overlap_flux;
       return 0.;
     }
+    bool singleThreaded() const override { return true; }  ///< gammaUPC Fortran module variables
 
   private:
     enum struct BeamsMode { pp, pB, Ap, AB };

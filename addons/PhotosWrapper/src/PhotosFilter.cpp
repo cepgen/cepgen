@@ -111,6 +111,7 @@ namespace cepgen::photos {
       photos_event.process();
       return hepmc_event.merge(event);  // merge everything back into the original event
     }
+    bool singleThreaded() const override { return true; }  ///< Photos++ global interface
 
   private:
     std::set<long> suppressed_beams_;  ///< beam particles for which Photos++ radiation was already disabled

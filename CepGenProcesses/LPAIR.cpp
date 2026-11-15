@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,6 +45,13 @@ public:
       : Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_), randomise_charge_(oth.randomise_charge_) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
+  bool singleThreaded() const override {
+    const auto& beams = kinematics().incomingBeams();
+    // structure functions are only evaluated if at least one beam is dissociating
+    return Process::singleThreaded() || (formfac1_ && formfac1_->singleThreaded()) ||
+           (formfac2_ && formfac2_->singleThreaded()) || (random_generator_ && random_generator_->singleThreaded()) ||
+           ((!beams.positive().elastic() || !beams.negative().elastic()) && strfun_ && strfun_->singleThreaded());
+  }
 
   void addEventContent() override {
     const auto signed_pair = static_cast<spdgid_t>(pair_.pdgid);
@@ -89,7 +96,7 @@ public:
           << "gamma=" << gamma_cm_ << ", beta*gamma=" << beta_gamma_cm_;
     }
 
-    random_generator_ = RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"));
+    random_generator_ = buildRandomGenerator();
     formfac1_ = FormFactorsFactory::get().build(kinematics().incomingBeams().positive().formFactors());
     formfac2_ = FormFactorsFactory::get().build(kinematics().incomingBeams().negative().formFactors());
     strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());

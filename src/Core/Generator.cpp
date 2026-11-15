@@ -16,7 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <atomic>
 #include <chrono>
+#include <thread>
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
@@ -31,6 +33,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
@@ -54,17 +57,31 @@ Generator::~Generator() {
 
 void Generator::clearRun() {
   CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
-  worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
-  CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters() << ".";
   parameters_->setGenerator(this);
   // destroy and recreate the integrator instance
   resetIntegrator();
-
-  worker_->setRunParameters(parameters_.get());
-  worker_->setIntegrator(integrator_.get());
+  buildWorker();
   cross_section_ = Value{};
   parameters_->prepareRun();
   initialised_ = false;
+}
+
+void Generator::resetGeneration() {
+  if (!worker_)  // nothing integrated yet: the next generation will prepare a full run
+    return;
+  CG_DEBUG("Generator:resetGeneration") << "Event generation is set to be reset, keeping the integration.";
+  buildWorker();
+  parameters_->prepareRun();
+  initialised_ = false;
+}
+
+void Generator::buildWorker() {
+  thread_workers_.clear();
+  worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
+  CG_DEBUG("Generator:buildWorker") << "Initialised a generator worker with parameters: " << worker_->parameters()
+                                    << ".";
+  worker_->setRunParameters(parameters_.get());
+  worker_->setIntegrator(integrator_.get());
 }
 
 void Generator::parseRunParameters(const std::string& filename) {
@@ -202,7 +219,9 @@ const Event& Generator::next() {
   return worker_->integrand().process().event();
 }
 
-void Generator::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
+void Generator::generate(size_t num_events,
+                         const std::function<void(const proc::Process&)>& callback,
+                         size_t num_threads) {
   CG_TICKER(parameters_->timeKeeper());
 
   if (!worker_ || !initialised_)
@@ -221,7 +240,28 @@ void Generator::generate(size_t num_events, const std::function<void(const proc:
 
   const utils::Timer tmr;
 
-  worker_->generate(num_events, callback);  // launch the event generation
+  // launch the event generation
+  if (num_threads == 0)
+    num_threads = parameters_->generation().numThreads();
+  if (num_threads <= 1 || !prepareThreadWorkers(num_threads)) {
+    thread_workers_.clear();
+    worker_->generate(num_events, callback);
+  } else {  // multithreaded generation
+    const size_t num_remaining =
+        num_events > parameters_->numGeneratedEvents() ? num_events - parameters_->numGeneratedEvents() : 0;
+    CG_INFO("Generator") << "Generating events on " << utils::s("thread", num_threads, true) << ".";
+
+    std::atomic<bool> stop{false};
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < num_threads; ++i) {
+      auto* worker = i == 0 ? worker_.get() : thread_workers_.at(i - 1).get();
+      const size_t share = num_remaining / num_threads + (i < num_remaining % num_threads ? 1 : 0);
+      threads.emplace_back([&, worker, share]() { worker->produce(share, callback, stop); });
+    }
+
+    for (auto& thread : threads)
+      thread.join();
+  }
 
   const double generation_time = tmr.elapsed();
   const double rate_ms = (parameters_->numGeneratedEvents() > 0)
@@ -234,11 +274,56 @@ void Generator::generate(size_t num_events, const std::function<void(const proc:
                        << "Equivalent luminosity: " << utils::format("%g", equivalent_luminosity) << " pb^-1.";
 }
 
-void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {
-  generate(num_events, [this, &callback](const proc::Process& process) {
-    if (callback)
-      callback(process.event(), parameters_->numGeneratedEvents());
-  });
+bool Generator::prepareThreadWorkers(size_t num_threads) {
+  // the integrator is shared between all workers, but only its (stateless) evaluation method is called concurrently
+  if (worker_->singleThreaded()) {
+    CG_WARNING("Generator")
+        << "Generator worker cannot be run concurrently. Falling back to a single-threaded event generation.";
+    return false;
+  }
+  if (worker_->integrand().process().singleThreaded()) {
+    CG_WARNING("Generator")
+        << "Process cannot be run concurrently. Falling back to a single-threaded event generation.";
+    return false;
+  }
+  for (const auto& event_modifier : parameters_->eventModifiersSequence())
+    if (event_modifier->singleThreaded()) {
+      CG_WARNING("Generator") << "Event modifier '" << event_modifier->name()
+                              << "' cannot be run concurrently. Falling back to a single-threaded event generation.";
+      return false;
+    }
+  for (const auto& taming_function : parameters_->tamingFunctions())
+    if (taming_function->singleThreaded()) {
+      CG_WARNING("Generator") << "Taming function '" << taming_function->name()
+                              << "' cannot be run concurrently. Falling back to a single-threaded event generation.";
+      return false;
+    }
+  // workers are kept between calls, so that a new generation continues the random numbers streams of the previous one
+  for (size_t stream = thread_workers_.size() + 1; stream < num_threads; ++stream) {
+    if (auto worker = worker_->fork(stream, cross_section_); worker)
+      thread_workers_.emplace_back(std::move(worker));
+    else {
+      CG_WARNING("Generator")
+          << "Generator worker cannot be run concurrently. Falling back to a single-threaded event generation.";
+      return false;
+    }
+  }
+  worker_->setStoreMutex(&store_mutex_);
+  for (auto& worker : thread_workers_)
+    worker->setStoreMutex(&store_mutex_);
+  return true;
+}
+
+void Generator::generate(size_t num_events,
+                         const std::function<void(const Event&, size_t)>& callback,
+                         size_t num_threads) {
+  generate(
+      num_events,
+      [this, &callback](const proc::Process& process) {
+        if (callback)
+          callback(process.event(), parameters_->numGeneratedEvents());
+      },
+      num_threads);
 }
 
 const GeneratorWorker& Generator::generatorWorker() const {

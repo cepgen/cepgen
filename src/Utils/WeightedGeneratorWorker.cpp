@@ -23,6 +23,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/RandomGenerator.h"
+#include "CepGen/Utils/Value.h"
 
 using namespace cepgen;
 
@@ -43,6 +44,22 @@ public:
         .setDescription("random number generator engine");
     desc.add("numPresamplingPoints", 100'000).setDescription("number of points used to normalise the event weights");
     return desc;
+  }
+
+  std::unique_ptr<GeneratorWorker> fork(size_t stream, const Value& cross_section) const override {
+    if (coordinates_.empty())
+      throw CG_FATAL("WeightedGeneratorWorker:fork") << "Presampling must be performed before forking/spawning worker.";
+    auto params = parameters();
+    params.set("randomGenerator",
+               utils::RandomGenerator::streamParameters(steer<ParametersList>("randomGenerator"), stream));
+    auto worker = std::make_unique<WeightedGeneratorWorker>(params);
+    worker->setRunParameters(run_params_, stream);
+    worker->setIntegrator(integrator_);
+    worker->integrand().setStorage(true);  // no presampling for this worker: directly store the events
+    worker->integrand().buildLocalModules(stream, cross_section);
+    worker->coordinates_.resize(worker->integrand().size());
+    worker->mean_weight_ = mean_weight_;  // common normalisation of the event weights for all threads
+    return worker;
   }
 
   void initialise() override {

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2025  Laurent Forthomme
+ *  Copyright (C) 2021-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ namespace cepgen::apfel {
       if (steer<bool>("checkAPFEL") && !APFEL::CheckAPFEL())
         throw CG_FATAL("apfel:AlphaS") << "Something is wrong with your APFEL configuration.";
     }
+
     static ParametersDescription description() {
       auto desc = cepgen::Coupling::description();
       desc.setDescription("APFEL alpha(S) evolution algorithm");
@@ -48,6 +49,7 @@ namespace cepgen::apfel {
         CG_WARNING("apfel:AlphaS:get") << "q = " << q << " outside the evolution range" << q_range_ << ".";
       return APFEL::AlphaQCD(q);
     }
+    bool singleThreaded() const override { return true; }  ///< APFEL Fortran core
 
   private:
     const Limits q_range_;

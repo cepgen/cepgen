@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,17 +37,19 @@ namespace cepgen::root {
       CG_DEBUG("root:Functional") << "Successfully defined a dimension-" << vars_.size() << " function with arguments "
                                   << vars_ << ": " << expr << ".";
     }
-    inline double eval() const override {
-      if (!func_.IsValid())
-        throw CG_ERROR("root:Functional") << "Cannot evaluate the invalid function at " << values_ << ".";
-      return func_.EvalPar(values_.data());
-    }
 
     inline static ParametersDescription description() {
       auto desc = utils::Functional::description();
       desc.setDescription("Plain old TFormula evaluator from ROOT");
       return desc;
     }
+
+    inline double eval() const override {
+      if (!func_.IsValid())
+        throw CG_ERROR("root:Functional") << "Cannot evaluate the invalid function at " << values_ << ".";
+      return func_.EvalPar(values_.data());
+    }
+    bool singleThreaded() const override { return true; }  ///< ROOT TFormula global state
 
   private:
     TFormula func_;

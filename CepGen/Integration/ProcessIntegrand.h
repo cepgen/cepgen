@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,26 +20,37 @@
 #define CepGen_Integration_ProcessIntegrand_h
 
 #include <memory>
+#include <vector>
 
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Integration/Integrand.h"
 
 namespace cepgen {
+  class EventModifier;
   class RunParameters;
-}
+  class Value;
+}  // namespace cepgen
 namespace cepgen::proc {
   class Process;
 }
 namespace cepgen::utils {
+  class Functional;
   class Timer;
-}
+}  // namespace cepgen::utils
 
 namespace cepgen {
   /// Wrapper to the function to be integrated
   class ProcessIntegrand final : public Integrand {
   public:
     explicit ProcessIntegrand(const proc::Process&);
-    explicit ProcessIntegrand(const RunParameters*);
+    explicit ProcessIntegrand(const RunParameters*, size_t stream = 0);
+    ~ProcessIntegrand() override;
+
+    /// Build private copies of the (stateful) event modifiers and taming functions of the runtime parameters
+    /// \note Mandatory for any integrand evaluated in a secondary thread
+    /// \param[in] stream Index of this integrand's thread
+    /// \param[in] cross_section Cross-section computed for this run
+    void buildLocalModules(size_t stream, const Value& cross_section);
 
     /// Compute the integrand for a given phase space point (or “event”)
     /// \param[in] x Phase space point coordinates
@@ -58,13 +69,16 @@ namespace cepgen {
     bool storage() const { return storage_; }          ///< Store the events generated in this run?
 
   private:
-    void setProcess(const proc::Process&);
+    void setProcess(const proc::Process&, size_t stream = 0);
 
     std::unique_ptr<proc::Process> process_;        ///< Local instance of the physics process
     const RunParameters* run_parameters_{nullptr};  ///< Generator-owned runtime parameters
     const std::unique_ptr<utils::Timer> timer_;     ///< Timekeeper for event generation
     utils::EventBrowser bws_;                       ///< Event browser
     bool storage_{false};                           ///< Will the next event generated be stored?
+    bool local_modules_{false};                     ///< Are private copies of the modules to be used?
+    std::vector<std::unique_ptr<EventModifier> > local_event_modifiers_;       ///< Private event modifiers
+    std::vector<std::unique_ptr<utils::Functional> > local_taming_functions_;  ///< Private taming functions
   };
 }  // namespace cepgen
 
