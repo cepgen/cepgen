@@ -1,0 +1,23 @@
+#!/bin/bash
+# COPR "custom script" source method: clones CepGen at a release tag and leaves a spec file and the matching
+# source tarball in $COPR_RESULTDIR, from which COPR builds the SRPM and then the RPMs.
+# The release workflow prepends the two variables below before registering the script on COPR:
+#   TAG        release tag to package (e.g. 1.3.1)
+#   REPO_URL   git clone URL of the repository
+# Runs unprivileged in a mock chroot (builddeps: "git"), with network access.
+set -euxo pipefail
+: "${TAG:?}" "${REPO_URL:?}" "${COPR_RESULTDIR:?}"
+
+# RPM versions cannot contain '-', and a leading 'v' is not part of the version
+version=$(echo "${TAG#v}" | sed -E 's/[-_]/./g')
+
+src=$(mktemp -d)
+git clone --quiet "$REPO_URL" "$src/cepgen"
+cd "$src/cepgen"
+git checkout --quiet "$TAG"
+
+git archive --format=tar.gz --prefix="cepgen-$version/" -o "$COPR_RESULTDIR/cepgen-$version.tar.gz" HEAD
+sed -E \
+  -e "s/^Version:.*/Version:        $version/" \
+  -e 's/^Release:.*/Release:        1%{?dist}/' \
+  .github/packaging/cepgen.spec > "$COPR_RESULTDIR/cepgen.spec"
