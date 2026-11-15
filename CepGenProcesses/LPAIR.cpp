@@ -46,8 +46,11 @@ public:
 
   proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
   bool singleThreaded() const override {
-    return Process::singleThreaded() || formfac1_->singleThreaded() || formfac2_->singleThreaded() ||
-           random_generator_->singleThreaded() || (strfun_ && strfun_->singleThreaded());
+    const auto& beams = kinematics().incomingBeams();
+    // structure functions are only evaluated if at least one beam is dissociating
+    return Process::singleThreaded() || (formfac1_ && formfac1_->singleThreaded()) ||
+           (formfac2_ && formfac2_->singleThreaded()) || (random_generator_ && random_generator_->singleThreaded()) ||
+           ((!beams.positive().elastic() || !beams.negative().elastic()) && strfun_ && strfun_->singleThreaded());
   }
 
   void addEventContent() override {
