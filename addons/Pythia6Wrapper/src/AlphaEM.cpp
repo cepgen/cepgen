@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ namespace cepgen::pythia6 {
     }
 
     inline double operator()(double q) const override { return pyalem(q * q); }
+    bool singleThreaded() const override { return true; }  ///< Pythia 6 Fortran core
   };
 }  // namespace cepgen::pythia6
 using Pythia6AlphaEM = cepgen::pythia6::AlphaEM;

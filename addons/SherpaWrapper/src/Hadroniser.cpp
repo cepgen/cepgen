@@ -145,6 +145,7 @@ namespace cepgen::sherpa {
         update(event, role, fragments);
       return true;
     }
+    bool singleThreaded() const override { return true; }  ///< Sherpa global state
 
   private:
     /// Build Sherpa configuration from the steered parameters

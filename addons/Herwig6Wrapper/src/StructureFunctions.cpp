@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024-2025  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,8 @@ namespace cepgen::herwig6 {
           .setDescription("structure functions set");
       return desc;
     }
+
+    bool singleThreaded() const override { return true; }  ///< Herwig 6 Fortran core
 
   private:
     inline void eval() override { setF2(hwsfun(args_.xbj, args_.q2, idhad_, nset_, 2)); }
