@@ -92,7 +92,11 @@ double PDG::mass(spdgid_t id) const {
 
 double PDG::width(spdgid_t id) const { return operator()(id).width; }
 
-double PDG::charge(spdgid_t id) const { return operator()(id).integerCharge() * (id / std::abs(id)) * 1. / 3.; }
+double PDG::charge(spdgid_t id) const {
+  if (HeavyIon::isHI(id))  // heavy ions are not in the catalogue: charge is Z
+    return static_cast<double>(static_cast<short>(HeavyIon::fromPdgId(std::abs(id)).Z)) * (id / std::abs(id));
+  return operator()(id).integerCharge() * (id / std::abs(id)) * 1. / 3.;
+}
 
 std::vector<double> PDG::charges(spdgid_t id) const {
   std::vector<double> chs;

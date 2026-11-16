@@ -20,6 +20,7 @@
 #include <iomanip>
 
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Message.h"
@@ -45,7 +46,12 @@ bool Particle::valid() const {
   return true;
 }
 
-float Particle::charge() const { return (antiparticle_ ? -1 : +1) * PDG::get()(pdg_id_).integerCharge() / 3.; }
+float Particle::charge() const {
+  const auto sign = antiparticle_ ? -1 : +1;
+  if (HeavyIon::isHI(static_cast<spdgid_t>(pdg_id_)))  // heavy ions are not in the PDG catalogue: charge is Z
+    return sign * static_cast<float>(static_cast<short>(HeavyIon::fromPdgId(pdg_id_).Z));
+  return sign * PDG::get()(pdg_id_).integerCharge() / 3.;
+}
 
 Particle& Particle::addMother(Particle& mother_particle) {
   if (const auto& [it, inserted] = mothers_.insert(mother_particle.id_); inserted) {
