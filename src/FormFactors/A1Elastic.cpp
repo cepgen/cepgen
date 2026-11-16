@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2024  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ namespace cepgen {
           throw CG_FATAL("A1Elastic") << "Invalid coefficients multiplicity for the G_M functional form!";
         if (const auto grid_filename = steerPath("A1SplinesGrid"); !grid_filename.empty()) {
           std::ifstream grid_file(grid_filename);
+          if (!grid_file.is_open())
+            throw CG_FATAL("A1Elastic") << "Failed to open the splines interpolation grid file '" << grid_filename
+                                        << "'.";
           for (std::string line; std::getline(grid_file, line);) {
             const auto vals = utils::split(line, ' ');
             if (vals.size() < 6)  // should be 13
