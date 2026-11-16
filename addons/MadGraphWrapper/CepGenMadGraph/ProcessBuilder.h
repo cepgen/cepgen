@@ -32,11 +32,16 @@ namespace cepgen::mg5amc {
   protected:
     void loadMG5Library();
     void prepareSteeringCard() const;
-    mg5amc::Process& process() const;
+    mg5amc::Process& process() const { return *mg5_proc_; }  ///< always set once the constructor has returned
+    /// Common event-weight computation: cuts on partons/central system, matrix element evaluation, flux normalisation
+    double computeFactorisedMatrixElement() final;
+    /// Feed the MadGraph process with the incoming/outgoing particles momenta of the current phase space point
+    virtual void fillMomenta() = 0;
     /// Locate the parameters card: a file provided by the user, or the one generated along with the process
     std::string parametersCardPath() const;
 
   private:
+    const bool owns_library_;  ///< was the library loaded by this object? (not the case for process clones)
     std::string library_filename_;
     std::unique_ptr<mg5amc::Process> mg5_proc_;
   };

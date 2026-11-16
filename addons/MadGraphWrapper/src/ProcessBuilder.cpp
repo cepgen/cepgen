@@ -16,14 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Event/Event.h>
+#include <CepGen/Generator.h>
+#include <CepGen/Physics/PDG.h>
+#include <CepGen/Process/FactorisedProcess.h>
+#include <CepGen/Utils/AbortHandler.h>
+#include <CepGen/Utils/Math.h>
+#include <CepGen/Utils/RandomGenerator.h>
+
 #include <fstream>
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Generator.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Utils/AbortHandler.h"
-#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGenMadGraph/Interface.h"
 #include "CepGenMadGraph/Process.h"
 #include "CepGenMadGraph/ProcessBuilder.h"
@@ -35,7 +38,7 @@ using namespace cepgen::mg5amc;
 using namespace std::string_literals;
 
 ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library)
-    : FactorisedProcess(params), library_filename_(steer<std::string>("lib")) {
+    : FactorisedProcess(params), owns_library_(load_library), library_filename_(steer<std::string>("lib")) {
   if (load_library)
     loadMG5Library();
   CG_DEBUG("mg5amc:ProcessBuilder") << "List of MadGraph process registered in the runtime database: "
@@ -49,6 +52,8 @@ ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library)
 
 ProcessBuilder::~ProcessBuilder() {
   mg5_proc_.reset();  // call the destructor, as the library will be invalidated
+  if (!owns_library_)
+    return;  // clones share the library of the process they were built from
   if (!library_filename_.empty() && !unloadLibrary(library_filename_))
     CG_ERROR("mg5amc:~ProcessBuilder") << "Failed to unload library '" << library_filename_ << "'.";
   if (steer<bool>("removeLibrary")) {
@@ -108,10 +113,19 @@ void ProcessBuilder::prepareSteeringCard() const {
   }
 }
 
-mg5amc::Process& ProcessBuilder::process() const {
-  if (!mg5_proc_)
-    throw CG_FATAL("mg5amc:ProcessBuilder:process") << "Process not properly linked!";
-  return *mg5_proc_;
+double ProcessBuilder::computeFactorisedMatrixElement() {
+  if (!kinematics().cuts().initial.contain(event()(Particle::Role::Parton1)) ||
+      !kinematics().cuts().initial.contain(event()(Particle::Role::Parton2)) ||
+      !kinematics().cuts().central.contain(event()(Particle::Role::CentralSystem)))
+    return 0.;
+  CG_DEBUG_LOOP("mg5amc:ProcessBuilder:eval")
+      << "Incoming partons: " << q1() << " (m=" << q1().mass() << "), " << q2() << " (m=" << q2().mass() << ").";
+  fillMomenta();
+  if (const auto weight = process().eval(); utils::positive(weight)) {
+    const auto s = shat();
+    return weight / (s * s);
+  }
+  return 0.;
 }
 
 std::string ProcessBuilder::parametersCardPath() const {

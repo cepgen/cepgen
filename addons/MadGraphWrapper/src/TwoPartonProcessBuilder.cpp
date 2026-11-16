@@ -16,13 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/Generator.h"
-#include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Utils/Math.h"
-#include "CepGen/Utils/RandomGenerator.h"
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Event/Event.h>
+#include <CepGen/Generator.h>
+#include <CepGen/Modules/ProcessFactory.h>
+#include <CepGen/Process/FactorisedProcess.h>
+#include <CepGen/Utils/Math.h>
+#include <CepGen/Utils/RandomGenerator.h>
+
 #include "CepGenMadGraph/Process.h"
 #include "CepGenMadGraph/ProcessBuilder.h"
 
@@ -43,24 +44,13 @@ namespace cepgen::mg5amc {
             << "is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
       prepareSteeringCard();
     }
-    double computeFactorisedMatrixElement() override {
-      if (!kinematics().cuts().initial.contain(event()(Particle::Role::Parton1)) ||
-          !kinematics().cuts().initial.contain(event()(Particle::Role::Parton2)))
-        return 0.;
-      if (!kinematics().cuts().central.contain(event()(Particle::Role::CentralSystem)))
-        return 0.;
 
-      CG_DEBUG_LOOP("mg5amc:TwoPartonProcessBuilder:eval")
-          << "Particles content:\n"
-          << "incoming: " << q1() << " (m=" << q1().mass() << "), " << q2() << " (m=" << q2().mass() << ")\n"
-          << "outgoing: " << pc(0) << " (m=" << pc(0).mass() << "), " << pc(1) << " (m=" << pc(1).mass() << ").";
+  private:
+    void fillMomenta() override {
       process().setMomentum(0, q1());  // first incoming parton
       process().setMomentum(1, q2());  // second incoming parton
-      for (size_t i = 0; i < event()(Particle::Role::CentralSystem).size(); ++i)
+      for (size_t i = 0, n = central().size(); i < n; ++i)
         process().setMomentum(2 + i, pc(i));  // outgoing central particles
-      if (const auto weight = process().eval(); utils::positive(weight))
-        return weight * std::pow(shat(), -2);
-      return 0.;
     }
   };
 }  // namespace cepgen::mg5amc
