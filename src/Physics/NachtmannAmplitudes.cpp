@@ -109,6 +109,7 @@ public:
     desc.setDescription("W");
     return desc;
   }
+  bool hasAAWW() const override { return true; }
   std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
       return 3i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.invA *
@@ -145,6 +146,7 @@ public:
     desc.setDescription("Wbar");
     return desc;
   }
+  bool hasAAWW() const override { return true; }
   std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
       return {-3 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.inv_gamma2 *
@@ -348,13 +350,13 @@ std::unique_ptr<NachtmannAmplitudes> NachtmannAmplitudes::build(const Parameters
     return std::make_unique<PhiWModel>(params);
   else if (name == "PhiWbar")
     return std::make_unique<PhiWbarModel>(params);
-  else if (name == "PhBW")
+  else if (name == "PhiB")
     return std::make_unique<PhiBModel>(params);
-  else if (name == "PhBWbar")
+  else if (name == "PhiBbar")
     return std::make_unique<PhiBbarModel>(params);
-  else if (name == "WW")
+  else if (name == "WB")
     return std::make_unique<WBModel>(params);
-  else if (name == "WWbar")
+  else if (name == "WbarB")
     return std::make_unique<WbarBModel>(params);
   else
     throw CG_FATAL("NachtmannAmplitudes:build") << "Failed to build amplitudes model with name '" << name << "'.";

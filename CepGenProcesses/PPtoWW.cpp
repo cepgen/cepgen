@@ -108,8 +108,8 @@ private:
       CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name() << ") initialised.";
       if (!amplitudes_->hasAAWW())
         throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
-                                 << "Only supported extensions are W, Wbar and dimension-6 AQGC (W). Specified model: "s
-                                 << amplitudes_->name() << ".";
+                                 << "Specified model: "s << amplitudes_->name()
+                                 << " does not have a registered AAWW vertex in its specifications.";
       CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
     }
     const auto kin = amplitudes::Kinematics(mW2_, shat(), that(), uhat());
