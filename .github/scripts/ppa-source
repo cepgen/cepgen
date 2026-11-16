@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Build unsigned Debian source packages of a CepGen release tag, one per Ubuntu series.
+#
+#   ppa-source <tag> <output-dir> "<series> [<series> ...]" [<ppa-revision>]
+#
+# Needs DEBFULLNAME and DEBEMAIL (identity of the PPA uploader, i.e. of the GPG key that signs the upload).
+# Must be run from inside a git checkout containing <tag>; the Debian packaging is read from
+# .github/packaging/debian. For each series, <output-dir>/<series>/ gets
+#   cepgen_<version>-0ppa<rev>~<series>1_source.changes (+ .dsc, .debian.tar.xz, .orig.tar.gz)
+# BUILD_CMD can be overridden (e.g. "dpkg-source -b .") to test without a full debhelper toolchain.
+set -euo pipefail
+
+tag=${1:?usage: $0 <tag> <output-dir> "<series...>" [revision]}
+outdir=${2:?}
+series_list=${3:?}
+rev=${4:-1}
+: "${DEBFULLNAME:?DEBFULLNAME must be set}" "${DEBEMAIL:?DEBEMAIL must be set}"
+build_cmd=${BUILD_CMD:-dpkg-buildpackage -S -sa -d -us -uc}
+
+# Debian upstream versions may not contain '_' or a leading 'v'; '-' is mapped too to keep it simple.
+version=$(echo "${tag#v}" | tr '_-' '..')
+ts=$(git log -1 --format=%ct "$tag^{commit}")
+mkdir -p "$outdir"
+outdir=$(realpath "$outdir")
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+git archive --format=tar --prefix="cepgen-$version/" "$tag" | tar -x -C "$tmp"
+template="$tmp/cepgen-$version/.github/packaging/debian"
+[ -d "$template" ] || { echo "error: $tag has no .github/packaging/debian directory" >&2; exit 1; }
+# the Debian packaging is kept out of the repository root and copied in as debian/ at build time
+mv "$template" "$tmp/debian.template"
+
+# reproducible orig tarball: the exact same bytes must be uploaded for every series
+orig="cepgen_$version.orig.tar.gz"
+tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$ts" -cf - -C "$tmp" "cepgen-$version" \
+  | gzip -9n > "$outdir/$orig"
+
+for series in $series_list; do
+  debver="$version-0ppa$rev~${series}1"
+  work="$outdir/$series"
+  rm -rf "$work"; mkdir -p "$work"
+  cp "$outdir/$orig" "$work/"
+  tar xzf "$work/$orig" -C "$work"
+  cp -r "$tmp/debian.template" "$work/cepgen-$version/debian"
+  cat > "$work/cepgen-$version/debian/changelog" <<EOF
+cepgen ($debver) $series; urgency=medium
+
+  * New upstream release $tag.
+
+ -- $DEBFULLNAME <$DEBEMAIL>  $(date -R -d "@$ts")
+EOF
+  echo ">>> $series: cepgen $debver"
+  (cd "$work/cepgen-$version" && $build_cmd)
+  rm -rf "$work/cepgen-$version"
+done
