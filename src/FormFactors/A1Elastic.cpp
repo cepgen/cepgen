@@ -45,15 +45,21 @@ namespace cepgen {
             throw CG_FATAL("A1Elastic") << "Failed to open the splines interpolation grid file '" << grid_filename
                                         << "'.";
           for (std::string line; std::getline(grid_file, line);) {
-            const auto vals = utils::split(line, ' ');
-            if (vals.size() < 6)  // should be 13
+            // whitespace-separated columns: Q^2, then four values for each of the (three) tabulated form factors
+            std::istringstream line_stream(line);
+            std::vector<double> vals;
+            for (double val; line_stream >> val;)
+              vals.emplace_back(val);
+            if (vals.size() < 13)
               continue;
-            const auto q2 = std::stod(vals.at(0)), ge = std::stod(vals.at(1)), gm = std::stod(vals.at(5));
-            coh_grid_.insert({q2}, {ge, gm});
+            coh_grid_.insert({vals.at(0)}, {vals.at(1), vals.at(5)});  // Q^2 -> (G_E, G_M/mu_p)
           }
+          if (coh_grid_.values().empty())
+            throw CG_FATAL("A1Elastic") << "No valid entry found in the splines interpolation grid file '"
+                                        << grid_filename << "'.";
           coh_grid_.initialise();
           min_interp_q2_ = coh_grid_.min().at(0);
-          CG_DEBUG("A1Elastic") << "Splines interpolation grid file loaded from '" << grid_filename << ". "
+          CG_DEBUG("A1Elastic") << "Splines interpolation grid file loaded from '" << grid_filename << "'. "
                                 << "Q^2 range: " << coh_grid_.boundaries().at(0) << " GeV^2.";
         }
       }
@@ -65,7 +71,8 @@ namespace cepgen {
             .setDescription("coefficients for the G_E functional form");
         desc.add<std::vector<double> >("coeffM", {0.28231, 1.34919, 0.55473})
             .setDescription("coefficients for the G_M functional form");
-        desc.add<std::string>("A1SplinesGrid", "External/PhysRevC.90.015206.SplinesWithVariableKnots.dat");
+        desc.add<std::string>("A1SplinesGrid", "External/PhysRevC.90.015206.SplinesWithVariableKnots.dat")
+            .setDescription("path to the splines interpolation grid");
         desc.add<double>("q2interp", 10.).setDescription("maximal Q^2 at which interpolation is performed (in GeV^2)");
         return desc;
       }
@@ -78,9 +85,10 @@ namespace cepgen {
                             (1. - coeffs.at(0)) * std::pow(1. + q2 / coeffs.at(2), -2));
       }
       void eval() override {
-        if (q2_ < min_interp_q2_) {
+        if (!coh_grid_.values().empty() && q2_ < min_interp_q2_) {
           const auto& min_vals = coh_grid_.values().begin()->second;
-          setGEGM(1. + q2_ * (min_vals.at(0) - 1.) / 0.005, (1. + q2_ * (min_vals.at(1) - 1.) / 0.005) * MU);
+          setGEGM(1. + q2_ * (min_vals.at(0) - 1.) / min_interp_q2_,
+                  (1. + q2_ * (min_vals.at(1) - 1.) / min_interp_q2_) * MU);
         } else if (q2_ < max_interp_q2_) {
           const auto& grid_vals = coh_grid_.eval({q2_});
           setGEGM(grid_vals.at(0), grid_vals.at(1) * MU);
