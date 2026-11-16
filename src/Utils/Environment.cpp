@@ -32,16 +32,25 @@ namespace cepgen::utils::env {
 
   std::vector<std::string> searchPaths() {
     const auto cepgen_path = fs::path(get("CEPGEN_PATH", "."));
-    return std::vector<std::string>{fs::current_path(),
-                                    fs::current_path().parent_path(),
-                                    cepgen_path,
-                                    cepgen_path / "CepGen",
-                                    cepgen_path / "lib",
-                                    cepgen_path / "lib64",
-                                    cepgen_path / "share" / "CepGen",
-                                    // additional paths for local builds
-                                    cepgen_path / "External",
-                                    cepgen_path / "build"};
+    auto paths = std::vector<std::string>{fs::current_path(),
+                                          fs::current_path().parent_path(),
+                                          cepgen_path,
+                                          cepgen_path / "CepGen",
+                                          cepgen_path / "lib",
+                                          cepgen_path / "lib64",
+                                          cepgen_path / "share" / "CepGen",
+                                          // additional paths for local builds
+                                          cepgen_path / "External",
+                                          cepgen_path / "build"};
+    // locations where CepGen was installed (e.g. from a distribution package): these are tried last, so that
+    // CEPGEN_PATH and local builds keep priority, but no environment variable is needed for an installed CepGen
+#ifdef CEPGEN_INSTALL_LIBDIR
+    paths.emplace_back(CEPGEN_INSTALL_LIBDIR);
+#endif
+#ifdef CEPGEN_INSTALL_DATADIR
+    paths.emplace_back(CEPGEN_INSTALL_DATADIR);
+#endif
+    return paths;
   }
 
   void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }

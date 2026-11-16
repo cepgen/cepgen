@@ -50,6 +50,11 @@ cepgen_build(CepGen
         LIBRARIES ${CEPGEN_CORE_EXT}
         COMPONENT lib)
 
+#----- installed locations of the libraries and data files, used as fallback search paths at runtime
+target_compile_definitions(CepGen PRIVATE
+        CEPGEN_INSTALL_LIBDIR="${CMAKE_INSTALL_FULL_LIBDIR}"
+        CEPGEN_INSTALL_DATADIR="${CMAKE_INSTALL_FULL_DATAROOTDIR}/CepGen")
+
 file(GLOB exec_sources *.cc)
 message(STATUS "Executables will be linked against CepGen core library")
 foreach(exec_src ${exec_sources})
