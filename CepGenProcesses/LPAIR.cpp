@@ -69,7 +69,8 @@ public:
   void prepareKinematics() override {
     ml_ = pair_.mass;
     ml2_ = ml_ * ml_;
-    charge_factor_ = std::pow(pair_.integerCharge() / 3., 2);
+    // squared amplitude scales as Q_f^4, with a sum over final state colours (for quarks)
+    charge_factor_ = std::pow(pair_.integerCharge() / 3., 4) * (pair_.colours > 0 ? pair_.colours : 1.);
     beams_mode_ = kinematics().incomingBeams().mode();
     pA() = kinematics().incomingBeams().positive().momentum();
     pB() = kinematics().incomingBeams().negative().momentum();
