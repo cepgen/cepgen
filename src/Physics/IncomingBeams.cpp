@@ -34,6 +34,13 @@
 using namespace cepgen;
 using namespace std::string_literals;
 
+namespace {
+  /// Number of nucleons in a beam particle (1 for anything but a heavy ion)
+  double numNucleons(int pdg_id) {
+    return HeavyIon::isHI(pdg_id) ? static_cast<double>(HeavyIon::fromPdgId(std::abs(pdg_id)).A) : 1.;
+  }
+}  // namespace
+
 IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
   add("structureFunctions", strfun_);
 }
@@ -74,8 +81,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   double p1z = 0., p2z = 0;
   if (const auto& beams_pz = steer<std::vector<double> >("pz"); beams_pz.size() >= 2) {
     // fill from beam momenta
-    p1z = beams_pz.at(0);
-    p2z = beams_pz.at(1);
+    p1z = beams_pz.at(0) * numNucleons(pos_pdg);  // heavy ions: momentum per nucleon -> momentum per ion
+    p2z = beams_pz.at(1) * numNucleons(neg_pdg);
   } else if (const auto& beams_ene = steer<std::vector<double> >("energies"); beams_ene.size() >= 2) {
     // fill from beam energies
     p1z = utils::fastSqrtSqDiff(beams_ene.at(0), PDG::get().mass(pos_pdg));
@@ -84,6 +91,8 @@ void IncomingBeams::setParameters(const ParametersList& params) {
     // when everything failed, retrieve "beamNpz" attributes
     params_.fill<double>("beam1pz", p1z);
     params_.fill<double>("beam2pz", p2z);
+    p1z *= numNucleons(pos_pdg);  // heavy ions: momentum per nucleon -> momentum per ion
+    p2z *= numNucleons(neg_pdg);
     if (std::abs(pos_pdg) == std::abs(neg_pdg)) {  // special case: symmetric beams -> fill from centre-of-mass energy
       if (const auto sqrt_s = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0. ? steer<double>("sqrtS")
                               : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0.
@@ -245,9 +254,9 @@ void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) const {
 const ParametersList& IncomingBeams::parameters() const {
   params_ = ParametersList(SteeredObject::parameters())
                 .set<int>("beam1id", pos_beam_.integerPdgId())
-                .set("beam1pz", +pos_beam_.momentum().pz())
+                .set("beam1pz", +pos_beam_.momentum().pz() / numNucleons(pos_beam_.integerPdgId()))
                 .set<int>("beam2id", neg_beam_.integerPdgId())
-                .set("beam2pz", -neg_beam_.momentum().pz())
+                .set("beam2pz", -neg_beam_.momentum().pz() / numNucleons(neg_beam_.integerPdgId()))
                 .setAs<int, mode::Kinematics>("mode", mode());
   if (HeavyIon::isHI(pos_beam_.integerPdgId())) {
     const auto hi1 = HeavyIon::fromPdgId(std::abs(pos_beam_.integerPdgId()));
@@ -270,7 +279,7 @@ ParametersDescription IncomingBeams::description() {
   desc.addAs<int, Element>("beam2Z", Element::invalid).setDescription("Atomic number of the negative-z ion beam");
   desc.add("pdgIds", std::vector<ParametersList>{}).setDescription("PDG description of incoming beam particles");
   desc.add("pdgIds", std::vector<int>{}).setDescription("PDG ids of incoming beam particles");
-  desc.add("pz", std::vector<double>{}).setDescription("Beam momenta (in GeV/c)");
+  desc.add("pz", std::vector<double>{}).setDescription("Beam momenta (in GeV/c; per nucleon for heavy ions)");
   desc.add("energies", std::vector<double>{}).setDescription("Beam energies (in GeV/c)");
   desc.add("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
   desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
