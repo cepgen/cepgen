@@ -13,6 +13,7 @@ class Cepgen < Formula
   depends_on "boost"
   depends_on "gcc" # gfortran at build time, libgfortran at run time
   depends_on "gsl"
+  depends_on "ninja" => :build
   depends_on "pybind11" => :build
   depends_on "python@3.14"
 
@@ -25,7 +26,12 @@ class Cepgen < Formula
     # tarballs carry no git metadata: the version is imposed by the formula
     args << "-DCEPGEN_VERSION_OVERRIDE=#{version}" if build.stable?
 
-    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    # the add-on and process libraries do not link against the core library, which Linux tolerates but the macOS
+    # linker does not: let their CepGen symbols be resolved when they are loaded. The headerpad flag is Homebrew's
+    # own default, repeated since this variable replaces it.
+    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names -Wl,-undefined,dynamic_lookup" if OS.mac?
+
+    system "cmake", "-S", ".", "-B", "build", "-G", "Ninja", *std_cmake_args, *args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
