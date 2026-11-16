@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
@@ -32,4 +33,8 @@ ParametersDescription PartonFlux::description() {
   auto desc = ParametersDescription();
   desc.setDescription("Unnamed parton flux evaluator");
   return desc;
+}
+
+double PartonFlux::beta2(double) const {
+  throw CG_ERROR("PartonFlux:beta2") << "Flux '" << name() << "' does not provide an effective parton-quark coupling.";
 }

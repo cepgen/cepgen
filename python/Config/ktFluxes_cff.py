@@ -14,6 +14,7 @@ class ProtonFlux:
     PhotonElasticBudnev = Module('BudnevElastic')
     PhotonInelasticBudnev = Module('BudnevInelastic')
     GluonKMR = Module('KMR')
+    PomeronElastic = Module('PomeronElastic')
 
 
 class HeavyIonFlux:
