@@ -61,7 +61,7 @@ namespace cepgen {
     static inline HeavyIon proton() { return HeavyIon(1, Element::H); }         ///< Simple proton
     static inline HeavyIon neutron() { return HeavyIon(1, Element::neutron); }  ///< Simple neutron
     static inline HeavyIon Au() { return HeavyIon(197, Element::Au); }          ///< Standard gold
-    static inline HeavyIon Pb() { return HeavyIon(207, Element::Pb); }          ///< Standard lead
+    static inline HeavyIon Pb() { return HeavyIon(208, Element::Pb); }          ///< Standard lead (208Pb)
 
     operator pdgid_t() const;                                         ///< Convert the HI into a custom PDG id
     friend std::ostream& operator<<(std::ostream&, const HeavyIon&);  ///< Human-readable expression of the ion
