@@ -40,10 +40,13 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Will test process(es): " << processes << ".";
   for (const auto& proc_name : processes) {
     auto proc_name_fix = proc_name;
-    if (proc_name == "mg5_aMC") {
+    if (const auto mg5_proc = cepgen::utils::split(proc_name, ':'); mg5_proc.at(0) == "mg5_aMC") {
       if (!include_mg5_proc)
         continue;
-      proc_name_fix += "<process:'a a > mu- mu+'";
+      if (mg5_proc.size() > 1)
+        proc_name_fix += "<process:'a e- > mu- mu+ e-'<removeLibrary:true";
+      else
+        proc_name_fix += "<process:'a a > mu- mu+'<removeLibrary:true";
     }
     auto proc = cepgen::ProcessFactory::get().build(proc_name_fix);
     proc->initialise();
