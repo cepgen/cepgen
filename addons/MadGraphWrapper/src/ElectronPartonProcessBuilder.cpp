@@ -23,33 +23,20 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/RandomGenerator.h"
 #include "CepGenMadGraph/Interface.h"
 #include "CepGenMadGraph/Process.h"
-#include "CepGenMadGraph/ProcessFactory.h"
-#include "CepGenMadGraph/Utils.h"
+#include "CepGenMadGraph/ProcessBuilder.h"
 
 using namespace cepgen;
 using namespace std::string_literals;
 
 namespace cepgen::mg5amc {
-  class ElectronPartonProcessBuilder : public proc::FactorisedProcess {
+  class ElectronPartonProcessBuilder final : public ProcessBuilder {
   public:
     explicit ElectronPartonProcessBuilder(const ParametersList& params, bool load_library = true)
-        : FactorisedProcess(params) {
-      if (load_library)
-        loadMG5Library();
-      CG_DEBUG("ElectronPartonProcessBuilder")
-          << "List of MadGraph process registered in the runtime database: " << ProcessFactory::get().modules() << ".";
-      // once MadGraph process library is loaded into runtime environment, can define its wrapper object
-      mg5_proc_ = ProcessFactory::get().build(normalise(steer<std::string>("process")));
-      if (mg5_proc_->centralSystem().empty())
-        throw CG_FATAL("ElectronPartonProcessBuilder")
-            << "Failed to retrieve produced particles system from MadGraph process:\n"
-            << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
+        : ProcessBuilder(params, load_library) {
       auto central_system = mg5_proc_->centralSystem();
       if (std::abs(*central_system.begin()) == PDG::electron) {
         e_pdg_ = *central_system.begin();
@@ -62,21 +49,16 @@ namespace cepgen::mg5amc {
       } else
         throw CG_FATAL("ElectronPartonProcessBuilder")
             << "No electron/positron found in mg5_aMC process particles list.";
-      setCentral(central_system);  // electron/positron stripped off central system
+      setCentral(central_system);
     }
-
-    bool singleThreaded() const override { return true; }  ///< MadGraph standalone process: global model parameters
 
     proc::ProcessPtr clone() const override {
       return std::make_unique<ElectronPartonProcessBuilder>(parameters(), false);
     }
 
     static ParametersDescription description() {
-      auto desc = FactorisedProcess::description();
+      auto desc = ProcessBuilder::description();
       desc.setDescription("MadGraph_aMC electron-parton process builder");
-      desc.add("lib", ""s).setDescription("Precompiled library for this process definition");
-      desc.add("parametersCard", "param_card.dat"s).setDescription("Runtime MadGraph parameters card");
-      desc += Interface::description();
       return desc;
     }
 
@@ -123,18 +105,18 @@ namespace cepgen::mg5amc {
           << "outgoing: " << pc(0) << " (m=" << pc(0).mass() << "), " << pc(1) << " (m=" << pc(1).mass() << ").";
       if (mode_ == Mode::electron_parton) {
         size_t i = 0;
-        mg5_proc_->setMomentum(i++, pA());  // first "parton" is beam electron
-        mg5_proc_->setMomentum(i++, q2());  // second "parton" is parton-from-hadron
+        mg5_proc_->setMomentum(i++, pA());  // first "parton": beam electron
+        mg5_proc_->setMomentum(i++, q2());  // second "parton": parton-from-hadron
         mg5_proc_->setMomentum(i++, pX());
         for (size_t j = 0; j < central().size(); ++j)
           mg5_proc_->setMomentum(i++, pc(j));  // outgoing central particles
       } else if (mode_ == Mode::parton_electron) {
         size_t i = 0;
-        mg5_proc_->setMomentum(i++, q1());  // first "parton" is parton-from-hadron
-        mg5_proc_->setMomentum(i++, pB());  // second "parton" is beam electron
+        mg5_proc_->setMomentum(i++, q1());  // first "parton": parton-from-hadron
+        mg5_proc_->setMomentum(i++, pB());  // second "parton": beam electron
         for (size_t j = 0; j < central().size(); ++j)
           mg5_proc_->setMomentum(i++, pc(j));  // outgoing central particles
-        mg5_proc_->setMomentum(i++, pY());
+        mg5_proc_->setMomentum(i, pY());
       } else
         throw CG_FATAL("ElectronPartonProcessBuilder:eval") << "Invalid beams mode: " << mode_ << ".";
       if (const auto weight = mg5_proc_->eval(); utils::positive(weight))
@@ -143,23 +125,6 @@ namespace cepgen::mg5amc {
     }
 
   private:
-    void loadMG5Library() const {
-      utils::AbortHandler();
-      try {
-        if (const auto& lib_file = steer<std::string>("lib"); !lib_file.empty())  // user-provided library file
-          loadLibrary(lib_file);
-        else {  // library has to be generated from mg5_aMC directives
-          const Interface interface(params_);
-          const fs::path generated_lib = interface.run();
-          loadLibrary(generated_lib.string());
-          // record the process location in the steering parameters, so that it is inherited by all process clones
-          params_.set("tmpDir", generated_lib.parent_path().string());
-        }
-      } catch (const utils::RunAbortedException&) {
-        throw CG_FATAL("ElectronPartonProcessBuilder") << "MadGraph_aMC process generation aborted.";
-      }
-    }
-    std::unique_ptr<mg5amc::Process> mg5_proc_;
     spdgid_t e_pdg_{11};
     enum struct Mode { electron_parton, parton_electron } mode_{Mode::electron_parton};
     friend std::ostream& operator<<(std::ostream& os, const Mode& mode) {
@@ -173,5 +138,5 @@ namespace cepgen::mg5amc {
     }
   };
 }  // namespace cepgen::mg5amc
-using MadGraphElectronPartonProcessBuilder = cepgen::mg5amc::ElectronPartonProcessBuilder;
+using MadGraphElectronPartonProcessBuilder = mg5amc::ElectronPartonProcessBuilder;
 REGISTER_PROCESS("mg5_aMC:eh", MadGraphElectronPartonProcessBuilder);
