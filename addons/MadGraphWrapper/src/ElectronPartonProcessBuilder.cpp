@@ -76,6 +76,27 @@ namespace cepgen::mg5amc {
       return Momentum::fromPxPyPzE(0., 0., positive ? e : -e, e);
     }
 
+    double matrixElementNormalisation() const override {
+      const bool lep_pos = electron_first_;
+      const auto s_eg =
+          (lep_pos ? leptonBeam(true) + q2() : leptonBeam(false) + q1()).mass2();  // beam lepton + hadron-side photon
+      const auto x_had = lep_pos ? x2() : x1(), x_lep = lep_pos ? x1() : x2();
+      if (s_eg <= 0. || x_had <= 0. || x_lep >= 1.)
+        return 0.;
+      const auto lep_q2 = std::fabs((lep_pos ? leptonBeam(true) - pX() : leptonBeam(false) - pY()).mass2());
+      if (!kinematics()
+               .cuts()
+               .initial.q2
+               .at(static_cast<size_t>(electron_first_ ? PartonSampler::Side::positive : PartonSampler::Side::negative))
+               .contains(lep_q2))  // lepton-side photon virtuality not sampled: apply parton virtuality cut explicitly
+        return 0.;
+      const auto norm = 1. / (2. * std::pow(2. * M_PI, 3) * x_had * s() * s_eg * (1. - x_lep));
+      CG_DEBUG_LOOP("ElectronPartonProcessBuilder:norm")
+          << "x_had=" << x_had << ", x_lep=" << x_lep << ", s_eg=" << s_eg << ", lepton q2=" << lep_q2
+          << ", norm=" << norm << ".";
+      return norm;
+    }
+
     void fillMomenta() override {
       Momentum central_sum;
       for (size_t j = 0, n = central().size(); j < n; ++j)
