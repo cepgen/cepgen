@@ -9,7 +9,12 @@ process = kt.process.clone('pptoww',
         mode = cepgen.ProcessMode.ElasticElastic,
         method = 1,  # on-shell (0) or off-shell (1) formula
         polarisationStates = 0,  # full
-        model = cepgen.Module("W", s1 = 1.e-2),
+        #model = cepgen.Module("W", s1 = 1.e-2),
+        model = cepgen.Module("dim6EFTww",
+            #a0w = 1.e-5,
+            a0w = 1.e-6,
+            includeSM = False,
+        ),
     ),
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
