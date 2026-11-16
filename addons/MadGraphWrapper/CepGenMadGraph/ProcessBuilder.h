@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2026  Laurent Forthomme
+ *  Copyright (C) 2025-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,10 +27,14 @@ namespace cepgen::mg5amc {
 
     static ParametersDescription description();
 
+    bool singleThreaded() const override { return true; }  ///< MadGraph standalone process: global model parameters
+
   protected:
     void loadMG5Library();
     void prepareSteeringCard() const;
     mg5amc::Process& process() const;
+    /// Locate the parameters card: a file provided by the user, or the one generated along with the process
+    std::string parametersCardPath() const;
 
   private:
     std::string library_filename_;

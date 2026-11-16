@@ -77,6 +77,8 @@ void ProcessBuilder::loadMG5Library() {
     if (library_filename_.empty()) {  // library has to be generated from mg5_aMC directives
       const Interface interface(params_);
       library_filename_ = interface.run();
+      // record the process location in the steering parameters, so that it is inherited by all process clones
+      params_.set("tmpDir", fs::path(library_filename_).parent_path().string());
     }
     if (!loadLibrary(library_filename_))
       throw CG_ERROR("mg5amc:ProcessBuilder:loadMG5Library")
@@ -84,12 +86,12 @@ void ProcessBuilder::loadMG5Library() {
     CG_DEBUG("mg5amc:ProcessBuilder:loadMG5Library")
         << "MadGraph_aMC process loaded from library '" << library_filename_ << "'.";
   } catch (const utils::RunAbortedException&) {
-    CG_FATAL("mg5amc:ProcessBuilder:loadMG5Library") << "MadGraph_aMC process generation aborted.";
+    throw CG_FATAL("mg5amc:ProcessBuilder:loadMG5Library") << "MadGraph_aMC process generation aborted.";
   }
 }
 
 void ProcessBuilder::prepareSteeringCard() const {
-  if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
+  if (const auto params_card = parametersCardPath(); !params_card.empty()) {
     CG_INFO("mg5amc:ProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
     const auto unsteered_pcard = Interface::extractParamCardParameters(utils::readFile(params_card));
     CG_DEBUG("mg5amc:ProcessBuilder") << "Unsteered parameters card:\n" << unsteered_pcard;
@@ -108,6 +110,23 @@ void ProcessBuilder::prepareSteeringCard() const {
 
 mg5amc::Process& ProcessBuilder::process() const {
   if (!mg5_proc_)
-    CG_FATAL("mg5amc:GeneralProcessBuilder:eval") << "Process not properly linked!";
+    throw CG_FATAL("mg5amc:ProcessBuilder:process") << "Process not properly linked!";
   return *mg5_proc_;
+}
+
+std::string ProcessBuilder::parametersCardPath() const {
+  const fs::path card = steer<std::string>("parametersCard");
+  if (card.empty() || (fs::exists(card) && !fs::is_symlink(card)))
+    return card.string();  // trivial case: cards were found in lib directory or with user-provided path
+  const auto& lib_path = steer<std::string>("lib");
+  const auto& standalone_path = steer<std::string>("standaloneCppPath");
+  const fs::path process_path = !lib_path.empty()          ? fs::path{lib_path}.parent_path()
+                                : !standalone_path.empty() ? fs::path{standalone_path}
+                                                           : Interface::temporaryPath(steer<std::string>("tmpDir"));
+  if (const auto generated_card = process_path / "Cards" / card; fs::exists(generated_card))
+    return generated_card.string();
+  if (fs::exists(card))
+    return card.string();
+  throw CG_FATAL("mg5amc:ProcessBuilder") << "Failed to find the parameters card '" << card
+                                          << "' in the working directory, or in " << process_path / "Cards" << ".";
 }

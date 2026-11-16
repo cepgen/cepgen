@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2026  Laurent Forthomme
+ *  Copyright (C) 2025-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,8 +64,7 @@ namespace cepgen::mg5amc {
            *process().intermediatePartons().rbegin() != static_cast<int>(psgen_partons.at(1))))
         throw CG_FATAL("ElectronPartonProcessBuilder")
             << "MadGraph unpacked process incoming state (" << process().intermediatePartons()
-            << ") is incompatible with user-steered incoming fluxes particles (" << partons()
-            << ").";
+            << ") is incompatible with user-steered incoming fluxes particles (" << partons() << ").";
       prepareSteeringCard();
     }
     double computeFactorisedMatrixElement() override {

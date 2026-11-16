@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2025  Laurent Forthomme
+ *  Copyright (C) 2020-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,8 +37,7 @@ namespace cepgen::mg5amc {
     proc::ProcessPtr clone() const override { return std::make_unique<TwoPartonProcessBuilder>(parameters(), false); }
 
     void prepareFactorisedPhaseSpace() override {
-      if (const auto psgen_partons = partons();
-          process().intermediatePartons() != psgen_partons)
+      if (const auto psgen_partons = partons(); process().intermediatePartons() != psgen_partons)
         throw CG_FATAL("mg5amc:TwoPartonProcessBuilder")
             << "MadGraph unpacked process incoming state (" << process().intermediatePartons() << ") "
             << "is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
