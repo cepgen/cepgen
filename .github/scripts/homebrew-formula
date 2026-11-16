@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Render the Homebrew formula for a release tag: homebrew-formula <tag> <output.rb>
+# The checksum is that of the tarball GitHub serves for the tag, i.e. what Homebrew will download.
+set -euo pipefail
+tag=$1
+out=$2
+repo=${GITHUB_REPOSITORY:-cepgen/cepgen}
+here=$(cd "$(dirname "$0")" && pwd)
+version=${tag#v}
+url="https://github.com/${repo}/archive/refs/tags/${tag}.tar.gz"
+sha256=$(curl -fsSL --retry 3 "$url" | shasum -a 256 | cut -d' ' -f1)
+test -n "$sha256" || { echo "cannot checksum $url" >&2; exit 1; }
+mkdir -p "$(dirname "$out")"
+sed -e "s|@REPO@|${repo}|g" -e "s|@TAG@|${tag}|g" -e "s|@VERSION@|${version}|g" -e "s|@SHA256@|${sha256}|g" \
+  "$here/../packaging/homebrew/cepgen.rb.in" > "$out"
+echo "wrote $out ($version, sha256 $sha256)"

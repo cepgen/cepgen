@@ -1,0 +1,39 @@
+# Template of the Homebrew formula, rendered by .github/scripts/homebrew-formula for every release.
+# @TAG@, @VERSION@, @SHA256@ and @REPO@ are substituted; nothing else should need to change from release to release.
+class Cepgen < Formula
+  desc "Generic central exclusive processes event generator"
+  homepage "https://github.com/@REPO@"
+  url "https://github.com/@REPO@/archive/refs/tags/@TAG@.tar.gz"
+  version "@VERSION@"
+  sha256 "@SHA256@"
+  license "GPL-3.0-or-later"
+  head "https://github.com/@REPO@.git", branch: "main"
+
+  depends_on "cmake" => :build
+  depends_on "boost"
+  depends_on "gcc" # gfortran at build time, libgfortran at run time
+  depends_on "gsl"
+  depends_on "pybind11" => :build
+  depends_on "python@3.14"
+
+  def install
+    args = %W[
+      -DCMAKE_BUILD_UTILS=ON
+      -DCMAKE_BUILD_TESTS=OFF
+      -DPython_EXECUTABLE=#{Formula["python@3.14"].opt_bin}/python3.14
+    ]
+    # tarballs carry no git metadata: the version is imposed by the formula
+    args << "-DCEPGEN_VERSION_OVERRIDE=#{version}" if build.stable?
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
+  end
+
+  test do
+    # the executable and its plugins must be found without any CEPGEN_PATH
+    output = pipe_output("#{bin}/cepgen --help 2>&1")
+    assert_match(/cepgen/i, output)
+    refute_match(/Failed to load/i, output)
+  end
+end
