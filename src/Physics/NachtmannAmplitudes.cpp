@@ -21,33 +21,16 @@
 #include <algorithm>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
 
 using namespace cepgen;
+using namespace cepgen::amplitudes;
 using namespace std::complex_literals;
 
-NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
-    : SteeredObject(params),
-      mode_(steerAs<int, Mode>("model")),
-      eft_ext_(steer<ParametersList>("eftParameters")),
-      G_EM_SQ(constants::G_EM_SQ),
-      G_EM(sqrt(G_EM_SQ)) {
-  CG_DEBUG("NachtmannAmplitudes") << "Nachtmann amplitudes evaluation framework built for mode=" << mode_ << ".";
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
-    : SteeredObject(params), s1(steer<double>("s1")), mH(steer<double>("mH")) {}
-
-ParametersDescription NachtmannAmplitudes::EFTParameters::description() {
-  auto desc = ParametersDescription();
-  desc.add("s1", 0.);
-  desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
-  return desc;
-}
-
-NachtmannAmplitudes::Kinematics::Kinematics(double mw2, double s_hat, double t_hat, double u_hat)
+Kinematics::Kinematics(double mw2, double s_hat, double t_hat, double u_hat)
     : shat(s_hat),
       that(t_hat),
       uhat(u_hat),
@@ -62,15 +45,13 @@ NachtmannAmplitudes::Kinematics::Kinematics(double mw2, double s_hat, double t_h
   setCosTheta((t_hat - u_hat) / s_hat / beta);
 }
 
-NachtmannAmplitudes::Kinematics NachtmannAmplitudes::Kinematics::fromSCosTheta(double shat,
-                                                                               double cos_theta,
-                                                                               double mw2) {
+Kinematics Kinematics::fromSCosTheta(double shat, double cos_theta, double mw2) {
   Kinematics kin(mw2, shat, 0., 0.);
   kin.setCosTheta(cos_theta);
   return kin;
 }
 
-void NachtmannAmplitudes::Kinematics::setCosTheta(double cth) {
+void Kinematics::setCosTheta(double cth) {
   // with off-shell photons, (t-u)/(s*beta) may exceed unity, possibly reaching the 1/A pole at beta*|cos(theta)|=1
   cos_theta = std::clamp(cth, -1., 1.);
   cos_theta2 = cos_theta * cos_theta;
@@ -79,212 +60,277 @@ void NachtmannAmplitudes::Kinematics::setCosTheta(double cth) {
   invA = 1. / (1. - beta2 * cos_theta2);
 }
 
-bool NachtmannAmplitudes::Kinematics::operator!=(const Kinematics& oth) const {
+bool Kinematics::operator!=(const Kinematics& oth) const {
   // checking only the base variables as all others are computed from these three
   return shat != oth.shat || that != oth.that || uhat != oth.uhat;
 }
 
 std::complex<double> NachtmannAmplitudes::operator()(
     const Kinematics& kin, short lam1, short lam2, short lam3, short lam4) const {
-  const HelicityStates hel{lam1, lam2, lam3, lam4};
+  return amplitude(kin, HelicityStates{lam1, lam2, lam3, lam4});
+}
 
-  //--- per-helicity amplitude
-  switch (mode_) {
-    case Mode::SM:
-      return amplitudeSM(kin, hel);
-    case Mode::W:
-      return amplitudeW(kin, hel);
-    case Mode::Wbar:
-      return amplitudeWbar(kin, hel);
-    case Mode::phiW:
-      return amplitudePhiW(kin, hel);
-    case Mode::phiWbar:
-      return 2i * static_cast<double>(lam1) * amplitudePhiW(kin, hel);
-    case Mode::phiB:
-      return std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudePhiW(kin, hel);
-    case Mode::phiBbar:
-      return 2i * static_cast<double>(lam1) * std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudePhiW(kin, hel);
-    case Mode::WB:
-      return amplitudeWB(kin, hel);
-    case Mode::WbarB:
-      return amplitudeWbarB(kin, hel);
+struct StandardModel : NachtmannAmplitudes {
+  explicit StandardModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
+  static std::string description() { return "Standard model"; }
+  bool hasAAWW() const override { return true; }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+      return 1i * constants::G_EM_SQ * kin.invA * kin.inv_gamma2 *
+             ((kin.gamma2 + 1.) * (1. - hel.lam1 * hel.lam2) * kin.sin_theta2 - (1. + hel.lam1 * hel.lam2));
+
+    if (hel.lam4 == 0)  // transverse-longitudinal
+      return -1i * constants::G_EM_SQ * M_SQRT2 * kin.invA * kin.inv_gamma * static_cast<double>(hel.lam1 - hel.lam2) *
+             (1. + hel.lam1 * hel.lam3 * kin.cos_theta) * kin.sin_theta;
+
+    if (hel.lam3 == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+
+    // transverse-transverse
+    return -0.5i * constants::G_EM_SQ * kin.invA *
+           (2. * kin.beta * static_cast<double>(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
+            kin.inv_gamma2 * (1. + hel.lam3 * hel.lam4) *
+                (2. * hel.lam1 * hel.lam2 + (1. - hel.lam1 * hel.lam2) * kin.cos_theta2) +
+            (1. + hel.lam1 * hel.lam2 * hel.lam3 * hel.lam4) * (3. + hel.lam1 * hel.lam2) +
+            2. * (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
+            (1. - hel.lam1 * hel.lam2) * (1. - hel.lam3 * hel.lam4) * kin.cos_theta2);
   }
-  throw CG_FATAL("NachtmannAmplitudes") << "Invalid mode: " << mode_ << "!";
-}
+};
 
-std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, const HelicityStates& hel) const {
-  if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return 1i * G_EM_SQ * kin.invA * kin.inv_gamma2 *
-           ((kin.gamma2 + 1.) * (1. - hel.lam1 * hel.lam2) * kin.sin_theta2 - (1. + hel.lam1 * hel.lam2));
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  if (hel.lam4 == 0)  // transverse-longitudinal
-    return -1i * G_EM_SQ * M_SQRT2 * kin.invA * kin.inv_gamma * static_cast<double>(hel.lam1 - hel.lam2) *
-           (1. + hel.lam1 * hel.lam3 * kin.cos_theta) * kin.sin_theta;
+class WModel : public NachtmannAmplitudes {
+public:
+  explicit WModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
+  static ParametersDescription description() {
+    auto desc = NachtmannAmplitudes::description();
+    desc.setDescription("W");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+      return 3i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.invA *
+             kin.inv_gamma2 * kin.sin_theta2 * (1. + hel.lam1 * hel.lam2);
 
-  if (hel.lam3 == 0)  // longitudinal-transverse
-    return amplitudeSM(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel.lam4 == 0)  // transverse-longitudinal
+      return 1.5i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * constants::G_F * kin.invA * kin.inv_gamma *
+             kin.sin_theta *
+             ((hel.lam1 - hel.lam2) * kin.beta2 - kin.beta * kin.cos_theta * (hel.lam1 + hel.lam2) -
+              2 * hel.lam3 * kin.cos_theta * (hel.lam1 * hel.lam2 + kin.inv_gamma2));
 
-  // transverse-transverse
-  return -0.5i * G_EM_SQ * kin.invA *
-         (2. * kin.beta * static_cast<double>(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
-          kin.inv_gamma2 * (1. + hel.lam3 * hel.lam4) *
-              (2. * hel.lam1 * hel.lam2 + (1. - hel.lam1 * hel.lam2) * kin.cos_theta2) +
-          (1. + hel.lam1 * hel.lam2 * hel.lam3 * hel.lam4) * (3. + hel.lam1 * hel.lam2) +
-          2. * (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
-          (1. - hel.lam1 * hel.lam2) * (1. - hel.lam3 * hel.lam4) * kin.cos_theta2);
-}
+    if (hel.lam3 == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
-std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, const HelicityStates& hel) const {
-  if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return 3i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA * kin.inv_gamma2 * kin.sin_theta2 *
-           (1. + hel.lam1 * hel.lam2);
+    // transverse-transverse
+    return 0.75i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F *
+           (-kin.inv_gamma2 * kin.beta * (1. + kin.cos_theta2) * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) +
+            2 * kin.sin_theta2 *
+                (3. + hel.lam3 * hel.lam4 + hel.lam1 * hel.lam2 * (1 - hel.lam3 * hel.lam4) -
+                 kin.beta * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4)) -
+            2 * kin.inv_gamma2 *
+                (2 + (1 - hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4 -
+                 kin.cos_theta2 * (3 + hel.lam1 * hel.lam2 + 2 * hel.lam3 * hel.lam4)));
+  }
+};
 
-  if (hel.lam4 == 0)  // transverse-longitudinal
-    return 1.5i * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma * kin.sin_theta *
-           ((hel.lam1 - hel.lam2) * kin.beta2 - kin.beta * kin.cos_theta * (hel.lam1 + hel.lam2) -
-            2 * hel.lam3 * kin.cos_theta * (hel.lam1 * hel.lam2 + kin.inv_gamma2));
+class WbarModel : public NachtmannAmplitudes {
+public:
+  explicit WbarModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
+  static ParametersDescription description() {
+    auto desc = NachtmannAmplitudes::description();
+    desc.setDescription("Wbar");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+      return {-3 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.inv_gamma2 *
+                  kin.invA * kin.sin_theta2 * (hel.lam1 + hel.lam2),
+              0.};
 
-  if (hel.lam3 == 0)  // longitudinal-transverse
-    return amplitudeW(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel.lam4 == 0)  // transverse-longitudinal
+      return {1.5 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * constants::G_F * kin.inv_gamma * kin.invA *
+                  kin.sin_theta *
+                  (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
+                   kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3)),
+              0.};
 
-  // transverse-transverse
-  return 0.75i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F *
-         (-kin.inv_gamma2 * kin.beta * (1. + kin.cos_theta2) * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) +
-          2 * kin.sin_theta2 *
-              (3. + hel.lam3 * hel.lam4 + hel.lam1 * hel.lam2 * (1 - hel.lam3 * hel.lam4) -
-               kin.beta * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4)) -
-          2 * kin.inv_gamma2 *
-              (2 + (1 - hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4 -
-               kin.cos_theta2 * (3 + hel.lam1 * hel.lam2 + 2 * hel.lam3 * hel.lam4)));
-}
+    if (hel.lam3 == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
-std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, const HelicityStates& hel) const {
-  if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return {-3 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * kin.invA * kin.sin_theta2 *
-                (hel.lam1 + hel.lam2),
+    // transverse-transverse
+    return {-1.5 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.invA *
+                (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
+                 kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
+                                   kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4))),
             0.};
+  }
+};
 
-  if (hel.lam4 == 0)  // transverse-longitudinal
-    return {1.5 * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
-                (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
-                 kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3)),
+class PhiWModel : public NachtmannAmplitudes {
+public:
+  explicit PhiWModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
+  static ParametersDescription description() {
+    auto desc = NachtmannAmplitudes::description();
+    desc.setDescription("phi-W");
+    desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    const double invB = 1. / (kin.shat - m_h_ * m_h_);
+    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+      return -0.25i * kin.shat2 * s1() * s1() * M_SQRT2 * constants::G_F * invB * (1. + kin.beta2) *
+             (1. + hel.lam1 * hel.lam2);
+
+    if (hel.lam4 == 0 || hel.lam3 == 0)  // transverse-longitudinal or longitudinal-transverse
+      return {0., 0.};
+
+    // transverse-transverse
+    return -0.125i * kin.shat2 * s1() * s1() * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB *
+           (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
+  }
+
+private:
+  const double m_h_;
+};
+
+struct PhiWbarModel : PhiWModel {
+  static ParametersDescription description() {
+    auto desc = PhiWModel::description();
+    desc.setDescription("phi-Wbar");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    return 2i * static_cast<double>(hel.lam1) * PhiWModel::amplitude(kin, hel);
+  }
+};
+
+struct PhiBModel : PhiWModel {
+  static ParametersDescription description() {
+    auto desc = PhiWModel::description();
+    desc.setDescription("phi-B");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    return std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
+  }
+};
+
+struct PhiBbarModel : PhiWModel {
+  static ParametersDescription description() {
+    auto desc = PhiWModel::description();
+    desc.setDescription("phi-Bbar");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    return 2i * static_cast<double>(hel.lam1) * std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
+  }
+};
+
+class WBModel : public NachtmannAmplitudes {
+public:
+  explicit WBModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
+  static ParametersDescription description() {
+    auto desc = NachtmannAmplitudes::description();
+    desc.setDescription("W-b");
+    desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    const auto invB = 1. / (kin.shat - m_h_ * m_h_);
+    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+      return 2i * constants::G_EM_SQ * kin.invA * c1() / s1() *
+                 (1 - hel.lam1 * hel.lam2 - 2 * kin.cos_theta2 -
+                  kin.gamma2 * (1. + hel.lam1 * hel.lam2) * kin.sin_theta2) +
+             0.5i * kin.shat2 * constants::G_F * M_SQRT2 * invB * s1() * c1() * (1. + kin.beta2) *
+                 (1. + hel.lam1 * hel.lam2);
+
+    if (hel.lam4 == 0)  // transverse-longitudinal
+      return 0.5i * constants::G_EM_SQ * kin.gamma * M_SQRT2 * kin.invA * c1() / s1() * kin.sin_theta *
+             ((hel.lam2 - hel.lam1) * (1. + kin.inv_gamma2) + (kin.beta * static_cast<double>(hel.lam1 + hel.lam2) +
+                                                               2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
+                                                                  kin.cos_theta);
+
+    if (hel.lam3 == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+
+    // transverse-transverse
+    return -0.5i * constants::G_EM_SQ * kin.invA * c1() / s1() *
+               (kin.beta * static_cast<double>(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
+                2 * (2 + (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
+                     ((hel.lam1 * hel.lam2 - 1) * kin.cos_theta2 + 1. + hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4)) +
+           0.25i * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * s1() * c1() *
+               (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
+  }
+
+private:
+  const double m_h_;
+};
+
+class WbarBModel : public NachtmannAmplitudes {
+public:
+  explicit WbarBModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
+  static ParametersDescription description() {
+    auto desc = NachtmannAmplitudes::description();
+    desc.setDescription("Wbar-B");
+    return desc;
+  }
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+    CG_WARNING("NachtmannAmplitudes") << "Mode " << description() << " is not yet properly handled!";
+    const auto invB = 1. / (kin.shat - m_h_ * m_h_);
+    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+      return {2. * constants::G_EM_SQ * c1() / s1() * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
+                  0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * invB * s1() * c1() * (1. + kin.beta2) *
+                      static_cast<double>(hel.lam1 + hel.lam2),
+              0.};
+
+    if (hel.lam4 == 0)  // transverse-longitudinal
+      return {0.5 * constants::G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * c1() / s1() * kin.sin_theta *
+                  (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
+                   kin.cos_theta * (2. * kin.beta + kin.beta2 * static_cast<double>(hel.lam1 + hel.lam2) * hel.lam3)),
+              0.};
+
+    if (hel.lam3 == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+
+    // transverse-transverse
+    return {kin.invA * constants::G_EM_SQ * c1() * c1() / s1() *
+                    (hel.lam3 * static_cast<double>(hel.lam1 + hel.lam2) +
+                     kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
+                    (hel.lam3 + hel.lam4) -
+                0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * s1() * c1() * c1() *
+                    static_cast<double>(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4),
             0.};
+  }
 
-  if (hel.lam3 == 0)  // longitudinal-transverse
-    return amplitudeWbar(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+private:
+  const double m_h_;
+};
 
-  // transverse-transverse
-  return {-1.5 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
-              (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
-               kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
-                                 kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4))),
-          0.};
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::complex<double> NachtmannAmplitudes::amplitudePhiW(const Kinematics& kin, const HelicityStates& hel) const {
-  const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
-  if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return -0.25i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * invB * (1. + kin.beta2) *
-           (1. + hel.lam1 * hel.lam2);
-
-  if (hel.lam4 == 0 || hel.lam3 == 0)  // transverse-longitudinal or longitudinal-transverse
-    return {0., 0.};
-
-  // transverse-transverse
-  return -0.125i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB *
-         (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
-}
-
-std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, const HelicityStates& hel) const {
-  const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
-  if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return 2i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
-               (1 - hel.lam1 * hel.lam2 - 2 * kin.cos_theta2 -
-                kin.gamma2 * (1. + hel.lam1 * hel.lam2) * kin.sin_theta2) +
-           0.5i * kin.shat2 * constants::G_F * M_SQRT2 * invB * eft_ext_.s1 * eft_ext_.c1() * (1. + kin.beta2) *
-               (1. + hel.lam1 * hel.lam2);
-
-  if (hel.lam4 == 0)  // transverse-longitudinal
-    return 0.5i * G_EM_SQ * kin.gamma * M_SQRT2 * kin.invA * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
-           ((hel.lam2 - hel.lam1) * (1. + kin.inv_gamma2) + (kin.beta * static_cast<double>(hel.lam1 + hel.lam2) +
-                                                             2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
-                                                                kin.cos_theta);
-
-  if (hel.lam3 == 0)  // longitudinal-transverse
-    return amplitudeWB(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
-
-  // transverse-transverse
-  return -0.5i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
-             (kin.beta * static_cast<double>(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
-              2 * (2 + (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
-                   ((hel.lam1 * hel.lam2 - 1) * kin.cos_theta2 + 1. + hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4)) +
-         0.25i * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * eft_ext_.s1 * eft_ext_.c1() *
-             (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
-}
-
-std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, const HelicityStates& hel) const {
-  CG_WARNING("NachtmannAmplitudes") << "Mode " << mode_ << " is not yet properly handled!";
-  const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
-  if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-    return {2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
-                0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * invB * eft_ext_.s1 * eft_ext_.c1() *
-                    (1. + kin.beta2) * static_cast<double>(hel.lam1 + hel.lam2),
-            0.};
-
-  if (hel.lam4 == 0)  // transverse-longitudinal
-    return {0.5 * G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
-                (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
-                 kin.cos_theta * (2. * kin.beta + kin.beta2 * static_cast<double>(hel.lam1 + hel.lam2) * hel.lam3)),
-            0.};
-
-  if (hel.lam3 == 0)  // longitudinal-transverse
-    return amplitudeWbarB(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
-
-  // transverse-transverse
-  return {kin.invA * G_EM_SQ * eft_ext_.c1() * eft_ext_.c1() / eft_ext_.s1 *
-                  (hel.lam3 * static_cast<double>(hel.lam1 + hel.lam2) +
-                   kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
-                  (hel.lam3 + hel.lam4) -
-              0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * eft_ext_.s1 *
-                  eft_ext_.c1() * eft_ext_.c1() * static_cast<double>(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4),
-          0.};
-}
+NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
+    : NamedModule(params), s1_(steer<double>("s1")) {}
 
 ParametersDescription NachtmannAmplitudes::description() {
   auto desc = ParametersDescription();
-  desc.addAs<int, Mode>("model", Mode::SM).setDescription("SM/anomalous model to consider");
-  desc.add("eftParameters", EFTParameters::description());
+  desc.setDescription("generic helicity model");
+  desc.add("s1", 0.);
   return desc;
 }
 
-namespace cepgen {
-  std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Kinematics& kin) {
+std::unique_ptr<NachtmannAmplitudes> NachtmannAmplitudes::build(const ParametersList& params) {
+  if (const auto& name = params.name(); name == "standardModel")
+    return std::make_unique<StandardModel>(params);
+  else
+    throw CG_FATAL("NachtmannAmplitudes:build") << "Failed to build amplitudes model with name '" << name << "'.";
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace cepgen::amplitudes {
+  std::ostream& operator<<(std::ostream& os, const Kinematics& kin) {
     return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
               << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta
               << "->1/A=" << kin.invA << "}";
   }
-
-  std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Mode& mode) {
-    switch (mode) {
-      case NachtmannAmplitudes::Mode::SM:
-        return os << "Standard model";
-      case NachtmannAmplitudes::Mode::W:
-        return os << "W";
-      case NachtmannAmplitudes::Mode::Wbar:
-        return os << "Wbar";
-      case NachtmannAmplitudes::Mode::phiW:
-        return os << "phi-W";
-      case NachtmannAmplitudes::Mode::phiWbar:
-        return os << "phi-Wbar";
-      case NachtmannAmplitudes::Mode::phiB:
-        return os << "phi-B";
-      case NachtmannAmplitudes::Mode::phiBbar:
-        return os << "phi-Bbar";
-      case NachtmannAmplitudes::Mode::WB:
-        return os << "W-B";
-      case NachtmannAmplitudes::Mode::WbarB:
-        return os << "Wbar-B";
-    }
-    return os << static_cast<int>(mode);
-  }
-}  // namespace cepgen
+}  // namespace cepgen::amplitudes

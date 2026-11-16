@@ -43,26 +43,14 @@ public:
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),
-        amplitudes_(params_),
         polarisation_(polarisationParameters(params_)) {
     CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
                        << "polarisation states: "
                        << "W1=" << polarisation_.polarisations().first << ", "
                        << "W2=" << polarisation_.polarisations().second << ".";
-
-    if (method_ == 1) {
-      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_.mode() << ") initialised.";
-      if (amplitudes_.mode() != NachtmannAmplitudes::Mode::SM) {
-        if (amplitudes_.mode() != NachtmannAmplitudes::Mode::W && amplitudes_.mode() != NachtmannAmplitudes::Mode::Wbar)
-          throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
-                                   << "Only supported extensions are W and Wbar. Specified model: "s
-                                   << amplitudes_.mode() << ".";
-        CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
-      }
-    }
   }
 
-  proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(*this); }
+  proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(parameters()); }
 
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();
@@ -73,7 +61,7 @@ public:
         .allow(0, "on-shell")
         .allow(1, "off-shell by Nachtmann et al.");
     desc.add("polarisationStates"s, PolarisationState::description());
-    desc += NachtmannAmplitudes::description();
+    desc.add("model", ParametersDescription{}.setName("standardModel"));
     return desc;
   }
 
@@ -115,7 +103,16 @@ private:
     return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2) / s_hat / s_hat;
   }
   double offShellME() const {
-    const auto kin = NachtmannAmplitudes::Kinematics(mW2_, shat(), that(), uhat());
+    if (!amplitudes_) {
+      amplitudes_ = cepgen::amplitudes::NachtmannAmplitudes::build(steer<ParametersList>("model"));
+      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name() << ") initialised.";
+      if (!amplitudes_->hasAAWW())
+        throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
+                                 << "Only supported extensions are W, Wbar and dimension-6 AQGC (W). Specified model: "s
+                                 << amplitudes_->name() << ".";
+      CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
+    }
+    const auto kin = amplitudes::Kinematics(mW2_, shat(), that(), uhat());
     const double p1 = q1().px() * q2().px() + q1().py() * q2().py(), p2 = q1().px() * q2().py() - q1().py() * q2().px(),
                  p3 = q1().px() * q2().px() - q1().py() * q2().py(), p4 = q1().px() * q2().py() + q1().py() * q2().px();
 
@@ -124,8 +121,8 @@ private:
     for (const auto& lam3 : polarisation_.polarisations().first)
       for (const auto& lam4 : polarisation_.polarisations().second) {
         // compute all photon helicity amplitudes
-        const auto pp = amplitudes_(kin, +1, +1, lam3, lam4), mm = amplitudes_(kin, -1, -1, lam3, lam4),
-                   pm = amplitudes_(kin, +1, -1, lam3, lam4), mp = amplitudes_(kin, -1, +1, lam3, lam4);
+        const auto pp = (*amplitudes_)(kin, +1, +1, lam3, lam4), mm = (*amplitudes_)(kin, -1, -1, lam3, lam4),
+                   pm = (*amplitudes_)(kin, +1, -1, lam3, lam4), mp = (*amplitudes_)(kin, -1, +1, lam3, lam4);
         // add ME for this W helicity to total ME
         hel_mat_elem += std::norm(p1 * (pp + mm) - 1i * p2 * (pp - mm) - p3 * (pm + mp) - 1i * p4 * (pm - mp));
       }
@@ -134,7 +131,8 @@ private:
 
   const double mW_, mW2_;
   const int method_;
-  const NachtmannAmplitudes amplitudes_;
   const PolarisationState polarisation_;
+
+  mutable std::unique_ptr<amplitudes::NachtmannAmplitudes> amplitudes_;
 };
 REGISTER_PROCESS("pptoww", PPtoWW);

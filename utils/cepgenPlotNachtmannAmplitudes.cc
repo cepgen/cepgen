@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "CepGen/Utils/Message.h"
 
 using namespace std::complex_literals;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   std::string integr_name, plotter;
@@ -47,8 +48,8 @@ int main(int argc, char* argv[]) {
 
   const std::vector<short> lambdas = {-1, 0, 1};
   auto dsig_dcosth = [&integrator, &lambdas](
-                         const cepgen::NachtmannAmplitudes& ampl, double shat, double costh) -> double {
-    const auto kin = cepgen::NachtmannAmplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
+                         const cepgen::amplitudes::NachtmannAmplitudes& ampl, double shat, double costh) -> double {
+    const auto kin = cepgen::amplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
     auto dsig = [&ampl, &kin, &lambdas](double theta1, double phi1, double theta2, double phi2) -> double {
       auto l = [](short lam, double theta, double phi) -> std::complex<double> {
         auto dp = [](double theta) -> double { return 0.5 * (1. + cos(theta)) * M_SQRT2; };
@@ -105,25 +106,17 @@ int main(int argc, char* argv[]) {
     return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * integrator->integrate(integrand);
   };
 
-  for (auto i = static_cast<int>(cepgen::NachtmannAmplitudes::Mode::SM);
-       i <= static_cast<int>(cepgen::NachtmannAmplitudes::Mode::WbarB);
-       ++i) {
-    // first get mode name
-    if (i > 0)
-      break;
-    std::ostringstream os;
-    os << static_cast<cepgen::NachtmannAmplitudes::Mode>(i);
-    const auto name = os.str();
-    CG_LOG << "Computing " << name << ".";
+  for (const auto& mode : std::vector{"standardModel"s}) {
+    CG_LOG << "Computing " << mode << ".";
     // then fill the plot
-    auto ampl = cepgen::NachtmannAmplitudes(cepgen::ParametersList().set<int>("mode", i));
-    if (ampl.mode() == cepgen::NachtmannAmplitudes::Mode::SM) {
+    auto ampl = cepgen::amplitudes::NachtmannAmplitudes::build(cepgen::ParametersList{}.setName(mode));
+    if (mode == "standardModel") {
       cepgen::utils::Graph1D gr_sm_cth_400gev("sm_cth_400gev", "400 GeV;cos#theta;d#sigma/dcos#theta (pb)"),
           gr_sm_cth_2400gev("sm_cth_2400gev", "2400 GeV;cos#theta;d#sigma/dcos#theta (pb)");
       for (const auto x : cepgen::Limits{-1., 1.}.generate(num_points)) {
         CG_LOG << x;
-        gr_sm_cth_400gev.addPoint(x, dsig_dcosth(ampl, 400., x));
-        gr_sm_cth_2400gev.addPoint(x, dsig_dcosth(ampl, 2400., x));
+        gr_sm_cth_400gev.addPoint(x, dsig_dcosth(*ampl, 400., x));
+        gr_sm_cth_2400gev.addPoint(x, dsig_dcosth(*ampl, 2400., x));
       }
       if (!plotter.empty()) {
         auto plt = cepgen::DrawerFactory::get().build(plotter);
