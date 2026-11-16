@@ -84,6 +84,11 @@ ParametersList FactorisedProcess::partonSamplerParameters(const ParametersList& 
 }
 
 std::unique_ptr<PartonSampler> FactorisedProcess::buildPartonSampler(PartonSampler::Side side) const {
+  if (fluxlessBeam(side)) {  // the beam particle enters the matrix element: only its recoil phase space is sampled
+    auto sampler = std::make_unique<KTPartonSampler>(sampler_params_);
+    sampler->setFluxless();
+    return sampler;
+  }
   const auto& beam = side == PartonSampler::Side::positive ? kinematics().incomingBeams().positive()
                                                            : kinematics().incomingBeams().negative();
   auto kt_factorised = partons_generator_ == "kt";

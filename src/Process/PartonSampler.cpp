@@ -140,6 +140,8 @@ Momentum KTPartonSampler::partonMomentum() const {
 }
 
 double KTPartonSampler::weight(double x, double mx2) const {
+  if (fluxless_)
+    return qt_;
   // factor 1/pi due to integration over d^2(kt) instead of d(kt^2)
   return kt_flux_->fluxMX2(x, qt_ * qt_, mx2) * M_1_PI * qt_;
 }

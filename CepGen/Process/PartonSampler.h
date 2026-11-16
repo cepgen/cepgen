@@ -104,12 +104,18 @@ namespace cepgen {
     Momentum partonMomentum() const override;
     double weight(double x, double mx2) const override;
 
+    /// Switch off the parton flux for this beam
+    /// \note Parton transverse momentum is still sampled (and its polar Jacobian, qT, is still returned as weight)
+    inline void setFluxless(bool fluxless = true) { fluxless_ = fluxless; }
+    inline bool fluxless() const { return fluxless_; }  ///< Is the parton flux switched off for this beam?
+
   private:
     ParametersDescription defaultFluxParameters(BeamCategory, const Beam&, const Kinematics&) const override;
     std::unique_ptr<PartonFlux> buildFlux(const ParametersList&) const override;
     void fluxInitialised() override;
 
     const KTFlux* kt_flux_{nullptr};  ///< Type-casted flux (NOT owning)
+    bool fluxless_{false};            ///< Is the flux switched off (only phase space weight kept)?
     double qt_{0.};                   ///< Parton transverse virtuality
     double phi_qt_{0.};               ///< Parton transverse virtuality azimuthal angle
   };

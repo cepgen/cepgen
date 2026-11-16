@@ -68,6 +68,8 @@ namespace cepgen::proc {
     virtual void prepareFactorisedPhaseSpace() {}  ///< Prepare central part of the Jacobian after kinematics is set
     virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
     virtual void computeBeamKinematics();                 ///< Compute the outgoing protons (or remnants) kinematics
+    /// Is parton flux to be replaced by its pure phase space weight?
+    virtual bool fluxlessBeam(PartonSampler::Side) const { return false; }
     /// Build the central system phase space mapper (by default, chosen from the central system multiplicity)
     virtual std::unique_ptr<CentralPhaseSpace> buildCentralPhaseSpace() const;
 
