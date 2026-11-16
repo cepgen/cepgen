@@ -271,6 +271,16 @@ void FactorisedProcess::fillKinematics() {
     for (size_t i = 0; i < central_particles_.size(); ++i)  // loop over all central particles
       pc(i).mirrorZ();
   }
+  {  // boost all objects from the two-beam centre-of-mass frame to the lab frame
+    const auto beams_sum = pA() + pB();
+    if (const auto beta_gamma = beams_sum.pz() * inverseSqrtS(); beta_gamma != 0.) {  // trivial for symmetric beams
+      const auto gamma = beams_sum.energy() * inverseSqrtS();
+      for (auto* momentum : {&q1(), &q2(), &pX(), &pY()})
+        momentum->betaGammaBoost(gamma, beta_gamma);
+      for (size_t i = 0; i < central_particles_.size(); ++i)
+        pc(i).betaGammaBoost(gamma, beta_gamma);
+    }
+  }
   // parton systems
   event().oneWithRole(Particle::Role::Parton1).setMomentum(pA() - pX(), true);
   event().oneWithRole(Particle::Role::Parton2).setMomentum(pB() - pY(), true);
