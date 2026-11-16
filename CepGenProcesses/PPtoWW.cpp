@@ -48,6 +48,16 @@ public:
                        << "polarisation states: "
                        << "W1=" << polarisation_.polarisations().first << ", "
                        << "W2=" << polarisation_.polarisations().second << ".";
+    if (method_ == 1) {  // build the amplitudes model once, so that invalid steering fails at initialisation
+      const auto& model_params = steer<ParametersList>("model");
+      amplitudes_ = amplitudes::NachtmannAmplitudes::build(model_params);
+      if (!amplitudes_->hasAAWW())
+        throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
+                                 << "Specified model: "s << amplitudes_->name()
+                                 << " does not have a registered AAWW vertex in its specifications.";
+      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name() << ") initialised. "
+                        << "Parameters: " << model_params << ".";
+    }
   }
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(parameters()); }
@@ -103,15 +113,6 @@ private:
     return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2) / s_hat / s_hat;
   }
   double offShellME() const {
-    if (!amplitudes_) {
-      amplitudes_ = cepgen::amplitudes::NachtmannAmplitudes::build(steer<ParametersList>("model"));
-      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name() << ") initialised.";
-      if (!amplitudes_->hasAAWW())
-        throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
-                                 << "Specified model: "s << amplitudes_->name()
-                                 << " does not have a registered AAWW vertex in its specifications.";
-      CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
-    }
     const auto kin = amplitudes::Kinematics(mW2_, shat(), that(), uhat());
     const double p1 = q1().px() * q2().px() + q1().py() * q2().py(), p2 = q1().px() * q2().py() - q1().py() * q2().px(),
                  p3 = q1().px() * q2().px() - q1().py() * q2().py(), p4 = q1().px() * q2().py() + q1().py() * q2().px();
@@ -133,6 +134,6 @@ private:
   const int method_;
   const PolarisationState polarisation_;
 
-  mutable std::unique_ptr<amplitudes::NachtmannAmplitudes> amplitudes_;
+  std::unique_ptr<amplitudes::NachtmannAmplitudes> amplitudes_;
 };
 REGISTER_PROCESS("pptoww", PPtoWW);
