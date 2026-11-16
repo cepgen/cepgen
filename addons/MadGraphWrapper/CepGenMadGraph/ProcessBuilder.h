@@ -37,6 +37,8 @@ namespace cepgen::mg5amc {
     double computeFactorisedMatrixElement() final;
     /// Feed the MadGraph process with the incoming/outgoing particles momenta of the current phase space point
     virtual void fillMomenta() = 0;
+    /// Factor applied to the matrix element (flux and phase space normalisation); 0 rejects the point
+    virtual double matrixElementNormalisation() const;
     /// Locate the parameters card: a file provided by the user, or the one generated along with the process
     std::string parametersCardPath() const;
 

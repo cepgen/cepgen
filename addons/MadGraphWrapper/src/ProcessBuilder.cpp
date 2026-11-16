@@ -66,6 +66,12 @@ ProcessBuilder::~ProcessBuilder() {
   }
 }
 
+double ProcessBuilder::matrixElementNormalisation() const {
+  if (const auto s = shat(); s > 0.)
+    return 1. / (s * s);
+  return 0.;
+}
+
 ParametersDescription ProcessBuilder::description() {
   auto desc = FactorisedProcess::description();
   desc.setDescription("MadGraph_aMC process builder");
@@ -121,10 +127,8 @@ double ProcessBuilder::computeFactorisedMatrixElement() {
   CG_DEBUG_LOOP("mg5amc:ProcessBuilder:eval")
       << "Incoming partons: " << q1() << " (m=" << q1().mass() << "), " << q2() << " (m=" << q2().mass() << ").";
   fillMomenta();
-  if (const auto weight = process().eval(); utils::positive(weight)) {
-    const auto s = shat();
-    return weight / (s * s);
-  }
+  if (const auto weight = process().eval(); utils::positive(weight))
+    return weight * matrixElementNormalisation();
   return 0.;
 }
 
