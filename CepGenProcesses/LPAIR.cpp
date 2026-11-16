@@ -23,6 +23,7 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/Process.h"
@@ -32,6 +33,16 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
+
+namespace {
+  /// Squared electric charge (in units of e^2) of the elastically-emitting beam: Z^2 for heavy ions, 1 otherwise
+  double beamChargeSquared(spdgid_t pdg_id) {
+    if (!HeavyIon::isHI(pdg_id))
+      return 1.;
+    const auto z = static_cast<int>(HeavyIon::fromPdgId(static_cast<pdgid_t>(std::abs(pdg_id))).Z);
+    return static_cast<double>(z * z);
+  }
+}  // namespace
 
 /// Matrix element for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process as defined in \cite Vermaseren:1982cz
 class LPAIR final : public proc::Process {
@@ -226,7 +237,8 @@ private:
         [this](formfac::Parameterisation& formfac, bool elastic, double q2, double mi2, double mx2) -> Vector {
       if (elastic) {  // trivial case for elastic photon emission
         const auto ff = formfac(q2);
-        return Vector{ff.FM, ff.FE};
+        const auto z2 = beamChargeSquared(formfac.pdgId());  // coherent emission from the Z protons of a heavy ion
+        return Vector{z2 * ff.FM, z2 * ff.FE};
       }
       if (!strfun_)
         throw CG_FATAL("LPAIR:peripp")
