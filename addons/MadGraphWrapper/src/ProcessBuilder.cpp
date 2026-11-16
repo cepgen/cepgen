@@ -48,8 +48,8 @@ ProcessBuilder::ProcessBuilder(const ParametersList& params, bool load_library)
 }
 
 ProcessBuilder::~ProcessBuilder() {
-  delete mg5_proc_.release();
-  if (!unloadLibrary(library_filename_))
+  mg5_proc_.reset();  // call the destructor, as the library will be invalidated
+  if (!library_filename_.empty() && !unloadLibrary(library_filename_))
     CG_ERROR("mg5amc:~ProcessBuilder") << "Failed to unload library '" << library_filename_ << "'.";
   if (steer<bool>("removeLibrary")) {
     std::error_code error_code;
