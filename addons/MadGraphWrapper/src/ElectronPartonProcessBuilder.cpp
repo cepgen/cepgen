@@ -54,10 +54,16 @@ namespace cepgen::mg5amc {
       return desc;
     }
 
+    bool fluxlessBeam(PartonSampler::Side side) const override {
+      return side == (electron_first_ ? PartonSampler::Side::positive : PartonSampler::Side::negative);
+    }
+
     void prepareFactorisedPhaseSpace() override {
+      // the hadron-side parton is the last (first) incoming MadGraph parton if the lepton is first (last)
+      const auto& mg_partons = process().intermediatePartons();
+      const auto mg_hadron_parton = electron_first_ ? *mg_partons.rbegin() : *mg_partons.begin();
       if (const auto psgen_partons = partons();  // ensure parton system is compatible
-          (!electron_first_ && *process().intermediatePartons().begin() != static_cast<int>(psgen_partons.at(0))) ||
-          (electron_first_ && *process().intermediatePartons().rbegin() != static_cast<int>(psgen_partons.at(1))))
+          static_cast<int>(mg_hadron_parton) != static_cast<int>(psgen_partons.at(electron_first_ ? 1 : 0)))
         throw CG_FATAL("ElectronPartonProcessBuilder")
             << "MadGraph unpacked process incoming state (" << process().intermediatePartons()
             << ") is incompatible with user-steered incoming fluxes particles (" << psgen_partons << ").";
@@ -65,19 +71,29 @@ namespace cepgen::mg5amc {
     }
 
   private:
+    Momentum leptonBeam(bool positive) const {
+      const auto e = 0.5 * std::sqrt(s());
+      return Momentum::fromPxPyPzE(0., 0., positive ? e : -e, e);
+    }
+
     void fillMomenta() override {
-      pX() = (pA() - q1()).setMass2(mX2());
-      pY() = (pB() - q2()).setMass2(mY2());
+      Momentum central_sum;
+      for (size_t j = 0, n = central().size(); j < n; ++j)
+        central_sum += pc(j);
+      if (electron_first_)
+        pX() = leptonBeam(true) + q2() - central_sum;
+      else
+        pY() = leptonBeam(false) + q1() - central_sum;
       size_t i = 0;
       if (electron_first_) {
-        process().setMomentum(i++, pA());  // first "parton": beam electron
-        process().setMomentum(i++, q2());  // second "parton": parton-from-hadron
+        process().setMomentum(i++, leptonBeam(true));  // first "parton": beam electron
+        process().setMomentum(i++, q2());              // second "parton": parton-from-hadron
         process().setMomentum(i++, pX());
         for (size_t j = 0, n = central().size(); j < n; ++j)
           process().setMomentum(i++, pc(j));  // outgoing central particles
       } else {
-        process().setMomentum(i++, q1());  // first "parton": parton-from-hadron
-        process().setMomentum(i++, pB());  // second "parton": beam electron
+        process().setMomentum(i++, q1());               // first "parton": parton-from-hadron
+        process().setMomentum(i++, leptonBeam(false));  // second "parton": beam electron
         for (size_t j = 0, n = central().size(); j < n; ++j)
           process().setMomentum(i++, pc(j));  // outgoing central particles
         process().setMomentum(i, pY());
