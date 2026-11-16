@@ -81,7 +81,7 @@ jobs:
         uses: actions/download-artifact@v8
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz/*.tar.gz
