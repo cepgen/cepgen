@@ -70,6 +70,8 @@ std::complex<double> NachtmannAmplitudes::operator()(
   return amplitude(kin, HelicityStates{lam1, lam2, lam3, lam4});
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct StandardModel : NachtmannAmplitudes {
   explicit StandardModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
   static std::string description() { return "Standard model"; }
@@ -133,6 +135,8 @@ public:
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 class WbarModel : public NachtmannAmplitudes {
 public:
   explicit WbarModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
@@ -166,6 +170,8 @@ public:
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 class PhiWModel : public NachtmannAmplitudes {
 public:
   explicit PhiWModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
@@ -193,7 +199,10 @@ private:
   const double m_h_;
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct PhiWbarModel : PhiWModel {
+  using PhiWModel::PhiWModel;
   static ParametersDescription description() {
     auto desc = PhiWModel::description();
     desc.setDescription("phi-Wbar");
@@ -204,7 +213,10 @@ struct PhiWbarModel : PhiWModel {
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct PhiBModel : PhiWModel {
+  using PhiWModel::PhiWModel;
   static ParametersDescription description() {
     auto desc = PhiWModel::description();
     desc.setDescription("phi-B");
@@ -215,7 +227,10 @@ struct PhiBModel : PhiWModel {
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct PhiBbarModel : PhiWModel {
+  using PhiWModel::PhiWModel;
   static ParametersDescription description() {
     auto desc = PhiWModel::description();
     desc.setDescription("phi-Bbar");
@@ -225,6 +240,8 @@ struct PhiBbarModel : PhiWModel {
     return 2i * static_cast<double>(hel.lam1) * std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 class WBModel : public NachtmannAmplitudes {
 public:
@@ -265,6 +282,8 @@ public:
 private:
   const double m_h_;
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 class WbarBModel : public NachtmannAmplitudes {
 public:
@@ -321,6 +340,22 @@ ParametersDescription NachtmannAmplitudes::description() {
 std::unique_ptr<NachtmannAmplitudes> NachtmannAmplitudes::build(const ParametersList& params) {
   if (const auto& name = params.name(); name == "standardModel")
     return std::make_unique<StandardModel>(params);
+  else if (name == "W")
+    return std::make_unique<WModel>(params);
+  else if (name == "Wbar")
+    return std::make_unique<WbarModel>(params);
+  else if (name == "PhiW")
+    return std::make_unique<PhiWModel>(params);
+  else if (name == "PhiWbar")
+    return std::make_unique<PhiWbarModel>(params);
+  else if (name == "PhBW")
+    return std::make_unique<PhiBModel>(params);
+  else if (name == "PhBWbar")
+    return std::make_unique<PhiBbarModel>(params);
+  else if (name == "WW")
+    return std::make_unique<WBModel>(params);
+  else if (name == "WWbar")
+    return std::make_unique<WbarBModel>(params);
   else
     throw CG_FATAL("NachtmannAmplitudes:build") << "Failed to build amplitudes model with name '" << name << "'.";
 }
