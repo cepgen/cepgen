@@ -18,7 +18,8 @@ rev=${4:-1}
 build_cmd=${BUILD_CMD:-dpkg-buildpackage -S -sa -d -us -uc}
 
 # Debian upstream versions may not contain '_' or a leading 'v'; '-' is mapped too to keep it simple.
-version=$(echo "${tag#v}" | tr '_-' '..')
+# Pre-releases (1.4.0pre1, 1.4.0-rc1) become 1.4.0~pre1 so that they sort before the final 1.4.0.
+version=$(echo "${tag#v}" | sed -E 's/[-_.]?(pre|rc|alpha|beta)/~\1/; s/[-_]/./g')
 ts=$(git log -1 --format=%ct "$tag^{commit}")
 mkdir -p "$outdir"
 outdir=$(realpath "$outdir")

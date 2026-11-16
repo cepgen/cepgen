@@ -8,8 +8,9 @@
 set -euxo pipefail
 : "${TAG:?}" "${REPO_URL:?}" "${COPR_RESULTDIR:?}"
 
-# RPM versions cannot contain '-', and a leading 'v' is not part of the version
-version=$(echo "${TAG#v}" | sed -E 's/[-_]/./g')
+# RPM versions cannot contain '-', and a leading 'v' is not part of the version.
+# Pre-releases (1.4.0pre1, 1.4.0-rc1) become 1.4.0~pre1 so that they sort before the final 1.4.0.
+version=$(echo "${TAG#v}" | sed -E 's/[-_.]?(pre|rc|alpha|beta)/~\1/; s/[-_]/./g')
 
 src=$(mktemp -d)
 git clone --quiet "$REPO_URL" "$src/cepgen"

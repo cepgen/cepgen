@@ -53,8 +53,12 @@ the CepGen libraries.
 %build
 # CMAKE_BUILD_TYPE must be explicit: the project only selects its optimised flags for "Release".
 # CEPGEN_VERSION_OVERRIDE replaces the "git describe" lookup, which cannot work from a tarball.
+# CMAKE_Fortran_FLAGS must be explicit too: the project sets it before enabling Fortran, which hides the FFLAGS
+# environment variable. Without Fedora's flags (-fPIE through the hardening specs) the Fortran check fails to
+# link against the hardened (-pie) LDFLAGS.
 %cmake \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_Fortran_FLAGS="%{build_fflags}" \
     -DCEPGEN_VERSION_OVERRIDE=%{version} \
     -DCMAKE_BUILD_UTILS=ON \
     -DCMAKE_BUILD_TESTS=%{?with_tests:ON}%{!?with_tests:OFF}
