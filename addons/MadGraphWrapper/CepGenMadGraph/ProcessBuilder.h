@@ -30,6 +30,8 @@ namespace cepgen::mg5amc {
 
   protected:
     void loadMG5Library() const;
+    void prepareSteeringCard() const;
+
     std::unique_ptr<mg5amc::Process> mg5_proc_;
   };
 }  // namespace cepgen::mg5amc
