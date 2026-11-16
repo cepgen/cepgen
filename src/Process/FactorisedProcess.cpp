@@ -281,11 +281,18 @@ void FactorisedProcess::fillKinematics() {
   }
 }
 
+double FactorisedProcess::cmBeamMomentum() const {  // momentum of each beam in the two-beam centre-of-mass frame
+  const auto s_val = s(), m1 = pA().mass(), m2 = pB().mass();
+  return 0.5 * std::sqrt(std::max(0., (s_val - (m1 + m2) * (m1 + m2)) * (s_val - (m1 - m2) * (m1 - m2)) / s_val));
+}
+
 void FactorisedProcess::computeBeamKinematics() {  // compute the four-momenta of the outgoing protons (or remnants)
   const double norm = wCM() * wCM() * s(), inv_norm = 1. / norm, prefactor = 0.5 * std::sqrt(norm);
 
   // positive-z outgoing beam system
-  const auto px_p = (1. - x1()) * pA().p(), px_m = (mX2() + q1().p2()) * 0.25 / px_p;
+  // (all momenta are expressed in the two-beam centre-of-mass frame, the boost to the lab frame is done at the very end)
+  const auto p_cm = cmBeamMomentum();
+  const auto px_p = (1. - x1()) * p_cm, px_m = (mX2() + q1().p2()) * 0.25 / px_p;
   pX() = (-q1()).setPz(px_p - px_m).setEnergy(px_p + px_m);
   if (!kinematics().incomingBeams().positive().elastic())
     pX().setMass2(mX2());
@@ -293,7 +300,7 @@ void FactorisedProcess::computeBeamKinematics() {  // compute the four-momenta o
   q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
 
   // negative-z outgoing beam system
-  const auto py_m = (1. - x2()) * pB().p(), py_p = (mY2() + q2().p2()) * 0.25 / py_m;
+  const auto py_m = (1. - x2()) * p_cm, py_p = (mY2() + q2().p2()) * 0.25 / py_m;
   pY() = (-q2()).setPz(py_p - py_m).setEnergy(py_p + py_m);
   if (!kinematics().incomingBeams().negative().elastic())
     pY().setMass2(mY2());
