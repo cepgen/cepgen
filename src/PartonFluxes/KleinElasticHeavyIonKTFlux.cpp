@@ -34,8 +34,9 @@ class KleinElasticHeavyIonKTFlux final : public KTFlux {
 public:
   explicit KleinElasticHeavyIonKTFlux(const ParametersList& params)
       : KTFlux(params),
-        hi_(HeavyIon::fromPdgId(steer<pdgid_t>("heavyIon"))),
-        ff_(FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {}
+        ff_(FormFactorsFactory::get().build(formFactorsParameters(params))),
+        hi_(HeavyIon::fromPdgId(ff_->pdgId())),  // the form factors (set by the beam) define the ion
+        mass2_(hi_.mass() * hi_.mass()) {}
 
   static ParametersDescription description() {
     auto desc = KTFlux::description();
@@ -46,7 +47,7 @@ public:
   }
 
   bool fragmenting() const override { return false; }
-  double mass2() const override { return hi_.A * hi_.A * mp2_; }
+  double mass2() const override { return mass2_; }
   spdgid_t partonPdgId() const override { return PDG::photon; }
   bool singleThreaded() const override { return KTFlux::singleThreaded() || ff_->singleThreaded(); }
 
@@ -65,7 +66,15 @@ public:
   double fluxMX2(double x, double kt2, double) const override { return fluxQ2(x, kt2, utils::kt::q2(x, kt2, mass2())); }
 
 private:
-  const HeavyIon hi_;
+  /// Form factors modelling parameters, defaulting to the flux-defined heavy ion if no ion was set by the beam
+  static ParametersList formFactorsParameters(const ParametersList& params) {
+    auto ff_params = params.get<ParametersList>("formFactors");
+    if (!ff_params.has<int>("pdgId"))
+      ff_params.set<int>("pdgId", static_cast<int>(params.get<pdgid_t>("heavyIon", static_cast<pdgid_t>(HeavyIon::Pb()))));
+    return ff_params;
+  }
   const std::unique_ptr<formfac::Parameterisation> ff_;
+  const HeavyIon hi_;
+  const double mass2_;
 };
 REGISTER_KT_FLUX("KleinElasticHI", 101, KleinElasticHeavyIonKTFlux);
