@@ -13,6 +13,8 @@ process = kt.process.clone('pptoww',
         model = cepgen.Module("dim6EFTww",
             #a0w = 1.e-5,
             a0w = 1.e-6,
+            #--- taming of the anomalous couplings with the two-photon mass W (optional)
+            #formFactor = cepgen.Module('dipole', scale = 500., exponent = 2.),  # a -> a/(1+W^2/scale^2)^n, or 'sharp' cut-off
             includeSM = False,
         ),
     ),

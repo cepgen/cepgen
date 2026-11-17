@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/HelicityAmplitudes/FormFactor.h"
 #include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Physics/Constants.h"
 
@@ -29,7 +30,15 @@ using namespace std::complex_literals;
 /// Common contact terms for the dimension-6 anomalous quartic gauge couplings (\f$a_0\f$ and \f$a_C\f$ operators)
 class Dim6EFTModel : public HelicityAmplitudes {
 public:
-  explicit Dim6EFTModel(const ParametersList& params) : HelicityAmplitudes(params) {}
+  explicit Dim6EFTModel(const ParametersList& params)
+      : HelicityAmplitudes(params), form_factor_(FormFactor::build(steer<ParametersList>("formFactor"))) {}
+
+  static ParametersDescription description() {
+    auto desc = HelicityAmplitudes::description();
+    desc.add("formFactor", FormFactor::description())
+        .setDescription("two-parton squared mass form factor of the anomalous couplings");
+    return desc;
+  }
 
 protected:
   /// Contact amplitude for the (already normalised, in units of the charge squared) \f$a_0\f$ and \f$a_C\f$ couplings
@@ -62,6 +71,9 @@ protected:
     // matrix element of the corresponding Lagrangian terms (checked against explicit polarisation vectors)
     return 1i * (hel[3] == 0 ? -1. : 1.) * kin.shat * val;
   }
+
+protected:
+  const std::unique_ptr<FormFactor> form_factor_;
 };
 
 /// \f$\gamma\gamma\to W^+W^-\f$ with \f$a_{0,C}^W\f$ quartic couplings (+ SM if requested)
@@ -74,7 +86,7 @@ public:
         a0w_(steer<double>("a0w")),
         acw_(steer<double>("acw")) {}
   static ParametersDescription description() {
-    auto desc = HelicityAmplitudes::description();
+    auto desc = Dim6EFTModel::description();
     desc.setDescription("dimension-6 AQGC (AAWW vertex)");
     desc.add("a0w", 0.).setDescription("a_0^W/Lambda^2 anomalous quartic coupling (in GeV^-2)");
     desc.add("acw", 0.).setDescription("a_C^W/Lambda^2 anomalous quartic coupling (in GeV^-2)");
@@ -83,7 +95,8 @@ public:
   }
   bool hasAAWW() const override { return true; }
   std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
-    auto ampl = eval(2. * constants::G_EM_SQ * a0w_, constants::G_EM_SQ * acw_, kin, hel);
+    const auto ff = (*form_factor_)(kin.shat);
+    auto ampl = eval(2. * constants::G_EM_SQ * a0w_ * ff, constants::G_EM_SQ * acw_ * ff, kin, hel);
     if (include_sm_)
       ampl += sm_->amplitude(kin, hel);
     return ampl;
@@ -109,7 +122,7 @@ public:
       throw CG_FATAL("Zdim6EFTModel") << "Invalid squared cosine of the weak mixing angle: " << cos2_theta_w_ << ".";
   }
   static ParametersDescription description() {
-    auto desc = HelicityAmplitudes::description();
+    auto desc = Dim6EFTModel::description();
     desc.setDescription("dimension-6 AQGC (AAZZ vertex)");
     desc.add("a0z", 0.).setDescription("a_0^Z/Lambda^2 anomalous quartic coupling (in GeV^-2)");
     desc.add("acz", 0.).setDescription("a_C^Z/Lambda^2 anomalous quartic coupling (in GeV^-2)");
@@ -118,8 +131,9 @@ public:
   }
   bool hasAAZZ() const override { return true; }
   std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
-    return eval(constants::G_EM_SQ * a0z_ / cos2_theta_w_ * 2.,  // factor 2 from identical Z bosons
-                constants::G_EM_SQ * acz_ / cos2_theta_w_,       // a_C already symmetrised
+    const auto ff = (*form_factor_)(kin.shat);
+    return eval(constants::G_EM_SQ * a0z_ * ff / cos2_theta_w_ * 2.,  // factor 2 from identical Z bosons
+                constants::G_EM_SQ * acz_ * ff / cos2_theta_w_,       // a_C already symmetrised
                 kin,
                 hel);
   }
