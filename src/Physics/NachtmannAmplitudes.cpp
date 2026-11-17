@@ -65,9 +65,29 @@ bool Kinematics::operator!=(const Kinematics& oth) const {
   return shat != oth.shat || that != oth.that || uhat != oth.uhat;
 }
 
+namespace cepgen::amplitudes {
+  std::ostream& operator<<(std::ostream& os, const Kinematics& kin) {
+    return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
+              << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta
+              << "->1/A=" << kin.invA << "}";
+  }
+}  // namespace cepgen::amplitudes
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
+    : NamedModule(params), s1_(steer<double>("s1")) {}
+
 std::complex<double> NachtmannAmplitudes::operator()(
     const Kinematics& kin, short lam1, short lam2, short lam3, short lam4) const {
   return amplitude(kin, HelicityStates{lam1, lam2, lam3, lam4});
+}
+
+ParametersDescription NachtmannAmplitudes::description() {
+  auto desc = ParametersDescription();
+  desc.setDescription("generic helicity model");
+  desc.add("s1", 0.);
+  return desc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -341,25 +361,3 @@ private:
   const double m_h_;
 };
 REGISTER_NACHTMANN_AMPLITUDES("WbarB", WbarBModel);
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
-    : NamedModule(params), s1_(steer<double>("s1")) {}
-
-ParametersDescription NachtmannAmplitudes::description() {
-  auto desc = ParametersDescription();
-  desc.setDescription("generic helicity model");
-  desc.add("s1", 0.);
-  return desc;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-namespace cepgen::amplitudes {
-  std::ostream& operator<<(std::ostream& os, const Kinematics& kin) {
-    return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
-              << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta
-              << "->1/A=" << kin.invA << "}";
-  }
-}  // namespace cepgen::amplitudes
