@@ -77,7 +77,7 @@ struct BudnevElasticKTFlux : ElasticKTFlux {
     const auto& form_fac = (*form_factors_)(q2);
     const double f_D = form_fac.FE * (1. - x) * q_norm;
     const double f_C = form_fac.FM;
-    return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
+    return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) / (1. - x) / q2;
   }
 };
 

@@ -84,7 +84,7 @@ struct BudnevInelasticNucleonKTFlux final : public InelasticNucleonKTFlux {
     const auto xbj = utils::xBj(q2, mass2(), mx2), q_norm = 1. - q2min / q2;
     const double f_D = sf_->F2(xbj, q2) * (xbj / q2) * (1. - x) * q_norm;
     const double f_C = sf_->F1(xbj, q2) * 2. / q2;
-    return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
+    return alpha_over_pi_ * (f_D + 0.5 * x * x * f_C) / (1. - x) / q2;
   }
 };
 REGISTER_KT_FLUX("Inelastic", 1, InelasticNucleonKTFlux);
