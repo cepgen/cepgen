@@ -19,7 +19,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGenProcesses/PPtoVV.h"
 
@@ -35,10 +34,10 @@ public:
                        << "Z1=" << polarisation_.polarisations().first << ", "
                        << "Z2=" << polarisation_.polarisations().second << ".";
     const auto& model_params = steer<ParametersList>("model");
-    if (amplitudes_ = amplitudes::NachtmannAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAZZ())
+    if (amplitudes_ = amplitudes::HelicityAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAZZ())
       throw CG_FATAL("PPtoZZ") << "Invalid EFT extension enabled for γγ → ZZ (AAZZ). Model '" << amplitudes_->name()
                                << "' does not have a registered AAWW vertex in its specifications.";
-    CG_INFO("PPtoZZ") << "Nachtmann amplitudes (model: " << amplitudes_->name()
+    CG_INFO("PPtoZZ") << "Helicity amplitudes (model: " << amplitudes_->name()
                       << ") initialised. Parameters: " << model_params << ".";
   }
 
@@ -48,7 +47,7 @@ public:
     auto desc = PPtoVV::description();
     desc.setDescription("γγ → ZZ (anomalous couplings only)");
     // the default model has vanishing couplings, i.e. no contribution unless steered explicitly
-    desc.add("model", amplitudes::NachtmannAmplitudesFactory::get().describeParameters("dim6EFTzz"));
+    desc.add("model", amplitudes::HelicityAmplitudesFactory::get().describeParameters("dim6EFTzz"));
     return desc;
   }
 

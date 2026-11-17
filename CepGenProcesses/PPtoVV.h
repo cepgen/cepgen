@@ -28,7 +28,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
-#include "CepGen/HelicityAmplitudes/PolarisationState.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/RandomGenerator.h"
