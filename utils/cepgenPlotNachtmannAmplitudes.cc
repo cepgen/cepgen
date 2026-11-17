@@ -18,11 +18,11 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Generator.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Integration/FunctionIntegrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("models,m",
                            "amplitudes models to plot",
                            &models,
-                           cepgen::amplitudes::NachtmannAmplitudesFactory::get().modules())
+                           cepgen::amplitudes::HelicityAmplitudesFactory::get().modules())
       .addOptionalArgument("shat,s", "two-photon c.m.s.", &shats, std::vector{400., 2400.})
       .parse();
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 
   const std::vector<short> lambdas = {-1, 0, 1};
   auto dsig_dcosth = [&integrator, &lambdas](
-                         const cepgen::amplitudes::NachtmannAmplitudes& ampl, double shat, double costh) -> double {
+                         const cepgen::amplitudes::HelicityAmplitudes& ampl, double shat, double costh) -> double {
     const auto kin = cepgen::amplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
     auto dsig = [&ampl, &kin, &lambdas](double theta1, double phi1, double theta2, double phi2) -> double {
       auto l = [](short lam, double theta, double phi) -> std::complex<double> {
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
     auto& graphs_per_shat = all_graphs.emplace_back();
     for (const auto& mode : models) {
       // then fill the plot
-      auto ampl = cepgen::amplitudes::NachtmannAmplitudesFactory::get().build(mode);
+      auto ampl = cepgen::amplitudes::HelicityAmplitudesFactory::get().build(mode);
       CG_LOG << "Computing " << ampl->parameters() << ".";
       auto& gr_cth = graphs_per_shat.emplace_back("sm_cth_" + std::to_string(shat), ampl->description().description());
       gr_cth.xAxis().setLabel("cos#theta");

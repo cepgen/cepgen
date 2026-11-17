@@ -21,8 +21,8 @@
 #include <algorithm>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 
 using namespace cepgen;
 using namespace cepgen::amplitudes;
@@ -30,72 +30,10 @@ using namespace std::complex_literals;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Kinematics::Kinematics(double mv2, double s_hat, double t_hat, double u_hat)
-    : shat(s_hat),
-      that(t_hat),
-      uhat(u_hat),
-      mv2_(mv2),
-      shat2(s_hat * s_hat),
-      beta2(1. - 4. * mv2_ / s_hat),
-      beta(sqrt(beta2)),
-      inv_gamma2(1. - beta2),
-      gamma2(1. / inv_gamma2),
-      gamma(sqrt(gamma2)),
-      inv_gamma(1. / gamma) {
-  setCosTheta((t_hat - u_hat) / s_hat / beta);
-}
-
-Kinematics Kinematics::fromSCosTheta(double shat, double cos_theta, double mv2) {
-  Kinematics kin(mv2, shat, 0., 0.);
-  kin.setCosTheta(cos_theta);
-  return kin;
-}
-
-void Kinematics::setCosTheta(double cth) {
-  // with off-shell photons, (t-u)/(s*beta) may exceed unity, possibly reaching the 1/A pole at beta*|cos(theta)|=1
-  cos_theta = std::clamp(cth, -1., 1.);
-  cos_theta2 = cos_theta * cos_theta;
-  sin_theta2 = 1. - cos_theta2;
-  sin_theta = sqrt(fabs(sin_theta2));
-  invA = 1. / (1. - beta2 * cos_theta2);
-}
-
-bool Kinematics::operator!=(const Kinematics& oth) const {
-  // checking only the base variables as all others are computed from these three
-  return shat != oth.shat || that != oth.that || uhat != oth.uhat;
-}
-
-namespace cepgen::amplitudes {
-  std::ostream& operator<<(std::ostream& os, const Kinematics& kin) {
-    return os << "Kin{mV2=" << kin.mv2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
-              << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta
-              << "->1/A=" << kin.invA << "}";
-  }
-}  // namespace cepgen::amplitudes
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
-    : NamedModule(params), s1_(steer<double>("s1")) {}
-
-std::complex<double> NachtmannAmplitudes::operator()(
-    const Kinematics& kin, short lam1, short lam2, short lam3, short lam4) const {
-  return amplitude(kin, HelicityStates{lam1, lam2, lam3, lam4});
-}
-
-ParametersDescription NachtmannAmplitudes::description() {
-  auto desc = ParametersDescription();
-  desc.setDescription("generic helicity model");
-  desc.add("s1", 0.);
-  return desc;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct StandardModel : NachtmannAmplitudes {
-  explicit StandardModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
+struct StandardModel : HelicityAmplitudes {
+  explicit StandardModel(const ParametersList& params) : HelicityAmplitudes(params) {}
   static ParametersDescription description() {
-    auto desc = NachtmannAmplitudes::description();
+    auto desc = HelicityAmplitudes::description();
     desc.setDescription("Standard model");
     return desc;
   }
@@ -122,15 +60,15 @@ struct StandardModel : NachtmannAmplitudes {
             (1. - hel.lam1 * hel.lam2) * (1. - hel.lam3 * hel.lam4) * kin.cos_theta2);
   }
 };
-REGISTER_NACHTMANN_AMPLITUDES("standardModel", StandardModel);
+REGISTER_HELICITY_AMPLITUDES("standardModel", StandardModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WModel : public NachtmannAmplitudes {
+class WModel : public HelicityAmplitudes {
 public:
-  explicit WModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
+  explicit WModel(const ParametersList& params) : HelicityAmplitudes(params) {}
   static ParametersDescription description() {
-    auto desc = NachtmannAmplitudes::description();
+    auto desc = HelicityAmplitudes::description();
     desc.setDescription("W");
     return desc;
   }
@@ -160,15 +98,15 @@ public:
                  kin.cos_theta2 * (3 + hel.lam1 * hel.lam2 + 2 * hel.lam3 * hel.lam4)));
   }
 };
-REGISTER_NACHTMANN_AMPLITUDES("W", WModel);
+REGISTER_HELICITY_AMPLITUDES("W", WModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WbarModel : public NachtmannAmplitudes {
+class WbarModel : public HelicityAmplitudes {
 public:
-  explicit WbarModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
+  explicit WbarModel(const ParametersList& params) : HelicityAmplitudes(params) {}
   static ParametersDescription description() {
-    auto desc = NachtmannAmplitudes::description();
+    auto desc = HelicityAmplitudes::description();
     desc.setDescription("Wbar");
     return desc;
   }
@@ -197,15 +135,15 @@ public:
             0.};
   }
 };
-REGISTER_NACHTMANN_AMPLITUDES("Wbar", WbarModel);
+REGISTER_HELICITY_AMPLITUDES("Wbar", WbarModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PhiWModel : public NachtmannAmplitudes {
+class PhiWModel : public HelicityAmplitudes {
 public:
-  explicit PhiWModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
+  explicit PhiWModel(const ParametersList& params) : HelicityAmplitudes(params), m_h_(steer<double>("mH")) {}
   static ParametersDescription description() {
-    auto desc = NachtmannAmplitudes::description();
+    auto desc = HelicityAmplitudes::description();
     desc.setDescription("phi-W");
     desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
@@ -227,7 +165,7 @@ public:
 private:
   const double m_h_;
 };
-REGISTER_NACHTMANN_AMPLITUDES("PhiW", PhiWModel);
+REGISTER_HELICITY_AMPLITUDES("PhiW", PhiWModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -242,7 +180,7 @@ struct PhiWbarModel : PhiWModel {
     return 2i * static_cast<double>(hel.lam1) * PhiWModel::amplitude(kin, hel);
   }
 };
-REGISTER_NACHTMANN_AMPLITUDES("PhiWbar", PhiWbarModel);
+REGISTER_HELICITY_AMPLITUDES("PhiWbar", PhiWbarModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -257,7 +195,7 @@ struct PhiBModel : PhiWModel {
     return std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
-REGISTER_NACHTMANN_AMPLITUDES("PhiB", PhiBModel);
+REGISTER_HELICITY_AMPLITUDES("PhiB", PhiBModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -272,15 +210,15 @@ struct PhiBbarModel : PhiWModel {
     return 2i * static_cast<double>(hel.lam1) * std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
-REGISTER_NACHTMANN_AMPLITUDES("PhiBbar", PhiBbarModel);
+REGISTER_HELICITY_AMPLITUDES("PhiBbar", PhiBbarModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WBModel : public NachtmannAmplitudes {
+class WBModel : public HelicityAmplitudes {
 public:
-  explicit WBModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
+  explicit WBModel(const ParametersList& params) : HelicityAmplitudes(params), m_h_(steer<double>("mH")) {}
   static ParametersDescription description() {
-    auto desc = NachtmannAmplitudes::description();
+    auto desc = HelicityAmplitudes::description();
     desc.setDescription("W-b");
     desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
@@ -315,17 +253,17 @@ public:
 private:
   const double m_h_;
 };
-REGISTER_NACHTMANN_AMPLITUDES("WB", WBModel);
+REGISTER_HELICITY_AMPLITUDES("WB", WBModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WbarBModel : public NachtmannAmplitudes {
+class WbarBModel : public HelicityAmplitudes {
 public:
-  explicit WbarBModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {
-    CG_WARNING("NachtmannAmplitudes") << "Mode Wbar-B is not yet properly handled!";
+  explicit WbarBModel(const ParametersList& params) : HelicityAmplitudes(params), m_h_(steer<double>("mH")) {
+    CG_WARNING("HelicityAmplitudes") << "Mode Wbar-B is not yet properly handled!";
   }
   static ParametersDescription description() {
-    auto desc = NachtmannAmplitudes::description();
+    auto desc = HelicityAmplitudes::description();
     desc.setDescription("Wbar-B");
     desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
@@ -360,4 +298,4 @@ public:
 private:
   const double m_h_;
 };
-REGISTER_NACHTMANN_AMPLITUDES("WbarB", WbarBModel);
+REGISTER_HELICITY_AMPLITUDES("WbarB", WbarBModel);

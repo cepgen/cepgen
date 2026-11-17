@@ -18,8 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_NachtmannAmplitudes_h
-#define CepGen_Physics_NachtmannAmplitudes_h
+#ifndef CepGen_HelicityAmplitudes_HelicityAmplitude_h
+#define CepGen_HelicityAmplitudes_HelicityAmplitude_h
 
 #include <complex>
 
@@ -27,13 +27,13 @@
 #include "CepGen/Modules/NamedModule.h"
 
 /// Add an amplitudes computation algorithm definition to the factory
-#define REGISTER_NACHTMANN_AMPLITUDES(name, obj)                                           \
-  namespace cepgen::amplitudes {                                                           \
-    struct BUILDER_NAME(obj) {                                                             \
-      BUILDER_NAME(obj)() { NachtmannAmplitudesFactory::get().registerModule<obj>(name); } \
-    };                                                                                     \
-    static const BUILDER_NAME(obj) gNachAmp##obj;                                          \
-  }                                                                                        \
+#define REGISTER_HELICITY_AMPLITUDES(name, obj)                                           \
+  namespace cepgen::amplitudes {                                                          \
+    struct BUILDER_NAME(obj) {                                                            \
+      BUILDER_NAME(obj)() { HelicityAmplitudesFactory::get().registerModule<obj>(name); } \
+    };                                                                                    \
+    static const BUILDER_NAME(obj) gNachAmp##obj;                                         \
+  }                                                                                       \
   static_assert(true, "")
 
 namespace cepgen {
@@ -76,7 +76,7 @@ namespace cepgen::amplitudes {
 
   /// Amplitudes computational tool, as developed by Nachtmann et al.
   /// \cite Nachtmann:2005en
-  class NachtmannAmplitudes : public NamedModule<NachtmannAmplitudes> {
+  class HelicityAmplitudes : public NamedModule<HelicityAmplitudes> {
   public:
     static ParametersDescription description();
 
@@ -87,7 +87,7 @@ namespace cepgen::amplitudes {
     virtual bool hasAAZZ() const { return false; }
 
   protected:
-    explicit NachtmannAmplitudes(const ParametersList&);
+    explicit HelicityAmplitudes(const ParametersList&);
 
     virtual std::complex<double> amplitude(const Kinematics&, const HelicityStates&) const = 0;
     double s1() const { return s1_; }
@@ -97,8 +97,8 @@ namespace cepgen::amplitudes {
     const double s1_;
   };
 
-  /// An amplitudes calculation algorithms factory
-  DEFINE_FACTORY(NachtmannAmplitudesFactory, NachtmannAmplitudes, "Nachtmann amplitudes factory");
+  /// A helicity-dependent amplitudes calculation algorithms factory
+  DEFINE_FACTORY(HelicityAmplitudesFactory, HelicityAmplitudes, "Helicity-dependent amplitudes factory");
 }  // namespace cepgen::amplitudes
 
 #endif

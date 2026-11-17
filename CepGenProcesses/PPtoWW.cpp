@@ -18,13 +18,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
+#include <complex>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/PolarisationState.h"
 #include "CepGen/Process/FactorisedProcess.h"
@@ -50,10 +50,10 @@ public:
                        << "W2=" << polarisation_.polarisations().second << ".";
     if (method_ == 1) {  // build the amplitudes model once, so that invalid steering fails at initialisation
       const auto& model_params = steer<ParametersList>("model");
-      if (amplitudes_ = amplitudes::NachtmannAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAWW())
+      if (amplitudes_ = amplitudes::HelicityAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAWW())
         throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯ (AAWW). Model '" << amplitudes_->name()
                                  << "' does not have a registered AAWW vertex in its specifications.";
-      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name()
+      CG_INFO("PPtoWW") << "Helicity amplitudes (model: " << amplitudes_->name()
                         << ") initialised. Parameters: " << model_params << ".";
     }
   }
@@ -68,7 +68,7 @@ public:
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
         .allow(1, "off-shell by Nachtmann et al.");
-    desc.add("model", amplitudes::NachtmannAmplitudesFactory::get().describeParameters("standardModel"));
+    desc.add("model", amplitudes::HelicityAmplitudesFactory::get().describeParameters("standardModel"));
     desc.add("polarisationStates"s, PolarisationState::description());
     return desc;
   }
@@ -132,6 +132,6 @@ private:
   const int method_;
   const PolarisationState polarisation_;
 
-  std::unique_ptr<amplitudes::NachtmannAmplitudes> amplitudes_;
+  std::unique_ptr<amplitudes::HelicityAmplitudes> amplitudes_;
 };
 REGISTER_PROCESS("pptoww", PPtoWW);

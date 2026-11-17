@@ -26,11 +26,11 @@
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Process/CentralPhaseSpace.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -43,7 +43,7 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
-  template class ModuleFactory<amplitudes::NachtmannAmplitudes>;
+  template class ModuleFactory<amplitudes::HelicityAmplitudes>;
   template class ModuleFactory<card::Handler>;
   template class ModuleFactory<CentralPhaseSpace>;
   template class ModuleFactory<CollinearFlux>;

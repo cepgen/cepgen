@@ -10,6 +10,7 @@ file(GLOB core_sources
 file(GLOB phys_sources
         Event/*.cpp
         FormFactors/*.cpp
+        HelicityAmplitudes/*.cpp
         PartonFluxes/*.cpp
         Physics/*.cpp
         StructureFunctions/*.cpp
