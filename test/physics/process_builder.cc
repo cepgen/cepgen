@@ -19,6 +19,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
@@ -63,15 +64,24 @@ int main(int argc, char* argv[]) {
       CG_TEST_EQUAL(proc->event().particles().size(), 9, proc_name + " particles content");
       const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
       CG_TEST_EQUAL(cs.size(), 2, proc_name + " outgoing state");
-      CG_TEST_EQUAL(cs.at(0).integerPdgId(), +13, proc_name + " first outgoing particle");
-      CG_TEST_EQUAL(cs.at(1).integerPdgId(), -13, proc_name + " second outgoing particle");
+      CG_TEST_EQUAL(
+          cs.at(0).integerPdgId(), +static_cast<int>(cepgen::PDG::muon), proc_name + " first outgoing particle");
+      CG_TEST_EQUAL(
+          cs.at(1).integerPdgId(), -static_cast<int>(cepgen::PDG::muon), proc_name + " second outgoing particle");
     }
     if (proc_name == "pptoww"s) {
       CG_TEST_EQUAL(proc->event().particles().size(), 9, proc_name + " particles content");
       const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
       CG_TEST_EQUAL(cs.size(), 2, proc_name + " outgoing state");
-      CG_TEST_EQUAL(cs.at(0).integerPdgId(), +24, proc_name + " first outgoing particle");
-      CG_TEST_EQUAL(cs.at(1).integerPdgId(), -24, proc_name + " second outgoing particle");
+      CG_TEST_EQUAL(cs.at(0).integerPdgId(), +static_cast<int>(cepgen::PDG::W), proc_name + " first outgoing particle");
+      CG_TEST_EQUAL(
+          cs.at(1).integerPdgId(), -static_cast<int>(cepgen::PDG::W), proc_name + " second outgoing particle");
+    }
+    if (proc_name == "pptozz"s) {
+      const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
+      CG_TEST_EQUAL(cs.size(), 2, proc_name + " outgoing state");
+      CG_TEST_EQUAL(cs.at(0).integerPdgId(), cepgen::PDG::Z, proc_name + " first outgoing particle");
+      CG_TEST_EQUAL(cs.at(1).integerPdgId(), cepgen::PDG::Z, proc_name + " second outgoing particle");
     }
   }
 
