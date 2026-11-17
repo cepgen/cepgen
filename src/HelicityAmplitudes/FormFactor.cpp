@@ -81,12 +81,13 @@ ParametersDescription FormFactor::description() {
 }
 
 std::unique_ptr<FormFactor> FormFactor::build(const ParametersList& params) {
-  if (const auto& name = params.name(); name == "none")
-    return std::make_unique<FormFactor>(params);
-  else if (name == "dipole")
+  if (const auto& name = params.name(); name == "dipole")
     return std::make_unique<DipoleFormFactor>(params);
   else if (name == "sharp")
     return std::make_unique<SharpFormFactor>(params);
-  else
-    throw CG_FATAL("FormFactor:build") << "Failed to build a taming form factor with name '" << name << "'.";
+  else {
+    if (name != "none")
+      CG_WARNING("FormFactor:build") << "No form factor modelling specified. Assuming no form factor is required.";
+    return std::make_unique<FormFactor>(params);
+  }
 }

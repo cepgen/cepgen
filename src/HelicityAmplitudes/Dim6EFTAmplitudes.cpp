@@ -35,7 +35,7 @@ public:
 
   static ParametersDescription description() {
     auto desc = HelicityAmplitudes::description();
-    desc.add("formFactor", FormFactor::description())
+    desc.add("formFactor", FormFactor::description().setName("none"))
         .setDescription("two-parton squared mass form factor of the anomalous couplings");
     return desc;
   }
