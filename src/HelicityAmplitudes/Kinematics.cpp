@@ -1,8 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2026  Laurent Forthomme
- *                2017-2019  Wolfgang Schaefer
- *                2019       Marta Luszczak
+ *  Copyright (C) 2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,16 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
+#include <algorithm>  // std::clamp
+#include <cmath>
+#include <iostream>
 
-#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/HelicityAmplitudes/Kinematics.h"
 
-using namespace cepgen;
 using namespace cepgen::amplitudes;
-using namespace std::complex_literals;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Kinematics::Kinematics(double mv2, double s_hat, double t_hat, double u_hat)
     : shat(s_hat),
@@ -71,19 +66,3 @@ namespace cepgen::amplitudes {
               << "->1/A=" << kin.invA << "}";
   }
 }  // namespace cepgen::amplitudes
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-HelicityAmplitudes::HelicityAmplitudes(const ParametersList& params) : NamedModule(params), s1_(steer<double>("s1")) {}
-
-std::complex<double> HelicityAmplitudes::operator()(
-    const Kinematics& kin, short lam1, short lam2, short lam3, short lam4) const {
-  return amplitude(kin, HelicityStates{lam1, lam2, lam3, lam4});
-}
-
-ParametersDescription HelicityAmplitudes::description() {
-  auto desc = ParametersDescription();
-  desc.setDescription("generic helicity model");
-  desc.add("s1", 0.);
-  return desc;
-}

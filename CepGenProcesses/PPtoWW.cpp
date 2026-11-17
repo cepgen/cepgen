@@ -23,10 +23,10 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
+#include "CepGen/HelicityAmplitudes/PolarisationState.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PolarisationState.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
@@ -120,8 +120,10 @@ private:
     for (const auto& lam3 : polarisation_.polarisations().first)
       for (const auto& lam4 : polarisation_.polarisations().second) {
         // compute all photon helicity amplitudes
-        const auto pp = (*amplitudes_)(kin, +1, +1, lam3, lam4), mm = (*amplitudes_)(kin, -1, -1, lam3, lam4),
-                   pm = (*amplitudes_)(kin, +1, -1, lam3, lam4), mp = (*amplitudes_)(kin, -1, +1, lam3, lam4);
+        const auto pp = amplitudes_->amplitude(kin, {+1, +1, lam3, lam4}),
+                   mm = amplitudes_->amplitude(kin, {-1, -1, lam3, lam4}),
+                   pm = amplitudes_->amplitude(kin, {+1, -1, lam3, lam4}),
+                   mp = amplitudes_->amplitude(kin, {-1, +1, lam3, lam4});
         // add ME for this W helicity to total ME
         hel_mat_elem += std::norm(p1 * (pp + mm) - 1i * p2 * (pp - mm) - p3 * (pm + mp) - 1i * p4 * (pm - mp));
       }

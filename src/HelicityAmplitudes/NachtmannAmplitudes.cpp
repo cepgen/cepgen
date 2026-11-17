@@ -38,26 +38,25 @@ struct StandardModel : HelicityAmplitudes {
     return desc;
   }
   bool hasAAWW() const override { return true; }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
-    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
+    if (hel[2] == 0 && hel[3] == 0)  // longitudinal-longitudinal
       return 1i * constants::G_EM_SQ * kin.invA * kin.inv_gamma2 *
-             ((kin.gamma2 + 1.) * (1. - hel.lam1 * hel.lam2) * kin.sin_theta2 - (1. + hel.lam1 * hel.lam2));
+             ((kin.gamma2 + 1.) * (1. - hel[0] * hel[1]) * kin.sin_theta2 - (1. + hel[0] * hel[1]));
 
-    if (hel.lam4 == 0)  // transverse-longitudinal
-      return -1i * constants::G_EM_SQ * M_SQRT2 * kin.invA * kin.inv_gamma * static_cast<double>(hel.lam1 - hel.lam2) *
-             (1. + hel.lam1 * hel.lam3 * kin.cos_theta) * kin.sin_theta;
+    if (hel[3] == 0)  // transverse-longitudinal
+      return -1i * constants::G_EM_SQ * M_SQRT2 * kin.invA * kin.inv_gamma * static_cast<double>(hel[0] - hel[1]) *
+             (1. + hel[0] * hel[2] * kin.cos_theta) * kin.sin_theta;
 
-    if (hel.lam3 == 0)  // longitudinal-transverse
-      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel[2] == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel[1], hel[0], hel[3], hel[2]});
 
     // transverse-transverse
     return -0.5i * constants::G_EM_SQ * kin.invA *
-           (2. * kin.beta * static_cast<double>(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
-            kin.inv_gamma2 * (1. + hel.lam3 * hel.lam4) *
-                (2. * hel.lam1 * hel.lam2 + (1. - hel.lam1 * hel.lam2) * kin.cos_theta2) +
-            (1. + hel.lam1 * hel.lam2 * hel.lam3 * hel.lam4) * (3. + hel.lam1 * hel.lam2) +
-            2. * (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
-            (1. - hel.lam1 * hel.lam2) * (1. - hel.lam3 * hel.lam4) * kin.cos_theta2);
+           (2. * kin.beta * static_cast<double>(hel[0] + hel[1]) * (hel[2] + hel[3]) -
+            kin.inv_gamma2 * (1. + hel[2] * hel[3]) * (2. * hel[0] * hel[1] + (1. - hel[0] * hel[1]) * kin.cos_theta2) +
+            (1. + hel[0] * hel[1] * hel[2] * hel[3]) * (3. + hel[0] * hel[1]) +
+            2. * (hel[0] - hel[1]) * (hel[2] - hel[3]) * kin.cos_theta +
+            (1. - hel[0] * hel[1]) * (1. - hel[2] * hel[3]) * kin.cos_theta2);
   }
 };
 REGISTER_HELICITY_AMPLITUDES("standardModel", StandardModel);
@@ -73,29 +72,29 @@ public:
     return desc;
   }
   bool hasAAWW() const override { return true; }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
-    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
+    if (hel[2] == 0 && hel[3] == 0)  // longitudinal-longitudinal
       return 3i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.invA *
-             kin.inv_gamma2 * kin.sin_theta2 * (1. + hel.lam1 * hel.lam2);
+             kin.inv_gamma2 * kin.sin_theta2 * (1. + hel[0] * hel[1]);
 
-    if (hel.lam4 == 0)  // transverse-longitudinal
+    if (hel[3] == 0)  // transverse-longitudinal
       return 1.5i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * constants::G_F * kin.invA * kin.inv_gamma *
              kin.sin_theta *
-             ((hel.lam1 - hel.lam2) * kin.beta2 - kin.beta * kin.cos_theta * (hel.lam1 + hel.lam2) -
-              2 * hel.lam3 * kin.cos_theta * (hel.lam1 * hel.lam2 + kin.inv_gamma2));
+             ((hel[0] - hel[1]) * kin.beta2 - kin.beta * kin.cos_theta * (hel[0] + hel[1]) -
+              2 * hel[2] * kin.cos_theta * (hel[0] * hel[1] + kin.inv_gamma2));
 
-    if (hel.lam3 == 0)  // longitudinal-transverse
-      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel[2] == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel[1], hel[0], hel[3], hel[2]});
 
     // transverse-transverse
     return 0.75i * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F *
-           (-kin.inv_gamma2 * kin.beta * (1. + kin.cos_theta2) * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) +
+           (-kin.inv_gamma2 * kin.beta * (1. + kin.cos_theta2) * (hel[0] + hel[1]) * (hel[2] + hel[3]) +
             2 * kin.sin_theta2 *
-                (3. + hel.lam3 * hel.lam4 + hel.lam1 * hel.lam2 * (1 - hel.lam3 * hel.lam4) -
-                 kin.beta * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4)) -
+                (3. + hel[2] * hel[3] + hel[0] * hel[1] * (1 - hel[2] * hel[3]) -
+                 kin.beta * (hel[0] + hel[1]) * (hel[2] + hel[3])) -
             2 * kin.inv_gamma2 *
-                (2 + (1 - hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4 -
-                 kin.cos_theta2 * (3 + hel.lam1 * hel.lam2 + 2 * hel.lam3 * hel.lam4)));
+                (2 + (1 - hel[0] * hel[1]) * hel[2] * hel[3] -
+                 kin.cos_theta2 * (3 + hel[0] * hel[1] + 2 * hel[2] * hel[3])));
   }
 };
 REGISTER_HELICITY_AMPLITUDES("W", WModel);
@@ -111,27 +110,27 @@ public:
     return desc;
   }
   bool hasAAWW() const override { return true; }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
-    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
+    if (hel[2] == 0 && hel[3] == 0)  // longitudinal-longitudinal
       return {-3 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.inv_gamma2 *
-                  kin.invA * kin.sin_theta2 * (hel.lam1 + hel.lam2),
+                  kin.invA * kin.sin_theta2 * (hel[0] + hel[1]),
               0.};
 
-    if (hel.lam4 == 0)  // transverse-longitudinal
+    if (hel[3] == 0)  // transverse-longitudinal
       return {1.5 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * constants::G_F * kin.inv_gamma * kin.invA *
                   kin.sin_theta *
-                  (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
-                   kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3)),
+                  (kin.beta * (hel[0] - hel[1]) * hel[2] +
+                   kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel[0] + hel[1]) * hel[2])),
               0.};
 
-    if (hel.lam3 == 0)  // longitudinal-transverse
-      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel[2] == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel[1], hel[0], hel[3], hel[2]});
 
     // transverse-transverse
     return {-1.5 * std::sqrt(constants::G_EM_SQ) * kin.shat * s1() * M_SQRT2 * constants::G_F * kin.invA *
-                (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
-                 kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
-                                   kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4))),
+                (2 * kin.sin_theta2 * (hel[0] + hel[1] - kin.beta * (hel[2] + hel[3])) +
+                 kin.inv_gamma2 * ((hel[0] + hel[1]) * (kin.cos_theta2 * (2 + hel[2] * hel[3]) - 1) -
+                                   kin.beta * (kin.cos_theta2 + hel[0] * hel[1]) * (hel[2] + hel[3]))),
             0.};
   }
 };
@@ -148,18 +147,18 @@ public:
     desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
   }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
     const double invB = 1. / (kin.shat - m_h_ * m_h_);
-    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+    if (hel[2] == 0 && hel[3] == 0)  // longitudinal-longitudinal
       return -0.25i * kin.shat2 * s1() * s1() * M_SQRT2 * constants::G_F * invB * (1. + kin.beta2) *
-             (1. + hel.lam1 * hel.lam2);
+             (1. + hel[0] * hel[1]);
 
-    if (hel.lam4 == 0 || hel.lam3 == 0)  // transverse-longitudinal or longitudinal-transverse
+    if (hel[3] == 0 || hel[2] == 0)  // transverse-longitudinal or longitudinal-transverse
       return {0., 0.};
 
     // transverse-transverse
     return -0.125i * kin.shat2 * s1() * s1() * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB *
-           (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
+           (1. + hel[0] * hel[1]) * (1. + hel[2] * hel[3]);
   }
 
 private:
@@ -176,8 +175,8 @@ struct PhiWbarModel : PhiWModel {
     desc.setDescription("phi-Wbar");
     return desc;
   }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
-    return 2i * static_cast<double>(hel.lam1) * PhiWModel::amplitude(kin, hel);
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
+    return 2i * static_cast<double>(hel[0]) * PhiWModel::amplitude(kin, hel);
   }
 };
 REGISTER_HELICITY_AMPLITUDES("PhiWbar", PhiWbarModel);
@@ -191,7 +190,7 @@ struct PhiBModel : PhiWModel {
     desc.setDescription("phi-B");
     return desc;
   }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
     return std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
@@ -206,8 +205,8 @@ struct PhiBbarModel : PhiWModel {
     desc.setDescription("phi-Bbar");
     return desc;
   }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
-    return 2i * static_cast<double>(hel.lam1) * std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
+    return 2i * static_cast<double>(hel[0]) * std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
 REGISTER_HELICITY_AMPLITUDES("PhiBbar", PhiBbarModel);
@@ -223,31 +222,30 @@ public:
     desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
   }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
     const auto invB = 1. / (kin.shat - m_h_ * m_h_);
-    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
+    if (hel[2] == 0 && hel[3] == 0)  // longitudinal-longitudinal
       return 2i * constants::G_EM_SQ * kin.invA * c1() / s1() *
-                 (1 - hel.lam1 * hel.lam2 - 2 * kin.cos_theta2 -
-                  kin.gamma2 * (1. + hel.lam1 * hel.lam2) * kin.sin_theta2) +
+                 (1 - hel[0] * hel[1] - 2 * kin.cos_theta2 - kin.gamma2 * (1. + hel[0] * hel[1]) * kin.sin_theta2) +
              0.5i * kin.shat2 * constants::G_F * M_SQRT2 * invB * s1() * c1() * (1. + kin.beta2) *
-                 (1. + hel.lam1 * hel.lam2);
+                 (1. + hel[0] * hel[1]);
 
-    if (hel.lam4 == 0)  // transverse-longitudinal
+    if (hel[3] == 0)  // transverse-longitudinal
       return 0.5i * constants::G_EM_SQ * kin.gamma * M_SQRT2 * kin.invA * c1() / s1() * kin.sin_theta *
-             ((hel.lam2 - hel.lam1) * (1. + kin.inv_gamma2) + (kin.beta * static_cast<double>(hel.lam1 + hel.lam2) +
-                                                               2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
-                                                                  kin.cos_theta);
+             ((hel[1] - hel[0]) * (1. + kin.inv_gamma2) +
+              (kin.beta * static_cast<double>(hel[0] + hel[1]) + 2 * hel[2] * (hel[0] * hel[1] - kin.inv_gamma2)) *
+                  kin.cos_theta);
 
-    if (hel.lam3 == 0)  // longitudinal-transverse
-      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel[2] == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel[1], hel[0], hel[3], hel[2]});
 
     // transverse-transverse
     return -0.5i * constants::G_EM_SQ * kin.invA * c1() / s1() *
-               (kin.beta * static_cast<double>(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
-                2 * (2 + (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
-                     ((hel.lam1 * hel.lam2 - 1) * kin.cos_theta2 + 1. + hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4)) +
-           0.25i * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * s1() * c1() *
-               (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
+               (kin.beta * static_cast<double>(hel[0] + hel[1]) * (hel[2] + hel[3]) * (1. + kin.cos_theta2) +
+                2 * (2 + (hel[0] - hel[1]) * (hel[2] - hel[3]) * kin.cos_theta +
+                     ((hel[0] * hel[1] - 1) * kin.cos_theta2 + 1. + hel[0] * hel[1]) * hel[2] * hel[3])) +
+           0.25i * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * s1() * c1() * (1. + hel[0] * hel[1]) *
+               (1. + hel[2] * hel[3]);
   }
 
 private:
@@ -268,30 +266,29 @@ public:
     desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
   }
-  std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
+  std::complex<double> amplitude(const Kinematics& kin, const HelicityState& hel) const override {
     const auto invB = 1. / (kin.shat - m_h_ * m_h_);
-    if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return {2. * constants::G_EM_SQ * c1() / s1() * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
+    if (hel[2] == 0 && hel[3] == 0)  // longitudinal-longitudinal
+      return {2. * constants::G_EM_SQ * c1() / s1() * kin.gamma2 * static_cast<double>(hel[0] + hel[1]) -
                   0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * invB * s1() * c1() * (1. + kin.beta2) *
-                      static_cast<double>(hel.lam1 + hel.lam2),
+                      static_cast<double>(hel[0] + hel[1]),
               0.};
 
-    if (hel.lam4 == 0)  // transverse-longitudinal
+    if (hel[3] == 0)  // transverse-longitudinal
       return {0.5 * constants::G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * c1() / s1() * kin.sin_theta *
-                  (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
-                   kin.cos_theta * (2. * kin.beta + kin.beta2 * static_cast<double>(hel.lam1 + hel.lam2) * hel.lam3)),
+                  (kin.beta * (hel[1] - hel[0]) * hel[2] -
+                   kin.cos_theta * (2. * kin.beta + kin.beta2 * static_cast<double>(hel[0] + hel[1]) * hel[2])),
               0.};
 
-    if (hel.lam3 == 0)  // longitudinal-transverse
-      return amplitude(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
+    if (hel[2] == 0)  // longitudinal-transverse
+      return amplitude(kin, {hel[1], hel[0], hel[3], hel[2]});
 
     // transverse-transverse
     return {kin.invA * constants::G_EM_SQ * c1() * c1() / s1() *
-                    (hel.lam3 * static_cast<double>(hel.lam1 + hel.lam2) +
-                     kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
-                    (hel.lam3 + hel.lam4) -
+                    (hel[2] * static_cast<double>(hel[0] + hel[1]) + kin.beta * (hel[0] * hel[1] + kin.cos_theta2)) *
+                    (hel[2] + hel[3]) -
                 0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * s1() * c1() * c1() *
-                    static_cast<double>(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4),
+                    static_cast<double>(hel[0] + hel[1]) * (1. + hel[2] * hel[3]),
             0.};
   }
 

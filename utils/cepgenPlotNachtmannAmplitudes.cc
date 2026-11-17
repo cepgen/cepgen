@@ -76,11 +76,15 @@ int main(int argc, char* argv[]) {
 
       auto p = [&kin, &ampl](short lam3, short lam4, short lam3p, short lam4p) -> std::complex<double> {
         std::complex<double> p{0., 0.};
-        for (const auto& lam1 : {-1, 1})
-          for (const auto& lam2 : {-1, 1}) {
-            CG_DEBUG("dsig_dcosth") << kin << "?" << ampl(kin, lam1, lam2, lam3, lam4) << "?"
-                                    << std::conj(ampl(kin, lam1, lam2, lam3p, lam4p));
-            p += ampl(kin, lam1, lam2, lam3, lam4) * std::conj(ampl(kin, lam1, lam2, lam3p, lam4p));
+        for (const auto& lam1 : std::vector<short>{-1, 1})
+          for (const auto& lam2 : std::vector<short>{-1, 1}) {
+            CG_DEBUG("dsig_dcosth") << kin << "?"
+                                    << ampl.amplitude(kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3, lam4})
+                                    << "?"
+                                    << std::conj(ampl.amplitude(
+                                           kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3p, lam4p}));
+            p += ampl.amplitude(kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3, lam4}) *
+                 std::conj(ampl.amplitude(kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3p, lam4p}));
           }
         return p;
       };

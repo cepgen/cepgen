@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_PolarisationState_h
-#define CepGen_Physics_PolarisationState_h
+#ifndef CepGen_HelicityAmplitudes_PolarisationState_h
+#define CepGen_HelicityAmplitudes_PolarisationState_h
 
 #include "CepGen/Core/SteeredObject.h"
 
@@ -31,7 +31,7 @@ namespace cepgen {
     enum class Mode { invalid = -1, full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
     friend std::ostream& operator<<(std::ostream&, const Mode&);
 
-    using Polarisation = std::vector<int>;                        ///< list of polarisation states
+    using Polarisation = std::vector<short>;                      ///< list of polarisation states
     using Polarisations = std::pair<Polarisation, Polarisation>;  ///< polarisation for a pair of particles
 
     const Mode& mode() const { return mode_; }                   ///< polarisation mode

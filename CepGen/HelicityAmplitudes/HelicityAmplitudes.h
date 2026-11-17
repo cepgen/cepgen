@@ -23,6 +23,7 @@
 
 #include <complex>
 
+#include "CepGen/HelicityAmplitudes/Kinematics.h"
 #include "CepGen/Modules/ModuleFactory.h"
 #include "CepGen/Modules/NamedModule.h"
 
@@ -36,67 +37,32 @@
   }                                                                                       \
   static_assert(true, "")
 
-namespace cepgen {
-  class ParametersList;
-}  // namespace cepgen
-
 namespace cepgen::amplitudes {
-  /// Helper container to handle all kinematics variables computation once
-  class Kinematics {
-  public:
-    explicit Kinematics(double mv2, double s_hat, double t_hat, double u_hat);
-    static Kinematics fromSCosTheta(double shat, double cos_theta, double mv2);
-
-    bool operator!=(const Kinematics&) const;
-    friend std::ostream& operator<<(std::ostream&, const Kinematics&);
-
-    // base variables
-    const double shat{0.}, that{0.}, uhat{0.};
-
-  private:
-    void setCosTheta(double cos_theta);
-    const double mv2_{0.};  /// Squared mass of each of the two produced bosons (in GeV^2)
-
-  public:
-    // all derived variables
-    const double shat2{0.};
-    const double beta2{0.}, beta{0.};
-    const double inv_gamma2{0.}, gamma2{0.}, gamma{0.}, inv_gamma{0.};
-    double cos_theta{0.}, cos_theta2{0.}, sin_theta2{0.}, sin_theta{0.};
-    double invA{0.};
-  };
-
-  /// Simple container for helicity components
-  struct HelicityStates {
-    short lam1;  ///< first incoming photon
-    short lam2;  ///< second incoming photon
-    short lam3;  ///< first outgoing boson
-    short lam4;  ///< second outgoing boson
-  };
-
   /// Amplitudes computational tool, as developed by Nachtmann et al.
   /// \cite Nachtmann:2005en
   class HelicityAmplitudes : public NamedModule<HelicityAmplitudes> {
   public:
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("generic helicity model");
+      desc.add("s1", 0.);
+      return desc;
+    }
 
     /// Compute the amplitude for a given kinematics and a given set of helicity components
-    std::complex<double> operator()(const Kinematics&, short lam1, short lam2, short lam3, short lam4) const;
-
+    virtual std::complex<double> amplitude(const Kinematics&, const HelicityState&) const = 0;
     virtual bool hasAAWW() const { return false; }
     virtual bool hasAAZZ() const { return false; }
 
   protected:
-    explicit HelicityAmplitudes(const ParametersList&);
+    explicit HelicityAmplitudes(const ParametersList& params) : NamedModule(params), s1_(steer<double>("s1")) {}
 
-    virtual std::complex<double> amplitude(const Kinematics&, const HelicityStates&) const = 0;
     double s1() const { return s1_; }
     double c1() const { return std::sqrt(1. - s1_ * s1_); }
 
   private:
     const double s1_;
   };
-
   /// A helicity-dependent amplitudes calculation algorithms factory
   DEFINE_FACTORY(HelicityAmplitudesFactory, HelicityAmplitudes, "Helicity-dependent amplitudes factory");
 }  // namespace cepgen::amplitudes

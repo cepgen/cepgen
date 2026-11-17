@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023-2025  Laurent Forthomme
+ *  Copyright (C) 2023-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,14 +17,19 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Physics/PolarisationState.h"
+#include "CepGen/HelicityAmplitudes/PolarisationState.h"
 
 using namespace cepgen;
+
+static std::vector<short> fromIntegerList(const std::vector<int>& list) {
+  return std::vector<short>(list.begin(), list.end());
+}
 
 PolarisationState::PolarisationState(const ParametersList& params)
     : SteeredObject(params),
       mode_(params_.has<int>("mode") ? steerAs<int, Mode>("mode") : Mode::invalid),
-      pol_(mode_ == Mode::invalid ? std::make_pair(steer<std::vector<int> >("W1"), steer<std::vector<int> >("W2"))
+      pol_(mode_ == Mode::invalid ? std::make_pair(fromIntegerList(steer<std::vector<int> >("W1")),
+                                                   fromIntegerList(steer<std::vector<int> >("W2")))
                                   : computePolarisations(mode_)) {}
 
 PolarisationState::Polarisations PolarisationState::computePolarisations(const Mode& mode) {
