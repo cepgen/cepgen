@@ -23,7 +23,18 @@
 
 #include <complex>
 
+#include "CepGen/Modules/ModuleFactory.h"
 #include "CepGen/Modules/NamedModule.h"
+
+/// Add an amplitudes computation algorithm definition to the factory
+#define REGISTER_NACHTMANN_AMPLITUDES(name, obj)                                           \
+  namespace cepgen::amplitudes {                                                           \
+    struct BUILDER_NAME(obj) {                                                             \
+      BUILDER_NAME(obj)() { NachtmannAmplitudesFactory::get().registerModule<obj>(name); } \
+    };                                                                                     \
+    static const BUILDER_NAME(obj) gNachAmp##obj;                                          \
+  }                                                                                        \
+  static_assert(true, "")
 
 namespace cepgen {
   class ParametersList;
@@ -67,8 +78,6 @@ namespace cepgen::amplitudes {
   /// \cite Nachtmann:2005en
   class NachtmannAmplitudes : public NamedModule<NachtmannAmplitudes> {
   public:
-    static std::unique_ptr<NachtmannAmplitudes> build(const ParametersList&);
-
     static ParametersDescription description();
 
     /// Compute the amplitude for a given kinematics and a given set of helicity components
@@ -87,6 +96,9 @@ namespace cepgen::amplitudes {
   private:
     const double s1_;
   };
+
+  /// An amplitudes calculation algorithms factory
+  DEFINE_FACTORY(NachtmannAmplitudesFactory, NachtmannAmplitudes, "Nachtmann amplitudes factory");
 }  // namespace cepgen::amplitudes
 
 #endif

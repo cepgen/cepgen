@@ -50,7 +50,7 @@ public:
                        << "W2=" << polarisation_.polarisations().second << ".";
     if (method_ == 1) {  // build the amplitudes model once, so that invalid steering fails at initialisation
       const auto& model_params = steer<ParametersList>("model");
-      amplitudes_ = amplitudes::NachtmannAmplitudes::build(model_params);
+      amplitudes_ = amplitudes::NachtmannAmplitudesFactory::get().build(model_params);
       if (!amplitudes_->hasAAWW())
         throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
                                  << "Specified model: "s << amplitudes_->name()

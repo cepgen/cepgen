@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
   for (const auto& mode : std::vector{"standardModel"s}) {
     CG_LOG << "Computing " << mode << ".";
     // then fill the plot
-    auto ampl = cepgen::amplitudes::NachtmannAmplitudes::build(cepgen::ParametersList{}.setName(mode));
+    auto ampl = cepgen::amplitudes::NachtmannAmplitudesFactory::get().build(cepgen::ParametersList{}.setName(mode));
     if (mode == "standardModel") {
       cepgen::utils::Graph1D gr_sm_cth_400gev("sm_cth_400gev", "400 GeV;cos#theta;d#sigma/dcos#theta (pb)"),
           gr_sm_cth_2400gev("sm_cth_2400gev", "2400 GeV;cos#theta;d#sigma/dcos#theta (pb)");

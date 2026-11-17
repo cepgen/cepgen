@@ -74,7 +74,11 @@ std::complex<double> NachtmannAmplitudes::operator()(
 
 struct StandardModel : NachtmannAmplitudes {
   explicit StandardModel(const ParametersList& params) : NachtmannAmplitudes(params) {}
-  static std::string description() { return "Standard model"; }
+  static ParametersDescription description() {
+    auto desc = NachtmannAmplitudes::description();
+    desc.setDescription("Standard model");
+    return desc;
+  }
   bool hasAAWW() const override { return true; }
   std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
@@ -98,6 +102,7 @@ struct StandardModel : NachtmannAmplitudes {
             (1. - hel.lam1 * hel.lam2) * (1. - hel.lam3 * hel.lam4) * kin.cos_theta2);
   }
 };
+REGISTER_NACHTMANN_AMPLITUDES("standardModel", StandardModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -135,6 +140,7 @@ public:
                  kin.cos_theta2 * (3 + hel.lam1 * hel.lam2 + 2 * hel.lam3 * hel.lam4)));
   }
 };
+REGISTER_NACHTMANN_AMPLITUDES("W", WModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -171,6 +177,7 @@ public:
             0.};
   }
 };
+REGISTER_NACHTMANN_AMPLITUDES("Wbar", WbarModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -200,6 +207,7 @@ public:
 private:
   const double m_h_;
 };
+REGISTER_NACHTMANN_AMPLITUDES("PhiW", PhiWModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -214,6 +222,7 @@ struct PhiWbarModel : PhiWModel {
     return 2i * static_cast<double>(hel.lam1) * PhiWModel::amplitude(kin, hel);
   }
 };
+REGISTER_NACHTMANN_AMPLITUDES("PhiWbar", PhiWbarModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -228,6 +237,7 @@ struct PhiBModel : PhiWModel {
     return std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
+REGISTER_NACHTMANN_AMPLITUDES("PhiB", PhiBModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -242,6 +252,7 @@ struct PhiBbarModel : PhiWModel {
     return 2i * static_cast<double>(hel.lam1) * std::pow(c1() / s1(), 2) * PhiWModel::amplitude(kin, hel);
   }
 };
+REGISTER_NACHTMANN_AMPLITUDES("PhiBbar", PhiBbarModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -284,6 +295,7 @@ public:
 private:
   const double m_h_;
 };
+REGISTER_NACHTMANN_AMPLITUDES("WB", WBModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -328,6 +340,7 @@ public:
 private:
   const double m_h_;
 };
+REGISTER_NACHTMANN_AMPLITUDES("WbarB", WbarBModel);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -339,29 +352,6 @@ ParametersDescription NachtmannAmplitudes::description() {
   desc.setDescription("generic helicity model");
   desc.add("s1", 0.);
   return desc;
-}
-
-std::unique_ptr<NachtmannAmplitudes> NachtmannAmplitudes::build(const ParametersList& params) {
-  if (const auto& name = params.name(); name == "standardModel")
-    return std::make_unique<StandardModel>(params);
-  else if (name == "W")
-    return std::make_unique<WModel>(params);
-  else if (name == "Wbar")
-    return std::make_unique<WbarModel>(params);
-  else if (name == "PhiW")
-    return std::make_unique<PhiWModel>(params);
-  else if (name == "PhiWbar")
-    return std::make_unique<PhiWbarModel>(params);
-  else if (name == "PhiB")
-    return std::make_unique<PhiBModel>(params);
-  else if (name == "PhiBbar")
-    return std::make_unique<PhiBbarModel>(params);
-  else if (name == "WB")
-    return std::make_unique<WBModel>(params);
-  else if (name == "WbarB")
-    return std::make_unique<WbarBModel>(params);
-  else
-    throw CG_FATAL("NachtmannAmplitudes:build") << "Failed to build amplitudes model with name '" << name << "'.";
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
