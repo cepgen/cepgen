@@ -218,7 +218,7 @@ struct PhiWbarModel : PhiWModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct PhiBModel : PhiWModel {
-  using PhiWModel::PhiWModel;
+  explicit PhiBModel(const ParametersList& params) : PhiWModel(params) {}
   static ParametersDescription description() {
     auto desc = PhiWModel::description();
     desc.setDescription("phi-B");
@@ -232,7 +232,7 @@ struct PhiBModel : PhiWModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct PhiBbarModel : PhiWModel {
-  using PhiWModel::PhiWModel;
+  explicit PhiBbarModel(const ParametersList& params) : PhiWModel(params) {}
   static ParametersDescription description() {
     auto desc = PhiWModel::description();
     desc.setDescription("phi-Bbar");
@@ -289,14 +289,16 @@ private:
 
 class WbarBModel : public NachtmannAmplitudes {
 public:
-  explicit WbarBModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {}
+  explicit WbarBModel(const ParametersList& params) : NachtmannAmplitudes(params), m_h_(steer<double>("mH")) {
+    CG_WARNING("NachtmannAmplitudes") << "Mode Wbar-B is not yet properly handled!";
+  }
   static ParametersDescription description() {
     auto desc = NachtmannAmplitudes::description();
     desc.setDescription("Wbar-B");
+    desc.add("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
     return desc;
   }
   std::complex<double> amplitude(const Kinematics& kin, const HelicityStates& hel) const override {
-    CG_WARNING("NachtmannAmplitudes") << "Mode " << description() << " is not yet properly handled!";
     const auto invB = 1. / (kin.shat - m_h_ * m_h_);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
       return {2. * constants::G_EM_SQ * c1() / s1() * kin.gamma2 * static_cast<double>(hel.lam1 + hel.lam2) -
