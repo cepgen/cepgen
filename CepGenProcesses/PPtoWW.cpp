@@ -50,13 +50,11 @@ public:
                        << "W2=" << polarisation_.polarisations().second << ".";
     if (method_ == 1) {  // build the amplitudes model once, so that invalid steering fails at initialisation
       const auto& model_params = steer<ParametersList>("model");
-      amplitudes_ = amplitudes::NachtmannAmplitudesFactory::get().build(model_params);
-      if (!amplitudes_->hasAAWW())
-        throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
-                                 << "Specified model: "s << amplitudes_->name()
-                                 << " does not have a registered AAWW vertex in its specifications.";
-      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name() << ") initialised. "
-                        << "Parameters: " << model_params << ".";
+      if (amplitudes_ = amplitudes::NachtmannAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAWW())
+        throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯ (AAWW). Model '" << amplitudes_->name()
+                                 << "' does not have a registered AAWW vertex in its specifications.";
+      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_->name()
+                        << ") initialised. Parameters: " << model_params << ".";
     }
   }
 
@@ -70,8 +68,8 @@ public:
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
         .allow(1, "off-shell by Nachtmann et al.");
+    desc.add("model", amplitudes::NachtmannAmplitudesFactory::get().describeParameters("standardModel"));
     desc.add("polarisationStates"s, PolarisationState::description());
-    desc.add("model", ParametersDescription{}.setName("standardModel"));
     return desc;
   }
 
