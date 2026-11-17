@@ -14,6 +14,7 @@ class ProtonFlux:
     PhotonElasticBudnev = Module('BudnevElastic')
     PhotonInelasticBudnev = Module('BudnevInelastic')
     GluonKMR = Module('KMR')
+    NeoPDF = Module('NeoPDF', set = 'PB-NLO+QED-HERAI+II-set1')
 
 
 class HeavyIonFlux:
