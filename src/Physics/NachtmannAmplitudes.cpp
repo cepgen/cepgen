@@ -30,13 +30,13 @@ using namespace std::complex_literals;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Kinematics::Kinematics(double mw2, double s_hat, double t_hat, double u_hat)
+Kinematics::Kinematics(double mv2, double s_hat, double t_hat, double u_hat)
     : shat(s_hat),
       that(t_hat),
       uhat(u_hat),
-      mw2_(mw2),
+      mv2_(mv2),
       shat2(s_hat * s_hat),
-      beta2(1. - 4. * mw2_ / s_hat),
+      beta2(1. - 4. * mv2_ / s_hat),
       beta(sqrt(beta2)),
       inv_gamma2(1. - beta2),
       gamma2(1. / inv_gamma2),
@@ -45,8 +45,8 @@ Kinematics::Kinematics(double mw2, double s_hat, double t_hat, double u_hat)
   setCosTheta((t_hat - u_hat) / s_hat / beta);
 }
 
-Kinematics Kinematics::fromSCosTheta(double shat, double cos_theta, double mw2) {
-  Kinematics kin(mw2, shat, 0., 0.);
+Kinematics Kinematics::fromSCosTheta(double shat, double cos_theta, double mv2) {
+  Kinematics kin(mv2, shat, 0., 0.);
   kin.setCosTheta(cos_theta);
   return kin;
 }
@@ -67,7 +67,7 @@ bool Kinematics::operator!=(const Kinematics& oth) const {
 
 namespace cepgen::amplitudes {
   std::ostream& operator<<(std::ostream& os, const Kinematics& kin) {
-    return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
+    return os << "Kin{mV2=" << kin.mv2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
               << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta
               << "->1/A=" << kin.invA << "}";
   }

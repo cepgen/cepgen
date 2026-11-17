@@ -44,18 +44,18 @@ namespace cepgen::amplitudes {
   /// Helper container to handle all kinematics variables computation once
   class Kinematics {
   public:
-    explicit Kinematics(double mw2, double s_hat, double t_hat, double u_hat);
+    explicit Kinematics(double mv2, double s_hat, double t_hat, double u_hat);
+    static Kinematics fromSCosTheta(double shat, double cos_theta, double mv2);
+
     bool operator!=(const Kinematics&) const;
     friend std::ostream& operator<<(std::ostream&, const Kinematics&);
-    static Kinematics fromSCosTheta(double shat, double cos_theta, double mw2);
 
     // base variables
     const double shat{0.}, that{0.}, uhat{0.};
 
   private:
     void setCosTheta(double cos_theta);
-    /// W squared mass, in GeV^2
-    const double mw2_{0.};
+    const double mv2_{0.};  /// Squared mass of each of the two produced bosons (in GeV^2)
 
   public:
     // all derived variables
@@ -70,8 +70,8 @@ namespace cepgen::amplitudes {
   struct HelicityStates {
     short lam1;  ///< first incoming photon
     short lam2;  ///< second incoming photon
-    short lam3;  ///< first outgoing W
-    short lam4;  ///< second outgoing W
+    short lam3;  ///< first outgoing boson
+    short lam4;  ///< second outgoing boson
   };
 
   /// Amplitudes computational tool, as developed by Nachtmann et al.
