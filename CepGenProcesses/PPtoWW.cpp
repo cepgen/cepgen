@@ -18,15 +18,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
+#include <complex>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
+#include "CepGen/HelicityAmplitudes/PolarisationState.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PolarisationState.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
@@ -43,26 +43,22 @@ public:
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),
-        amplitudes_(params_),
         polarisation_(polarisationParameters(params_)) {
     CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
                        << "polarisation states: "
                        << "W1=" << polarisation_.polarisations().first << ", "
                        << "W2=" << polarisation_.polarisations().second << ".";
-
-    if (method_ == 1) {
-      CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << amplitudes_.mode() << ") initialised.";
-      if (amplitudes_.mode() != NachtmannAmplitudes::Mode::SM) {
-        if (amplitudes_.mode() != NachtmannAmplitudes::Mode::W && amplitudes_.mode() != NachtmannAmplitudes::Mode::Wbar)
-          throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
-                                   << "Only supported extensions are W and Wbar. Specified model: "s
-                                   << amplitudes_.mode() << ".";
-        CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
-      }
+    if (method_ == 1) {  // build the amplitudes model once, so that invalid steering fails at initialisation
+      const auto& model_params = steer<ParametersList>("model");
+      if (amplitudes_ = amplitudes::HelicityAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAWW())
+        throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯ (AAWW). Model '" << amplitudes_->name()
+                                 << "' does not have a registered AAWW vertex in its specifications.";
+      CG_INFO("PPtoWW") << "Helicity amplitudes (model: " << amplitudes_->name()
+                        << ") initialised. Parameters: " << model_params << ".";
     }
   }
 
-  proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(*this); }
+  proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(parameters()); }
 
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();
@@ -72,8 +68,8 @@ public:
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
         .allow(1, "off-shell by Nachtmann et al.");
+    desc.add("model", amplitudes::HelicityAmplitudesFactory::get().describeParameters("standardModel"));
     desc.add("polarisationStates"s, PolarisationState::description());
-    desc += NachtmannAmplitudes::description();
     return desc;
   }
 
@@ -115,7 +111,7 @@ private:
     return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2) / s_hat / s_hat;
   }
   double offShellME() const {
-    const auto kin = NachtmannAmplitudes::Kinematics(mW2_, shat(), that(), uhat());
+    const auto kin = amplitudes::Kinematics(mW2_, shat(), that(), uhat());
     const double p1 = q1().px() * q2().px() + q1().py() * q2().py(), p2 = q1().px() * q2().py() - q1().py() * q2().px(),
                  p3 = q1().px() * q2().px() - q1().py() * q2().py(), p4 = q1().px() * q2().py() + q1().py() * q2().px();
 
@@ -124,8 +120,10 @@ private:
     for (const auto& lam3 : polarisation_.polarisations().first)
       for (const auto& lam4 : polarisation_.polarisations().second) {
         // compute all photon helicity amplitudes
-        const auto pp = amplitudes_(kin, +1, +1, lam3, lam4), mm = amplitudes_(kin, -1, -1, lam3, lam4),
-                   pm = amplitudes_(kin, +1, -1, lam3, lam4), mp = amplitudes_(kin, -1, +1, lam3, lam4);
+        const auto pp = amplitudes_->amplitude(kin, {+1, +1, lam3, lam4}),
+                   mm = amplitudes_->amplitude(kin, {-1, -1, lam3, lam4}),
+                   pm = amplitudes_->amplitude(kin, {+1, -1, lam3, lam4}),
+                   mp = amplitudes_->amplitude(kin, {-1, +1, lam3, lam4});
         // add ME for this W helicity to total ME
         hel_mat_elem += std::norm(p1 * (pp + mm) - 1i * p2 * (pp - mm) - p3 * (pm + mp) - 1i * p4 * (pm - mp));
       }
@@ -134,7 +132,8 @@ private:
 
   const double mW_, mW2_;
   const int method_;
-  const NachtmannAmplitudes amplitudes_;
   const PolarisationState polarisation_;
+
+  std::unique_ptr<amplitudes::HelicityAmplitudes> amplitudes_;
 };
 REGISTER_PROCESS("pptoww", PPtoWW);

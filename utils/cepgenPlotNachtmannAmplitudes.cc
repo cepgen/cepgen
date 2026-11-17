@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,37 +18,47 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Generator.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Integration/FunctionIntegrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
 
 using namespace std::complex_literals;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
+  cepgen::initialise();
+
   std::string integr_name, plotter;
   bool logy, draw_grid;
   int num_points;
+  std::vector<std::string> models;
+  std::vector<double> shats;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("integrator,i", "type of integrator used", &integr_name, "Vegas")
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("num-points,n", "number of points to compute", &num_points, 20)
+      .addOptionalArgument("models,m",
+                           "amplitudes models to plot",
+                           &models,
+                           cepgen::amplitudes::HelicityAmplitudesFactory::get().modules())
+      .addOptionalArgument("shat,s", "two-photon c.m.s.", &shats, std::vector{400., 2400.})
       .parse();
 
-  cepgen::initialise();
   auto integrator = cepgen::IntegratorFactory::get().build(integr_name);
 
   const std::vector<short> lambdas = {-1, 0, 1};
   auto dsig_dcosth = [&integrator, &lambdas](
-                         const cepgen::NachtmannAmplitudes& ampl, double shat, double costh) -> double {
-    const auto kin = cepgen::NachtmannAmplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
+                         const cepgen::amplitudes::HelicityAmplitudes& ampl, double shat, double costh) -> double {
+    const auto kin = cepgen::amplitudes::Kinematics::fromSCosTheta(shat, costh, 80.379);
     auto dsig = [&ampl, &kin, &lambdas](double theta1, double phi1, double theta2, double phi2) -> double {
       auto l = [](short lam, double theta, double phi) -> std::complex<double> {
         auto dp = [](double theta) -> double { return 0.5 * (1. + cos(theta)) * M_SQRT2; };
@@ -66,11 +76,15 @@ int main(int argc, char* argv[]) {
 
       auto p = [&kin, &ampl](short lam3, short lam4, short lam3p, short lam4p) -> std::complex<double> {
         std::complex<double> p{0., 0.};
-        for (const auto& lam1 : {-1, 1})
-          for (const auto& lam2 : {-1, 1}) {
-            CG_DEBUG("dsig_dcosth") << kin << "?" << ampl(kin, lam1, lam2, lam3, lam4) << "?"
-                                    << std::conj(ampl(kin, lam1, lam2, lam3p, lam4p));
-            p += ampl(kin, lam1, lam2, lam3, lam4) * std::conj(ampl(kin, lam1, lam2, lam3p, lam4p));
+        for (const auto& lam1 : std::vector<short>{-1, 1})
+          for (const auto& lam2 : std::vector<short>{-1, 1}) {
+            CG_DEBUG("dsig_dcosth") << kin << "?"
+                                    << ampl.amplitude(kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3, lam4})
+                                    << "?"
+                                    << std::conj(ampl.amplitude(
+                                           kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3p, lam4p}));
+            p += ampl.amplitude(kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3, lam4}) *
+                 std::conj(ampl.amplitude(kin, cepgen::amplitudes::HelicityState{lam1, lam2, lam3p, lam4p}));
           }
         return p;
       };
@@ -105,36 +119,38 @@ int main(int argc, char* argv[]) {
     return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * integrator->integrate(integrand);
   };
 
-  for (auto i = static_cast<int>(cepgen::NachtmannAmplitudes::Mode::SM);
-       i <= static_cast<int>(cepgen::NachtmannAmplitudes::Mode::WbarB);
-       ++i) {
-    // first get mode name
-    if (i > 0)
-      break;
-    std::ostringstream os;
-    os << static_cast<cepgen::NachtmannAmplitudes::Mode>(i);
-    const auto name = os.str();
-    CG_LOG << "Computing " << name << ".";
-    // then fill the plot
-    auto ampl = cepgen::NachtmannAmplitudes(cepgen::ParametersList().set<int>("mode", i));
-    if (ampl.mode() == cepgen::NachtmannAmplitudes::Mode::SM) {
-      cepgen::utils::Graph1D gr_sm_cth_400gev("sm_cth_400gev", "400 GeV;cos#theta;d#sigma/dcos#theta (pb)"),
-          gr_sm_cth_2400gev("sm_cth_2400gev", "2400 GeV;cos#theta;d#sigma/dcos#theta (pb)");
+  std::vector<std::vector<cepgen::utils::Graph1D> > all_graphs;
+  for (const auto& shat : shats) {
+    auto& graphs_per_shat = all_graphs.emplace_back();
+    for (const auto& mode : models) {
+      // then fill the plot
+      auto ampl = cepgen::amplitudes::HelicityAmplitudesFactory::get().build(mode);
+      CG_LOG << "Computing " << ampl->parameters() << ".";
+      auto& gr_cth = graphs_per_shat.emplace_back("sm_cth_" + std::to_string(shat), ampl->description().description());
+      gr_cth.xAxis().setLabel("cos#theta");
+      gr_cth.yAxis().setLabel("d#sigma/dcos#theta (pb)");
       for (const auto x : cepgen::Limits{-1., 1.}.generate(num_points)) {
         CG_LOG << x;
-        gr_sm_cth_400gev.addPoint(x, dsig_dcosth(ampl, 400., x));
-        gr_sm_cth_2400gev.addPoint(x, dsig_dcosth(ampl, 2400., x));
+        gr_cth.addPoint(x, dsig_dcosth(*ampl, shat, x));
       }
-      if (!plotter.empty()) {
-        auto plt = cepgen::DrawerFactory::get().build(plotter);
-        cepgen::utils::Drawer::Mode dm;
-        if (logy)
-          dm |= cepgen::utils::Drawer::Mode::logy;
-        if (draw_grid)
-          dm |= cepgen::utils::Drawer::Mode::grid;
-        (void)plt->draw(gr_sm_cth_400gev, dm);
-        (void)plt->draw(gr_sm_cth_2400gev, dm);
-      }
+    }
+  }
+  if (!plotter.empty()) {
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
+
+    size_t i = 0;
+    for (const auto& graphs_per_shat : all_graphs) {
+      cepgen::utils::DrawableColl dr;
+      for (const auto& gr : graphs_per_shat)
+        dr.push_back(&gr);
+      (void)plt->draw(
+          dr, cepgen::utils::format("cth_%ggev", shats.at(i)), cepgen::utils::format("%g GeV", shats.at(i)), dm);
+      ++i;
     }
   }
 
