@@ -37,6 +37,7 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Modules/SurvivalFactorFactory.h"
 
 using namespace cepgen;
 using namespace cepgen::utils;
@@ -75,6 +76,7 @@ DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : N
   add_category("collflux"s, "Collinear parton flux modelling", "", cepgen::CollinearFluxFactory::get());
   add_category("ktflux"s, "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
   add_category("centralps"s, "Central system phase space mappers", "", cepgen::CentralPhaseSpaceFactory::get());
+  add_category("surv"s, "Survival factor modelling", "", cepgen::SurvivalFactorFactory::get());
   add_category("alphaem"s, "Electromagnetic coupling evolution", "", cepgen::AlphaEMFactory::get());
   add_category("alphas"s, "Strong coupling evolution", "", cepgen::AlphaSFactory::get());
   add_category("integr"s, "Integrator algorithms", "", cepgen::IntegratorFactory::get());
