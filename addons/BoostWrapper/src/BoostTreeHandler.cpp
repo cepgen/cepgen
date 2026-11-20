@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2025  Laurent Forthomme
+ *  Copyright (C) 2020-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public:
         runParameters()->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
       if (tree_.count(EVT_MOD_SEQ_NAME)) {
         evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
-        for (const auto& name : evt_mod_.keys()) {
+        for (const auto& name : evt_mod_.keysOf<ParametersList>()) {
           const auto& mod = evt_mod_.get<ParametersList>(name);
           if (!mod.empty())
             runParameters()->addModifier(EventModifierFactory::get().build(name, mod));
@@ -86,7 +86,7 @@ public:
       }
       if (tree_.count(OUTPUT_NAME)) {
         evt_out_ = bc::unpack(tree_.get_child(OUTPUT_NAME));
-        for (const auto& name : evt_out_.keys()) {
+        for (const auto& name : evt_out_.keysOf<ParametersList>()) {
           const auto& mod = evt_out_.get<ParametersList>(name);
           if (!mod.empty())
             runParameters()->addEventExporter(EventExporterFactory::get().build(name, mod));
