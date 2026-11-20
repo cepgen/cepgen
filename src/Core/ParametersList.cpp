@@ -27,11 +27,45 @@
 using namespace cepgen;
 using namespace std::string_literals;
 
+namespace {
+  /// Human-readable name of a registered parameter type
+  template <typename T>
+  std::string typeName() {
+    return utils::demangle(typeid(T).name());
+  }
+#define __TYPE_ENUM(type, map, name) \
+  template <>                        \
+  std::string typeName<type>() {     \
+    return name;                     \
+  }
+  REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
+
+  /// Lossless conversion of a floating point value into an integer type
+  template <typename I>
+  bool integralFrom(double value, I& out) {
+    if (!std::isfinite(value) || std::trunc(value) != value)
+      return false;
+    // upper bound check on the (exactly representable) power of two above the maximum
+    if (value < static_cast<double>(std::numeric_limits<I>::min()) ||
+        value >= 2. * static_cast<double>(std::numeric_limits<I>::max() / 2 + 1))
+      return false;
+    out = static_cast<I>(value);
+    return true;
+  }
+}  // namespace
+
 #define IMPL_TYPE_GET(type, values_collection)                                                                     \
   template <>                                                                                                      \
   type ParametersList::get<type>(const std::string& key, const type& default_value) const {                        \
-    if (values_collection.count(key) > 0)                                                                          \
-      return values_collection.at(key);                                                                            \
+    if (const auto it = values_collection.find(key); it != values_collection.end())                                \
+      return it->second;                                                                                           \
+    if (type converted; convert<type>(key, converted))                                                             \
+      return converted;                                                                                            \
+    if (const auto stored_type = typeOf(key); !stored_type.empty())                                                \
+      throw CG_ERROR("ParametersList:get")                                                                         \
+          << "Parameter '" << key << "' is stored as '" << stored_type << "' (value: " << getString(key)           \
+          << "), and cannot be converted into a '" << typeName<type>() << "' without loss.";                       \
     CG_DEBUG("ParametersList") << "Found no '" << utils::demangle(typeid(type).name()) << "' parameter with key '" \
                                << key << "'. Returning default value '" << default_value << "'.";                  \
     return default_value;                                                                                          \
@@ -45,12 +79,18 @@ using namespace std::string_literals;
   }                                                                                                                    \
   template <>                                                                                                          \
   ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                               \
+    eraseOtherTypes<type>(key);                                                                                        \
     values_collection[key] = static_cast<type>(value);                                                                 \
     return *this;                                                                                                      \
   }                                                                                                                    \
   template <>                                                                                                          \
   type& ParametersList::operator[]<type>(const std::string& key) {                                                     \
-    return values_collection[key];                                                                                     \
+    if (const auto it = values_collection.find(key); it != values_collection.end())                                    \
+      return it->second;                                                                                               \
+    type converted{}; /* keep any value stored with another, convertible type */                                       \
+    convert<type>(key, converted);                                                                                     \
+    eraseOtherTypes<type>(key);                                                                                        \
+    return values_collection[key] = converted;                                                                         \
   }                                                                                                                    \
   template <>                                                                                                          \
   std::vector<std::string> ParametersList::keysOf<type>() const {                                                      \
@@ -87,23 +127,19 @@ ParametersList ParametersList::diff(const ParametersList& oth) const {
   ParametersList &mine = diff.operator[]<ParametersList>("mine"), &theirs = diff.operator[]<ParametersList>("theirs");
   if (*this == oth)
     return diff;
-  for (const auto& key : keys()) {
-    if (has<ParametersList>(key)) {
-      const auto& my_plist = get<ParametersList>(key);
-      if (!has<ParametersList>(key))
-        mine.set(key, my_plist);
-      else if (const auto their_plist = oth.get<ParametersList>(key); my_plist != their_plist) {
-        mine.set(key, my_plist);
-        theirs.set(key, their_plist);
-      }
-      continue;
-    }
-#define __TYPE_ENUM(type, map, name)                                                                     \
-  if (const auto my_param = get<type>(key), their_param = oth.get<type>(key); my_param != their_param) { \
-    mine.set(key, my_param);                                                                             \
-    if (!oth.empty())                                                                                    \
-      theirs.set(key, their_param);                                                                      \
-    continue;                                                                                            \
+  auto all_keys = keys();
+  for (const auto& key : oth.keys())
+    if (std::find(all_keys.begin(), all_keys.end(), key) == all_keys.end())
+      all_keys.emplace_back(key);
+  for (const auto& key : all_keys) {  // only compare values stored with the same type (no conversion involved)
+#define __TYPE_ENUM(type, map, name)                                                               \
+  if (const auto my_it = map.find(key), their_it = oth.map.find(key);                              \
+      (my_it != map.end() || their_it != oth.map.end()) &&                                         \
+      (my_it == map.end() || their_it == oth.map.end() || !(my_it->second == their_it->second))) { \
+    if (my_it != map.end())                                                                        \
+      mine.set(key, my_it->second);                                                                \
+    if (their_it != oth.map.end())                                                                 \
+      theirs.set(key, their_it->second);                                                           \
   }
     REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
@@ -125,17 +161,23 @@ ParametersList& ParametersList::operator+=(const ParametersList& other) {
     if (has<ParametersList>(other_key)) {
       // do not remove a duplicate parameters collection if they are not strictly identical ;
       // will concatenate its values with the other object's
-      if (get<ParametersList>(other_key) == other_modified.get<ParametersList>(other_key) &&
-          other_modified.erase(other_key) > 0)
+      if (!other_modified.has<ParametersList>(other_key)) {  // replaced by a value of another type
+        if (erase(other_key) > 0)
+          keys_erased.emplace_back(other_key);
+      } else if (get<ParametersList>(other_key) == other_modified.get<ParametersList>(other_key) &&
+                 other_modified.erase(other_key) > 0)
         keys_erased.emplace_back(other_key);
     } else if (other_modified.has<double>(other_key) &&
                (utils::endsWith(other_key, "max") || utils::endsWith(other_key, "min"))) {
       // hacky path to drop '*min'/'*max' keys if '*' limits were found
-      if (auto& limits = operator[]<Limits>(other_key.substr(0, other_key.size() - 3));
-          utils::endsWith(other_key, "max"))
+      const auto limits_key = other_key.substr(0, other_key.size() - 3);
+      Limits limits;
+      cast(limits_key, limits);  // keep any limits already set with another type
+      if (utils::endsWith(other_key, "max"))
         limits.max() = other_modified.get<double>(other_key);
       else if (utils::endsWith(other_key, "min"))
         limits.min() = other_modified.get<double>(other_key);
+      set(limits_key, limits);
       if (erase(other_key) > 0 && other_modified.erase(other_key) > 0)
         keys_erased.emplace_back(other_key);
     } else if (erase(other_key) > 0)  // any other duplicate key is just replaced
@@ -247,6 +289,24 @@ size_t ParametersList::erase(const std::string& key) {
   REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
   return num_keys_erased;
+}
+
+template <typename T>
+void ParametersList::eraseOtherTypes(const std::string& key) {
+#define __TYPE_ENUM(type, map, name)      \
+  if constexpr (!std::is_same_v<T, type>) \
+    map.erase(key);
+  REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
+}
+
+std::string ParametersList::typeOf(const std::string& key) const {
+#define __TYPE_ENUM(type, map, name) \
+  if (map.count(key) > 0)            \
+    return name;
+  REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
+  return "";
 }
 
 bool ParametersList::empty() const { return keys(true).empty(); }
@@ -437,23 +497,24 @@ IMPL_TYPE_SET(Limits, lim_values_);
 
 template <>
 Limits ParametersList::get<Limits>(const std::string& key, const Limits& default_value) const {
-  // first try to find Limits object in collections
-  auto out = default_value;
-  if (const auto val =
-          std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-      val != lim_values_.end())
-    out = val->second;
-  else {  // still trying to build it from (min/max) attributes
-    fill<double>(key + "min", out.min());
-    fill<double>(key + "max", out.max());
-  }
+  if (const auto it = lim_values_.find(key); it != lim_values_.end())  // first try to find Limits object in collections
+    return Limits(it->second).validate();
+  if (Limits converted; convert<Limits>(key, converted))  // then try to build it from a convertible type
+    return converted.validate();
+  if (const auto stored_type = typeOf(key); !stored_type.empty())
+    throw CG_ERROR("ParametersList:get") << "Parameter '" << key << "' is stored as '" << stored_type
+                                         << "' (value: " << getString(key) << "), and cannot be converted into a '"
+                                         << typeName<Limits>() << "' without loss.";
+  auto out = default_value;  // still trying to build it from (min/max) attributes
+  fill<double>(key + "min", out.min());
+  fill<double>(key + "max", out.max());
   return out.validate();
 }
 
 template <>
 const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits& value) const {
-  if (has<Limits>(key)) {
-    const auto& limits = get<Limits>(key);
+  if (has<Limits>(key) || !typeOf(key).empty()) {
+    const auto limits = get<Limits>(key);  // converts, or throws if the stored type is not convertible
     if (limits.hasMin())
       value.min() = limits.min();
     if (limits.hasMax())
@@ -463,6 +524,204 @@ const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limit
   fill<double>(key + "min", value.min());
   fill<double>(key + "max", value.max());
   return *this;
+}
+
+//------------------------------------------------------------------
+// lossless conversions between stored types
+//------------------------------------------------------------------
+
+template <>
+bool ParametersList::convert<bool>(const std::string& key, bool& value) const {
+  if (const auto it = int_values_.find(key); it != int_values_.end() && (it->second == 0 || it->second == 1)) {
+    value = it->second == 1;
+    return true;
+  }
+  if (const auto it = ulong_values_.find(key); it != ulong_values_.end() && it->second <= 1) {
+    value = it->second == 1;
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<int>(const std::string& key, int& value) const {
+  if (const auto it = bool_values_.find(key); it != bool_values_.end()) {
+    value = static_cast<int>(it->second);
+    return true;
+  }
+  if (const auto it = ulong_values_.find(key);
+      it != ulong_values_.end() && it->second <= static_cast<unsigned long long>(std::numeric_limits<int>::max())) {
+    value = static_cast<int>(it->second);
+    return true;
+  }
+  if (const auto it = dbl_values_.find(key); it != dbl_values_.end())
+    return integralFrom(it->second, value);
+  return false;
+}
+
+template <>
+bool ParametersList::convert<unsigned long long>(const std::string& key, unsigned long long& value) const {
+  if (const auto it = bool_values_.find(key); it != bool_values_.end()) {
+    value = static_cast<unsigned long long>(it->second);
+    return true;
+  }
+  if (const auto it = int_values_.find(key); it != int_values_.end() && it->second >= 0) {
+    value = static_cast<unsigned long long>(it->second);
+    return true;
+  }
+  if (const auto it = dbl_values_.find(key); it != dbl_values_.end())
+    return integralFrom(it->second, value);
+  return false;
+}
+
+template <>
+bool ParametersList::convert<double>(const std::string& key, double& value) const {
+  if (const auto it = int_values_.find(key); it != int_values_.end()) {
+    value = static_cast<double>(it->second);
+    return true;
+  }
+  if (const auto it = ulong_values_.find(key);
+      it != ulong_values_.end() &&
+      static_cast<unsigned long long>(static_cast<double>(it->second)) == it->second) {  // exactly representable
+    value = static_cast<double>(it->second);
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::string>(const std::string&, std::string&) const {
+  return false;  // no implicit conversion into a string
+}
+
+template <>
+bool ParametersList::convert<Limits>(const std::string& key, Limits& value) const {
+  const auto from_vector = [&value](const auto& vec) {
+    if (vec.size() == 1)
+      value = Limits{static_cast<double>(vec.at(0))};
+    else if (vec.size() == 2)
+      value = Limits{static_cast<double>(vec.at(0)), static_cast<double>(vec.at(1))};
+    else
+      return false;
+    return true;
+  };
+  if (const auto it = vec_dbl_values_.find(key); it != vec_dbl_values_.end())
+    return from_vector(it->second);
+  if (const auto it = vec_int_values_.find(key); it != vec_int_values_.end())
+    return from_vector(it->second);
+  if (const auto it = vec_lim_values_.find(key); it != vec_lim_values_.end() && it->second.size() == 1) {
+    value = it->second.at(0);
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<ParametersList>(const std::string&, ParametersList&) const {
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::vector<int> >(const std::string& key, std::vector<int>& value) const {
+  if (isEmptyVector(key)) {
+    value.clear();
+    return true;
+  }
+  if (const auto it = vec_dbl_values_.find(key); it != vec_dbl_values_.end()) {
+    std::vector<int> out;
+    for (const auto& element : it->second) {
+      if (int integral; integralFrom(element, integral))
+        out.emplace_back(integral);
+      else
+        return false;
+    }
+    value = out;
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::vector<double> >(const std::string& key, std::vector<double>& value) const {
+  if (isEmptyVector(key)) {
+    value.clear();
+    return true;
+  }
+  if (const auto it = vec_int_values_.find(key); it != vec_int_values_.end()) {
+    value = std::vector<double>(it->second.begin(), it->second.end());
+    return true;
+  }
+  if (const auto it = lim_values_.find(key); it != lim_values_.end()) {
+    value = std::vector<double>{it->second.min(), it->second.max()};
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::vector<std::string> >(const std::string& key, std::vector<std::string>& value) const {
+  if (isEmptyVector(key)) {
+    value.clear();
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::vector<Limits> >(const std::string& key, std::vector<Limits>& value) const {
+  if (isEmptyVector(key)) {
+    value.clear();
+    return true;
+  }
+  if (const auto it = vec_vec_dbl_values_.find(key); it != vec_vec_dbl_values_.end()) {
+    std::vector<Limits> out;
+    for (const auto& vec : it->second) {
+      if (vec.size() == 1)
+        out.emplace_back(vec.at(0));
+      else if (vec.size() == 2)
+        out.emplace_back(vec.at(0), vec.at(1));
+      else
+        return false;
+    }
+    value = out;
+    return true;
+  }
+  if (Limits limits; convert<Limits>(key, limits)) {  // a single range
+    value = std::vector<Limits>{limits};
+    return true;
+  }
+  if (const auto it = lim_values_.find(key); it != lim_values_.end()) {
+    value = std::vector<Limits>{it->second};
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::vector<ParametersList> >(const std::string& key,
+                                                           std::vector<ParametersList>& value) const {
+  if (isEmptyVector(key)) {
+    value.clear();
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool ParametersList::convert<std::vector<std::vector<double> > >(const std::string& key,
+                                                                 std::vector<std::vector<double> >& value) const {
+  if (isEmptyVector(key)) {
+    value.clear();
+    return true;
+  }
+  if (const auto it = vec_lim_values_.find(key); it != vec_lim_values_.end()) {
+    std::vector<std::vector<double> > out;
+    for (const auto& limits : it->second)
+      out.emplace_back(std::vector<double>{limits.min(), limits.max()});
+    value = out;
+    return true;
+  }
+  return false;
 }
 
 //------------------------------------------------------------------
