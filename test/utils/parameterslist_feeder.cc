@@ -5,6 +5,7 @@
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
