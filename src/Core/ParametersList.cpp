@@ -300,6 +300,15 @@ void ParametersList::eraseOtherTypes(const std::string& key) {
 #undef __TYPE_ENUM
 }
 
+bool ParametersList::isEmptyVector(const std::string& key) const {
+  const auto empty_in = [&key](const auto& map) {
+    const auto it = map.find(key);
+    return it != map.end() && it->second.empty();
+  };
+  return empty_in(vec_int_values_) || empty_in(vec_dbl_values_) || empty_in(vec_str_values_) ||
+         empty_in(vec_lim_values_) || empty_in(vec_param_values_) || empty_in(vec_vec_dbl_values_);
+}
+
 std::string ParametersList::typeOf(const std::string& key) const {
 #define __TYPE_ENUM(type, map, name) \
   if (map.count(key) > 0)            \

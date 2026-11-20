@@ -173,6 +173,8 @@ namespace cepgen {
     bool convert(const std::string&, T&) const {
       return false;
     }
+    /// Is the key holding an empty vector (of any type)? An empty vector can be converted into any vector type
+    bool isEmptyVector(const std::string&) const;
     /// Erase all values with a given key but stored with another type than the requested one
     template <typename T>
     void eraseOtherTypes(const std::string&);
