@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2024  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,19 @@
 #include "CepGenPython/Error.h"
 #include "CepGenPython/Utils.h"
 // clang-format on
-#include "CepGen/Core/RunParameters.h"
-#include "CepGen/Generator.h"
-#include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Process/Process.h"
-#include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Test.h"
+#include <CepGen/Core/Exception.h>
+#include <CepGen/Core/ParametersDescription.h>
+#include <CepGen/Core/RunParameters.h>
+#include <CepGen/Generator.h>
+#include <CepGen/Modules/FormFactorsFactory.h>
+#include <CepGen/Modules/ProcessFactory.h>
+#include <CepGen/Process/Process.h>
+#include <CepGen/Utils/ArgumentsParser.h>
+#include <CepGen/Utils/Test.h>
+
+#include <fstream>
+#include <iterator>
+
 #include "CepGenPython/ConfigWriter.h"
 
 using namespace std;
@@ -63,6 +70,26 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUAL(proc_params.name(), process, "Process name conservation");
   } catch (const cepgen::python::Error& err) {
     err.dump();
+  }
+  {  // a single collection steered in place of a vector of collections (e.g. one form factors module for both beams)
+    const auto ff_desc = cepgen::FormFactorsFactory::get().describeParameters("StandardDipole");
+    cepgen::ParametersDescription desc("test");
+    desc.addParametersDescriptionVector("formFactors", ff_desc, {ff_desc.parameters(), ff_desc.parameters()});
+    desc = desc.steer(cepgen::ParametersList().set("formFactors", ff_desc.parameters()));
+    const std::string vec_output_file = "py_vec_cfg.py";
+    bool written = true;
+    try {
+      cepgen::python::ConfigWriter py(cepgen::ParametersList().set("filename", vec_output_file));
+      py << desc;
+    } catch (const cepgen::Exception& exc) {
+      exc.dump();
+      written = false;
+    }
+    CG_TEST(written, "writing a single collection steered in place of a vector");
+    std::ifstream vec_file(vec_output_file);
+    const std::string content((std::istreambuf_iterator<char>(vec_file)), std::istreambuf_iterator<char>());
+    CG_TEST(content.find("formFactors = cepgen.Module('StandardDipole'") != std::string::npos,
+            "single collection written in place of a vector");
   }
   CG_TEST_SUMMARY;
 }

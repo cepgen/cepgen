@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2025  Laurent Forthomme
+ *  Copyright (C) 2021-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -79,8 +79,9 @@ namespace cepgen::python {
       std::string out{"["}, sep;
       for (const auto& param : params.get<std::vector<ParametersList> >(key)) {
         out += sep + "cepgen.Parameters(";
+        std::string param_sep;
         for (const auto& pkey : param.keys())
-          out += pkey + " = " + repr(param, pkey);
+          out += param_sep + pkey + " = " + repr(param, pkey), param_sep = ", ";
         out += ")";
         sep = ", ";
       }
@@ -150,10 +151,14 @@ ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
           os << write(w_pdesc.get(pkey), pkey, offset_num + 1);
           break;
         case ParametersDescription::Type::ParametersVector: {
+          if (params.has<ParametersList>(pkey)) {  // a single collection may be steered in place of a vector
+            os << write(ParametersDescription(params.get<ParametersList>(pkey)), pkey, offset_num + 1);
+            break;
+          }
           os << offset(offset_num + 1) << pkey << " = [";
-          if (const auto& it = params.get<std::vector<ParametersList> >(pkey); !it.empty()) {
+          if (std::vector<ParametersList> vec_params; params.cast(pkey, vec_params) && !vec_params.empty()) {
             os << "\n";
-            for (const auto& it : params.get<std::vector<ParametersList> >(pkey))
+            for (const auto& it : vec_params)
               os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
             os << offset(offset_num + 1) << "]";
           } else
