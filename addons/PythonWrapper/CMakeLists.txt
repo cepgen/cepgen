@@ -69,7 +69,7 @@ if(CMAKE_BUILD_UTILS)
     PATTERN "__pycache__" EXCLUDE)
 endif()
 
-cepgen_test_declare_unstable(python_output python_particle_mod)
+cepgen_test_declare_unstable(python_particle_mod)
 
 # Python tests
 if(CMAKE_BUILD_TESTS AND pybind11)

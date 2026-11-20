@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2025  Laurent Forthomme
+ *  Copyright (C) 2013-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,10 +69,13 @@ void IncomingBeams::setParameters(const ParametersList& params) {
   //----- combined two-beam system
 
   //--- beams PDG ids
-  if (const auto& plist_pdg_ids = steer<std::vector<ParametersList> >("pdgIds"); plist_pdg_ids.size() >= 2) {
+  if (std::vector<ParametersList> plist_pdg_ids;
+      params_.cast("pdgIds", plist_pdg_ids) &&
+      plist_pdg_ids.size() >= 2) {  // PDG ids may either be steered as a list of particle properties...
     pos_pdg = plist_pdg_ids.at(0).get<int>("pdgid"s);
     neg_pdg = plist_pdg_ids.at(1).get<int>("pdgid"s);
-  } else if (const auto& pdg_ids = steer<std::vector<int> >("pdgIds"); pdg_ids.size() >= 2) {
+  } else if (std::vector<int> pdg_ids;
+             params_.cast("pdgIds", pdg_ids) && pdg_ids.size() >= 2) {  // ... or as a list of integer PDG ids
     pos_pdg = pdg_ids.at(0);
     neg_pdg = pdg_ids.at(1);
   }
@@ -116,10 +119,11 @@ void IncomingBeams::setParameters(const ParametersList& params) {
 
   //--- form factors
   ParametersList pos_form_factors, neg_form_factors;
-  if (const auto& vec_form_factors = steer<std::vector<ParametersList> >("formFactors"); vec_form_factors.size() >= 2) {
+  if (std::vector<ParametersList> vec_form_factors;
+      params_.cast("formFactors", vec_form_factors) && vec_form_factors.size() >= 2) {
     pos_form_factors = vec_form_factors.at(0);
     neg_form_factors = vec_form_factors.at(1);
-  } else if (const auto& form_factors = steer<ParametersList>("formFactors"); !form_factors.empty())
+  } else if (ParametersList form_factors; params_.cast("formFactors", form_factors) && !form_factors.empty())
     pos_form_factors = neg_form_factors = form_factors;
   pos_form_factors.set<int>("pdgId", std::abs(pos_pdg));
   neg_form_factors.set<int>("pdgId", std::abs(neg_pdg));
@@ -142,21 +146,23 @@ void IncomingBeams::setParameters(const ParametersList& params) {
     pos_flux = neg_flux = PartonFluxFactory::get().describeParameters(fluxes).parameters();
   };
 
-  if (const auto& vec_parton_fluxes = steer<std::vector<ParametersList> >("partonFluxes");
-      vec_parton_fluxes.size() >= 2) {
+  if (std::vector<ParametersList> vec_parton_fluxes;
+      params_.cast("partonFluxes", vec_parton_fluxes) && vec_parton_fluxes.size() >= 2) {
     pos_flux = vec_parton_fluxes.at(0);
     neg_flux = vec_parton_fluxes.at(1);
-  } else if (const auto& parton_fluxes = steer<ParametersList>("partonFluxes"); !parton_fluxes.empty())
+  } else if (ParametersList parton_fluxes; params_.cast("partonFluxes", parton_fluxes) && !parton_fluxes.empty())
     pos_flux = neg_flux = parton_fluxes;
-  else if (const auto& vec_parton_fluxes_names = steer<std::vector<std::string> >("partonFluxes");
-           !vec_parton_fluxes_names.empty())
+  else if (std::vector<std::string> vec_parton_fluxes_names;
+           params_.cast("partonFluxes", vec_parton_fluxes_names) && !vec_parton_fluxes_names.empty())
     set_part_fluxes_from_name_vector(vec_parton_fluxes_names);
-  else if (const auto& parton_fluxes_name = steer<std::string>("partonFluxes"); !parton_fluxes_name.empty())
+  else if (std::string parton_fluxes_name;
+           params_.cast("partonFluxes", parton_fluxes_name) && !parton_fluxes_name.empty())
     set_part_fluxes_from_name(parton_fluxes_name);
-  else if (const auto& kt_fluxes_names = steer<std::vector<std::string> >("ktFluxes"); !kt_fluxes_names.empty()) {
+  else if (std::vector<std::string> kt_fluxes_names;
+           params_.cast("ktFluxes", kt_fluxes_names) && !kt_fluxes_names.empty()) {
     set_part_fluxes_from_name_vector(kt_fluxes_names);
     CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
-  } else if (const auto& kt_fluxes_name = steer<std::string>("ktFluxes"); !kt_fluxes_name.empty()) {
+  } else if (std::string kt_fluxes_name; params_.cast("ktFluxes", kt_fluxes_name) && !kt_fluxes_name.empty()) {
     set_part_fluxes_from_name(kt_fluxes_name);
     CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
   }

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2025  Laurent Forthomme
+ *  Copyright (C) 2022-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -153,7 +153,8 @@ namespace cepgen::ctml {
             if (!subdesc.description().empty())
               item.AppendText(" defining a ").AppendChild(CTML::Node("i", subdesc.description()));
             item.AppendChild(moduleDescription(subdesc));
-            if (const auto& vparams = desc.parameters().get<std::vector<ParametersList> >(key); !vparams.empty()) {
+            if (std::vector<ParametersList> vparams;
+                desc.parameters().cast(key, vparams) && !vparams.empty()) {  // a single collection may also be steered
               CTML::Node itparams("ol");
               for (const auto& it : vparams)
                 itparams.AppendChild(CTML::Node("li").AppendChild(moduleDescription(ParametersDescription(it))));

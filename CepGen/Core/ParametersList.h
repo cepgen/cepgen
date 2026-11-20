@@ -87,17 +87,36 @@ namespace cepgen {
     /// Fill a variable with the key content if exists
     /// \param[in] key Unique key for the parameter
     /// \param[out] value Object/variable to fill with parameter value
+    /// \note If the key is stored with another type, its value is losslessly converted (see cast)
+    /// \throw Exception if the key is stored with a type that cannot be converted into the requested one
     template <typename T>
     const ParametersList& fill(const std::string& key, T& value) const {
-      if (has<T>(key))
+      if (has<T>(key) || !typeOf(key).empty())
         value = get<T>(key);
       return *this;
     }
     /// Get a parameter value
     /// \param[in] key Unique key for the parameter
     /// \param[in] def Default parameters values if parameter is not contained
+    /// \note If the key is stored with another type, its value is losslessly converted (see cast)
+    /// \throw Exception if the key is stored with a type that cannot be converted into the requested one
     template <typename T>
     T get(const std::string& key, const T& def = default_arg<T>::get()) const;
+    /// Fill a variable with a parameter value, converted into the requested type if this conversion is lossless
+    /// \param[in] key Unique key for the parameter
+    /// \param[out] value Object/variable to fill with parameter value, left untouched if the conversion failed
+    /// \return False if the key is not found, or stored with a type not convertible into the requested one
+    template <typename T>
+    bool cast(const std::string& key, T& value) const {
+      if (has<T>(key)) {
+        value = get<T>(key);
+        return true;
+      }
+      return convert<T>(key, value);
+    }
+    /// Human-readable name of the type a parameter is stored with (e.g. "float", "Limits")
+    /// \return Empty string if the key is not found
+    std::string typeOf(const std::string& key) const;
     /// Get a recast parameter value
     /// \tparam T Base parameter type
     /// \tparam U Type to recast the parameter into
@@ -111,8 +130,10 @@ namespace cepgen {
     /// \param[in] key Unique key for parameter
     template <typename T>
     T& operator[](const std::string& key);
+    /// Set a parameter value
+    /// \note Any value stored with the same key but another type is erased: a key is only held with one type
     template <typename T>
-    ParametersList& set(const std::string&, const T&);  ///< Set a parameter value
+    ParametersList& set(const std::string&, const T&);
     /// Set a recast parameter value
     /// \tparam T Base parameter type
     /// \tparam U Type to recast the parameter into
@@ -147,6 +168,17 @@ namespace cepgen {
     std::string print(bool compact = false) const;           ///< Normal printout of a parameter container
 
   private:
+    /// Lossless conversion of a value stored with another type than the requested one
+    template <typename T>
+    bool convert(const std::string&, T&) const {
+      return false;
+    }
+    /// Is the key holding an empty vector (of any type)? An empty vector can be converted into any vector type
+    bool isEmptyVector(const std::string&) const;
+    /// Erase all values with a given key but stored with another type than the requested one
+    template <typename T>
+    void eraseOtherTypes(const std::string&);
+
     std::map<std::string, ParametersList> param_values_;
     std::unordered_map<std::string, bool> bool_values_;
     std::unordered_map<std::string, int> int_values_;
@@ -175,7 +207,9 @@ namespace cepgen {
   template <>                                                                 \
   std::vector<std::string> ParametersList::keysOf<type>() const;              \
   template <>                                                                 \
-  size_t ParametersList::erase<type>(const std::string&);
+  size_t ParametersList::erase<type>(const std::string&);                     \
+  template <>                                                                 \
+  bool ParametersList::convert<type>(const std::string&, type&) const;
   REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
 }  // namespace cepgen

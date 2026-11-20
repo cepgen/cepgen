@@ -140,7 +140,7 @@ std::string ParametersDescription::describe(size_t offset) const {
                         utils::Modifier::italic | utils::Modifier::underline);
         if (const auto& parameters_description = parameter.description(); !parameters_description.empty())
           os << " (" << colourise(parameters_description, utils::Colour::none, utils::Modifier::italic) << ")";
-        if (const auto& parameters = ParametersList::get<ParametersList>(key); !parameters.empty())
+        if (ParametersList parameters; ParametersList::cast(key, parameters) && !parameters.empty())
           os << " with user-steered content: " << parameter.steer(parameters).describe(offset + 1);
         else
           os << " with expected content: " << parameter.describe(offset + 1);
@@ -218,9 +218,10 @@ ParametersList ParametersDescription::validate(const ParametersList& user_params
     } else if (user_params.has<ParametersList>(key)) {  // map{key -> ParametersList}
       plist.erase(key);
       const auto& pit = user_params.get<ParametersList>(key);
-      for (const auto& kit : pit.keys())
-        plist.operator[]<ParametersList>(key).operator[]<ParametersList>(kit) =
-            obj_descr_.at(key).validate(pit.get<ParametersList>(kit));
+      auto& validated_params = plist.operator[]<ParametersList>(key);
+      validated_params = pit;  // keep any non-collection entry as steered
+      for (const auto& kit : pit.keysOf<ParametersList>())
+        validated_params.set(kit, obj_descr_.at(key).validate(pit.get<ParametersList>(kit)));
     }
   }
   for (const auto& [key, parameters_description] : obj_descr_) {  // simple value
