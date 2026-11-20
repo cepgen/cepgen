@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ namespace cepgen {
   YODAHistsHandler<T>::YODAHistsHandler(const ParametersList& params)
       : EventExporter(params), file_(steer<std::string>("filename")), variables_(steer<ParametersList>("variables")) {
     //--- extract list of variables/correlations to be plotted in histograms
-    for (const auto& key : variables_.keys()) {
+    for (const auto& key : variables_.keysOf<ParametersList>()) {
       const auto& vars = utils::split(key, ':');
       if (vars.size() < 1 || vars.size() > 3)
         throw CG_FATAL("YODAHistsHandler") << "Invalid number of variables to correlate for '" << key << "'!";
@@ -170,10 +170,8 @@ namespace cepgen {
     for (auto& h_var : profiles1d_)
       h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), weight);
     for (auto& h_var : profiles2d_)
-      h_var.second.fill(browser_.get(ev, h_var.first[0]),
-                        browser_.get(ev, h_var.first[1]),
-                        browser_.get(ev, h_var.first[2]),
-                        weight);
+      h_var.second.fill(
+          browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), browser_.get(ev, h_var.first[2]), weight);
     weight_cnt_.fill(ev.metadata("weight"));
     return true;
   }

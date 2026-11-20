@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2025  Laurent Forthomme
+ *  Copyright (C) 2019-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
       file_(TFile::Open(steer<std::string>("filename"s).c_str(), "recreate")),
       variables_(steer<ParametersList>("variables"s)) {
   //--- extract list of variables/correlations to be plotted in histograms
-  for (const auto& key : variables_.keys()) {
+  for (const auto& key : variables_.keysOf<ParametersList>()) {
     const auto& vars = utils::split(key, ':');
     if (vars.size() < 1 || vars.size() > 3)
       throw CG_FATAL("ROOTHistsHandler") << "Invalid number of variables to correlate for '" << key << "'!";
