@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2025  Laurent Forthomme
+ *  Copyright (C) 2017-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ void Initial::setParameters(const ParametersList& params) {
   if (params.empty())
     return;
   SteeredObject::setParameters(params);
-  if (const auto q2lim = params.get<Limits>("q2"); q2lim.valid())  // symmetric Q^2 cut specified
+  if (Limits q2lim; params.cast("q2", q2lim) && q2lim.valid())  // symmetric Q^2 cut specified
     q2 = {q2lim, q2lim};
   for (auto& q2lim : q2)
     if (q2lim.max() <= 0.) {
