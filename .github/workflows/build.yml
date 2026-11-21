@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches: main
-    tags:
+    tags: ['**']
   pull_request:
     branches: main
   workflow_call:
@@ -83,7 +83,7 @@ jobs:
     - name: 'Test CepGen'
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
-        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> "$GITHUB_ENV"
         ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_|validation_" --output-on-failure --repeat until-pass:2
 
   benchmark:
@@ -104,7 +104,7 @@ jobs:
     - name: 'Benchmark CepGen modules'
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
-        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> "$GITHUB_ENV"
         ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "benchmark_*" --output-on-failure
     - name: 'Compress environment'
       run: tar cvfz benchmark-environment.tar.gz /Package/*.html
@@ -132,7 +132,7 @@ jobs:
     - name: 'Validate CepGen modules'
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
-        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> "$GITHUB_ENV"
         ctest -j 10 -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure
     - name: 'Compress environment'
       run: |
