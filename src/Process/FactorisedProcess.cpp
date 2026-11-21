@@ -278,6 +278,12 @@ void FactorisedProcess::fillKinematics() {
     for (size_t i = 0; i < central_particles_.size(); ++i)  // loop over all central particles
       pc(i).mirrorZ();
   }
+  if (boost_beta_gamma_ != 0.) {  // asymmetric beams: boost the c.m. frame kinematics to the lab frame
+    for (auto* momentum : {&q1(), &q2(), &pX(), &pY()})
+      momentum->betaGammaBoost(boost_gamma_, boost_beta_gamma_);
+    for (size_t i = 0; i < central_particles_.size(); ++i)
+      pc(i).betaGammaBoost(boost_gamma_, boost_beta_gamma_);
+  }
   // parton systems
   event().oneWithRole(Particle::Role::Parton1).setMomentum(pA() - pX(), true);
   event().oneWithRole(Particle::Role::Parton2).setMomentum(pB() - pY(), true);
