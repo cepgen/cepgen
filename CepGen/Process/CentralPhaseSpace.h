@@ -57,6 +57,9 @@ namespace cepgen {
     virtual double generate(const Momentum& qt_sum, std::vector<Momentum>& central_momenta) const = 0;
 
     inline const spdgids_t& particles() const { return particles_; }  ///< Central particles content
+    /// Rapidity (in the lab frame) of the two-beam centre-of-mass frame, in which the central system is generated
+    /// \note Null for symmetric beams. Lab-frame rapidity = CM-frame rapidity + this value.
+    inline double labRapidity() const { return lab_rapidity_; }
 
   protected:
     const Kinematics& kinematics() const;  ///< Consumer process' kinematics (incl. its cuts)
@@ -66,6 +69,7 @@ namespace cepgen {
 
   private:
     const Kinematics* kin_{nullptr};  ///< Consumer process' kinematics (not owning)
+    double lab_rapidity_{0.};         ///< Rapidity of the two-beam centre-of-mass frame in the lab frame
     spdgids_t particles_;
     std::vector<double> masses_;
     std::vector<cuts::Central> particle_cuts_;

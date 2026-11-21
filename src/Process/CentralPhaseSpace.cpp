@@ -19,6 +19,8 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/Beam.h"
+#include "CepGen/Physics/IncomingBeams.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/CentralPhaseSpace.h"
@@ -32,6 +34,10 @@ void CentralPhaseSpace::initialise(const Kinematics& kin, const spdgids_t& centr
     throw CG_FATAL("CentralPhaseSpace:initialise") << "Invalid central particles multiplicity: expecting "
                                                    << multiplicity() << ", got " << central_particles << ".";
   kin_ = &kin;
+  {  // the central system is generated in the two-beam centre-of-mass frame: retrieve its boost w.r.t. the lab frame
+    const auto beams_sum = kin.incomingBeams().positive().momentum() + kin.incomingBeams().negative().momentum();
+    lab_rapidity_ = beams_sum.pz() == 0. ? 0. : beams_sum.rapidity();
+  }
   particles_ = central_particles;
   masses_.clear();
   particle_cuts_.clear();
