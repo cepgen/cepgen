@@ -76,7 +76,8 @@ namespace cepgen::formfac {
         return;
       }
       const auto qr = std::sqrt(qr2), inv_qr = 1. / qr;
-      const auto sph = (std::sin(qr) - qr * std::cos(qr)) * 3. * inv_qr * inv_qr;
+      // hard-sphere form factor: 3 (sin(qR)-qR cos(qR))/(qR)^3, which tends to 1 for q->0
+      const auto sph = (std::sin(qr) - qr * std::cos(qr)) * 3. * inv_qr * inv_qr * inv_qr;
       const auto ge = sph / (1. + q2_ * a02_);
       setGEGM(ge, MU * ge);
     }

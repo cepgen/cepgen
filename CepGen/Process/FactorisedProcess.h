@@ -98,6 +98,10 @@ namespace cepgen::proc {
 
     spdgids_t central_particles_;  ///< List of particle Ids in the central system
 
+    double cm_momentum_{0.};       ///< Beams momentum in the two-beam centre-of-mass frame (in GeV/c)
+    double boost_gamma_{1.};       ///< Lorentz factor of the c.m. -> lab boost (along z)
+    double boost_beta_gamma_{0.};  ///< Lorentz beta*gamma factor of the c.m. -> lab boost (along z)
+
     const Limits x_validity_range_{0., 1.};
     double kin_prefactor_{1.};
   };

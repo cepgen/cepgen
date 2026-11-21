@@ -70,7 +70,7 @@ struct BudnevElasticKTFlux : ElasticKTFlux {
     desc.setDescription("Elastic photon emission (Budnev)");
     return desc;
   }
-  double fluxMX2(double x, double kt2, double) const final {
+  double fluxMX2(double x, double kt2, double) const override {
     if (!x_range_.contains(x))
       return 0.;
     const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x), q_norm = 1. - q2min / q2;
@@ -130,7 +130,35 @@ private:
   const HeavyIon hi_;
   const double mass2_;
 };
+/// Budnev coherent photon emission from a heavy ion
+/// \note Same expression as the Budnev proton flux for the ion mass, and scaled by \f$Z^2\f$
+class BudnevElasticHeavyIonKTFlux final : public BudnevElasticKTFlux {
+public:
+  explicit BudnevElasticHeavyIonKTFlux(const ParametersList& params)
+      : BudnevElasticKTFlux(params),
+        hi_(HeavyIon::fromPdgId(form_factors_->pdgId())),
+        mass2_(hi_.mass() * hi_.mass()) {}
+
+  static ParametersDescription description() {
+    auto desc = BudnevElasticKTFlux::description();
+    desc.setDescription("HI elastic photon emission (Budnev)");
+    desc.add("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
+    return desc;
+  }
+
+  double mass2() const override { return mass2_; }
+
+  double fluxMX2(double x, double kt2, double mx2) const override {
+    const auto z = static_cast<unsigned short>(hi_.Z);
+    return z * z * BudnevElasticKTFlux::fluxMX2(x, kt2, mx2);
+  }
+
+private:
+  const HeavyIon hi_;
+  const double mass2_;
+};
 REGISTER_KT_FLUX("Elastic", 0, ElasticKTFlux);
 REGISTER_KT_FLUX("BudnevElastic", 10, BudnevElasticKTFlux);
+REGISTER_KT_FLUX("BudnevElasticHeavyIon", 11, BudnevElasticHeavyIonKTFlux);
 REGISTER_KT_FLUX("BudnevElasticLepton", 12, BudnevElasticLeptonKTFlux);
 REGISTER_KT_FLUX("ElasticHeavyIon", 100, ElasticHeavyIonKTFlux);

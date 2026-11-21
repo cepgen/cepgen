@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/CentralPhaseSpaceFactory.h"
@@ -176,6 +178,16 @@ void FactorisedProcess::addEventContent() {
 
 void FactorisedProcess::prepareKinematics() {
   random_generator_ = buildRandomGenerator();
+  {  // two-beam centre-of-mass frame properties, and its boost w.r.t. the lab frame (where the beams are defined)
+    const auto beams_sum =
+        kinematics().incomingBeams().positive().momentum() + kinematics().incomingBeams().negative().momentum();
+    const auto rapidity = beams_sum.pz() == 0. ? 0. : beams_sum.rapidity();
+    boost_gamma_ = std::cosh(rapidity);
+    boost_beta_gamma_ = std::sinh(rapidity);
+    cm_momentum_ = 0.5 * std::sqrt((s() - std::pow(mA() + mB(), 2)) * (s() - std::pow(mA() - mB(), 2)) / s());
+    CG_DEBUG("FactorisedProcess:prepareKinematics")
+        << "Two-beam c.m. frame: beams momentum=" << cm_momentum_ << " GeV, lab rapidity=" << rapidity << ".";
+  }
   if (central_particles_.empty())
     CG_WARNING("FactorisedProcess:prepareKinematics") << "Empty central particles content.";
 
@@ -266,6 +278,12 @@ void FactorisedProcess::fillKinematics() {
     for (size_t i = 0; i < central_particles_.size(); ++i)  // loop over all central particles
       pc(i).mirrorZ();
   }
+  if (boost_beta_gamma_ != 0.) {  // asymmetric beams: boost the c.m. frame kinematics to the lab frame
+    for (auto* momentum : {&q1(), &q2(), &pX(), &pY()})
+      momentum->betaGammaBoost(boost_gamma_, boost_beta_gamma_);
+    for (size_t i = 0; i < central_particles_.size(); ++i)
+      pc(i).betaGammaBoost(boost_gamma_, boost_beta_gamma_);
+  }
   // parton systems
   event().oneWithRole(Particle::Role::Parton1).setMomentum(pA() - pX(), true);
   event().oneWithRole(Particle::Role::Parton2).setMomentum(pB() - pY(), true);
@@ -280,7 +298,7 @@ void FactorisedProcess::computeBeamKinematics() {  // compute the four-momenta o
   const double norm = wCM() * wCM() * s(), inv_norm = 1. / norm, prefactor = 0.5 * std::sqrt(norm);
 
   // positive-z outgoing beam system
-  const auto px_p = (1. - x1()) * pA().p(), px_m = (mX2() + q1().p2()) * 0.25 / px_p;
+  const auto px_p = (1. - x1()) * cm_momentum_, px_m = (mX2() + q1().p2()) * 0.25 / px_p;
   pX() = (-q1()).setPz(px_p - px_m).setEnergy(px_p + px_m);
   if (!kinematics().incomingBeams().positive().elastic())
     pX().setMass2(mX2());
@@ -288,7 +306,7 @@ void FactorisedProcess::computeBeamKinematics() {  // compute the four-momenta o
   q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
 
   // negative-z outgoing beam system
-  const auto py_m = (1. - x2()) * pB().p(), py_p = (mY2() + q2().p2()) * 0.25 / py_m;
+  const auto py_m = (1. - x2()) * cm_momentum_, py_p = (mY2() + q2().p2()) * 0.25 / py_m;
   pY() = (-q2()).setPz(py_p - py_m).setEnergy(py_p + py_m);
   if (!kinematics().incomingBeams().negative().elastic())
     pY().setMass2(mY2());

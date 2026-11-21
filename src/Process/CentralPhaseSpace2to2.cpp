@@ -56,7 +56,8 @@ ParametersDescription CentralPhaseSpace2to2::description() {
 
 std::vector<IntegrationVariable> CentralPhaseSpace2to2::integrationVariables() {
   const auto& kin_cuts = kinematics().cuts().central;
-  const auto lim_rap = kin_cuts.rapidity_single.truncate(Limits{-6., 6.});
+  // rapidity cuts in lab frame <-> CM system generated in two-beam CM frame
+  const auto lim_rap = kin_cuts.rapidity_single.truncate(Limits{-6., 6.}) - labRapidity();
   return {{m_y_c1_, proc::Process::Mapping::linear, lim_rap, "y1", "First outgoing particle rapidity"},
           {m_y_c2_, proc::Process::Mapping::linear, lim_rap, "y2", "Second outgoing particle rapidity"},
           {m_pt_diff_,
