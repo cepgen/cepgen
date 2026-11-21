@@ -1,0 +1,91 @@
+name: Sanitizers
+
+# ASan+UBSan (blocking) and TSan (advisory at first) over the ctest suite.
+# Uses the same container image as build.yml so all external dependencies are present.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sanitize:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container:
+      image: laufor/ci-images:cepgen-fedora40
+    timeout-minutes: 120
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ASan + UBSan
+            id: asan-ubsan
+            flags: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer
+            experimental: false
+          - name: TSan
+            id: tsan
+            flags: -fsanitize=thread -fno-omit-frame-pointer
+            experimental: true # flip to false once the suite is clean
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_MAXSIZE: 1G
+      # Leak detection is noisy for long-lived singletons/plugin registries: enable once triaged.
+      ASAN_OPTIONS: detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:verify_asan_link_order=0
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+      TSAN_OPTIONS: halt_on_error=0:second_deadlock_stack=1
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install ccache
+        run: dnf install -y ccache
+
+      - uses: seanmiddleditch/gha-setup-ninja@v6
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ matrix.id }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ matrix.id }}-
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -GNinja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_BUILD_TESTS=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_Fortran_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_C_FLAGS="${{ matrix.flags }} -O1" \
+            -DCMAKE_CXX_FLAGS="${{ matrix.flags }} -O1" \
+            -DCMAKE_EXE_LINKER_FLAGS="${{ matrix.flags }}" \
+            -DCMAKE_SHARED_LINKER_FLAGS="${{ matrix.flags }}" \
+            -DCMAKE_MODULE_LINKER_FLAGS="${{ matrix.flags }}"
+          # Add -DMADGRAPH_BIN=... (as in build.yml) if the tests you care about need it.
+
+      - name: Build
+        run: cmake --build build -j "$(nproc)"
+
+      - name: Test
+        # Mirror the exclusions of the "test" job in build.yml (unstable label, benchmark_/validation_).
+        # Python-binding tests under ASan may need LD_PRELOAD=$(gcc -print-file-name=libasan.so);
+        # exclude them with an extra -E pattern if they get in the way.
+        working-directory: build
+        run: ctest -j 2 --output-on-failure --timeout 1800 -LE unstable -E "benchmark_|validation_"
+
+      - name: ccache stats
+        if: always()
+        run: ccache -s
