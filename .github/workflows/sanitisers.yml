@@ -1,4 +1,4 @@
-name: Sanitizers
+name: Sanitisers
 
 # ASan+UBSan (blocking) and TSan (advisory at first) over the ctest suite.
 # Uses the same container image as build.yml so all external dependencies are present.
@@ -48,8 +48,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install ccache
-        run: dnf install -y ccache
+      - name: Install ccache and sanitiser runtimes
+        # The image ships gcc but not the sanitiser runtime libraries (link fails with
+        # "cannot find libasan.so.8.0.0" etc. without them).
+        run: dnf install -y ccache libasan libubsan libtsan
 
       - uses: seanmiddleditch/gha-setup-ninja@v6
 
