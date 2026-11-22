@@ -44,7 +44,9 @@ namespace {
   }
 }  // namespace
 
-/// Matrix element for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process as defined in \cite Vermaseren:1982cz
+/// Matrix element for the \f$\gamma\gamma\to f\bar f\f$ process as defined in \cite Vermaseren:1982cz
+/// \note Lepton (original) and quark pairs are are supported through a factor \f$N_c Q_f^4\f$ on
+///   squared amplitude (colour-singlet initial state -> trivial colour sum, no \f$\alpha_S\f$ at LO).
 class LPAIR final : public proc::Process {
 public:
   explicit LPAIR(const ParametersList& params)
@@ -78,10 +80,17 @@ public:
   double computeWeight() override;
 
   void prepareKinematics() override {
+    if (!pair_.fermion || pair_.charges.empty() || pair_.integerCharge() == 0)
+      throw CG_FATAL("LPAIR:prepareKinematics") << "Invalid charged fermion pair selected: " << pair_ << ".";
     ml_ = pair_.mass;
     ml2_ = ml_ * ml_;
     // squared amplitude scales as Q_f^4, with a sum over final state colours (for quarks)
     charge_factor_ = std::pow(pair_.integerCharge() / 3., 4) * (pair_.colours > 0 ? pair_.colours : 1.);
+    if (pair_.colours > 1 && pair_.mass < 1. && !kinematics().cuts().central.pt_single.valid())
+      CG_WARNING("LPAIR:prepareKinematics")
+          << "Light-quark pair (" << pair_.name << ", m=" << pair_.mass << " GeV) requested without any single-quark "
+          << "pt cut. The cross section is logarithmically sensitive to the quark mass (collinear region) and "
+          << "perturbative QCD is not applicable at low pt: results depend on the mass value used.";
     beams_mode_ = kinematics().incomingBeams().mode();
     pA() = kinematics().incomingBeams().positive().momentum();
     pB() = kinematics().incomingBeams().negative().momentum();
@@ -198,8 +207,8 @@ public:
 
   static ParametersDescription description() {
     auto desc = proc::Process::description();
-    desc.setDescription("γγ → l⁺l¯ (LPAIR)");
-    desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("Lepton pair considered");
+    desc.setDescription("γγ → f⁺f⁻ (LPAIR; leptons/quarks)");
+    desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("Fermion pair considered (lepton or quark PDG id)");
     desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
     desc.add<bool>("randomiseCharge", true).setDescription("randomise the charges of the two central fermions?");
     desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
