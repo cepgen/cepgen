@@ -31,7 +31,9 @@ using namespace std::string_literals;
 class PPtoSS final : public proc::FactorisedProcess {
 public:
   explicit PPtoSS(const ParametersList& params)
-      : proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)) {}
+      : proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)),
+        method_(steerAs<int, Mode>("method")),
+        osp_(steer<ParametersList>("offShellParameters")) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoSS>(parameters()); }
 
@@ -40,6 +42,11 @@ public:
     desc.setDescription("γγ → S⁺S⁻ (charged scalars pair, e.g. sleptons)");
     desc.addAs<int, pdgid_t>("pair", PDG::piPlus)
         .setDescription("type of central charged scalar emitted (must be defined in the PDG library)");
+    desc.addAs<int, Mode>("method", Mode::offShell)
+        .setDescription("Matrix element computation method")
+        .allow(0, "on-shell")
+        .allow(1, "off-shell");
+    desc.add("offShellParameters", OffShellParameters::description());
     return desc;
   }
 
@@ -49,6 +56,9 @@ private:
   }
 
   void prepareFactorisedPhaseSpace() override {
+    if (method_ == Mode::offShell && !partonsKtFactorised())
+      throw CG_FATAL("PPtoSS:prepare")
+          << "Off-shell matrix element only defined for factorised process with partons kt.";
     const auto& cs_prop = PDG::get()(central().at(0));
     if (cs_prop.fermion)
       throw CG_FATAL("PPtoSS:prepare") << "Invalid central particle selected (fermion; use 'pptoff' instead): "
@@ -75,6 +85,17 @@ private:
   }
 
   double computeFactorisedMatrixElement() override {
+    switch (method_) {
+      case Mode::onShell:
+        return onShellME();
+      case Mode::offShell:
+        return offShellME();
+      default:
+        throw CG_FATAL("PPtoSS") << "Invalid ME calculation method (" << static_cast<int>(method_) << ")!";
+    }
+  }
+
+  double onShellME() const {
     const double s_hat = shat(), t_hat = that(), u_hat = uhat();            // buffer Mandelstam variables
     const auto d = 4. * (t_hat - ms2_) * (u_hat - ms2_) / (s_hat * s_hat);  // = 1-beta^2 cos^2(theta)
     if (!utils::positive(d))
@@ -87,6 +108,35 @@ private:
     const auto one_minus_beta2 = 4. * ms2_ / s_hat, beta2_sin2 = d - one_minus_beta2;
     return 2. * prefactor * (one_minus_beta2 * one_minus_beta2 + beta2_sin2 * beta2_sin2) / (d * d) / (s_hat * s_hat);
   }
+
+  const enum class Mode { onShell = 0, offShell = 1 } method_;
+
+  /// Parameters for the off-shell matrix element
+  struct OffShellParameters : SteeredObject<OffShellParameters> {
+    explicit OffShellParameters(const ParametersList& params) : SteeredObject(params) {
+      (*this)
+          .add("mat1"s, mat1)
+          .add("mat2"s, mat2)
+          .add("termLL"s, term_ll)
+          .add("termLT"s, term_lt)
+          .add("termTT"s, term_tt1)
+          .add("termtt"s, term_tt2);
+    }
+
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.add("mat1"s, 1).setDescription("symmetry factor for the first incoming photon");
+      desc.add("mat2"s, 1).setDescription("symmetry factor for the second incoming photon");
+      desc.add("termLL"s, 1).setDescription("fully longitudinal relative weight");
+      desc.add("termLT"s, 1).setDescription("cross-polarisation relative weight");
+      desc.add("termTT"s, 1).setDescription("fully transverse (polarisation-averaged) relative weight");
+      desc.add("termtt"s, 1).setDescription("transverse-transverse azimuthal correlation relative weight");
+      return desc;
+    }
+
+    int mat1{0}, mat2{0};
+    int term_ll{0}, term_lt{0}, term_tt1{0}, term_tt2{0};
+  } osp_;
 
   static constexpr double kFourPi = 4. * M_PI;
   double ms2_{0.}, qs2_{0.}, colour_factor_{1.};
