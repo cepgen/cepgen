@@ -31,14 +31,16 @@ PDG = Parameters(
 # \param name Computer-safe (and preferably human-readable) particle name
 # \param mass Particle on-shell mass (in GeV/c^2)
 # \param width Decay width (in GeV)
-# \param charge Particle electric charge (in e)
-# \param colour Colour charge
+# \param charge Particle electric charge (in e, may be fractional, e.g. 2./3.)
+# \param colour Colour factor (0 for a colourless particle)
 # \param fermion Is the particle following the fermion statistics?
+# \note The C++ particle properties store the electric charge as a list of integers, in units of e/3, under the key
+#  'charges', and the colour factor under the key 'colours'.
 def registerParticle(pdgid: int,
                      name: str,
                      mass: float=0.,
                      width: float=0.,
-                     charge: int=0,
+                     charge: float=0.,
                      colour: int=1,
                      fermion: bool=False):
     globals()['PDG'][name] = Parameters(
@@ -46,9 +48,9 @@ def registerParticle(pdgid: int,
         description = name,
         pdgid = pdgid,
         mass = mass,
-        charge = charge,
+        charges = (int(round(3. * charge)),),
         width = width,
-        colour = colour,
+        colours = colour,
         fermion = fermion
     )
     print('particle with pdg={} defined: {}'.format(pdgid, globals()['PDG'][name]))
