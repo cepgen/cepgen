@@ -20,6 +20,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/RandomGenerator.h"
@@ -95,6 +96,11 @@ private:
     }
   }
 
+  /// Coupling factor \f$N_c(4\pi\alpha_1Q^2)(4\pi\alpha_2Q^2)\f$ for given photon scales
+  double couplingFactor(double q1, double q2) const {
+    return colour_factor_ * kFourPi * kFourPi * qs2_ * qs2_ * alphaEM(q1) * alphaEM(q2);
+  }
+
   double onShellME() const {
     const double s_hat = shat(), t_hat = that(), u_hat = uhat();            // buffer Mandelstam variables
     const auto d = 4. * (t_hat - ms2_) * (u_hat - ms2_) / (s_hat * s_hat);  // = 1-beta^2 cos^2(theta)
@@ -107,6 +113,56 @@ private:
 
     const auto one_minus_beta2 = 4. * ms2_ / s_hat, beta2_sin2 = d - one_minus_beta2;
     return 2. * prefactor * (one_minus_beta2 * one_minus_beta2 + beta2_sin2 * beta2_sin2) / (d * d) / (s_hat * s_hat);
+  }
+
+  double offShellME() const {
+    if (q1().pt2() == 0. || q2().pt2() == 0)  // only works for kt-factorised case
+      return 0.;
+    const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
+    const auto compute_zs = [this, &mt1, &mt2](short pol, double x) -> std::pair<double, double> {
+      const auto norm_pol = pol / std::abs(pol);
+      const auto fact = inverseSqrtS() / x;
+      return std::make_pair(fact * mt1 * std::exp(norm_pol * pc(0).rapidity()),
+                            fact * mt2 * std::exp(norm_pol * pc(1).rapidity()));
+    };
+    const auto compute_mat_element =
+        [this](double zp, double zm, double q2, const Momentum& vec_pho, const Momentum& vec_qt) -> double {
+      const auto vec_kt = Momentum(zm * pc(0) - zp * pc(1)).transverse();
+      const auto phi_p = vec_kt + zp * vec_qt, phi_m = vec_kt - zm * vec_qt;
+      const auto zpm = zp * zm, eps2 = ms2_ + zpm * q2;
+
+      const auto kp = 1. / (phi_p.pt2() + eps2), km = 1. / (phi_m.pt2() + eps2);
+      const auto phi = Momentum(kp * phi_p - km * phi_m).setEnergy(kp - km);
+      const auto dot = phi.threeProduct(vec_pho), cross = phi.crossProduct(vec_pho, Momentum::Z);
+
+      const auto phi_0 = phi.energy(), phi2_0 = phi_0 * phi_0, phi_t = phi.p(), phi2_t = phi_t * phi_t;
+
+      // transverse term: 4 Phi_par^2 = 2 Phi^2 + 2 (Phi_par^2-Phi_perp^2)
+      return zpm * zpm / vec_qt.pt2() *
+             ((osp_.term_ll * (zp - zm) * (zp - zm) * q2 * phi2_0) + (osp_.term_tt1 * 2. * phi2_t) -
+              (osp_.term_tt2 * 2. * (cross * cross - dot * dot) / vec_pho.pt2()) +
+              (osp_.term_lt * 4. * (zp - zm) * phi_0 * dot));
+    };
+    //--- t-channel
+    const auto q2_1 = utils::kt::q2(x1(), q1().pt2(), mA2(), mX2());
+    const auto [zp_1, zm_1] = compute_zs(+1, x1());
+    const auto amat2_1 = compute_mat_element(zp_1, zm_1, q2_1, q1(), q2().transverse());
+
+    //--- u-channel
+    const auto q2_2 = utils::kt::q2(x2(), q2().pt2(), mB2(), mY2());
+    const auto [zp_2, zm_2] = compute_zs(-1, x2());
+    const auto amat2_2 = compute_mat_element(zp_2, zm_2, q2_2, q2(), q1().transverse());
+
+    //--- symmetrisation
+    const auto amat2 = 0.5 * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
+    if (!utils::positive(amat2))
+      return 0.;
+
+    const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
+    if (const auto prefactor = couplingFactor(std::sqrt(t_limits.trim(q2_1)), std::sqrt(t_limits.trim(q2_2)));
+        utils::positive(prefactor))
+      return prefactor * amat2;
+    return 0.;
   }
 
   const enum class Mode { onShell = 0, offShell = 1 } method_;
