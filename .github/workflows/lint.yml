@@ -1,0 +1,82 @@
+name: Lint
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clang-format:
+    name: clang-format (changed files)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check formatting
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          # Pin to the version your developers use locally, so results match.
+          CLANG_FORMAT_VERSION: "18.1.8"
+        run: |
+          pip install "clang-format==${CLANG_FORMAT_VERSION}"
+          files=$(git diff --name-only --diff-filter=ACMR "origin/${BASE_REF}...HEAD" -- \
+                  '*.cpp' '*.cc' '*.cxx' '*.h' '*.hh' '*.hpp' | grep -v '^External/' || true)
+          if [ -z "$files" ]; then echo "No C++ files changed."; exit 0; fi
+          echo "$files" | xargs clang-format --dry-run --Werror
+
+  clang-tidy:
+    name: clang-tidy (changed files, advisory)
+    runs-on: ubuntu-latest
+    container:
+      image: laufor/ci-images:cepgen-fedora40
+    continue-on-error: true # make blocking once the noise is under control
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install clang-tidy
+        run: dnf install -y clang-tools-extra git
+      - uses: seanmiddleditch/gha-setup-ninja@v6
+      - name: Configure (compile_commands.json)
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          cmake -S . -B build -GNinja \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_BUILD_TESTS=ON
+      - name: Run clang-tidy
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          files=$(git diff --name-only --diff-filter=ACMR "origin/${BASE_REF}...HEAD" -- \
+                  '*.cpp' '*.cc' '*.cxx' | grep -v '^External/' || true)
+          if [ -z "$files" ]; then echo "No C++ sources changed."; exit 0; fi
+          # No .clang-tidy in the repo yet: checks are given inline. Move them to a
+          # .clang-tidy file once settled. gcc-only flags in compile_commands may warn.
+          echo "$files" | xargs clang-tidy -p build --quiet \
+            -checks='-*,bugprone-*,performance-*,clang-analyzer-*,-bugprone-easily-swappable-parameters'
+
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          skip: ./External,*.svg,*.json,*.lock,CHANGELOG
+          # HEP names/abbreviations will trigger false positives: add them here.
+          ignore_words_list: ""
+          only_warn: 1 # remove once the word list is tuned
+
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Lint workflow files
+        run: docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:1.7.7 -color
