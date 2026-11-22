@@ -18,7 +18,7 @@ process = kt.process.clone('pptoff',
     ),
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
-        pz = (6500., 6500.),
+        sqrtS = 14.e3,
     ),
     outKinematics = kt.process.outKinematics.clone(
         pt = (0.,),
