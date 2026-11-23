@@ -62,7 +62,7 @@ std::vector<IntegrationVariable> CentralPhaseSpace2to2::integrationVariables() {
           {m_y_c2_, proc::Process::Mapping::linear, lim_rap, "y2", "Second outgoing particle rapidity"},
           {m_pt_diff_,
            proc::Process::Mapping::linear,
-           kin_cuts.pt_diff.truncate(Limits{0., 500.}),
+           kin_cuts.pt_diff.truncate(Limits{0., 1.e6}),
            "pt_diff",
            "Final state particles transverse momentum difference"},
           {m_phi_pt_diff_,
