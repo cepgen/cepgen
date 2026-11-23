@@ -53,6 +53,8 @@ namespace cepgen::amplitudes {
     virtual std::complex<double> amplitude(const Kinematics&, const HelicityState&) const = 0;
     virtual bool hasAAWW() const { return false; }
     virtual bool hasAAZZ() const { return false; }
+    virtual bool hasAAFF() const { return false; }
+    virtual bool hasAASS() const { return false; }
 
   protected:
     explicit HelicityAmplitudes(const ParametersList& params) : NamedModule(params), s1_(steer<double>("s1")) {}
