@@ -95,16 +95,16 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("states,s",
                            "initial states to validate (any of: pp, pPb, PbPb, ep)",
                            &states,
-                           vector<string>{"pp", "pPb", "PbPb", "ep"})
+                           vector{"pp"s, "pPb"s, "PbPb"s, "ep"s})
       .addOptionalArgument("final-state,f", "final state: 'll' (lepton pair) or 'ww'", &final_state, "ll"s)
       .addOptionalArgument("processes,P",
                            "processes to generate (lpair is only used for 'll', pptoww for 'ww')",
                            &processes,
-                           vector<string>{"lpair", "pptoff", "pptoww"})
+                           vector{"lpair"s, "pptoff"s, "pptoww"s})
       .addOptionalArgument("fluxes,F",
                            "kt-factorised flux modelling families (any of: default, elastic, budnev, klein)",
                            &flux_families,
-                           vector<string>{"default"})
+                           vector{"default"s})
       .addOptionalArgument("eta-max,e",
                            "single-lepton |eta| cut (<= 0 to disable; useful to check frame-dependent effects)",
                            &eta_max,
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
         continue;  // process incompatible with the requested final state
 
       // LPAIR has a built-in photon flux: only one sample is generated for it
-      for (const auto& flux : is_lpair ? vector<string>{"default"} : flux_families) {
+      for (const auto& flux : is_lpair ? vector{"default"s} : flux_families) {
         auto proc_params = cepgen::ParametersList();
         if (!is_lpair)
           proc_params.set<std::string>("partonsGenerator", "kt");
