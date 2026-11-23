@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,13 +33,14 @@ using namespace std;
 using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
-  int num_gen;
+  int num_gen, num_threads;
   vector<string> processes;
   string filename, plotter;
   bool ratio_plot;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("processes,P", "processes to generate", &processes, vector<string>{"pptoff", "mg5_aMC"})
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
+      .addOptionalArgument("num-threads,t", "number of threads to generate events", &num_threads, 4)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .addOptionalArgument("filename,f", "output base filename", &filename, "validation/comparison_dilepton_coll_")
@@ -87,6 +88,7 @@ int main(int argc, char* argv[]) {
       cepgen::ParametersList()
           .set("topLabel", "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, coll."s)
           .set("numEvents", num_gen)
+          .set("numThreads", num_threads)
           .set("pathTemplate", filename)
           .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)));
 
@@ -100,8 +102,7 @@ int main(int argc, char* argv[]) {
     else if (proc_name == "pptoff")
       proc += "<method:0";
     pars.setProcess(cepgen::ProcessFactory::get().build(
-        proc,
-        cepgen::ParametersList().set<std::string>("partonsGenerator", "coll")));
+        proc, cepgen::ParametersList().set<std::string>("partonsGenerator", "coll")));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})
                                                   .set<double>("sqrtS", 13.6e3)
