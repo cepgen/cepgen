@@ -188,7 +188,9 @@ double PPtoFF::offShellME() const {
     return 2. * zpm / vec_qt.pt2() *
            ((osp_.term_ll * 4. * zpm * zpm * q2 * phi2_0) +
             (osp_.term_tt1 * ((zp * zp + zm * zm) * phi2_t + mf2_ * phi2_0)) +
-            (osp_.term_tt2 * (cross * cross - dot * dot) / vec_pho.pt2()) -
+            // azimuthal correlation term: spin-summed splitting for a linearly polarised photon gives
+            // (zp^2+zm^2)|Phi|^2 + 2 zp zm (|Phi_perp|^2-|Phi_par|^2) = (zp-zm)^2 |Phi_par|^2 + |Phi_perp|^2
+            (osp_.term_tt2 * 2. * zpm * (cross * cross - dot * dot) / vec_pho.pt2()) -
             (osp_.term_lt * 4. * zpm * (zp - zm) * phi_0 * dot));
   };
   //--- t-channel
