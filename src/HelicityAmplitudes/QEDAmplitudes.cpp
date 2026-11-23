@@ -32,7 +32,7 @@ using namespace cepgen::amplitudes;
 
 /// \f$\gamma\gamma\to S^+S^-\f$ in scalar QED
 struct ScalarQED final : HelicityAmplitudes {
-  using HelicityAmplitudes::HelicityAmplitudes;
+  explicit ScalarQED(const ParametersList& params) : HelicityAmplitudes(params) {}
   static ParametersDescription description() {
     auto desc = HelicityAmplitudes::description();
     desc.setDescription("Scalar QED (γγ → S⁺S⁻)");
@@ -53,7 +53,7 @@ REGISTER_HELICITY_AMPLITUDES("scalarQED", ScalarQED);
 
 /// \f$\gamma\gamma\to f\bar f\f$ in QED, with \f$m_f\neq 0\f$
 struct FermionQED final : HelicityAmplitudes {
-  using HelicityAmplitudes::HelicityAmplitudes;
+  explicit FermionQED(const ParametersList& params) : HelicityAmplitudes(params) {}
   static ParametersDescription description() {
     auto desc = HelicityAmplitudes::description();
     desc.setDescription("Fermion QED (γγ → f f̄)");
