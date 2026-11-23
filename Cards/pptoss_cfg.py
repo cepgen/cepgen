@@ -2,8 +2,8 @@ import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.PDG_cfi import PDG, registerParticle
 from Config.generator_cfi import generator
-from OutputModules.dump_cfi import dump as _dump_output # periodic event printout
-from OutputModules.text_cfi import text as _text_output # ASCII histograms
+from OutputModules.dump_cfi import dump as _dump_output  # periodic event printout
+from OutputModules.text_cfi import text as _text_output  # ASCII histograms
 
 #--- two-photon production of a pair of charged scalars
 registerParticle(2000013, 'smuon_R', mass=100., charge=1., colour=0, fermion=False)
@@ -12,6 +12,8 @@ process = kt.process.clone('pptoss',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         pair = PDG.smuon_R,
+        # method = 1 (off-shell kT-factorised matrix element) is the default. Use method = 0 for the on-shell one,
+        # which is also the only option with a collinear partons generator.
     ),
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
@@ -20,6 +22,7 @@ process = kt.process.clone('pptoss',
     outKinematics = kt.process.outKinematics.clone(
         pt = (0.,),
         eta = (-2.5, 2.5),
+        qt = (0., 100.),  # transverse momentum of each incoming photon
     ),
 )
 
