@@ -87,7 +87,7 @@ namespace {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  int num_gen;
+  int num_gen, num_threads;
   double eta_max;
   vector<string> states, processes, flux_families;
   string filename, plotter, final_state;
@@ -110,6 +110,7 @@ int main(int argc, char* argv[]) {
                            &eta_max,
                            2.5)
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
+      .addOptionalArgument("num-threads,t", "number of threads to generate events", &num_threads, 4)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument(
           "filename,o", "output base filename", &filename, "validation/comparison_pair_initial_states_")
@@ -122,16 +123,18 @@ int main(int argc, char* argv[]) {
   cepgen::Generator gen;
   for (const auto& state_name : states) {
     const auto& state = cepgen::validation::InitialState::get(state_name);
-    comparison_t comp(gen,
-                      cepgen::ParametersList()
-                          .set("topLabel",
-                               state.label + ", elastic-elastic $\\gamma\\gamma \\rightarrow "s +
-                                   (ww ? "W^{+}W^{-}" : "l^{+}l^{-}") + "$")
-                          .set("numEvents", num_gen)
-                          .set("pathTemplate", filename + final_state + "_" + state.name + (eta_max > 0. ? "" : "_noetacut") + "_")
-                          .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)),
-                      state,
-                      ww);
+    comparison_t comp(
+        gen,
+        cepgen::ParametersList()
+            .set("topLabel",
+                 state.label + ", elastic-elastic $\\gamma\\gamma \\rightarrow "s + (ww ? "W^{+}W^{-}" : "l^{+}l^{-}") +
+                     "$")
+            .set("numEvents", num_gen)
+            .set("numThreads", num_threads)
+            .set("pathTemplate", filename + final_state + "_" + state.name + (eta_max > 0. ? "" : "_noetacut") + "_")
+            .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)),
+        state,
+        ww);
 
     auto& pars = gen.runParameters();
     for (const auto& proc_name : processes) {
@@ -155,8 +158,7 @@ int main(int argc, char* argv[]) {
         pars.setProcess(cepgen::ProcessFactory::get().build(proc_name, proc_params));
 
         auto kin_params = state.kinematics(is_lpair ? "default"s : flux);
-        if (!ww)
-          {
+        if (!ww) {
           kin_params.set<double>("ptmin", state.ptmin);
           if (eta_max > 0.)
             kin_params.set<cepgen::Limits>("eta", {-eta_max, eta_max});
