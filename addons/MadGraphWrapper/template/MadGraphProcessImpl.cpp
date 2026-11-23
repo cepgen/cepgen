@@ -63,7 +63,7 @@ public:
                                          << proc_->getMasses() << ".";
 
     mom_.clear();
-    for (size_t i = 0; i < proc_->nexternal; ++i)
+    for (int i = 0; i < proc_->nexternal; ++i)
       mom_.emplace_back(new double[4]{proc_->getMasses().at(i), 0., 0., 0.});
     momenta_.resize(proc_->nexternal);
   }
