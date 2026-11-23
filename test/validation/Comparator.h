@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2024  Laurent Forthomme
+ *  Copyright (C) 2024-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ namespace cepgen::validation {
           top_label_(steer<std::string>("topLabel")),
           path_tmpl_(steer<std::string>("pathTemplate")),
           num_events_(steer<int>("numEvents")),
+          num_threads_(steer<int>("numThreads")),
           bar_(num_events_) {
       bar_.setTimer();  // enable the time counter in progress bar
     }
@@ -69,10 +70,13 @@ namespace cepgen::validation {
       }
       addSample(sample_name);
       weight_ = static_cast<double>(gen_.computeXsection()) / num_events_;
-      gen_.generate(num_events_, [this](const Event& event, size_t event_id) {
-        process(event);
-        bar_.update(++event_id);
-      });
+      gen_.generate(
+          num_events_,
+          [this](const Event& event, size_t event_id) {
+            process(event);
+            bar_.update(++event_id);
+          },
+          num_threads_);
     }
     /// Fill a named histogram with a scalar value
     inline Comparator& fill(const std::string& plot_name, double value) {
@@ -134,6 +138,7 @@ namespace cepgen::validation {
     Generator& gen_;
     const std::string top_label_, path_tmpl_;
     const int num_events_;
+    const int num_threads_;
     utils::ProgressBar bar_;
 
     bool initialised_{false};
