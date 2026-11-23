@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2025  Laurent Forthomme
+ *  Copyright (C) 2021-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -149,13 +149,23 @@ void Hist1D::add(Hist1D oth, double scaling) {
   overflow_ += oth.overflow_;
 }
 
-void Hist1D::scale(double scaling) {
+void Hist1D::scale(double scaling, bool bin_width) {
   CG_ASSERT(hist_);
+  CG_ASSERT(hist_w2_);
   if (auto ret = gsl_histogram_scale(hist_.get(), scaling); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist1D:scale") << gsl_strerror(ret);
   gsl_histogram_scale(hist_w2_.get(), scaling * scaling);
   underflow_ *= scaling;
   overflow_ *= scaling;
+  if (!bin_width)
+    return;
+  for (size_t bin = 0; bin < nbins(); ++bin) {
+    const auto width = binRange(bin).range();
+    if (width <= 0.)
+      continue;
+    const auto val = value(bin);
+    setValue(bin, Value(static_cast<double>(val) / width, val.uncertainty() / width));
+  }
 }
 
 Drawable::axis_t Hist1D::axis() const {

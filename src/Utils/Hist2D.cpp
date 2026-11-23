@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2025  Laurent Forthomme
+ *  Copyright (C) 2021-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -176,11 +176,22 @@ void Hist2D::add(Hist2D oth, double scaling) {
   out_of_range_values_ += scaling * oth.out_of_range_values_;
 }
 
-void Hist2D::scale(double scaling) {
+void Hist2D::scale(double scaling, bool bin_width) {
   CG_ASSERT(hist_);
+  CG_ASSERT(hist_w2_);
   if (const auto ret = gsl_histogram2d_scale(hist_.get(), scaling); ret != GSL_SUCCESS)
     throw CG_ERROR("Hist2D:scale") << gsl_strerror(ret);
   gsl_histogram2d_scale(hist_w2_.get(), scaling * scaling);
+  if (!bin_width)
+    return;
+  for (size_t bin_x = 0; bin_x < nbinsX(); ++bin_x)
+    for (size_t bin_y = 0; bin_y < nbinsY(); ++bin_y) {
+      const auto area = binRangeX(bin_x).range() * binRangeY(bin_y).range();
+      if (area <= 0.)
+        continue;
+      const auto val = value(bin_x, bin_y);
+      setValue(bin_x, bin_y, Value(static_cast<double>(val) / area, val.uncertainty() / area));
+    }
 }
 
 size_t Hist2D::nbinsX() const {

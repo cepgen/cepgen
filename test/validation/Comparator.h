@@ -109,6 +109,8 @@ namespace cepgen::validation {
         return;
       auto plt = cepgen::DrawerFactory::get().build(plotter.set<std::string>("format", "png,pdf"));
       for (auto& plot : m_hist1ds_) {
+        for (auto& gr : plot.second)
+          gr.second.scale(1., true);  // differential cross section (labels are in pb/unit)
         cepgen::utils::DrawableColl coll;
         for (auto& gr : plot.second) {
           std::string chi2_info;

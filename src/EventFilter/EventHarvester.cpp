@@ -36,11 +36,13 @@ using namespace std::string_literals;
 /// \date Jul 2019
 class EventHarvester : public EventExporter {
 public:
-  explicit EventHarvester(const ParametersList& params) : EventExporter(params) {
+  explicit EventHarvester(const ParametersList& params)
+      : EventExporter(params), differential_(steer<bool>("differential")) {
     if (const auto& plotter = steer<std::string>("plotter"); !plotter.empty())  // build the plotter object if specified
       drawer_ = DrawerFactory::get().build(plotter, params);
 
     const auto& hist_vars = steer<ParametersList>("histVariables");
+    const std::string bin_unit = differential_ ? " (pb/unit)" : " (pb/bin)";
     for (const auto& key : hist_vars.keys()) {  // extract list of variables to be plotted in histogram
       auto hvar = hist_vars.get<ParametersList>(key);
       const auto& log = hvar.get<bool>("log");
@@ -48,13 +50,13 @@ public:
       if (const auto& vars = utils::split(key, ':'); vars.size() == 1) {  // 1D histogram
         auto hist = utils::Hist1D(hvar.set("name", name));
         hist.xAxis().setLabel(vars.at(0));
-        hist.yAxis().setLabel("d$\\sigma$/d" + vars.at(0) + " (pb/bin)");
+        hist.yAxis().setLabel("d$\\sigma$/d" + vars.at(0) + bin_unit);
         hists1d_.emplace_back(Hist1DInfo{vars.at(0), hist, log});
       } else if (vars.size() == 2) {  // 2D histogram
         auto hist = utils::Hist2D(hvar.set("name", utils::sanitise(name)));
         hist.xAxis().setLabel(vars.at(0));
         hist.yAxis().setLabel(vars.at(1));
-        hist.zAxis().setLabel("d${}^2\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
+        hist.zAxis().setLabel("d${}^2\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + bin_unit);
         hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), hist, log});
       } else
         throw CG_FATAL("EventHarvester") << "Invalid number of variables to correlate for '" << key << "'.";
@@ -63,12 +65,14 @@ public:
   ~EventHarvester() override {
     try {  // histogram printout
       for (auto& info : hists1d_) {
-        info.histogram.scale(cross_section_ / sum_weights_);
+        info.histogram.scale(cross_section_ / sum_weights_, differential_);
         info.histogram.setTitle(proc_name_);
         if (drawer_)
           (void)drawer_->draw(info.histogram, info.log_y ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
       }
       for (auto& info : hists2d_) {
+        if (differential_)
+          info.histogram.scale(1., true);
         info.histogram.setTitle(proc_name_);
         if (drawer_)
           (void)drawer_->draw(
@@ -86,6 +90,8 @@ public:
     auto desc = EventExporter::description();
     desc.setDescription("Event-based histogramming tool");
     desc.add("plotter"s, ""s).setDescription("Plotting algorithm to use");
+    desc.add("differential"s, false)
+        .setDescription("Divide the bins content by the bin width/area (pb/unit instead of pb/bin)");
     desc.addParametersDescriptionVector("histVariables"s, utils::Hist2D::description(), {})
         .setDescription("Histogram definition for 1/2 variable(s)");
     return desc;
@@ -116,6 +122,7 @@ private:
 
   Value cross_section_{1., 0.};  ///< Cross-section value, in pb
   double sum_weights_{0.};       ///< Sum of weights of the events processed
+  const bool differential_;      ///< Normalise the distributions to the bin width/area?
   std::string proc_name_;        ///< Name of the physics process
   struct Hist1DInfo {
     std::string variable;

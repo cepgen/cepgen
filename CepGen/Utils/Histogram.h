@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2025  Laurent Forthomme
+ *  Copyright (C) 2021-2026  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,8 +42,12 @@ namespace cepgen::utils {
 
     enum BinMode { low = 0, high, both };
 
-    virtual void clear() = 0;                    ///< Reset the histogram
-    virtual void scale(double) = 0;              ///< Rescale all histogram bins by a constant factor
+    virtual void clear() = 0;  ///< Reset the histogram
+    /// Rescale all histogram bins by a constant factor
+    /// \param[in] factor multiplicative factor applied to all bins
+    /// \param[in] bin_width also divide each bin by its width (1D)/area (2D), i.e. build a differential distribution
+    /// \note Underflow and overflow contents are not divided by any bin width, as it is undefined.
+    virtual void scale(double factor, bool bin_width = false) = 0;
     void normalise(double integral_value = 1.);  ///< Normalise the histogram to a given constant
     virtual double integral(bool include_out_of_range = false) const = 0;  ///< Compute the histogram integral
 
@@ -76,7 +80,7 @@ namespace cepgen::utils {
     void clear() override;
     void fill(double x, double weight = 1.);  ///< Increment the histogram with one value
     void add(Hist1D, double scaling = 1.);    ///< Bin-to-bin addition of another histogram to this one
-    void scale(double) override;
+    void scale(double, bool bin_width = false) override;
     double sample(RandomGenerator&) const;  ///< Sample individual "events" from a distribution
 
     /// Perform a chi^2 test between two histograms
@@ -148,7 +152,7 @@ namespace cepgen::utils {
     /// Fill the histogram with one value
     inline void fill(const std::pair<double, double>& xy, double weight = 1.) { fill(xy.first, xy.second, weight); }
     void add(Hist2D, double scaling = 1.);  ///< Bin-by-bin addition of another histogram to this one
-    void scale(double) override;
+    void scale(double, bool bin_width = false) override;
     std::pair<double, double> sample(RandomGenerator&) const;  ///< Sample individual "events" from a distribution
 
     Value value(size_t bin_x, size_t bin_y) const;           ///< Retrieve the value + uncertainty for one bin
