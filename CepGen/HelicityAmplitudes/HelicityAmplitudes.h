@@ -18,8 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_HelicityAmplitudes_HelicityAmplitude_h
-#define CepGen_HelicityAmplitudes_HelicityAmplitude_h
+#ifndef CepGen_HelicityAmplitudes_HelicityAmplitudes_h
+#define CepGen_HelicityAmplitudes_HelicityAmplitudes_h
 
 #include <complex>
 
@@ -42,25 +42,34 @@ namespace cepgen::amplitudes {
   /// \cite Nachtmann:2005en
   class HelicityAmplitudes : public NamedModule<HelicityAmplitudes> {
   public:
-    static ParametersDescription description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("generic helicity model");
-      desc.add("s1", 0.);
-      return desc;
-    }
+    static ParametersDescription description();
 
     /// Compute the amplitude for a given kinematics and a given set of helicity components
     virtual std::complex<double> amplitude(const Kinematics&, const HelicityState&) const = 0;
+    /// Amplitude for incoming photons linearly polarised along two (unit) transverse directions
+    /// \param[in] kin Kinematics block of the two-to-two subprocess
+    /// \param[in] lam3 Helicity of the first outgoing particle
+    /// \param[in] lam4 Helicity of the second outgoing particle
+    /// \param[in] e1 Direction of the first photon polarisation, as a unit complex number \f$e^{i\phi_1}\f$
+    /// \param[in] e2 Direction of the second photon polarisation, as a unit complex number \f$e^{i\phi_2}\f$
+    /// \note Both directions are expected relative to the azimuthal angle of the outgoing pair, as the underlying
+    ///       helicity amplitudes are defined in the scattering plane.
+    std::complex<double> amplitudeLinearPolarisations(const Kinematics& kin,
+                                                      short lam3,
+                                                      short lam4,
+                                                      const std::complex<double>& e1,
+                                                      const std::complex<double>& e2) const;
+
     virtual bool hasAAWW() const { return false; }
     virtual bool hasAAZZ() const { return false; }
     virtual bool hasAAFF() const { return false; }
     virtual bool hasAASS() const { return false; }
 
   protected:
-    explicit HelicityAmplitudes(const ParametersList& params) : NamedModule(params), s1_(steer<double>("s1")) {}
+    explicit HelicityAmplitudes(const ParametersList&);
 
-    double s1() const { return s1_; }
-    double c1() const { return std::sqrt(1. - s1_ * s1_); }
+    double s1() const;
+    double c1() const;
 
   private:
     const double s1_;
