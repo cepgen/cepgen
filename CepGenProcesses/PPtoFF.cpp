@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
@@ -42,7 +43,7 @@ public:
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {}
 
-  proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(*this); }
+  proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(parameters()); }
 
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();
@@ -51,20 +52,31 @@ public:
     desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method")
         .allow(0, "on-shell")
-        .allow(1, "off-shell");
+        .allow(1, "off-shell")
+        .allow(2, "off-shell (helicity amplitudes)");
     desc.add("offShellParameters", OffShellParameters::description());
+    desc.add("model", amplitudes::HelicityAmplitudesFactory::get().describeParameters("fermionQED"))
+        .setDescription("Helicity amplitudes model (only used for the method 2)");
     return desc;
   }
 
 private:
   void prepareFactorisedPhaseSpace() override {
-    if (method_ == Mode::offShell && !partonsKtFactorised())
+    if ((method_ == Mode::offShell || method_ == Mode::helicity) && !partonsKtFactorised())
       throw CG_FATAL("PPtoFF:prepare")
           << "Off-shell matrix element only defined for factorised process with partons kt.";
     const auto cs_prop = PDG::get()(central().at(0));
     // define central particle properties and couplings with partons
     if (!cs_prop.fermion || cs_prop.charges.empty())
       throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
+    if (method_ == Mode::helicity) {
+      const auto& model_params = steer<ParametersList>("model");
+      if (amplitudes_ = amplitudes::HelicityAmplitudesFactory::get().build(model_params); !amplitudes_->hasAAFF())
+        throw CG_FATAL("PPtoFF") << "Model '" << amplitudes_->name()
+                                 << "' does not have a registered γγ → f f̄ vertex in its specifications.";
+      CG_INFO("PPtoFF") << "Helicity amplitudes (model: " << amplitudes_->name()
+                        << ") initialised. Parameters: " << model_params << ".";
+    }
     mf2_ = cs_prop.mass * cs_prop.mass;
     qf2_ = std::pow(cs_prop.integerCharge() * (1. / 3), 2);
     const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id) -> std::function<double(double)> {
@@ -103,14 +115,18 @@ private:
         return onShellME();
       case Mode::offShell:
         return offShellME();
+      case Mode::helicity:
+        return helicityME();
       default:
         throw CG_FATAL("PPtoFF") << "Invalid ME calculation method (" << static_cast<int>(method_) << ")!";
     }
   }
   double onShellME() const;
   double offShellME() const;
+  double helicityME() const;
 
-  const enum class Mode { onShell = 0, offShell = 1 } method_;
+  const enum class Mode { onShell = 0, offShell = 1, helicity = 2 } method_;
+  std::unique_ptr<const amplitudes::HelicityAmplitudes> amplitudes_;  ///< helicity amplitudes (method 2 only)
 
   /// Parameters for the off-shell matrix element
   struct OffShellParameters : SteeredObject<OffShellParameters> {
@@ -208,6 +224,37 @@ double PPtoFF::offShellME() const {
   if (!utils::positive(amat2))
     return 0.;
 
+  const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
+  if (const auto prefactor =
+          colour_factor_ * g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
+      utils::positive(prefactor))
+    return prefactor * amat2;
+  return 0.;
+}
+
+double PPtoFF::helicityME() const {
+  // off-shell matrix element built from the on-shell γγ → f f̄ helicity amplitudes, with the incoming photons
+  // polarised along their respective transverse momenta (see e.g. \cite Luszczak:2018ntp for the γγ → W⁺W⁻ case)
+  if (q1().pt2() == 0. || q2().pt2() == 0.)
+    return 0.;
+  const auto s_hat = shat();
+  if (s_hat <= 4. * mf2_)
+    return 0.;
+  const amplitudes::Kinematics kin(mf2_, s_hat, that(), uhat());
+  // the helicity amplitudes are defined in the scattering plane: polarisations are taken relative to the pair azimuth
+  const auto phi_pair = std::atan2(pc(0).py() - pc(1).py(), pc(0).px() - pc(1).px());
+  const auto e1 = std::polar(1., std::atan2(q1().py(), q1().px()) - phi_pair),
+             e2 = std::polar(1., std::atan2(q2().py(), q2().px()) - phi_pair);
+  double amat2{0.};
+  for (const short lam3 : {-1, +1})
+    for (const short lam4 : {-1, +1})
+      amat2 += std::norm(amplitudes_->amplitudeLinearPolarisations(kin, lam3, lam4, e1, e2));
+  amat2 /= s_hat * s_hat;
+  if (!utils::positive(amat2))
+    return 0.;
+
+  const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
+  const auto q2_1 = utils::kt::q2(x1(), q1().pt2(), mA2(), mX2()), q2_2 = utils::kt::q2(x2(), q2().pt2(), mB2(), mY2());
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
   if (const auto prefactor =
           colour_factor_ * g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
