@@ -270,6 +270,13 @@ ParametersDescription Interface::extractParamCardParameters(const std::string& c
       auto& block_param = block_params.add(vars.at(0), std::stod(vars.at(1)));
       if (ln.size() > 1)
         block_param.setDescription(ln.at(1));
+    } else if (vars.size() > 2 && std::all_of(vars.begin(), vars.end() - 1, [](const auto& var) {
+                 return utils::isInt(var);
+               })) {  // matrix-like entry (e.g. mixing matrices): "i j [...] value", the key being "i j [...]"
+      const auto key = utils::merge(std::vector<std::string>(vars.begin(), vars.end() - 1), " ");
+      auto& block_param = block_params.add(key, std::stod(vars.back()));
+      if (ln.size() > 1)
+        block_param.setDescription(ln.at(1));
     } else
       throw CG_ERROR("mg5amc:Interface:extractParamCardParameters")
           << "Failed to unpack parameters line:\n\t" << buffer;
