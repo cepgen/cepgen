@@ -18,14 +18,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "PPtoPair.h"
 
 using namespace cepgen;
 using namespace std::string_literals;
 
 /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
-class PPtoFF final : public PPtoPair {
+class PPtoFF final : public cepgen::proc::PPtoPair {
 public:
   explicit PPtoFF(const ParametersList& params) : PPtoPair(params, {-1, 1}, {-1, 1}) {}
 

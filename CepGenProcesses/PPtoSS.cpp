@@ -16,14 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/HelicityAmplitudes/HelicityAmplitudes.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "PPtoPair.h"
 
 using namespace cepgen;
 using namespace std::string_literals;
 
 /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow S^+S^-\f$ process, with \f$S\f$ a charged scalar
-class PPtoSS final : public PPtoPair {
+class PPtoSS final : public cepgen::proc::PPtoPair {
 public:
   explicit PPtoSS(const ParametersList& params) : PPtoPair(params, {0}, {0}) {}
 
