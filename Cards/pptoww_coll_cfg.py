@@ -7,7 +7,7 @@ from Config.generator_cfi import generator as _gen
 process = coll.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
-        method = 0,  # on-shell (0) or off-shell (1) formula
+        method = 0,  # on-shell (0) or off-shell (2, helicity amplitudes) formula
         polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(

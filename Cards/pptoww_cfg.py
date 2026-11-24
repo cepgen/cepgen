@@ -37,7 +37,7 @@ process = kt.process.clone('pptoww',
         mode = cepgen.ProcessMode.ElasticElastic,
         #mode = cepgen.ProcessMode.ElasticInelastic,
         #mode = cepgen.ProcessMode.InelasticInelastic,
-        method = 1,  # on-shell (0) or off-shell (1) formula
+        method = 2,  # on-shell (0) or off-shell (2, helicity amplitudes) formula
         polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
