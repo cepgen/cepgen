@@ -30,7 +30,7 @@ public:
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoSS>(parameters()); }
 
   static ParametersDescription description() {
-    auto desc = FactorisedProcess::description();
+    auto desc = PPtoPair::description();
     desc.setDescription("γγ → S⁺S⁻ (charged scalars pair, e.g. sleptons)");
     desc.addAs<int, pdgid_t>("pair", PDG::piPlus)
         .setDescription("type of central charged scalar emitted (must be defined in the PDG library)");
@@ -45,6 +45,7 @@ private:
   }
 
   void prepareFactorisedPhaseSpace() override {
+    PPtoPair::prepareFactorisedPhaseSpace();
     const auto& cs_prop = PDG::get()(central().at(0));
     if (cs_prop.fermion)
       throw CG_FATAL("PPtoSS:prepare") << "Invalid central particle selected (fermion; use 'pptoff' instead): "

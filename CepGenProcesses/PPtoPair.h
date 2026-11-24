@@ -62,12 +62,8 @@ protected:
           << "Off-shell matrix element only defined for factorised process with partons kt.";
     const auto cs_prop = PDG::get()(central().at(0));
     // define central particle properties and couplings with partons
-    if (method_ == Mode::helicity) {
-      if (amplitudes_ = amplitudes::HelicityAmplitudesFactory::get().build(steer<ParametersList>("model"));
-          !amplitudes_)
-        throw CG_FATAL("PPtoXX:prepare") << "Model '" << amplitudes_->name()
-                                         << "' does not have a proper amplitudes model specified.";
-    }
+    if (method_ == Mode::helicity)
+      amplitudes_ = amplitudes::HelicityAmplitudesFactory::get().build(steer<ParametersList>("model"));
     mx2_ = cs_prop.mass * cs_prop.mass;
     qx2_ = std::pow(cs_prop.integerCharge() * (1. / 3), 2);
     const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id) -> std::function<double(double)> {
