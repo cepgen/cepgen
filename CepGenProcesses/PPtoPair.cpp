@@ -32,11 +32,10 @@ using namespace cepgen;
 using namespace cepgen::proc;
 using namespace std::string_literals;
 
-PPtoPair::PPtoPair(const ParametersList& params, const std::vector<short>& hel_x1, const std::vector<short>& hel_x2)
+PPtoPair::PPtoPair(const ParametersList& params, const PolarisationState& polarisation)
     : cepgen::proc::FactorisedProcess(params, buildPdgIdsPair(params.get<ParticleProperties>("pair").pdgid)),
       osp_(steer<ParametersList>("offShellParameters")),
-      helicities_x1_(hel_x1),
-      helicities_x2_(hel_x2),
+      polarisation_state_(polarisation),
       method_(steerAs<int, Mode>("method")) {}
 
 ParametersDescription PPtoPair::description() {
@@ -133,8 +132,9 @@ double PPtoPair::helicityME() const {
   const auto e1 = std::polar(1., std::atan2(q1().py(), q1().px()) - phi_pair),
              e2 = std::polar(1., std::atan2(q2().py(), q2().px()) - phi_pair);
   double amat2{0.};
-  for (const short lam3 : helicities_x1_)
-    for (const short lam4 : helicities_x2_)
+  const auto& polarisations = polarisation_state_.polarisations();
+  for (const short lam3 : polarisations.first)
+    for (const short lam4 : polarisations.second)
       amat2 += std::norm(amplitudes_->amplitudeLinearPolarisations(kin, lam3, lam4, e1, e2));
   amat2 /= s_hat * s_hat;
   if (!utils::positive(amat2))

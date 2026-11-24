@@ -30,7 +30,7 @@ using namespace std::string_literals;
 /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow S^+S^-\f$ process, with \f$S\f$ a charged scalar
 class PPtoSS final : public cepgen::proc::PPtoPair {
 public:
-  explicit PPtoSS(const ParametersList& params) : PPtoPair(params, {0}, {0}) {}
+  explicit PPtoSS(const ParametersList& params) : PPtoPair(params, PolarisationState{PolarisationState::Mode::LL}) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoSS>(parameters()); }
 

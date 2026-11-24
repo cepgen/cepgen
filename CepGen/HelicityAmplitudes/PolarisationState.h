@@ -24,12 +24,13 @@
 namespace cepgen {
   class PolarisationState final : public SteeredObject<PolarisationState> {
   public:
-    explicit PolarisationState(const ParametersList&);
-
-    static ParametersDescription description();
-
     enum class Mode { invalid = -1, full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
     friend std::ostream& operator<<(std::ostream&, const Mode&);
+
+    explicit PolarisationState(const ParametersList&);
+    explicit PolarisationState(Mode);
+
+    static ParametersDescription description();
 
     using Polarisation = std::vector<short>;                      ///< list of polarisation states
     using Polarisations = std::pair<Polarisation, Polarisation>;  ///< polarisation for a pair of particles

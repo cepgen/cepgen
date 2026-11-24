@@ -21,6 +21,7 @@
 #ifndef CepGenProcesses_PPtoPair_h
 #define CepGenProcesses_PPtoPair_h
 
+#include "CepGen/HelicityAmplitudes/PolarisationState.h"
 #include "CepGen/Process/FactorisedProcess.h"
 
 namespace cepgen::amplitudes {
@@ -31,7 +32,7 @@ namespace cepgen::proc {
   /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow Xf\bar X\f$ process
   class PPtoPair : public FactorisedProcess {
   public:
-    explicit PPtoPair(const ParametersList& params, const std::vector<short>& hel_x1, const std::vector<short>& hel_x2);
+    explicit PPtoPair(const ParametersList& params, const PolarisationState& polarisations);
 
     static ParametersDescription description();
 
@@ -61,8 +62,7 @@ namespace cepgen::proc {
 
     static constexpr double kFourPi = 4. * M_PI;
 
-    const std::vector<short> helicities_x1_;
-    const std::vector<short> helicities_x2_;
+    PolarisationState polarisation_state_;
     const enum class Mode { onShell = 0, offShell = 1, helicity = 2 } method_;
     std::unique_ptr<const amplitudes::HelicityAmplitudes> amplitudes_;  ///< helicity amplitudes (method 2 only)
     double mx2_{0.};

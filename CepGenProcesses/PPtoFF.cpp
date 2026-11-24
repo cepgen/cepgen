@@ -32,7 +32,7 @@ using namespace std::string_literals;
 /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
 class PPtoFF final : public cepgen::proc::PPtoPair {
 public:
-  explicit PPtoFF(const ParametersList& params) : PPtoPair(params, {-1, 1}, {-1, 1}) {}
+  explicit PPtoFF(const ParametersList& params) : PPtoPair(params, PolarisationState{PolarisationState::Mode::TT}) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(parameters()); }
 
