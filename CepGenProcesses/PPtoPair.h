@@ -69,7 +69,7 @@ namespace cepgen::proc {
     static constexpr double kFourPi = 4. * M_PI;
 
     PolarisationState polarisation_state_;
-    const enum class Mode { onShell = 0, offShell = 1, helicity = 2 } method_;
+    enum class Mode { onShell = 0, offShell = 1, helicity = 2 } method_;
     std::unique_ptr<const amplitudes::HelicityAmplitudes> amplitudes_;  ///< helicity amplitudes (method 2 only)
     double mx2_{0.};
     double qx2_{0.};

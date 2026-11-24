@@ -34,11 +34,7 @@ using namespace cepgen;
 /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
 class PPtoWW final : public proc::PPtoPair {
 public:
-  explicit PPtoWW(const ParametersList& params)
-      : PPtoPair(params,
-                 params.has<int>("polarisationStates")
-                     ? PolarisationState{ParametersList{params}.set("mode", params.get<int>("polarisationStates"))}
-                     : PolarisationState{steer<ParametersList>("polarisationStates")}) {}
+  explicit PPtoWW(const ParametersList& params) : PPtoPair(params, PolarisationState{polarisationParameters(params)}) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(parameters()); }
 
@@ -58,8 +54,21 @@ public:
   }
 
 private:
+  /// Build the polarisation states steering, also accepting the integer mode used by steering cards
+  /// \note Static, as it is evaluated before the base classes are constructed.
+  static ParametersList polarisationParameters(const ParametersList& params) {
+    if (params.has<int>("polarisationStates"))
+      return ParametersList().set<int>("mode", params.get<int>("polarisationStates"));
+    return params.get<ParametersList>("polarisationStates");
+  }
+
   void prepareFactorisedPhaseSpace() override {
     PPtoPair::prepareFactorisedPhaseSpace();
+    if (method_ == Mode::offShell) {
+      CG_WARNING("PPtoWW:ME") << "Method 1 (off-shell by Nachtmann et al.) is now referred to as method 2. "
+                              << "Please update your steering.";
+      method_ = Mode::helicity;
+    }
     if (method_ == Mode::helicity) {  // invalid steering fails at initialisation
       if (!amplitudes_->hasAAWW())
         throw CG_FATAL("PPtoWW:prepare") << "Invalid EFT extension enabled for γγ → W⁺W¯ (AAWW). Model '"
@@ -83,11 +92,6 @@ private:
                              (3. * std::pow(mx2_ - t_hat, 2) * std::pow(mx2_ - u_hat, 2));
 
         return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2) / s_hat / s_hat;
-      }
-      case Mode::offShell: {
-        CG_WARNING("PPtoWW:ME") << "Method 1 (off-shell by Nachtmann et al.) is now referred to as method 2. "
-                                << "Please update your steering.";
-        return helicityME();
       }
       case Mode::helicity:
         return helicityME();
