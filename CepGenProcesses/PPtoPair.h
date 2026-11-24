@@ -40,6 +40,12 @@ namespace cepgen::proc {
     void prepareFactorisedPhaseSpace() override;
     double offShellME() const;
     double helicityME() const;
+    /// Overall factor applied on top of the squared helicity amplitudes (method 2)
+    /// \param[in] q1 Virtuality scale of the first photon (trimmed to the allowed range) [GeV]
+    /// \param[in] q2 Virtuality scale of the second photon (trimmed to the allowed range) [GeV]
+    /// \note Defaults to QED Coupling factor \f$N_c(4\pi\alpha_1Q^2)(4\pi\alpha_2Q^2)\f$ for given photon scales
+    ///  as the helicity amplitudes of the QED models are coupling-stripped.
+    virtual double helicityPrefactor(double q1, double q2) const;
 
     /// Parameters for the off-shell matrix element
     struct OffShellParameters : SteeredObject<OffShellParameters> {
@@ -75,8 +81,6 @@ namespace cepgen::proc {
     static spdgids_t buildPdgIdsPair(pdgid_t pair) {
       return spdgids_t{static_cast<spdgid_t>(pair), -static_cast<spdgid_t>(pair)};
     }
-    /// Coupling factor \f$N_c(4\pi\alpha_1Q^2)(4\pi\alpha_2Q^2)\f$ for given photon scales
-    double couplingFactor(double q1, double q2) const;
   };
 }  // namespace cepgen::proc
 #endif

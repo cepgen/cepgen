@@ -143,13 +143,13 @@ double PPtoPair::helicityME() const {
   const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
   const auto q2_1 = utils::kt::q2(x1(), q1().pt2(), mA2(), mX2()), q2_2 = utils::kt::q2(x2(), q2().pt2(), mB2(), mY2());
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
-  if (const auto prefactor = couplingFactor(std::sqrt(t_limits.trim(q2_1)), std::sqrt(t_limits.trim(q2_2)));
+  if (const auto prefactor = helicityPrefactor(std::sqrt(t_limits.trim(q2_1)), std::sqrt(t_limits.trim(q2_2)));
       utils::positive(prefactor))
     return prefactor * amat2;
   return 0.;
 }
 
-double PPtoPair::couplingFactor(double q1, double q2) const {
+double PPtoPair::helicityPrefactor(double q1, double q2) const {
   return colour_factor_ * kFourPi * kFourPi * qx2_ * qx2_ * alphaEM(q1) * alphaEM(q2);
 }
 
