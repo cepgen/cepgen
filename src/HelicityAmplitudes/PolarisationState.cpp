@@ -32,6 +32,11 @@ PolarisationState::PolarisationState(const ParametersList& params)
                                                    fromIntegerList(steer<std::vector<int> >("W2")))
                                   : computePolarisations(mode_)) {}
 
+PolarisationState::PolarisationState(Mode mode)
+    : SteeredObject(ParametersList{}.set("mode", static_cast<int>(mode))),
+      mode_(mode),
+      pol_(computePolarisations(mode_)) {}
+
 PolarisationState::Polarisations PolarisationState::computePolarisations(const Mode& mode) {
   switch (mode) {
     case Mode::LL:

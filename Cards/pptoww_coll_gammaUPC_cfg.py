@@ -12,7 +12,7 @@ process = coll.process.clone('pptoww',
     survivalFactor = cepgen.Module('gammaUPC'),  # two-photon fluxes non-overlap correction
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
-        method = 0,  # on-shell (0) or off-shell (1) formula
+        method = 0,  # on-shell (0) or off-shell (2, helicity amplitudes) formula
         polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
