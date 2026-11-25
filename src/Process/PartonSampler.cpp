@@ -117,7 +117,7 @@ std::vector<IntegrationVariable> KTPartonSampler::integrationVariables(const cut
   if (log_parton_virtuality_)
     vars.push_back({qt_,
                     proc::Process::Mapping::exponential,
-                    cuts.qt.compute(std::log).truncate(Limits{-10., 10.}),
+                    cuts.qt.compute(std::log).truncate(Limits{-30., 10.}),
                     variableName("qt"),
                     sideLabel() + " parton virtuality"});
   else
@@ -177,7 +177,8 @@ std::unique_ptr<PartonFlux> CollinearPartonSampler::buildFlux(const ParametersLi
 void CollinearPartonSampler::fluxInitialised() { coll_flux_ = &flux<CollinearFlux>(); }
 
 std::vector<IntegrationVariable> CollinearPartonSampler::integrationVariables(const cuts::Initial& cuts) {
-  const auto lim_q2 = cuts.q2.at(static_cast<size_t>(side_)).truncate(Limits{1.e-10, 5.});
+  // as for the kT-factorised case, the lower bound must lie well below the flux knee (Q2min ~ (x*m_beam)^2)
+  const auto lim_q2 = cuts.q2.at(static_cast<size_t>(side_)).truncate(Limits{1.e-20, 5.});
   if (log_parton_virtuality_)
     return {{t_,
              proc::Process::Mapping::exponential,
