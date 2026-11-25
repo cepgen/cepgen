@@ -7,7 +7,7 @@ process = cepgen.Module('lpair',
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
-        structureFunctions = cepgen.StructureFunctions.SuriYennie,
+        structureFunctions = cepgen.StructureFunctions.suriYennie,
     ),
     outKinematics = cepgen.Parameters(
         pt = (3.,),

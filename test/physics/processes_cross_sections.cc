@@ -118,6 +118,7 @@ int main(int argc, char* argv[]) {
     } catch (const cepgen::Exception& e) {
       CG_LOG << "Test \"" << test.filename << "\" (located at " << filename << ") failed.";
       cepgen::Exception(e).dump();
+      CG_TEST(false, filename + ": configuration or integration failed");  // do not skip silently
     }
   }
   CG_TEST_SUMMARY;
