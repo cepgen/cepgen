@@ -57,7 +57,16 @@ ParametersDescription CentralPhaseSpace2to2::description() {
 std::vector<IntegrationVariable> CentralPhaseSpace2to2::integrationVariables() {
   const auto& kin_cuts = kinematics().cuts().central;
   // rapidity cuts in lab frame <-> CM system generated in two-beam CM frame
-  const auto lim_rap = kin_cuts.rapidity_single.truncate(Limits{-6., 6.}) - labRapidity();
+  // momentum fractions carried by the two partons satisfy x_{1,2} >= mT_i exp(+-y_i)/sqrt(s), and must be < 1.
+  const auto mt_min = std::max(
+      {std::hypot(
+           std::min(mass(0), mass(1)),
+           std::max({0., kin_cuts.pt_single.min(), particleCuts(0).pt_single.min(), particleCuts(1).pt_single.min()})),
+       1.e-3});
+  const auto max_rapidity = std::max(1., std::log(kinematics().incomingBeams().sqrtS() / mt_min));
+  const auto lim_rap =
+      kin_cuts.rapidity_single.truncate(Limits{labRapidity() - max_rapidity, labRapidity() + max_rapidity}) -
+      labRapidity();
   const auto lim_pt = kin_cuts.pt_diff.truncate(Limits{1.e-3, kinematics().incomingBeams().sqrtS()});
   return {{m_y_c1_, proc::Process::Mapping::linear, lim_rap, "y1", "First outgoing particle rapidity"},
           {m_y_c2_, proc::Process::Mapping::linear, lim_rap, "y2", "Second outgoing particle rapidity"},
