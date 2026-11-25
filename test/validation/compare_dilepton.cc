@@ -32,9 +32,9 @@ int main(int argc, char* argv[]) {
   double sqrt_s, pt_min;
   vector<string> processes;
   string filename, plotter;
-  bool kt_factor, ratio_plot;
+  bool coll_factor, ratio_plot;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("kt,k", "use kt-factorisation?", &kt_factor, false)
+      .addOptionalArgument("coll,c", "use collinear factorisation?", &coll_factor, false)
       .addOptionalArgument("processes,P", "processes to generate", &processes, vector{"lpair"s, "pptoff"s, "mg5_aMC"s})
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 50'000)
       .addOptionalArgument("num-threads,t", "number of threads to generate events", &num_threads, 4)
@@ -47,21 +47,21 @@ int main(int argc, char* argv[]) {
       .parse();
 
   std::string ps_gen_name, ps_gen_label;
-  if (kt_factor) {
-    ps_gen_name = "kt";
-    ps_gen_label = "$k_{T}$";
-  } else {
+  if (coll_factor) {
     ps_gen_name = "coll";
     ps_gen_label = "coll.";
+  } else {
+    ps_gen_name = "kt";
+    ps_gen_label = "$k_{T}$";
   }
 
   struct comparison_t final : cepgen::validation::Comparator {
-    explicit comparison_t(cepgen::Generator& gen, const cepgen::ParametersList& params, bool _kt_factor)
-        : Comparator(gen, params), kt_factor(_kt_factor) {}
+    explicit comparison_t(cepgen::Generator& gen, const cepgen::ParametersList& params, bool _coll_factor)
+        : Comparator(gen, params), coll_factor(_coll_factor) {}
     void initialise() override {
       (*this)
           .book("invmass", "$m(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {10., 510.}))
-          .book("ptpair", "$p_{T}(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {0., kt_factor ? 50. : 5.}))
+          .book("ptpair", "$p_{T}(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {0., coll_factor ? 5. : 50.}))
           .book("ptlead", "$p_{T}^{lead}$", "GeV", cepgen::utils::Hist1D(50, {0., 100.}))
           .book("ptsublead", "$p_{T}^{sublead}$", "GeV", cepgen::utils::Hist1D(50, {0., 100.}))
           .book("etalead", "$\\eta^{lead}$", "", cepgen::utils::Hist1D(50, {-2.5, 2.5}))
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
           .fill("acop", 1. - fabs(pl1.deltaPhi(pl2) * M_1_PI))
           .fill("mx", evt(cepgen::Particle::Role::OutgoingBeam1).at(0).momentum().mass());
     }
-    bool kt_factor;
+    bool coll_factor;
   };
 
   cepgen::Generator gen;
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
           .set("numThreads", num_threads)
           .set("pathTemplate", filename)
           .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)),
-      kt_factor);
+      coll_factor);
 
   auto& pars = gen.runParameters();
   for (const auto& proc_name : processes) {
