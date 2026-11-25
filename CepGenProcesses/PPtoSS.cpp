@@ -55,9 +55,17 @@ private:
     if (cs_prop.fermion)
       throw CG_FATAL("PPtoSS:prepare") << "Invalid central particle selected (fermion; use 'pptoff' instead): "
                                        << cs_prop << ".";
-    if (method_ == Mode::helicity)
+    if (cs_prop.integerCharge() == 0)
+      throw CG_FATAL("PPtoSS:prepare") << "The central scalar particle must be charged: " << cs_prop << ".";
+    if (cs_prop.mass <= 0.)
+      throw CG_FATAL("PPtoSS:prepare") << "The central scalar particle must be massive: " << cs_prop << ".";
+    if (method_ == Mode::helicity) {
+      if (!amplitudes_->hasAASS())
+        throw CG_FATAL("PPtoSS:prepare") << "Model '" << amplitudes_->name()
+                                         << "' does not have a registered γγ → S⁺S⁻ vertex in its specifications.";
       CG_INFO("PPtoSS:prepare") << "Helicity amplitudes (model: " << amplitudes_->name() << ") initialised. "
                                 << "Parameters: " << amplitudes_->parameters() << ".";
+    }
     CG_DEBUG("PPtoSS:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
                                << "Produced particles: " << central() << ".";
     // constrain central particles cuts

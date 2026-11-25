@@ -63,12 +63,12 @@ private:
   }
 
   void prepareFactorisedPhaseSpace() override {
-    PPtoPair::prepareFactorisedPhaseSpace();
     if (method_ == Mode::offShell) {
       CG_WARNING("PPtoWW:ME") << "Method 1 (off-shell by Nachtmann et al.) is now referred to as method 2. "
                               << "Please update your steering.";
       method_ = Mode::helicity;
     }
+    PPtoPair::prepareFactorisedPhaseSpace();
     if (method_ == Mode::helicity) {  // invalid steering fails at initialisation
       if (!amplitudes_->hasAAWW())
         throw CG_FATAL("PPtoWW:prepare") << "Invalid EFT extension enabled for γγ → W⁺W¯ (AAWW). Model '"
