@@ -106,7 +106,8 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -j 4 -C ${{ env.BUILD_TYPE }} -L "cross_sections" --output-on-failure --repeat until-pass:2
+        ctest -N -L "cross_sections"
+        ctest -j 4 -C ${{ env.BUILD_TYPE }} -L "cross_sections" --no-tests=error --output-on-failure --repeat until-pass:2
 
   benchmark:
     needs: build
