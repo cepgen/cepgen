@@ -7,7 +7,7 @@ process = cepgen.Module('pptoww',
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
-        structureFunctions = cepgen.StructureFunctions.ALLM97,
+        structureFunctions = cepgen.StructureFunctions.allm97,
     ),
     outKinematics = cepgen.Parameters(
         mx = (1.07, 1000.),

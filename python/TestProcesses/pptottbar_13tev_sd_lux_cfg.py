@@ -9,7 +9,7 @@ process = cepgen.Module('pptoff',
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
 )
 
