@@ -83,6 +83,21 @@ namespace cepgen::validation {
       m_hist1ds_.at(plot_name).at(this_sample_).fill(value, weight_);
       return *this;
     }
+    /// Human-readable label for a CepGen kinematics mode (cepgen::mode::Kinematics numbering)
+    static std::string modeFromId(int mode) {
+      switch (static_cast<cepgen::mode::Kinematics>(mode)) {
+        case cepgen::mode::Kinematics::ElasticElastic:
+          return "Elastic";
+        case cepgen::mode::Kinematics::InelasticElastic:  // beam 1 dissociates
+          return "SD^{+}";
+        case cepgen::mode::Kinematics::ElasticInelastic:  // beam 2 dissociates
+          return "SD^{-}";
+        case cepgen::mode::Kinematics::InelasticInelastic:
+          return "DD";
+        default:
+          return "invalid";
+      }
+    }
 
   protected:
     /// Event-level processing for analysis
@@ -121,7 +136,7 @@ namespace cepgen::validation {
           if (gr.first != ref_sample_) {  // do not compute chi^2 test for reference sample
             size_t ndf;
             const auto chi2 = gr.second.chi2test(plot.second.at(ref_sample_), ndf);
-            chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %.2g/%zu", chi2, ndf);
+            chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %g/%zu", chi2, ndf);
           }
           gr.second.setTitle(std::string(gr.first + chi2_info));
           coll.emplace_back(&gr.second);

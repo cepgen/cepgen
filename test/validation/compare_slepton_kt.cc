@@ -36,22 +36,6 @@
 using namespace std;
 using namespace std::string_literals;
 
-/// Human-readable label for a CepGen kinematics mode (cepgen::mode::Kinematics numbering)
-static std::string modeFromId(int mode) {
-  switch (static_cast<cepgen::mode::Kinematics>(mode)) {
-    case cepgen::mode::Kinematics::ElasticElastic:
-      return "Elastic";
-    case cepgen::mode::Kinematics::InelasticElastic:  // beam 1 dissociates
-      return "SD^{+}";
-    case cepgen::mode::Kinematics::ElasticInelastic:  // beam 2 dissociates
-      return "SD^{-}";
-    case cepgen::mode::Kinematics::InelasticInelastic:
-      return "DD";
-    default:
-      return "invalid";
-  }
-}
-
 /// Compare the kT-factorised two-photon production of a pair of charged scalars (sleptons) between CepGen's pptoss and
 /// mg5_aMC, using the MSSM_SLHA2 model for the latter.
 /// \note The slepton is defined with the same PDG id and mass in both generators: the mass of the MadGraph particle is
@@ -67,7 +51,7 @@ int main(int argc, char* argv[]) {
   string filename, plotter, mg5_process, mg5_model;
   bool ratio_plot;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("processes,P", "processes to generate", &processes, vector<string>{"pptoss", "mg5_aMC"})
+      .addOptionalArgument("processes,P", "processes to generate", &processes, vector{"pptoss"s, "mg5_aMC"s})
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
       .addOptionalArgument("num-threads,t", "number of threads to generate events", &num_threads, 4)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
@@ -130,7 +114,7 @@ int main(int argc, char* argv[]) {
       cepgen::ParametersList()
           .set(
               "topLabel",
-              modeFromId(mode) +
+              cepgen::validation::Comparator::modeFromId(mode) +
                   cepgen::utils::format(
                       " $\\gamma\\gamma \\rightarrow \\tilde{l}^{+}\\tilde{l}^{-}$ (%g TeV), $p_{T}^{\\tilde{l}} >$ %g GeV, $k_{T}$"s,
                       sqrt_s * 1.e-3,
