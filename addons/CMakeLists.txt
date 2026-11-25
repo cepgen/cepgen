@@ -25,6 +25,7 @@ add_subdirectory(ROOTWrapper)
 add_subdirectory(SciplotWrapper)
 add_subdirectory(SherpaWrapper)
 add_subdirectory(TauolaWrapper)
+add_subdirectory(TMDlibWrapper)
 add_subdirectory(TopdrawerWrapper)
 
 add_subdirectory(Functionals)
