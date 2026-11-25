@@ -84,7 +84,29 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_|validation_" --output-on-failure --repeat until-pass:2
+        ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable|cross_sections" -E "benchmark_|validation_" --output-on-failure --repeat until-pass:2
+
+  cross-sections:
+    needs: build
+    continue-on-error: true  # FIXME make blocking once the lpair/pptoll references are regenerated
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora40'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v7
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v8
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar xvfz environment.tar.gz -C /
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: 'Check physics processes cross sections'
+      working-directory: ${{ env.CEPGEN_PATH }}
+      run: |
+        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
+        ctest -j 4 -C ${{ env.BUILD_TYPE }} -L "cross_sections" --output-on-failure --repeat until-pass:2
 
   benchmark:
     needs: build
