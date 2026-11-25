@@ -125,6 +125,15 @@ void IncomingBeams::setParameters(const ParametersList& params) {
     neg_form_factors = vec_form_factors.at(1);
   } else if (ParametersList form_factors; params_.cast("formFactors", form_factors) && !form_factors.empty())
     pos_form_factors = neg_form_factors = form_factors;
+  // point-like lepton beams cannot be described by the (default) nucleon dipole form factors: use point-like fermions
+  const auto set_lepton_form_factors = [](ParametersList& form_factors, int pdg_id) {
+    if (const auto abs_pdg = std::abs(pdg_id);
+        (abs_pdg == PDG::electron || abs_pdg == PDG::muon || abs_pdg == PDG::tau) &&
+        (form_factors.name().empty() || form_factors.name() == "StandardDipole"))
+      form_factors = ParametersList().setName("PointLikeFermion");
+  };
+  set_lepton_form_factors(pos_form_factors, pos_pdg);
+  set_lepton_form_factors(neg_form_factors, neg_pdg);
   pos_form_factors.set<int>("pdgId", std::abs(pos_pdg));
   neg_form_factors.set<int>("pdgId", std::abs(neg_pdg));
   plist_pos.set("formFactors", pos_form_factors);
