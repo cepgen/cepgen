@@ -38,6 +38,8 @@ jobs:
     if: ${{ vars.COPR_PROJECT != '' && (github.event_name == 'release' || inputs.target == 'all' || inputs.target == 'copr') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      build_id: ${{ steps.submit.outputs.build_id }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -67,11 +69,16 @@ jobs:
           copr-cli edit-package-custom "${args[@]}" "$COPR_PROJECT" \
             || copr-cli add-package-custom "${args[@]}" "$COPR_PROJECT"
 
-      # --nowait: do not keep this runner busy while COPR builds.
+      # --nowait: do not keep this runner busy while COPR builds (the "assets" job waits for it).
       - name: Submit the build
+        id: submit
         env:
           COPR_PROJECT: ${{ vars.COPR_PROJECT }}
-        run: copr-cli build-package --name cepgen --nowait "$COPR_PROJECT"
+        run: |
+          out=$(copr-cli build-package --name cepgen --nowait "$COPR_PROJECT" | tee /dev/stderr)
+          id=$(sed -nE 's/^Created builds?: *([0-9]+).*/\1/p' <<<"$out")
+          test -n "$id" || { echo "::error::could not find the COPR build id"; exit 1; }
+          echo "build_id=$id" >> "$GITHUB_OUTPUT"
 
   ppa:
     name: Launchpad PPA upload
@@ -175,3 +182,52 @@ jobs:
           git diff --cached --quiet && { echo "formula unchanged"; exit 0; }
           git commit -m "cepgen $TAG"
           git push
+
+  # Waits for the COPR and Launchpad builds, then attaches the resulting .rpm and .deb files to the GitHub release.
+  assets:
+    name: Attach COPR/PPA packages to the release
+    needs: [copr, ppa]
+    # run if at least one of the two succeeded, even if the other was skipped or failed
+    if: ${{ !cancelled() && (needs.copr.result == 'success' || needs.ppa.result == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write # upload release assets
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Download the RPMs from COPR
+        if: ${{ needs.copr.result == 'success' }}
+        env:
+          COPR_CONFIG: ${{ secrets.COPR_CONFIG }}
+          BUILD_ID: ${{ needs.copr.outputs.build_id }}
+        run: |
+          pipx install copr-cli
+          mkdir -p ~/.config assets
+          (umask 077; printf '%s\n' "$COPR_CONFIG" > ~/.config/copr)
+          copr-cli watch-build "$BUILD_ID"
+          copr-cli download-build --rpms --dest assets "$BUILD_ID"
+          # one sub-directory per chroot: flatten, keeping the chroot name in case file names clash
+          find assets -mindepth 2 -name '*.rpm' ! -name '*.src.rpm' | while read -r f; do
+            mv "$f" "assets/$(basename "$(dirname "$f")")-$(basename "$f")"
+          done
+          find assets -mindepth 1 -type d -empty -delete
+
+      - name: Download the .deb files from the Launchpad PPA
+        if: ${{ needs.ppa.result == 'success' }}
+        env:
+          PPA: ${{ vars.PPA }}
+          SERIES: ${{ vars.PPA_SERIES || 'noble resolute' }}
+          REVISION: ${{ inputs.ppa_revision || '1' }}
+        run: |
+          pip install launchpadlib
+          .github/scripts/ppa-fetch-debs "$PPA" "$TAG" assets "$SERIES" "$REVISION"
+
+      - name: Upload to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l assets
+          gh release upload "$TAG" assets/* --clobber --repo "$GITHUB_REPOSITORY"
