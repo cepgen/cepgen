@@ -32,8 +32,9 @@ using namespace cepgen;
 using namespace cepgen::proc;
 using namespace std::string_literals;
 
-PPtoPair::PPtoPair(const ParametersList& params, const PolarisationState& polarisation)
-    : cepgen::proc::FactorisedProcess(params, buildPdgIdsPair(params.get<ParticleProperties>("pair").pdgid)),
+PPtoPair::PPtoPair(const ParametersList& params, const PolarisationState& polarisation, bool self_conjugate)
+    : cepgen::proc::FactorisedProcess(params,
+                                      buildPdgIdsPair(params.get<ParticleProperties>("pair").pdgid, self_conjugate)),
       osp_(steer<ParametersList>("offShellParameters")),
       polarisation_state_(polarisation),
       method_(steerAs<int, Mode>("method")) {}

@@ -31,7 +31,8 @@ using namespace cepgen;
 /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow ZZ\f$ process using \f$k_{\rm T}\f$-factorization approach
 class PPtoZZ final : public proc::PPtoPair {
 public:
-  explicit PPtoZZ(const ParametersList& params) : PPtoPair(params, PolarisationState{polarisationParameters(params)}) {}
+  explicit PPtoZZ(const ParametersList& params)
+      : PPtoPair(params, PolarisationState{polarisationParameters(params)}, true) {}
 
   proc::ProcessPtr clone() const override { return std::make_unique<PPtoZZ>(parameters()); }
 
@@ -74,8 +75,8 @@ private:
                                 << ") initialised. Parameters: " << amplitudes_->parameters() << ".";
     }
     CG_DEBUG("PPtoZZ:prepare") << "matrix element computation method: " << static_cast<int>(method_) << ", "
-                               << "polarisation states: W1=" << polarisation_state_.polarisations().first
-                               << ", W2=" << polarisation_state_.polarisations().second << ".";
+                               << "polarisation states: Z1=" << polarisation_state_.polarisations().first
+                               << ", Z2=" << polarisation_state_.polarisations().second << ".";
   }
   double computeFactorisedMatrixElement() override {
     CG_DEBUG_LOOP("PPtoZZ:ME") << "matrix element mode: " << static_cast<int>(method_) << ".";
