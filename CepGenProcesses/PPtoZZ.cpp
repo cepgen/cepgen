@@ -87,6 +87,8 @@ private:
         throw CG_FATAL("PPtoZZ:ME") << "Invalid ME calculation method (" << static_cast<int>(method_) << ")!";
     }
   }
-  double helicityPrefactor(double, double) const override { return 1.; }  ///< W+W- ampltiudes already have em prefactor
+  /// \note Amplitudes already include e-m and combinatorial factor of the two identical Z fields in vertex.
+  ///  Central phase space spans labellings of the two final-state bosons -> 1/2 symmetry factor.
+  double helicityPrefactor(double, double) const override { return 0.5; }
 };
 REGISTER_PROCESS("pptozz", PPtoZZ);
