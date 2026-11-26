@@ -51,14 +51,6 @@ public:
   }
 
 private:
-  /// Build the polarisation states steering, also accepting the integer mode used by steering cards
-  /// \note Static, as it is evaluated before the base classes are constructed.
-  static ParametersList polarisationParameters(const ParametersList& params) {
-    if (params.has<int>("polarisationStates"))
-      return ParametersList().set<int>("mode", params.get<int>("polarisationStates"));
-    return params.get<ParametersList>("polarisationStates");
-  }
-
   void prepareFactorisedPhaseSpace() override {
     if (method_ == Mode::offShell) {
       CG_WARNING("PPtoZZ:ME") << "Method 1 (off-shell by Nachtmann et al.) is now referred to as method 2. "
