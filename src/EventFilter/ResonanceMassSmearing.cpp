@@ -68,6 +68,10 @@ public:
     }
     if (pair.size() != 2)  // only (pair-wise) resonances are handled
       return true;
+    if (!pair.at(0)->children().empty() || !pair.at(1)->children().empty()) {
+      CG_WARNING("ResonanceMassSmearing:run") << "Resonances already decayed: mass smearing must precede the decay.";
+      return true;  // would otherwise break the parentage momentum balance
+    }
 
     const auto pdg_id = pair.at(0)->pdgId();
     const auto m0 = PDG::get().mass(pdg_id), width = PDG::get().width(pdg_id);
@@ -125,12 +129,24 @@ public:
         p2_new_rest{-p1_new_rest[0], -p1_new_rest[1], -p1_new_rest[2], std::sqrt(p_new * p_new + m2 * m2)};
     const auto p1_new = boost(p1_new_rest, -1.), p2_new = boost(p2_new_rest, -1.);
 
+    // event record consistency: the pair four-momentum (hence the intermediate two-parton system, the beam partons and
+    // the outgoing beams) must be preserved, to the precision the event record parentage check relies on
+    for (size_t i = 0; i < 4; ++i)
+      if (std::fabs(p1_new[i] + p2_new[i] - p_tot[i]) > kMomentumTolerance * (1. + std::fabs(p_tot[i]))) {
+        CG_WARNING("ResonanceMassSmearing:run")
+            << "Four-momentum not conserved by the mass smearing (component " << i << ").";
+        return false;
+      }
+    // the particles carry no separate mass: it is the invariant mass of their four-momentum, kept off-shell here
     pair.at(0)->setMomentum(Momentum::fromPxPyPzE(p1_new[0], p1_new[1], p1_new[2], p1_new[3]), true);
     pair.at(1)->setMomentum(Momentum::fromPxPyPzE(p2_new[0], p2_new[1], p2_new[2], p2_new[3]), true);
+    event.metadata["resonanceMassSmearing:m1"] = static_cast<float>(m1);
+    event.metadata["resonanceMassSmearing:m2"] = static_cast<float>(m2);
     return true;
   }
 
 private:
+  static constexpr double kMomentumTolerance = 1.e-9;  ///< relative four-momentum conservation tolerance
   const std::vector<int> pdg_ids_;
   const double num_widths_;
   const std::unique_ptr<utils::RandomGenerator> random_generator_;
