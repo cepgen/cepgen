@@ -32,8 +32,8 @@ while pending:
             sys.exit(f"{series}: build failed ({states})")
         if not len(builds) or states != {"Successfully built"}:
             continue
-        bins = [b for b in archive.getPublishedBinaries(source_name="cepgen", version=debver, exact_match=True)
-                if b.status == "Published"]
+        # archive.getPublishedBinaries() has no source_name filter: ask the source publication for its own binaries
+        bins = [b for b in src[0].getPublishedBinaries() if b.status == "Published"]
         if not bins:
             continue  # built, not yet published
         for b in bins:

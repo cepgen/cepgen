@@ -130,7 +130,13 @@ jobs:
             debsign -k"$FPR" \
               -p"gpg --batch --yes --pinentry-mode loopback --passphrase-file $RUNNER_TEMP/gpg-passphrase" \
               "$changes"
-            dput "$PPA" "$changes"
+            # Launchpad's FTP endpoint intermittently answers "550 ... internal server error":
+            # retry with backoff (-f: dput otherwise refuses to resend after a failed attempt)
+            for attempt in 1 2 3 4 5; do
+              dput -f "$PPA" "$changes" && break
+              [ "$attempt" -lt 5 ] || { echo "::error::upload of $changes failed"; exit 1; }
+              echo "::warning::upload attempt $attempt failed, retrying"; sleep $((attempt * 30))
+            done
           done
 
   homebrew:
@@ -214,6 +220,7 @@ jobs:
             mv "$f" "assets/$(basename "$(dirname "$f")")-$(basename "$f")"
           done
           find assets -mindepth 1 -type d -empty -delete
+          find assets -name '*.rpm' | grep -q . || { echo "::error::no RPM downloaded from COPR build $BUILD_ID"; exit 1; }
 
       - name: Download the .deb files from the Launchpad PPA
         if: ${{ needs.ppa.result == 'success' }}

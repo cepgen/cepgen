@@ -27,6 +27,14 @@ BuildRequires:  gsl-devel
 BuildRequires:  python3-devel
 BuildRequires:  pybind11-devel
 BuildRequires:  boost-devel
+# add-ons: picked up automatically by CMake when their -devel package is present, and shipped as sub-packages
+BuildRequires:  lhapdf-devel
+BuildRequires:  HepMC3-devel
+BuildRequires:  pythia-devel
+BuildRequires:  cmake(ROOT)
+BuildRequires:  root-hist
+BuildRequires:  root-mathcore
+BuildRequires:  root-foam
 
 %description
 CepGen is a generic central exclusive processes event generator. It provides a
@@ -41,6 +49,34 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    devel
 Headers and CMake find module needed to build programs and plugins against
 the CepGen libraries.
+
+%package        lhapdf
+Summary:        LHAPDF wrappers for %{name}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description    lhapdf
+CepGen add-on library interfacing the LHAPDF parton distribution functions.
+
+%package        hepmc3
+Summary:        HepMC3 output wrappers for %{name}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description    hepmc3
+CepGen add-on library to export events in the HepMC3 format.
+
+%package        root
+Summary:        ROOT wrappers for %{name}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description    root
+CepGen add-on library to export events and histograms through ROOT.
+
+%package        pythia8
+Summary:        Pythia 8 hadronisation wrappers for %{name}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description    pythia8
+CepGen add-on library interfacing the Pythia 8 hadronisation and decay engine.
 
 # CepGen ships its modules as unversioned shared objects loaded at runtime:
 # keep them in the main package, not in -devel.
@@ -78,7 +114,23 @@ export CEPGEN_PATH=%{_builddir}/%{name}-%{version}
 %doc README.md CHANGELOG
 %{_bindir}/*
 %{_libdir}/*.so
+%exclude %{_libdir}/libCepGenLHAPDF.so
+%exclude %{_libdir}/libCepGenHepMC3.so
+%exclude %{_libdir}/libCepGenPythia8.so
+%exclude %{_libdir}/libCepGenRoot.so
 %{_datadir}/CepGen/
+
+%files lhapdf
+%{_libdir}/libCepGenLHAPDF.so
+
+%files hepmc3
+%{_libdir}/libCepGenHepMC3.so
+
+%files pythia8
+%{_libdir}/libCepGenPythia8.so
+
+%files root
+%{_libdir}/libCepGenRoot.so
 
 %files devel
 %{_includedir}/CepGen*/
