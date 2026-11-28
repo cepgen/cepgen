@@ -51,6 +51,8 @@ namespace cepgen::proc {
     void prepareFactorisedPhaseSpace() override;
     double offShellME() const;
     double helicityME() const;
+    /// Helicity amplitudes matrix element for collinear (on-shell, unpolarised) incoming photons
+    double unpolarisedHelicityME() const;
     /// Overall factor applied on top of the squared helicity amplitudes (method 2)
     /// \param[in] q1 Virtuality scale of the first photon (trimmed to the allowed range) [GeV]
     /// \param[in] q2 Virtuality scale of the second photon (trimmed to the allowed range) [GeV]

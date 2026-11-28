@@ -55,7 +55,7 @@ ParametersDescription PPtoPair::description() {
 }
 
 void PPtoPair::prepareFactorisedPhaseSpace() {
-  if ((method_ == Mode::offShell || method_ == Mode::helicity) && !partonsKtFactorised())
+  if (method_ == Mode::offShell && !partonsKtFactorised())
     throw CG_FATAL("PPtoFF:prepare") << "Off-shell matrix element only defined for factorised process with partons kt.";
   const auto cs_prop = PDG::get()(central().at(0));
   // define central particle properties and couplings with partons
@@ -120,6 +120,8 @@ double PPtoPair::offShellME() const {
 }
 
 double PPtoPair::helicityME() const {
+  if (!partonsKtFactorised())  // no photon kT: no preferred photon polarisation direction
+    return unpolarisedHelicityME();
   // off-shell matrix element built from the on-shell γγ → f f̄ helicity amplitudes, with the incoming photons
   // polarised along their respective transverse momenta (see e.g. \cite Luszczak:2018ntp for the γγ → W⁺W⁻ case)
   if (q1().pt2() == 0. || q2().pt2() == 0.)
@@ -146,6 +148,31 @@ double PPtoPair::helicityME() const {
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
   if (const auto prefactor = helicityPrefactor(std::sqrt(t_limits.trim(q2_1)), std::sqrt(t_limits.trim(q2_2)));
       utils::positive(prefactor))
+    return prefactor * amat2;
+  return 0.;
+}
+
+double PPtoPair::unpolarisedHelicityME() const {
+  // collinear (on-shell, unpolarised) photons: the squared helicity amplitudes are averaged over the four incoming
+  // photon helicity combinations (a basis-independent unpolarised limit of the linear-polarisation sum used for the kT case)
+  const auto s_hat = shat();
+  if (s_hat <= 4. * mx2_)
+    return 0.;
+  const auto t_hat = that();
+  const amplitudes::Kinematics kin(mx2_, s_hat, t_hat, uhat());
+  double amat2{0.};
+  const auto& polarisations = polarisation_state_.polarisations();
+  for (const short lam3 : polarisations.first)
+    for (const short lam4 : polarisations.second)
+      for (const short h1 : {-1, +1})
+        for (const short h2 : {-1, +1})
+          amat2 += std::norm(amplitudes_->amplitude(kin, {h1, h2, lam3, lam4}));
+  amat2 /= 4. * s_hat * s_hat;
+  if (!utils::positive(amat2))
+    return 0.;
+  // photon scale for the (possibly running) couplings of the QED models: same convention as the on-shell method 0
+  const auto q = std::sqrt(std::fabs(t_hat));
+  if (const auto prefactor = helicityPrefactor(q, q); utils::positive(prefactor))
     return prefactor * amat2;
   return 0.;
 }
