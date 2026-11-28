@@ -35,6 +35,7 @@ class @CLASS@ < Formula
     system "cmake", "--install", "build"
   end
 
+@CAVEATS@
   test do
     assert_path_exists share/"CepGen/addons.d/@LIB@.txt"
     assert_path_exists lib/shared_library("lib@LIB@")

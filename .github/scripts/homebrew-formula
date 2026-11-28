@@ -26,7 +26,13 @@ values = {
     "@REPO@": repo, "@TAG@": tag, "@VERSION@": version, "@SHA256@": sha256,
     "@DEPS@": "\n".join(f'  depends_on "{d}"' for d in deps.split()),
 }
-text = open(template).read()
+# dependencies from other taps are not fetched by Homebrew unless that tap was added explicitly
+taps = sorted({"/".join(d.split("/")[:2]) for d in deps.split() if d.count("/") == 2})
+caveats = ""
+if taps:
+    lines = "\n".join(f"      brew tap {t}" for t in taps)
+    caveats = f"  def caveats\n    <<~EOS\n      This formula depends on formulae from other taps, to be added beforehand:\n{lines}\n    EOS\n  end\n\n"
+text = open(template).read().replace("@CAVEATS@\n", caveats)
 for key, value in values.items():
     text = text.replace(key, value)
 sys.stdout.write(text)
