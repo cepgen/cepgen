@@ -50,6 +50,11 @@ namespace cepgen::utils::env {
 #ifdef CEPGEN_INSTALL_DATADIR
     paths.emplace_back(CEPGEN_INSTALL_DATADIR);
 #endif
+#ifdef CEPGEN_EXTRA_SEARCH_PATHS
+    for (const auto& path : split(CEPGEN_EXTRA_SEARCH_PATHS, ':'))
+      if (!path.empty())
+        paths.emplace_back(path);
+#endif
     return paths;
   }
 

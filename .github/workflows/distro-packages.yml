@@ -167,8 +167,13 @@ jobs:
           ln -s "$PWD/tap" "$(brew --repository)/Library/Taps/$owner/homebrew-$name"
           echo "name=$owner/$name" >> "$GITHUB_OUTPUT"
 
-      - name: Render the formula
-        run: .github/scripts/homebrew-formula "$TAG" tap/Formula/cepgen.rb
+      # the core, then each add-on of packaging/homebrew/addons.conf as a formula of its own
+      - name: Render the formulae
+        run: |
+          .github/scripts/homebrew-formula "$TAG" tap/Formula/cepgen.rb
+          for addon in $(grep -vE '^(#|$)' .github/packaging/homebrew/addons.conf | cut -d'|' -f1); do
+            .github/scripts/homebrew-formula "$TAG" "tap/Formula/cepgen-$addon.rb" "$addon"
+          done
 
       - name: Build and test the formula
         env:
@@ -178,13 +183,17 @@ jobs:
         run: |
           brew install --build-from-source --verbose "$TAP/cepgen"
           brew test "$TAP/cepgen"
+          for addon in $(grep -vE '^(#|$)' .github/packaging/homebrew/addons.conf | cut -d'|' -f1); do
+            brew install --build-from-source --verbose "$TAP/cepgen-$addon"
+            brew test "$TAP/cepgen-$addon"
+          done
 
       - name: Push the formula
         working-directory: tap
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Formula/cepgen.rb
+          git add Formula/cepgen.rb Formula/cepgen-*.rb
           git diff --cached --quiet && { echo "formula unchanged"; exit 0; }
           git commit -m "cepgen $TAG"
           git push

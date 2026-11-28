@@ -155,10 +155,22 @@ namespace cepgen {
       utils::env::append("LD_LIBRARY_PATH", search_path);
     }
 
-    // load all necessary modules
-    if (!safe_mode && !addons_file.empty())
-      for (const auto& lib : utils::split(utils::readFile(addons_file), '\n'))
-        loadLibrary(lib, true);
+    // load all necessary modules: the list of add-ons of a build tree, and the drop-in file of each installed add-on
+    if (!safe_mode) {
+      std::vector<std::string> addons;
+      if (!addons_file.empty())
+        for (const auto& lib : utils::split(utils::readFile(addons_file), '\n'))
+          addons.emplace_back(lib);
+      for (const auto& search_path : search_paths)
+        if (const auto dropin_dir = fs::path{search_path} / "addons.d"; fs::is_directory(dropin_dir))
+          for (const auto& entry : fs::directory_iterator(dropin_dir))
+            if (entry.path().extension() == ".txt")
+              for (const auto& lib : utils::split(utils::readFile(entry.path().string()), '\n'))
+                addons.emplace_back(lib);
+      for (const auto& lib : addons)
+        if (!lib.empty())
+          loadLibrary(lib, true);
+    }
     loadLibrary("CepGenProcesses", true);
     if (!invalid_libraries.empty())
       CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";

@@ -55,6 +55,10 @@ cepgen_build(CepGen
 target_compile_definitions(CepGen PRIVATE
         CEPGEN_INSTALL_LIBDIR="${CMAKE_INSTALL_FULL_LIBDIR}"
         CEPGEN_INSTALL_DATADIR="${CMAKE_INSTALL_FULL_DATAROOTDIR}/CepGen")
+if(CEPGEN_EXTRA_SEARCH_PATHS)
+  string(REPLACE ";" ":" extra_search_paths "${CEPGEN_EXTRA_SEARCH_PATHS}")
+  target_compile_definitions(CepGen PRIVATE CEPGEN_EXTRA_SEARCH_PATHS="${extra_search_paths}")
+endif()
 
 file(GLOB exec_sources *.cc)
 message(STATUS "Executables will be linked against CepGen core library")
