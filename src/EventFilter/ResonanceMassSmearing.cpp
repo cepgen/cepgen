@@ -129,10 +129,15 @@ public:
         p2_new_rest{-p1_new_rest[0], -p1_new_rest[1], -p1_new_rest[2], std::sqrt(p_new * p_new + m2 * m2)};
     const auto p1_new = boost(p1_new_rest, -1.), p2_new = boost(p2_new_rest, -1.);
 
-    // event record consistency: the pair four-momentum (hence the intermediate two-parton system, the beam partons and
-    // the outgoing beams) must be preserved, to the precision the event record parentage check relies on
+    // event record consistency: the pair four-momentum must match the hard process (intermediate) system of the record,
+    // from which the parentage of the central particles (and of the beam partons, outgoing beams) is defined
+    auto reference = p_tot;
+    if (event.hasRole(Particle::Role::Intermediate)) {
+      const auto& mom_hard = event.oneWithRole(Particle::Role::Intermediate).momentum();
+      reference = {mom_hard.px(), mom_hard.py(), mom_hard.pz(), mom_hard.energy()};
+    }
     for (size_t i = 0; i < 4; ++i)
-      if (std::fabs(p1_new[i] + p2_new[i] - p_tot[i]) > kMomentumTolerance * (1. + std::fabs(p_tot[i]))) {
+      if (std::fabs(p1_new[i] + p2_new[i] - reference[i]) > kMomentumTolerance * (1. + std::fabs(reference[i]))) {
         CG_WARNING("ResonanceMassSmearing:run")
             << "Four-momentum not conserved by the mass smearing (component " << i << ").";
         return false;
