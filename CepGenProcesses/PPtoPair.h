@@ -32,11 +32,22 @@ namespace cepgen::proc {
   /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow Xf\bar X\f$ process
   class PPtoPair : public FactorisedProcess {
   public:
-    explicit PPtoPair(const ParametersList& params, const PolarisationState& polarisations);
+    /// \param[in] self_conjugate is the central particle its own antiparticle (e.g. Z, H)? If so, no antiparticle is emitted
+    explicit PPtoPair(const ParametersList& params,
+                      const PolarisationState& polarisations,
+                      bool self_conjugate = false);
 
     static ParametersDescription description();
 
   protected:
+    /// Build the polarisation states steering, also accepting the integer mode used by steering cards
+    /// \note Static, as it is evaluated before the base classes are constructed.
+    static ParametersList polarisationParameters(const ParametersList& params) {
+      if (params.has<int>("polarisationStates"))
+        return ParametersList().set<int>("mode", params.get<int>("polarisationStates"));
+      return params.get<ParametersList>("polarisationStates");
+    }
+
     void prepareFactorisedPhaseSpace() override;
     double offShellME() const;
     double helicityME() const;
@@ -78,8 +89,9 @@ namespace cepgen::proc {
     std::function<double(double)> g_part2_{nullptr};
 
   private:
-    static spdgids_t buildPdgIdsPair(pdgid_t pair) {
-      return spdgids_t{static_cast<spdgid_t>(pair), -static_cast<spdgid_t>(pair)};
+    static spdgids_t buildPdgIdsPair(pdgid_t pair, bool self_conjugate) {
+      const auto id = static_cast<spdgid_t>(pair);
+      return spdgids_t{id, self_conjugate ? id : -id};
     }
   };
 }  // namespace cepgen::proc

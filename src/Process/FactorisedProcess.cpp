@@ -261,7 +261,8 @@ double FactorisedProcess::computeWeight() {
 void FactorisedProcess::fillKinematics() {
   {  // central system
     auto central_system = event()[Particle::Role::CentralSystem];
-    if (randomise_charge_ && central_system.size() == 2) {  // randomise the charge of outgoing system
+    // randomise the charge of outgoing system (only for distinct particle/antiparticle pairs, not self-conjugate ones)
+    if (randomise_charge_ && central_system.size() == 2 && central_particles_.at(0) == -central_particles_.at(1)) {
       const auto sign = random_generator_->uniformInt(0, 1) == 1;
       central_system[0].get().setAntiparticle(sign);
       central_system[1].get().setAntiparticle(!sign);
