@@ -41,10 +41,13 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
     os << static_cast<PDG::Id>(beam.pdg_id_) << " (" << beam.momentum_.pz() << " GeV/c) "
        << (beam.elastic_ ? "elastic" : "inelastic");
+    // always report both the form factors and the parton flux modelling, to avoid hiding the latter
+    if (const auto& form_factors_name = beam.form_factors_.name(); !form_factors_name.empty())
+      os << " [form factors: " << beam.form_factors_.print(true) << "]";
     if (const auto& part_flux_name = beam.flux_info_.name(); !part_flux_name.empty())
       os << " [parton flux: " << beam.flux_info_.print(true) << "]";
-    else if (const auto& form_factors_name = beam.form_factors_.name(); !form_factors_name.empty())
-      os << " [form factors: " << beam.form_factors_.print(true) << "]";
+    else
+      os << " [parton flux: none set in beam]";
     return os;
   }
 }  // namespace cepgen
