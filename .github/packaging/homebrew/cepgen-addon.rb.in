@@ -1,0 +1,45 @@
+# Template of the Homebrew formula of a CepGen add-on, rendered by .github/scripts/homebrew-formula for every release
+# (see addons.conf). The add-on is built from the very same tarball as the core, without the core, and registers
+# itself through share/CepGen/addons.d/, which the core reads from Homebrew's shared prefix.
+class @CLASS@ < Formula
+  desc "@DESC@ for CepGen"
+  homepage "https://github.com/@REPO@"
+  url "https://github.com/@REPO@/archive/refs/tags/@TAG@.tar.gz"
+  version "@VERSION@"
+  sha256 "@SHA256@"
+  license "GPL-3.0-or-later"
+  head "https://github.com/@REPO@.git", branch: "main"
+
+  depends_on "cmake" => :build
+  depends_on "gcc" => :build # the CepGen build system enables Fortran
+  depends_on "ninja" => :build
+  depends_on "cepgen"
+@DEPS@
+
+  def install
+    args = %w[
+      -DCMAKE_BUILD_CORE=OFF
+      -DCMAKE_BUILD_PROCESSES=OFF
+      -DCMAKE_BUILD_UTILS=OFF
+      -DCMAKE_BUILD_TESTS=OFF
+      -DCEPGEN_ADDONS=@DIR@
+    ]
+    # tarballs carry no git metadata: the version is imposed by the formula
+    args << "-DCEPGEN_VERSION_OVERRIDE=#{version}" if build.stable?
+
+    # the add-on libraries do not link against the core library: its symbols are resolved when they are loaded
+    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names -Wl,-undefined,dynamic_lookup" if OS.mac?
+
+    system "cmake", "-S", ".", "-B", "build", "-G", "Ninja", *std_cmake_args, *args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
+  end
+
+  test do
+    assert_path_exists share/"CepGen/addons.d/@LIB@.txt"
+    assert_path_exists lib/shared_library("lib@LIB@")
+    # the core must load the add-on from the shared prefix, without any CEPGEN_PATH
+    output = pipe_output("#{Formula["cepgen"].opt_bin}/cepgen --help 2>&1")
+    refute_match(/Failed to load/i, output)
+  end
+end
