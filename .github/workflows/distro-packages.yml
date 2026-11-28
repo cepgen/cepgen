@@ -175,7 +175,7 @@ jobs:
             .github/scripts/homebrew-formula "$TAG" "tap/Formula/cepgen-$addon.rb" "$addon"
           done
 
-      - name: Build and test the formula
+      - name: Build and test the core formula
         env:
           HOMEBREW_NO_AUTO_UPDATE: "1"
           HOMEBREW_NO_INSTALL_FROM_API: "1"
@@ -183,20 +183,42 @@ jobs:
         run: |
           brew install --build-from-source --verbose "$TAP/cepgen"
           brew test "$TAP/cepgen"
-          for addon in $(grep -vE '^(#|$)' .github/packaging/homebrew/addons.conf | cut -d'|' -f1); do
-            brew install --build-from-source --verbose "$TAP/cepgen-$addon"
-            brew test "$TAP/cepgen-$addon"
-          done
 
-      - name: Push the formula
+      # the core goes out first: a failing add-on must not hold it back
+      - name: Push the core formula
         working-directory: tap
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Formula/cepgen.rb Formula/cepgen-*.rb
-          git diff --cached --quiet && { echo "formula unchanged"; exit 0; }
+          git add Formula/cepgen.rb
+          git diff --cached --quiet && { echo "core formula unchanged"; exit 0; }
           git commit -m "cepgen $TAG"
           git push
+
+      # Dependencies from other taps (e.g. davidchall/hep/lhapdf) must be tapped explicitly: Homebrew does not
+      # install formulae from an untrusted tap on its own.
+      - name: Build and test the add-on formulae, push those that pass
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_FROM_API: "1"
+          TAP: ${{ steps.tap.outputs.name }}
+        run: |
+          conf=$PWD/.github/packaging/homebrew/addons.conf
+          grep -vE '^(#|$)' "$conf" | cut -d'|' -f5 | tr ' ' '\n' | awk -F/ 'NF==3 {print $1"/"$2}' | sort -u |
+            while read -r dep_tap; do brew tap "$dep_tap"; done
+          failed=""
+          for addon in $(grep -vE '^(#|$)' "$conf" | cut -d'|' -f1); do
+            if brew install --build-from-source --verbose "$TAP/cepgen-$addon" && brew test "$TAP/cepgen-$addon"; then
+              git -C tap add "Formula/cepgen-$addon.rb"
+            else
+              echo "::error::formula cepgen-$addon failed"; failed="$failed $addon"
+            fi
+          done
+          if ! git -C tap diff --cached --quiet; then
+            git -C tap commit -m "cepgen add-ons $TAG"
+            git -C tap push
+          fi
+          test -z "$failed" || { echo "::error::failed add-on formulae:$failed"; exit 1; }
 
   # Waits for the COPR and Launchpad builds, then attaches the resulting .rpm and .deb files to the GitHub release.
   assets:
