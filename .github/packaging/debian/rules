@@ -18,7 +18,7 @@ override_dh_auto_test:
 	# tests are run by the upstream CI
 
 # add-on libraries go to their own packages, everything else to cepgen / cepgen-dev
-ADDONS = LHAPDF HepMC3 Pythia8
+ADDONS = LHAPDF HepMC3 Pythia8 Root
 override_dh_install:
-	dh_install -Ncepgen-lhapdf -Ncepgen-hepmc3 -Ncepgen-pythia8 $(foreach a,$(ADDONS),-XlibCepGen$(a).so)
-	dh_install -pcepgen-lhapdf -pcepgen-hepmc3 -pcepgen-pythia8
+	dh_install -Ncepgen-lhapdf -Ncepgen-hepmc3 -Ncepgen-pythia8 -Ncepgen-root $(foreach a,$(ADDONS),-XlibCepGen$(a).so)
+	dh_install -pcepgen-lhapdf -pcepgen-hepmc3 -pcepgen-pythia8 -pcepgen-root

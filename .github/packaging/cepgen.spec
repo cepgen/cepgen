@@ -31,6 +31,10 @@ BuildRequires:  boost-devel
 BuildRequires:  lhapdf-devel
 BuildRequires:  HepMC3-devel
 BuildRequires:  pythia-devel
+BuildRequires:  cmake(ROOT)
+BuildRequires:  root-hist
+BuildRequires:  root-mathcore
+BuildRequires:  root-foam
 
 %description
 CepGen is a generic central exclusive processes event generator. It provides a
@@ -59,6 +63,13 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    hepmc3
 CepGen add-on library to export events in the HepMC3 format.
+
+%package        root
+Summary:        ROOT wrappers for %{name}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description    root
+CepGen add-on library to export events and histograms through ROOT.
 
 %package        pythia8
 Summary:        Pythia 8 hadronisation wrappers for %{name}
@@ -106,6 +117,7 @@ export CEPGEN_PATH=%{_builddir}/%{name}-%{version}
 %exclude %{_libdir}/libCepGenLHAPDF.so
 %exclude %{_libdir}/libCepGenHepMC3.so
 %exclude %{_libdir}/libCepGenPythia8.so
+%exclude %{_libdir}/libCepGenRoot.so
 %{_datadir}/CepGen/
 
 %files lhapdf
@@ -116,6 +128,9 @@ export CEPGEN_PATH=%{_builddir}/%{name}-%{version}
 
 %files pythia8
 %{_libdir}/libCepGenPythia8.so
+
+%files root
+%{_libdir}/libCepGenRoot.so
 
 %files devel
 %{_includedir}/CepGen*/

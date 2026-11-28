@@ -11,6 +11,10 @@ Build-Depends: debhelper-compat (= 13),
                liblhapdf-dev,
                libhepmc3-dev,
                libpythia8-dev,
+               libroot-core-dev,
+               libroot-hist-dev,
+               libroot-math-mathcore-dev,
+               libroot-math-foam-dev,
                pybind11-dev,
                python3-dev
 Standards-Version: 4.7.0
@@ -53,3 +57,9 @@ Architecture: any
 Depends: cepgen (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: Generic central exclusive processes event generator - Pythia 8 add-on
  CepGen add-on library interfacing the Pythia 8 hadronisation and decay engine.
+
+Package: cepgen-root
+Architecture: any
+Depends: cepgen (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Description: Generic central exclusive processes event generator - ROOT add-on
+ CepGen add-on library to export events and histograms through ROOT.
