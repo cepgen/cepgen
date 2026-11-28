@@ -177,6 +177,15 @@ macro(cepgen_build mod_name)
     endif()" PARENT_SCOPE)
         endif()
         file(APPEND ${CEPGEN_ADDONS_FILE} "${mod_name}\n")
+        if(NOT ${ARG_COMPONENT} STREQUAL "lib")
+            #----- one-line "drop-in" file per add-on, installed along with its library: the add-ons may be shipped by
+            #      separate packages, so the core cannot rely on one installed list of all of them
+            set(dropin_file "${PROJECT_BINARY_DIR}/addons.d/${mod_name}.txt")
+            file(WRITE ${dropin_file} "${mod_name}\n")
+            install(FILES ${dropin_file}
+                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen/addons.d
+                COMPONENT ${ARG_COMPONENT})
+        endif()
     endif()
 endmacro()
 
@@ -275,4 +284,12 @@ macro(cepgen_test_declare_unstable)
         list(APPEND CEPGEN_UNSTABLE_TESTS ${_t})
     endforeach()
     set(CEPGEN_UNSTABLE_TESTS ${CEPGEN_UNSTABLE_TESTS} PARENT_SCOPE)
+endmacro()
+
+#----- add an add-on subdirectory, unless the build is restricted (CEPGEN_ADDONS) to a list of other add-ons: this is
+#      used by package managers shipping each add-on separately
+macro(cepgen_add_addon addon_dir)
+    if(NOT CEPGEN_ADDONS OR "${addon_dir}" IN_LIST CEPGEN_ADDONS)
+        add_subdirectory(${addon_dir})
+    endif()
 endmacro()

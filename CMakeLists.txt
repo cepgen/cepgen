@@ -15,6 +15,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
+set(CEPGEN_ADDONS "" CACHE STRING "Semicolon-separated list of add-on directories to build (default: all)")
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_UTILS "Build miscellaneous utilities" ON)
 option(CMAKE_COVERAGE "Generate code coverage" OFF)
@@ -69,6 +70,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CEPGEN_PATH ${PROJECT_SOURCE_DIR})
 set(CEPGEN_CORE_EXT dl)
+set(CEPGEN_EXTRA_SEARCH_PATHS "" CACHE STRING
+  "Additional runtime search paths for libraries and data files (e.g. a package manager's shared prefix)")
 set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 set(CEPGEN_UNSTABLE_TESTS)
 set(CEPGEN_EXTRA_LIBRARIES)
@@ -126,15 +129,18 @@ endif()
 configure_file(cmake/FindCepGen.cmake.in cmake/FindCepGen.cmake @ONLY)
 
 #----- installation rules
-install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
-  COMPONENT lib)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/FindCepGen.cmake
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake
-  COMPONENT lib)
-install(DIRECTORY CepGen
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT lib)
+# (CepGenAddOns.txt, listing all add-ons, stays in the build tree: installed add-ons register through addons.d/)
+if(CMAKE_BUILD_CORE)  # an add-ons-only build must not install files owned by the core package
+  install(FILES ${external_files} ${readme_file}
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+    COMPONENT lib)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/FindCepGen.cmake
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake
+    COMPONENT lib)
+  install(DIRECTORY CepGen
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT lib)
+endif()
 
 #----- documentation
 find_package(Doxygen)
