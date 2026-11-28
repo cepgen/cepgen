@@ -16,21 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <array>
 #include <cmath>
-#include <memory>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Event/Particle.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
+#include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 using namespace cepgen;
@@ -60,12 +54,11 @@ public:
     if (!event.hasRole(Particle::Role::CentralSystem))
       return true;
     std::vector<Particle*> pair;
-    for (auto& part_ref : event[Particle::Role::CentralSystem]) {
-      auto& part = part_ref.get();
-      if (std::find(pdg_ids_.begin(), pdg_ids_.end(), std::abs(static_cast<int>(part.integerPdgId()))) !=
+    for (auto& part_ref : event[Particle::Role::CentralSystem])
+      if (auto& part = part_ref.get();
+          std::find(pdg_ids_.begin(), pdg_ids_.end(), std::abs(static_cast<int>(part.integerPdgId()))) !=
           pdg_ids_.end())
         pair.emplace_back(&part);
-    }
     if (pair.size() != 2)  // only (pair-wise) resonances are handled
       return true;
     if (!pair.at(0)->children().empty() || !pair.at(1)->children().empty()) {
@@ -78,13 +71,10 @@ public:
     if (width <= 0.)
       return true;
 
-    // pair four-momentum and invariant mass
-    std::array<double, 4> p_tot{};  // (px, py, pz, E)
-    for (const auto* part : pair) {
-      const auto& mom = part->momentum();
-      p_tot[0] += mom.px(), p_tot[1] += mom.py(), p_tot[2] += mom.pz(), p_tot[3] += mom.energy();
-    }
-    const auto mass_pair2 = p_tot[3] * p_tot[3] - p_tot[0] * p_tot[0] - p_tot[1] * p_tot[1] - p_tot[2] * p_tot[2];
+    Momentum p_tot;  // pair four-momentum and invariant mass
+    for (const auto* part : pair)
+      p_tot += part->momentum();
+    const auto mass_pair2 = p_tot.mass2();
     if (mass_pair2 <= 0.)
       return false;
     const auto mass_pair = std::sqrt(mass_pair2);
@@ -101,50 +91,37 @@ public:
     if (!found)
       return false;
 
-    // pair rest frame: boost velocity
-    const std::array<double, 3> beta{p_tot[0] / p_tot[3], p_tot[1] / p_tot[3], p_tot[2] / p_tot[3]};
-    const auto beta2 = beta[0] * beta[0] + beta[1] * beta[1] + beta[2] * beta[2];
-    const auto gamma = 1. / std::sqrt(1. - beta2);
-    const auto boost = [&](const std::array<double, 4>& p, double sign) {  // sign = +1: lab -> rest, -1: rest -> lab
-      const auto bp = beta[0] * p[0] + beta[1] * p[1] + beta[2] * p[2];
-      const auto gamma2 = beta2 > 0. ? (gamma - 1.) / beta2 : 0.;
-      const auto coef = sign > 0 ? gamma2 * bp - gamma * p[3] : gamma2 * bp + gamma * p[3];
-      return std::array<double, 4>{
-          p[0] + coef * beta[0], p[1] + coef * beta[1], p[2] + coef * beta[2], gamma * (p[3] - sign * bp)};
-    };
-
-    const auto& mom1 = pair.at(0)->momentum();
-    const auto p1_rest = boost({mom1.px(), mom1.py(), mom1.pz(), mom1.energy()}, +1.);
-    const auto p1_norm = std::sqrt(p1_rest[0] * p1_rest[0] + p1_rest[1] * p1_rest[1] + p1_rest[2] * p1_rest[2]);
+    // lab -> pair rest frame
+    const auto p_tot_inv = Momentum::fromPxPyPzE(-p_tot.px(), -p_tot.py(), -p_tot.pz(), p_tot.energy());
+    const auto p1_rest = Momentum(pair.at(0)->momentum()).lorentzBoost(p_tot_inv);
+    const auto p1_norm = p1_rest.p();
     if (p1_norm <= 0.)
       return false;
 
     // new momentum in the rest frame (two-body decay kinematics for the new masses)
     const auto lambda = (mass_pair2 - std::pow(m1 + m2, 2)) * (mass_pair2 - std::pow(m1 - m2, 2));
     const auto p_new = std::sqrt(std::max(lambda, 0.)) / (2. * mass_pair);
-    const std::array<double, 4> p1_new_rest{p_new * p1_rest[0] / p1_norm,
-                                            p_new * p1_rest[1] / p1_norm,
-                                            p_new * p1_rest[2] / p1_norm,
-                                            std::sqrt(p_new * p_new + m1 * m1)},
-        p2_new_rest{-p1_new_rest[0], -p1_new_rest[1], -p1_new_rest[2], std::sqrt(p_new * p_new + m2 * m2)};
-    const auto p1_new = boost(p1_new_rest, -1.), p2_new = boost(p2_new_rest, -1.);
+    const auto scale = p_new / p1_norm;
+    const auto p1_new_rest =
+        Momentum::fromPxPyPzM(scale * p1_rest.px(), scale * p1_rest.py(), scale * p1_rest.pz(), m1);
+    const auto p2_new_rest =
+        Momentum::fromPxPyPzM(-scale * p1_rest.px(), -scale * p1_rest.py(), -scale * p1_rest.pz(), m2);
+    const auto p1_new = Momentum(p1_new_rest).lorentzBoost(p_tot);  // rest frame -> lab
+    const auto p2_new = Momentum(p2_new_rest).lorentzBoost(p_tot);
 
-    // event record consistency: the pair four-momentum must match the hard process (intermediate) system of the record,
-    // from which the parentage of the central particles (and of the beam partons, outgoing beams) is defined
+    // event record consistency: four-momentum of pair must match central system of the record
     auto reference = p_tot;
-    if (event.hasRole(Particle::Role::Intermediate)) {
-      const auto& mom_hard = event.oneWithRole(Particle::Role::Intermediate).momentum();
-      reference = {mom_hard.px(), mom_hard.py(), mom_hard.pz(), mom_hard.energy()};
-    }
+    if (event.hasRole(Particle::Role::Intermediate))
+      reference = event.oneWithRole(Particle::Role::Intermediate).momentum();
+    const auto delta_comp = (p1_new + p2_new - reference).pVector(), ref_comp = reference.pVector();
     for (size_t i = 0; i < 4; ++i)
-      if (std::fabs(p1_new[i] + p2_new[i] - reference[i]) > kMomentumTolerance * (1. + std::fabs(reference[i]))) {
+      if (std::fabs(delta_comp[i]) > kMomentumTolerance * (1. + std::fabs(ref_comp[i]))) {
         CG_WARNING("ResonanceMassSmearing:run")
             << "Four-momentum not conserved by the mass smearing (component " << i << ").";
         return false;
       }
-    // the particles carry no separate mass: it is the invariant mass of their four-momentum, kept off-shell here
-    pair.at(0)->setMomentum(Momentum::fromPxPyPzE(p1_new[0], p1_new[1], p1_new[2], p1_new[3]), true);
-    pair.at(1)->setMomentum(Momentum::fromPxPyPzE(p2_new[0], p2_new[1], p2_new[2], p2_new[3]), true);
+    pair.at(0)->setMomentum(p1_new, true);  // particles carry no separate mass
+    pair.at(1)->setMomentum(p2_new, true);  // (invariant mass of their four-momentum, kept off-shell here)
     event.metadata["resonanceMassSmearing:m1"] = static_cast<float>(m1);
     event.metadata["resonanceMassSmearing:m2"] = static_cast<float>(m2);
     return true;
