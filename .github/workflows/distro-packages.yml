@@ -220,6 +220,7 @@ jobs:
             mv "$f" "assets/$(basename "$(dirname "$f")")-$(basename "$f")"
           done
           find assets -mindepth 1 -type d -empty -delete
+          find assets -name '*.rpm' | grep -q . || { echo "::error::no RPM downloaded from COPR build $BUILD_ID"; exit 1; }
 
       - name: Download the .deb files from the Launchpad PPA
         if: ${{ needs.ppa.result == 'success' }}
