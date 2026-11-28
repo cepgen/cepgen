@@ -21,6 +21,7 @@ class Cepgen < Formula
     args = %W[
       -DCMAKE_BUILD_UTILS=ON
       -DCMAKE_BUILD_TESTS=OFF
+      -DCEPGEN_EXTRA_SEARCH_PATHS=#{HOMEBREW_PREFIX}/lib;#{HOMEBREW_PREFIX}/share/CepGen
       -DPython_EXECUTABLE=#{Formula["python@3.14"].opt_bin}/python3.14
     ]
     # tarballs carry no git metadata: the version is imposed by the formula

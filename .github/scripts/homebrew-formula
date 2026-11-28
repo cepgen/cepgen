@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Render the Homebrew formula for a release tag: homebrew-formula <tag> <output.rb>
+# Render the Homebrew formula for a release tag: homebrew-formula <tag> <output.rb> [<add-on>]
+# Without <add-on>, the formula of the core; with a name listed in packaging/homebrew/addons.conf (e.g. "root"),
+# the formula "cepgen-<add-on>" of that add-on.
 # The checksum is that of the tarball GitHub serves for the tag, i.e. what Homebrew will download.
 set -euo pipefail
 tag=$1
@@ -10,7 +12,28 @@ version=${tag#v}
 url="https://github.com/${repo}/archive/refs/tags/${tag}.tar.gz"
 sha256=$(curl -fsSL --retry 3 "$url" | shasum -a 256 | cut -d' ' -f1)
 test -n "$sha256" || { echo "cannot checksum $url" >&2; exit 1; }
+addon=${3:-}
 mkdir -p "$(dirname "$out")"
+if [ -n "$addon" ]; then
+  line=$(grep -E "^${addon}\|" "$here/../packaging/homebrew/addons.conf") || { echo "unknown add-on '$addon'" >&2; exit 1; }
+  # python3 rather than sed: the multi-line dependency list cannot be substituted portably (BSD sed on macOS)
+  python3 -I - "$line" "$repo" "$tag" "$version" "$sha256" "$here/../packaging/homebrew/cepgen-addon.rb.in" > "$out" <<'PY'
+import sys
+line, repo, tag, version, sha256, template = sys.argv[1:7]
+name, directory, lib, desc, deps = line.split("|")
+values = {
+    "@CLASS@": "Cepgen" + name.capitalize(), "@DESC@": desc, "@DIR@": directory, "@LIB@": lib,
+    "@REPO@": repo, "@TAG@": tag, "@VERSION@": version, "@SHA256@": sha256,
+    "@DEPS@": "\n".join(f'  depends_on "{d}"' for d in deps.split()),
+}
+text = open(template).read()
+for key, value in values.items():
+    text = text.replace(key, value)
+sys.stdout.write(text)
+PY
+  echo "wrote $out (cepgen-$addon, $version, sha256 $sha256)"
+  exit 0
+fi
 sed -e "s|@REPO@|${repo}|g" -e "s|@TAG@|${tag}|g" -e "s|@VERSION@|${version}|g" -e "s|@SHA256@|${sha256}|g" \
   "$here/../packaging/homebrew/cepgen.rb.in" > "$out"
 echo "wrote $out ($version, sha256 $sha256)"
