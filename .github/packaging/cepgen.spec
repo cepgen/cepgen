@@ -30,8 +30,8 @@ BuildRequires:  boost-devel
 # add-ons: picked up automatically by CMake when their -devel package is present, and shipped as sub-packages
 BuildRequires:  lhapdf-devel
 BuildRequires:  HepMC3-devel
-BuildRequires:  pythia-devel
-BuildRequires:  cmake(ROOT)
+BuildRequires:  pythia8-devel
+BuildRequires:  root-core
 BuildRequires:  root-hist
 BuildRequires:  root-mathcore
 BuildRequires:  root-foam
@@ -115,22 +115,30 @@ export CEPGEN_PATH=%{_builddir}/%{name}-%{version}
 %{_bindir}/*
 %{_libdir}/*.so
 %exclude %{_libdir}/libCepGenLHAPDF.so
+%exclude %{_datadir}/CepGen/addons.d/CepGenLHAPDF.txt
 %exclude %{_libdir}/libCepGenHepMC3.so
+%exclude %{_datadir}/CepGen/addons.d/CepGenHepMC3.txt
 %exclude %{_libdir}/libCepGenPythia8.so
+%exclude %{_datadir}/CepGen/addons.d/CepGenPythia8.txt
 %exclude %{_libdir}/libCepGenRoot.so
+%exclude %{_datadir}/CepGen/addons.d/CepGenRoot.txt
 %{_datadir}/CepGen/
 
 %files lhapdf
 %{_libdir}/libCepGenLHAPDF.so
+%{_datadir}/CepGen/addons.d/CepGenLHAPDF.txt
 
 %files hepmc3
 %{_libdir}/libCepGenHepMC3.so
+%{_datadir}/CepGen/addons.d/CepGenHepMC3.txt
 
 %files pythia8
 %{_libdir}/libCepGenPythia8.so
+%{_datadir}/CepGen/addons.d/CepGenPythia8.txt
 
 %files root
 %{_libdir}/libCepGenRoot.so
+%{_datadir}/CepGen/addons.d/CepGenRoot.txt
 
 %files devel
 %{_includedir}/CepGen*/

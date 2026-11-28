@@ -8,13 +8,7 @@ Build-Depends: debhelper-compat (= 13),
                gfortran,
                libboost-dev,
                libgsl-dev,
-               liblhapdf-dev,
                libhepmc3-dev,
-               libpythia8-dev,
-               libroot-core-dev,
-               libroot-hist-dev,
-               libroot-math-mathcore-dev,
-               libroot-math-foam-dev,
                pybind11-dev,
                python3-dev
 Standards-Version: 4.7.0
@@ -40,26 +34,8 @@ Description: Generic central exclusive processes event generator - development f
  This package contains the headers and the CMake find module needed to build
  programs and plugins against the CepGen libraries.
 
-Package: cepgen-lhapdf
-Architecture: any
-Depends: cepgen (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
-Description: Generic central exclusive processes event generator - LHAPDF add-on
- CepGen add-on library interfacing the LHAPDF parton distribution functions.
-
 Package: cepgen-hepmc3
 Architecture: any
 Depends: cepgen (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: Generic central exclusive processes event generator - HepMC3 add-on
  CepGen add-on library to export events in the HepMC3 format.
-
-Package: cepgen-pythia8
-Architecture: any
-Depends: cepgen (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
-Description: Generic central exclusive processes event generator - Pythia 8 add-on
- CepGen add-on library interfacing the Pythia 8 hadronisation and decay engine.
-
-Package: cepgen-root
-Architecture: any
-Depends: cepgen (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
-Description: Generic central exclusive processes event generator - ROOT add-on
- CepGen add-on library to export events and histograms through ROOT.
